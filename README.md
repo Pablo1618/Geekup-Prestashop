@@ -20,10 +20,6 @@ Kopia sklepu internetowego geekup.pl z wykorzystaniem PrestaShop
 
 Todo
 
-```bash
-  todo
-```
-
 
 ## Wersja oprogramowania
 
