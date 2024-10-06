@@ -1,5 +1,5 @@
 
-![Logo](https://geekup.pl/skins/user/rwd_shoper_6/images/logo.jpg)
+![Logo](https://i.ibb.co/PQg4dLN/logo.jpg)
 
 
 # Geekup-Prestashop
