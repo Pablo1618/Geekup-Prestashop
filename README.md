@@ -1,2 +1,33 @@
+
+![Logo](https://geekup.pl/skins/user/rwd_shoper_6/images/logo.jpg)
+
+
 # Geekup-Prestashop
-Clone of geekup.pl
+
+Kopia sklepu internetowego geekup.pl z wykorzystaniem PrestaShop
+
+
+## Członkowie zespołu
+
+- Michał Grabowski 193314
+- Patryk Sawuk 193059
+- Paweł Wawrzyński 193270
+- Dominika Zaorska 193266
+- Filip Jezierski 196333
+
+
+## Sposób uruchomienia
+
+Todo
+
+```bash
+  todo
+```
+
+
+## Wersja oprogramowania
+
+**Prestashop:** 1.7.8
+
+**Selenium:** -
+
