@@ -13,7 +13,7 @@ services:
       - ../prestashop/dbdata:/var/lib/mysql
   prestashop:
     container_name: prestashop
-    image: prestashop/prestashop:latest
+    image: prestashop/prestashop:1.7.8.11
     restart: unless-stopped
     depends_on:
       - mysql
