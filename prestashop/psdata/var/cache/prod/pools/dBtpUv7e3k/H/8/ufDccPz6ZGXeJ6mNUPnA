@@ -1,0 +1,139 @@
+<?php //resource_metadata_collection_f63bf44e52d69be1360f4ecd1a9f183e
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['ApiPlatform\\Metadata\\ApiResource'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('ApiPlatform\\Metadata\\ApiResource')),
+        clone ($p['ApiPlatform\\Metadata\\Operations'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('ApiPlatform\\Metadata\\Operations')),
+        clone ($p['ApiPlatform\\Metadata\\Get'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('ApiPlatform\\Metadata\\Get')),
+        clone ($p['ApiPlatform\\Metadata\\Link'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('ApiPlatform\\Metadata\\Link')),
+        clone $p['ApiPlatform\\Metadata\\Link'],
+    ],
+    null,
+    [
+        'ApiPlatform\\Metadata\\ApiResource' => [
+            'operations' => [
+                $o[1],
+            ],
+            'shortName' => [
+                'HookStatus',
+            ],
+            'uriVariables' => [
+                [
+                    'id' => $o[4],
+                ],
+            ],
+            'class' => [
+                'PrestaShopBundle\\Api\\Resource\\HookStatus',
+            ],
+            'graphQlOperations' => [
+                [],
+            ],
+            'extraProperties' => [
+                [],
+            ],
+        ],
+        'ApiPlatform\\Metadata\\Operations' => [
+            'operations' => [
+                1 => [
+                    [
+                        '_api_/hook-status/{id}_get',
+                        $o[2],
+                    ],
+                ],
+            ],
+        ],
+        'ApiPlatform\\Metadata\\Operation' => [
+            'shortName' => [
+                2 => 'HookStatus',
+            ],
+            'class' => [
+                2 => 'PrestaShopBundle\\Api\\Resource\\HookStatus',
+            ],
+            'filters' => [
+                2 => [],
+            ],
+            'name' => [
+                2 => '_api_/hook-status/{id}_get',
+            ],
+            'provider' => [
+                2 => 'PrestaShopBundle\\Api\\StateProvider\\HookStatusProvider',
+            ],
+            'extraProperties' => [
+                2 => [
+                    'user_defined_uri_template' => true,
+                ],
+            ],
+        ],
+        'ApiPlatform\\Metadata\\HttpOperation' => [
+            'method' => [
+                2 => 'GET',
+            ],
+            'uriTemplate' => [
+                2 => '/hook-status/{id}',
+            ],
+            'inputFormats' => [
+                2 => [
+                    'jsonld' => [
+                        'application/ld+json',
+                    ],
+                    'json' => [
+                        'application/json',
+                    ],
+                    'html' => [
+                        'text/html',
+                    ],
+                ],
+            ],
+            'outputFormats' => [
+                2 => [
+                    'jsonld' => [
+                        'application/ld+json',
+                    ],
+                    'json' => [
+                        'application/json',
+                    ],
+                    'html' => [
+                        'text/html',
+                    ],
+                ],
+            ],
+            'uriVariables' => [
+                2 => [
+                    'id' => $o[3],
+                ],
+            ],
+            'requirements' => [
+                2 => [
+                    'id' => '\\d+',
+                ],
+            ],
+            'exceptionToStatus' => [
+                2 => [
+                    'PrestaShop\\PrestaShop\\Core\\Domain\\Hook\\Exception\\HookNotFoundException' => 404,
+                ],
+            ],
+        ],
+        'ApiPlatform\\Metadata\\Link' => [
+            'parameterName' => [
+                3 => 'id',
+                'id',
+            ],
+            'fromClass' => [
+                3 => 'PrestaShopBundle\\Api\\Resource\\HookStatus',
+                'PrestaShopBundle\\Api\\Resource\\HookStatus',
+            ],
+            'identifiers' => [
+                3 => [
+                    'id',
+                ],
+                [
+                    'id',
+                ],
+            ],
+        ],
+    ],
+    [
+        $o[0],
+    ],
+    []
+); }];

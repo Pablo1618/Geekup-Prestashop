@@ -1,0 +1,3 @@
+<?php //PrestaShopBundle%255CApi%255CResource%255CHookStatus%2524isActive
+
+return [PHP_INT_MAX, []];

@@ -1,0 +1,48 @@
+<?php //PrestaShopBundle_Entity_FeatureFlag
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Symfony\\Component\\Serializer\\Mapping\\ClassMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\ClassMetadata')),
+        clone ($p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata')),
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+    ],
+    null,
+    [
+        'stdClass' => [
+            'name' => [
+                'PrestaShopBundle\\Entity\\FeatureFlag',
+                'id',
+                'name',
+                'state',
+                'labelWording',
+                'labelDomain',
+                'descriptionWording',
+                'descriptionDomain',
+                'stability',
+                'enabled',
+            ],
+            'attributesMetadata' => [
+                [
+                    'id' => $o[1],
+                    'name' => $o[2],
+                    'state' => $o[3],
+                    'labelWording' => $o[4],
+                    'labelDomain' => $o[5],
+                    'descriptionWording' => $o[6],
+                    'descriptionDomain' => $o[7],
+                    'stability' => $o[8],
+                    'enabled' => $o[9],
+                ],
+            ],
+        ],
+    ],
+    $o[0],
+    []
+); }];

@@ -1,0 +1,51 @@
+<?php //PrestaShopBundle%255CEntity%255CLang%2524shops
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Doctrine\\ORM\\Mapping\\ManyToMany'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\ManyToMany')),
+        clone ($p['Doctrine\\ORM\\Mapping\\JoinTable'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\JoinTable')),
+        clone ($p['Doctrine\\ORM\\Mapping\\JoinColumn'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\JoinColumn')),
+        clone $p['Doctrine\\ORM\\Mapping\\JoinColumn'],
+    ],
+    null,
+    [
+        'stdClass' => [
+            'targetEntity' => [
+                'PrestaShopBundle\\Entity\\Shop',
+            ],
+            'cascade' => [
+                [
+                    'remove',
+                    'persist',
+                ],
+            ],
+            'joinColumns' => [
+                1 => [
+                    $o[2],
+                ],
+            ],
+            'inverseJoinColumns' => [
+                1 => [
+                    $o[3],
+                ],
+            ],
+            'name' => [
+                2 => 'id_lang',
+                'id_shop',
+            ],
+            'referencedColumnName' => [
+                2 => 'id_lang',
+                'id_shop',
+            ],
+            'onDelete' => [
+                2 => 'CASCADE',
+                'CASCADE',
+            ],
+        ],
+    ],
+    [
+        $o[0],
+        $o[1],
+    ],
+    []
+); }];

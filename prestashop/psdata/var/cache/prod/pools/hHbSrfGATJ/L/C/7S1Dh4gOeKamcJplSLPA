@@ -1,0 +1,3 @@
+<?php //PrestaShopBundle%255CController%255CAdmin%255CCommonController%2523notificationsAction
+
+return [PHP_INT_MAX, []];

@@ -1,0 +1,39 @@
+<?php //PrestaShopBundle%255CEntity%255CAdminFilter
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Doctrine\\ORM\\Mapping\\Table'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\Table')),
+        clone ($p['Doctrine\\ORM\\Mapping\\UniqueConstraint'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\UniqueConstraint')),
+        clone ($p['Doctrine\\ORM\\Mapping\\Entity'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Doctrine\\ORM\\Mapping\\Entity')),
+    ],
+    null,
+    [
+        'stdClass' => [
+            'uniqueConstraints' => [
+                [
+                    $o[1],
+                ],
+            ],
+            'name' => [
+                1 => 'admin_filter_search_id_idx',
+            ],
+            'columns' => [
+                1 => [
+                    'employee',
+                    'shop',
+                    'controller',
+                    'action',
+                    'filter_id',
+                ],
+            ],
+            'repositoryClass' => [
+                2 => 'PrestaShopBundle\\Entity\\Repository\\AdminFilterRepository',
+            ],
+        ],
+    ],
+    [
+        $o[0],
+        $o[2],
+    ],
+    []
+); }];
