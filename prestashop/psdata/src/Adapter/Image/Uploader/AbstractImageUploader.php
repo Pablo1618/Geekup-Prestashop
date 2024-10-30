@@ -49,7 +49,7 @@ abstract class AbstractImageUploader
      *
      * @throws UploadedImageConstraintException
      */
-    public function checkImageIsAllowedForUpload(UploadedFile $image)
+    protected function checkImageIsAllowedForUpload(UploadedFile $image)
     {
         $maxFileSize = Tools::getMaxUploadSize();
 
@@ -61,14 +61,7 @@ abstract class AbstractImageUploader
             || !ImageManager::isCorrectImageFileExt($image->getClientOriginalName())
             || preg_match('/\%00/', $image->getClientOriginalName()) // prevent null byte injection
         ) {
-            throw new UploadedImageConstraintException(
-                sprintf(
-                    'Image format "%s", not recognized, allowed formats are: %s',
-                    $image->getClientOriginalExtension(),
-                    join(', ', ImageManager::EXTENSIONS_SUPPORTED)
-                ),
-                UploadedImageConstraintException::UNRECOGNIZED_FORMAT
-            );
+            throw new UploadedImageConstraintException(sprintf('Image format "%s", not recognized, allowed formats are: .gif, .jpg, .png', $image->getClientOriginalExtension()), UploadedImageConstraintException::UNRECOGNIZED_FORMAT);
         }
     }
 
@@ -160,24 +153,17 @@ abstract class AbstractImageUploader
         $width = $imageType['width'];
         $height = $imageType['height'];
 
-        if (!ImageManager::resize(
+        if (Configuration::get('PS_HIGHT_DPI')) {
+            $ext = '2x.jpg';
+            $width *= 2;
+            $height *= 2;
+        }
+
+        return ImageManager::resize(
             $imageDir . $id . '.jpg',
             $imageDir . $id . '-' . stripslashes($imageType['name']) . $ext,
             (int) $width,
             (int) $height
-        )) {
-            return false;
-        }
-
-        if ((bool) Configuration::get('PS_HIGHT_DPI') && !ImageManager::resize(
-            $imageDir . $id . '.jpg',
-            $imageDir . $id . '-' . stripslashes($imageType['name']) . '2x' . $ext,
-            (int) $width * 2,
-            (int) $height * 2
-        )) {
-            return false;
-        }
-
-        return true;
+        );
     }
 }

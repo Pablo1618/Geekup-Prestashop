@@ -3,10 +3,10 @@
         <div class="container">
             <h2 class="exception-hierarchy">
                 {% for previousException in exception.allPrevious|reverse %}
-                    <a href="#trace-box-{{ loop.revindex + 1 }}">{{ previousException.class|abbr_class }}</a>
+                    {{ previousException.class|abbr_class }}
                     <span class="icon">{{ include('@Twig/images/chevron-right.svg') }}</span>
                 {% endfor %}
-                <a href="#trace-box-1">{{ exception.class|abbr_class }}</a>
+                {{ exception.class|abbr_class }}
             </h2>
             <h2 class="exception-http">
                 HTTP {{ status_code }} <small>{{ status_text }}</small>

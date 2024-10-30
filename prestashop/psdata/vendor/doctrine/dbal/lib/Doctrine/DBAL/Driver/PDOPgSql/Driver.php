@@ -2,18 +2,15 @@
 
 namespace Doctrine\DBAL\Driver\PDOPgSql;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\AbstractPostgreSQLDriver;
-use Doctrine\DBAL\Driver\PDO;
-use Doctrine\DBAL\Exception;
-use Doctrine\Deprecations\Deprecation;
+use Doctrine\DBAL\Driver\PDOConnection;
+use PDO;
 use PDOException;
-
 use function defined;
 
 /**
  * Driver that connects through pdo_pgsql.
- *
- * @deprecated Use {@link PDO\PgSQL\Driver} instead.
  */
 class Driver extends AbstractPostgreSQLDriver
 {
@@ -23,20 +20,19 @@ class Driver extends AbstractPostgreSQLDriver
     public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
     {
         try {
-            $pdo = new PDO\Connection(
+            $pdo = new PDOConnection(
                 $this->_constructPdoDsn($params),
                 $username,
                 $password,
                 $driverOptions
             );
 
-            if (
-                defined('PDO::PGSQL_ATTR_DISABLE_PREPARES')
-                && (! isset($driverOptions[\PDO::PGSQL_ATTR_DISABLE_PREPARES])
-                    || $driverOptions[\PDO::PGSQL_ATTR_DISABLE_PREPARES] === true
+            if (defined('PDO::PGSQL_ATTR_DISABLE_PREPARES')
+                && (! isset($driverOptions[PDO::PGSQL_ATTR_DISABLE_PREPARES])
+                    || $driverOptions[PDO::PGSQL_ATTR_DISABLE_PREPARES] === true
                 )
             ) {
-                $pdo->setAttribute(\PDO::PGSQL_ATTR_DISABLE_PREPARES, true);
+                $pdo->setAttribute(PDO::PGSQL_ATTR_DISABLE_PREPARES, true);
             }
 
             /* defining client_encoding via SET NAMES to avoid inconsistent DSN support
@@ -49,7 +45,7 @@ class Driver extends AbstractPostgreSQLDriver
 
             return $pdo;
         } catch (PDOException $e) {
-            throw Exception::driverException($this, $e);
+            throw DBALException::driverException($this, $e);
         }
     }
 
@@ -112,17 +108,9 @@ class Driver extends AbstractPostgreSQLDriver
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated
      */
     public function getName()
     {
-        Deprecation::trigger(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/issues/3580',
-            'Driver::getName() is deprecated'
-        );
-
         return 'pdo_pgsql';
     }
 }

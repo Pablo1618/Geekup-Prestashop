@@ -64,18 +64,12 @@ class ProductImage
     private $thumbnailUrl;
 
     /**
-     * @var int[]
-     */
-    private $shopIds;
-
-    /**
      * @param int $imageId
      * @param bool $cover
      * @param int $position
      * @param array $localizedLegends
      * @param string $imageUrl
      * @param string $thumbnailUrl
-     * @param int[] $shopIds
      */
     public function __construct(
         int $imageId,
@@ -83,8 +77,7 @@ class ProductImage
         int $position,
         array $localizedLegends,
         string $imageUrl,
-        string $thumbnailUrl,
-        array $shopIds
+        string $thumbnailUrl
     ) {
         $this->imageId = $imageId;
         $this->cover = $cover;
@@ -92,7 +85,6 @@ class ProductImage
         $this->localizedLegends = $localizedLegends;
         $this->imageUrl = $imageUrl;
         $this->thumbnailUrl = $thumbnailUrl;
-        $this->shopIds = $shopIds;
     }
 
     /**
@@ -141,13 +133,5 @@ class ProductImage
     public function getThumbnailUrl(): string
     {
         return $this->thumbnailUrl;
-    }
-
-    /**
-     * @return int[]
-     */
-    public function getShopIds(): array
-    {
-        return $this->shopIds;
     }
 }

@@ -25,11 +25,8 @@
  */
 class PageNotFoundControllerCore extends FrontController
 {
-    /** @var string */
     public $php_self = 'pagenotfound';
-    /** @var string */
     public $page_name = 'pagenotfound';
-    /** @var bool */
     public $ssl = true;
 
     /**

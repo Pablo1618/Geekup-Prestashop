@@ -21,7 +21,7 @@ final class FormatExceptionContext
     private $lineno;
     private $cursor;
 
-    public function __construct(string $data, string $path, int $lineno, int $cursor)
+    public function __construct($data, $path, $lineno, $cursor)
     {
         $this->data = $data;
         $this->path = $path;
@@ -29,17 +29,17 @@ final class FormatExceptionContext
         $this->cursor = $cursor;
     }
 
-    public function getPath(): string
+    public function getPath()
     {
         return $this->path;
     }
 
-    public function getLineno(): int
+    public function getLineno()
     {
         return $this->lineno;
     }
 
-    public function getDetails(): string
+    public function getDetails()
     {
         $before = str_replace("\n", '\n', substr($this->data, max(0, $this->cursor - 20), min(20, $this->cursor)));
         $after = str_replace("\n", '\n', substr($this->data, $this->cursor, 20));

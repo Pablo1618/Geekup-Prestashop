@@ -28,24 +28,16 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Product\Stock;
 
-use PrestaShopBundle\Form\Admin\Type\DeltaQuantityType;
-use PrestaShopBundle\Form\Admin\Type\EntitySearchInputType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class QuantityType extends TranslatorAwareType
 {
-    /**
-     * @var RouterInterface
-     */
-    private $router;
-
     /**
      * @var bool
      */
@@ -54,17 +46,14 @@ class QuantityType extends TranslatorAwareType
     /**
      * @param TranslatorInterface $translator
      * @param array $locales
-     * @param RouterInterface $router
      * @param bool $stockManagementEnabled
      */
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
-        RouterInterface $router,
         bool $stockManagementEnabled
     ) {
         parent::__construct($translator, $locales);
-        $this->router = $router;
         $this->stockManagementEnabled = $stockManagementEnabled;
     }
 
@@ -74,36 +63,15 @@ class QuantityType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         if ($this->stockManagementEnabled) {
-            $stockMovementsUrl = $this->router->generate('admin_stock_movements_overview', ['productId' => $options['product_id']]);
-
             $builder
-                ->add('delta_quantity', DeltaQuantityType::class, [
+                ->add('quantity', NumberType::class, [
                     'required' => false,
-                    'label' => $this->trans('Edit quantity', 'Admin.Catalog.Feature'),
-                    'label_tag_name' => 'h4',
-                    'modify_delta_for_all_shops' => true,
-                ])
-                ->add('stock_movements', EntitySearchInputType::class, [
-                    'required' => false,
-                    'label' => $this->trans('Recent stock movements', 'Admin.Catalog.Feature'),
-                    'label_tag_name' => 'h4',
-                    'layout' => 'table',
-                    'entry_type' => StockMovementType::class,
-                    'entry_options' => [
-                        'product_type' => $options['product_type'],
-                        'block_prefix' => 'entity_item',
+                    'label' => $this->trans('Quantity', 'Admin.Catalog.Feature'),
+                    'constraints' => [
+                        new NotBlank(),
+                        new Type(['type' => 'numeric']),
                     ],
-                    // No search input
-                    'allow_search' => false,
-                    // No delete button
-                    'allow_delete' => false,
-                    'external_link' => [
-                        'text' => $this->trans('[1]View all stock movements[/1]', 'Admin.Catalog.Feature'),
-                        'href' => $stockMovementsUrl,
-                    ],
-                    'attr' => [
-                        'class' => 'stock-movement-list',
-                    ],
+                    'default_empty_data' => 0,
                 ])
             ;
         }
@@ -111,22 +79,13 @@ class QuantityType extends TranslatorAwareType
         $builder
             ->add('minimal_quantity', NumberType::class, [
                 'label' => $this->trans('Minimum quantity for sale', 'Admin.Catalog.Feature'),
+                'label_help_box' => $this->trans('The minimum quantity required to buy this product (set to 1 to disable this feature). E.g.: if set to 3, customers will be able to purchase the product only if they take at least 3 in quantity.', 'Admin.Catalog.Help'),
                 'constraints' => [
-                    new Positive(),
+                    new NotBlank(),
                     new Type(['type' => 'numeric']),
                 ],
                 'required' => false,
-                'default_empty_data' => 1,
-                'modify_all_shops' => true,
-                'attr' => [
-                    'class' => 'small-input',
-                    'min' => 1,
-                ],
-                'html5' => true,
-                'label_help_box' => $this->trans(
-                    'The minimum quantity required to buy this product (set to 1 to disable this feature). E.g.: if set to 3, customers will be able to purchase the product only if they take at least 3 in quantity.',
-                    'Admin.Catalog.Help'
-                ),
+                'default_empty_data' => 0,
             ])
         ;
     }
@@ -137,18 +96,11 @@ class QuantityType extends TranslatorAwareType
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-        $resolver
-            ->setDefaults([
-                'label' => $this->trans('Stocks', 'Admin.Catalog.Feature'),
-                'label_tag_name' => 'h3',
-                'required' => false,
-            ])
-            ->setRequired([
-                'product_id',
-                'product_type',
-            ])
-            ->setAllowedTypes('product_id', 'int')
-            ->setAllowedTypes('product_type', 'string')
-        ;
+        $resolver->setDefaults([
+            'label' => $this->trans('Quantities', 'Admin.Catalog.Feature'),
+            'label_tag_name' => 'h2',
+            'required' => false,
+            'columns_number' => 3,
+        ]);
     }
 }

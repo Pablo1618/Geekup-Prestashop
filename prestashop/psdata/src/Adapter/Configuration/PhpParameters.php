@@ -27,7 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter\Configuration;
 
 use InvalidArgumentException;
-use PrestaShop\PrestaShop\Core\Util\ArrayFinder;
+use Shudrum\Component\ArrayFinder\ArrayFinder;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -88,7 +88,7 @@ class PhpParameters
             $filesystem->dumpFile($this->filename, '<?php return ' . var_export($this->configuration->get(), true) . ';' . "\n");
 
             if (function_exists('opcache_invalidate')) {
-                @opcache_invalidate($this->filename);
+                opcache_invalidate($this->filename);
             }
         } catch (IOException $e) {
             return false;

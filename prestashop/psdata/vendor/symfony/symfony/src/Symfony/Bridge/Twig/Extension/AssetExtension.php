@@ -19,8 +19,6 @@ use Twig\TwigFunction;
  * Twig extension for the Symfony Asset component.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class AssetExtension extends AbstractExtension
 {
@@ -33,8 +31,6 @@ class AssetExtension extends AbstractExtension
 
     /**
      * {@inheritdoc}
-     *
-     * @return TwigFunction[]
      */
     public function getFunctions()
     {

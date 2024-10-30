@@ -11,54 +11,21 @@
 
 namespace Symfony\Component\Workflow\Event;
 
-use Symfony\Component\Workflow\Marking;
-use Symfony\Component\Workflow\Transition;
-use Symfony\Component\Workflow\TransitionBlocker;
-use Symfony\Component\Workflow\TransitionBlockerList;
-
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
- *
- * @final since Symfony 4.4
  */
 class GuardEvent extends Event
 {
-    private $transitionBlockerList;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct($subject, Marking $marking, Transition $transition, $workflowName = null)
-    {
-        parent::__construct($subject, $marking, $transition, $workflowName);
-
-        $this->transitionBlockerList = new TransitionBlockerList();
-    }
+    private $blocked = false;
 
     public function isBlocked()
     {
-        return !$this->transitionBlockerList->isEmpty();
+        return $this->blocked;
     }
 
     public function setBlocked($blocked)
     {
-        if (!$blocked) {
-            $this->transitionBlockerList->clear();
-
-            return;
-        }
-
-        $this->transitionBlockerList->add(TransitionBlocker::createUnknown());
-    }
-
-    public function getTransitionBlockerList(): TransitionBlockerList
-    {
-        return $this->transitionBlockerList;
-    }
-
-    public function addTransitionBlocker(TransitionBlocker $transitionBlocker): void
-    {
-        $this->transitionBlockerList->add($transitionBlocker);
+        $this->blocked = (bool) $blocked;
     }
 }

@@ -1,28 +1,28 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ * 2007-2020 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
- * that is bundled with this package in the file LICENSE.md.
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2020 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ * International Registered Trademark & Property of PrestaShop SA
  */
 
 use PrestaShop\Module\BlockWishList\Access\CustomerAccess;
 use PrestaShop\Module\BlockWishList\Search\WishListProductSearchProvider;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
-use PrestaShop\PrestaShop\Core\Product\Search\SortOrdersCollection;
+use PrestaShop\PrestaShop\Core\Product\Search\SortOrderFactory;
 
 /**
  * View the content of a personal wishlist
@@ -78,14 +78,16 @@ class BlockWishlistViewModuleFrontController extends ProductListingFrontControll
         parent::init();
 
         if (false === $this->customerAccess->hasReadAccessToWishlist($this->wishlist)) {
-            $this->errors = [
-                $this->trans(
-                    'You do not have access to this wishlist.',
-                    [],
-                    'Modules.Blockwishlist.Shop'
-                ),
-            ];
-            $this->redirectWithNotifications('index.php');
+            header('HTTP/1.1 403 Forbidden');
+            header('Status: 403 Forbidden');
+            $this->errors[] = $this->trans(
+                'You do not have access to this wishlist.',
+                [],
+                'Modules.Blockwishlist.Shop'
+            );
+            $this->template = 'module:blockwishlist/views/templates/errors/forbidden.tpl';
+
+            return;
         }
 
         $this->context->smarty->assign(
@@ -165,7 +167,7 @@ class BlockWishlistViewModuleFrontController extends ProductListingFrontControll
         return new WishListProductSearchProvider(
             Db::getInstance(),
             $this->wishlist,
-            new SortOrdersCollection($this->getTranslator()),
+            new SortOrderFactory($this->getTranslator()),
             $this->getTranslator()
         );
     }

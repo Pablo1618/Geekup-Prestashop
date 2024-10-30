@@ -81,11 +81,6 @@ class OrderPaymentForViewing
     private $cardHolder;
 
     /**
-     * @var string|null
-     */
-    protected $employeeName;
-
-    /**
      * @param int $paymentId
      * @param DateTimeImmutable $date
      * @param string $paymentMethod
@@ -96,7 +91,6 @@ class OrderPaymentForViewing
      * @param string $cardBrand
      * @param string $cardExpiration
      * @param string $cardHolder
-     * @param string|null $employeeName
      */
     public function __construct(
         int $paymentId,
@@ -108,8 +102,7 @@ class OrderPaymentForViewing
         string $cardNumber,
         string $cardBrand,
         string $cardExpiration,
-        string $cardHolder,
-        ?string $employeeName = null
+        string $cardHolder
     ) {
         $this->paymentId = $paymentId;
         $this->date = $date;
@@ -121,7 +114,6 @@ class OrderPaymentForViewing
         $this->cardBrand = $cardBrand;
         $this->cardExpiration = $cardExpiration;
         $this->cardHolder = $cardHolder;
-        $this->employeeName = $employeeName;
     }
 
     /**
@@ -202,13 +194,5 @@ class OrderPaymentForViewing
     public function getCardHolder(): string
     {
         return $this->cardHolder;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getEmployeeName(): ?string
-    {
-        return $this->employeeName;
     }
 }

@@ -31,7 +31,7 @@ namespace PrestaShop\PrestaShop\Core\Domain\Product\Command;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\LocalizedTags;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Updates product tags in provided languages
@@ -77,12 +77,12 @@ class SetProductTagsCommand
     /**
      * @param array[] $localizedTags key-value pairs where each key represents language id and value is the array of tags
      *
-     * @throws ProductConstraintException|InvalidArgumentException
+     * @throws ProductConstraintException
      */
     private function setLocalizedTagsList(array $localizedTags): void
     {
         if (empty($localizedTags)) {
-            throw new InvalidArgumentException(sprintf(
+            throw new RuntimeException(sprintf(
                 'Empty array of product tags provided in %s. To remove all product tags use %s.',
                 self::class,
                 RemoveAllProductTagsCommand::class

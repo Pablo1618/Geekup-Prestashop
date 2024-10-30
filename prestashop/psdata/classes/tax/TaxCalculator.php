@@ -32,21 +32,16 @@
 class TaxCalculatorCore
 {
     /**
-     * ONE_TAX_ONLY_METHOD uses one tax only
-     */
-    public const ONE_TAX_ONLY_METHOD = 0;
-
-    /**
      * COMBINE_METHOD sum taxes
      * eg: 100€ * (10% + 15%).
      */
-    public const COMBINE_METHOD = 1;
+    const COMBINE_METHOD = 1;
 
     /**
      * ONE_AFTER_ANOTHER_METHOD apply taxes one after another
      * eg: (100€ * 10%) * 15%.
      */
-    public const ONE_AFTER_ANOTHER_METHOD = 2;
+    const ONE_AFTER_ANOTHER_METHOD = 2;
 
     /**
      * @var array

@@ -28,7 +28,7 @@ namespace PrestaShopBundle\Form\Admin\Product;
 
 use Language;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\RedirectType;
+use PrestaShop\PrestaShop\Core\Product\ProductInterface;
 use PrestaShopBundle\Form\Admin\Type\CommonAbstractType;
 use PrestaShopBundle\Form\Admin\Type\TranslateType;
 use PrestaShopBundle\Form\Admin\Type\TypeaheadProductCollectionType;
@@ -36,11 +36,9 @@ use Symfony\Component\Form\Extension\Core\Type as FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Router;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This form class is responsible to generate the product SEO form.
  */
 class ProductSeo extends CommonAbstractType
@@ -85,10 +83,10 @@ class ProductSeo extends CommonAbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $remoteUrls = [
-            RedirectType::TYPE_PRODUCT_PERMANENT => $this->context->getLegacyAdminLink('AdminProducts', true, ['ajax' => 1, 'action' => 'productsList', 'forceJson' => 1, 'disableCombination' => 1, 'exclude_packs' => 0, 'excludeVirtuals' => 0, 'limit' => 20]) . '&q=%QUERY',
-            RedirectType::TYPE_PRODUCT_TEMPORARY => $this->context->getLegacyAdminLink('AdminProducts', true, ['ajax' => 1, 'action' => 'productsList', 'forceJson' => 1, 'disableCombination' => 1, 'exclude_packs' => 0, 'excludeVirtuals' => 0, 'limit' => 20]) . '&q=%QUERY',
-            RedirectType::TYPE_CATEGORY_PERMANENT => $this->router->generate('admin_get_ajax_categories') . '&query=%QUERY',
-            RedirectType::TYPE_CATEGORY_TEMPORARY => $this->router->generate('admin_get_ajax_categories') . '&query=%QUERY',
+            ProductInterface::REDIRECT_TYPE_PRODUCT_MOVED_PERMANENTLY => $this->context->getLegacyAdminLink('AdminProducts', true, ['ajax' => 1, 'action' => 'productsList', 'forceJson' => 1, 'disableCombination' => 1, 'exclude_packs' => 0, 'excludeVirtuals' => 0, 'limit' => 20]) . '&q=%QUERY',
+            ProductInterface::REDIRECT_TYPE_PRODUCT_FOUND => $this->context->getLegacyAdminLink('AdminProducts', true, ['ajax' => 1, 'action' => 'productsList', 'forceJson' => 1, 'disableCombination' => 1, 'exclude_packs' => 0, 'excludeVirtuals' => 0, 'limit' => 20]) . '&q=%QUERY',
+            ProductInterface::REDIRECT_TYPE_CATEGORY_MOVED_PERMANENTLY => $this->router->generate('admin_get_ajax_categories') . '&query=%QUERY',
+            ProductInterface::REDIRECT_TYPE_CATEGORY_FOUND => $this->router->generate('admin_get_ajax_categories') . '&query=%QUERY',
         ];
 
         $builder->add(
@@ -161,16 +159,11 @@ class ProductSeo extends CommonAbstractType
                 FormType\ChoiceType::class,
                 [
                     'choices' => [
-                        $this->translator->trans('Default behavior from configuration', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_DEFAULT,
-                        $this->translator->trans('No redirection (200), display product', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_SUCCESS_DISPLAYED,
-                        $this->translator->trans('No redirection (404), display product', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_NOT_FOUND_DISPLAYED,
-                        $this->translator->trans('No redirection (410), display product', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_GONE_DISPLAYED,
-                        $this->translator->trans('No redirection (404), display error page', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_NOT_FOUND,
-                        $this->translator->trans('No redirection (410), display error page', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_GONE,
-                        $this->translator->trans('Permanent redirection to a category (301)', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_CATEGORY_PERMANENT,
-                        $this->translator->trans('Temporary redirection to a category (302)', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_CATEGORY_TEMPORARY,
-                        $this->translator->trans('Permanent redirection to a product (301)', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_PRODUCT_PERMANENT,
-                        $this->translator->trans('Temporary redirection to a product (302)', [], 'Admin.Catalog.Feature') => RedirectType::TYPE_PRODUCT_TEMPORARY,
+                        $this->translator->trans('Permanent redirection to a category (301)', [], 'Admin.Catalog.Feature') => ProductInterface::REDIRECT_TYPE_CATEGORY_MOVED_PERMANENTLY,
+                        $this->translator->trans('Temporary redirection to a category (302)', [], 'Admin.Catalog.Feature') => ProductInterface::REDIRECT_TYPE_CATEGORY_FOUND,
+                        $this->translator->trans('Permanent redirection to a product (301)', [], 'Admin.Catalog.Feature') => ProductInterface::REDIRECT_TYPE_PRODUCT_MOVED_PERMANENTLY,
+                        $this->translator->trans('Temporary redirection to a product (302)', [], 'Admin.Catalog.Feature') => ProductInterface::REDIRECT_TYPE_PRODUCT_FOUND,
+                        $this->translator->trans('No redirection (404)', [], 'Admin.Catalog.Feature') => ProductInterface::REDIRECT_TYPE_NOT_FOUND,
                     ],
                     'choice_attr' => function ($val, $key, $index) use ($remoteUrls) {
                         if (array_key_exists($index, $remoteUrls)) {
@@ -183,10 +176,10 @@ class ProductSeo extends CommonAbstractType
                     'label' => $this->translator->trans('Redirection when offline', [], 'Admin.Catalog.Feature'),
                     'attr' => [
                         'data-labelproduct' => $this->translator->trans('Target product', [], 'Admin.Catalog.Feature'),
-                        'data-placeholderproduct' => $this->translator->trans('To which product should the page redirect?', [], 'Admin.Catalog.Help'),
+                        'data-placeholderproduct' => $this->translator->trans('To which product the page should redirect?', [], 'Admin.Catalog.Help'),
                         'data-labelcategory' => $this->translator->trans('Target category', [], 'Admin.Catalog.Feature'),
-                        'data-placeholdercategory' => $this->translator->trans('To which category should the page redirect?', [], 'Admin.Catalog.Help'),
-                        'data-hintcategory' => $this->translator->trans('By default, the main category will be used if no category is selected.', [], 'Admin.Catalog.Help'),
+                        'data-placeholdercategory' => $this->translator->trans('To which category the page should redirect?', [], 'Admin.Catalog.Help'),
+                        'data-hintcategory' => $this->translator->trans('If no category is selected the Main Category is used', [], 'Admin.Catalog.Help'),
                     ],
                 ]
             )

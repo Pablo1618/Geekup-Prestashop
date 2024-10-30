@@ -25,9 +25,6 @@
 <template>
   <tr>
     <td>
-      {{ product.product_id }}
-    </td>
-    <td>
       <div class="d-flex align-items-center">
         <PSMedia
           class="d-flex align-items-center"
@@ -66,7 +63,7 @@
       </span>
     </td>
     <td class="text-sm-center">
-      {{ product.date_add_formatted }}
+      {{ product.date_add }}
     </td>
     <td>
       {{ employeeName }}
@@ -74,36 +71,34 @@
   </tr>
 </template>
 
-<script lang="ts">
-  import PSMedia from '@app/widgets/ps-media.vue';
+<script>
+  import PSMedia from '@app/widgets/ps-media';
   import productDesc from '@app/pages/stock/mixins/product-desc';
-  import {defineComponent, PropType} from 'vue';
-  import {StockMovement} from './index.vue';
 
-  export default defineComponent({
+  export default {
     props: {
       product: {
-        type: Object as PropType<StockMovement>,
+        type: Object,
         required: true,
       },
     },
     mixins: [productDesc],
     computed: {
-      qty(): number {
+      qty() {
         return this.product.physical_quantity;
       },
-      employeeName(): string {
+      employeeName() {
         return `${this.product.employee_firstname} ${this.product.employee_lastname}`;
       },
-      isPositive(): boolean {
+      isPositive() {
         return this.product.sign > 0;
       },
-      orderLink(): string | null {
+      orderLink() {
         return this.product.order_link !== 'N/A' ? this.product.order_link : null;
       },
     },
     components: {
       PSMedia,
     },
-  });
+  };
 </script>

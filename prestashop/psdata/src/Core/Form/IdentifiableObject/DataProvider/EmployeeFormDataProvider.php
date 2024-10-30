@@ -51,26 +51,18 @@ final class EmployeeFormDataProvider implements FormDataProviderInterface
     private $defaultShopAssociation;
 
     /**
-     * @var string
-     */
-    private $defaultAvatarUrl;
-
-    /**
      * @param CommandBusInterface $queryBus
      * @param bool $isMultistoreFeatureActive
      * @param array $defaultShopAssociation
-     * @param string $defaultAvatarUrl
      */
     public function __construct(
         CommandBusInterface $queryBus,
         $isMultistoreFeatureActive,
-        array $defaultShopAssociation,
-        string $defaultAvatarUrl
+        array $defaultShopAssociation
     ) {
         $this->queryBus = $queryBus;
         $this->isMultistoreFeatureActive = $isMultistoreFeatureActive;
         $this->defaultShopAssociation = $defaultShopAssociation;
-        $this->defaultAvatarUrl = $defaultAvatarUrl;
     }
 
     /**
@@ -91,7 +83,6 @@ final class EmployeeFormDataProvider implements FormDataProviderInterface
             'profile' => $editableEmployee->getProfileId(),
             'shop_association' => $editableEmployee->getShopAssociation(),
             'has_enabled_gravatar' => $editableEmployee->hasEnabledGravatar(),
-            'avatar_url' => $editableEmployee->getAvatarUrl(),
         ];
     }
 
@@ -103,7 +94,6 @@ final class EmployeeFormDataProvider implements FormDataProviderInterface
         $data = [
             'active' => true,
             'has_enabled_gravatar' => false,
-            'avatar_url' => $this->defaultAvatarUrl,
         ];
 
         if ($this->isMultistoreFeatureActive) {

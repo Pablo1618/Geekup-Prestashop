@@ -1,26 +1,36 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Query;
 
-use BackedEnum;
-use DateInterval;
-use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Types\Types;
-
-use function current;
-use function is_array;
-use function is_bool;
-use function is_int;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Provides an enclosed support for parameter inferring.
  *
  * @link    www.doctrine-project.org
+ * @since   2.0
+ * @author  Benjamin Eberlei <kontakt@beberlei.de>
+ * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
+ * @author  Jonathan Wage <jonwage@gmail.com>
+ * @author  Roman Borschel <roman@code-factory.org>
  */
 class ParameterTypeInferer
 {
@@ -31,47 +41,32 @@ class ParameterTypeInferer
      *
      * @param mixed $value Parameter value.
      *
-     * @return int|string Parameter type constant.
+     * @return mixed Parameter type constant.
      */
     public static function inferType($value)
     {
         if (is_int($value)) {
-            return Types::INTEGER;
+            return Type::INTEGER;
         }
 
         if (is_bool($value)) {
-            return Types::BOOLEAN;
+            return Type::BOOLEAN;
         }
 
-        if ($value instanceof DateTimeImmutable) {
-            return Types::DATETIME_IMMUTABLE;
+        if ($value instanceof \DateTime || $value instanceof \DateTimeInterface) {
+            return Type::DATETIME;
         }
 
-        if ($value instanceof DateTimeInterface) {
-            return Types::DATETIME_MUTABLE;
-        }
-
-        if ($value instanceof DateInterval) {
-            return Types::DATEINTERVAL;
-        }
-
-        if ($value instanceof BackedEnum) {
-            return is_int($value->value)
-                ? Types::INTEGER
-                : Types::STRING;
+        if ($value instanceof \DateInterval) {
+            return Type::DATEINTERVAL;
         }
 
         if (is_array($value)) {
-            $firstValue = current($value);
-            if ($firstValue instanceof BackedEnum) {
-                $firstValue = $firstValue->value;
-            }
-
-            return is_int($firstValue)
+            return is_int(current($value))
                 ? Connection::PARAM_INT_ARRAY
                 : Connection::PARAM_STR_ARRAY;
         }
 
-        return ParameterType::STRING;
+        return \PDO::PARAM_STR;
     }
 }

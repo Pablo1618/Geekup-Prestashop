@@ -18,19 +18,15 @@ class ColumnDiff
     /** @var string[] */
     public $changedProperties = [];
 
-    /** @var Column|null */
+    /** @var Column */
     public $fromColumn;
 
     /**
      * @param string   $oldColumnName
      * @param string[] $changedProperties
      */
-    public function __construct(
-        $oldColumnName,
-        Column $column,
-        array $changedProperties = [],
-        ?Column $fromColumn = null
-    ) {
+    public function __construct($oldColumnName, Column $column, array $changedProperties = [], ?Column $fromColumn = null)
+    {
         $this->oldColumnName     = $oldColumnName;
         $this->column            = $column;
         $this->changedProperties = $changedProperties;

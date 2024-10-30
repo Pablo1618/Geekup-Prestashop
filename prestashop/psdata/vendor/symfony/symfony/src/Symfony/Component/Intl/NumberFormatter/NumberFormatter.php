@@ -11,12 +11,12 @@
 
 namespace Symfony\Component\Intl\NumberFormatter;
 
-use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Exception\MethodArgumentNotImplementedException;
 use Symfony\Component\Intl\Exception\MethodArgumentValueNotImplementedException;
 use Symfony\Component\Intl\Exception\MethodNotImplementedException;
 use Symfony\Component\Intl\Exception\NotImplementedException;
 use Symfony\Component\Intl\Globals\IntlGlobals;
+use Symfony\Component\Intl\Intl;
 use Symfony\Component\Intl\Locale\Locale;
 
 /**
@@ -40,94 +40,94 @@ use Symfony\Component\Intl\Locale\Locale;
  *
  * @internal
  */
-abstract class NumberFormatter
+class NumberFormatter
 {
     /* Format style constants */
-    public const PATTERN_DECIMAL = 0;
-    public const DECIMAL = 1;
-    public const CURRENCY = 2;
-    public const PERCENT = 3;
-    public const SCIENTIFIC = 4;
-    public const SPELLOUT = 5;
-    public const ORDINAL = 6;
-    public const DURATION = 7;
-    public const PATTERN_RULEBASED = 9;
-    public const IGNORE = 0;
-    public const DEFAULT_STYLE = 1;
+    const PATTERN_DECIMAL = 0;
+    const DECIMAL = 1;
+    const CURRENCY = 2;
+    const PERCENT = 3;
+    const SCIENTIFIC = 4;
+    const SPELLOUT = 5;
+    const ORDINAL = 6;
+    const DURATION = 7;
+    const PATTERN_RULEBASED = 9;
+    const IGNORE = 0;
+    const DEFAULT_STYLE = 1;
 
     /* Format type constants */
-    public const TYPE_DEFAULT = 0;
-    public const TYPE_INT32 = 1;
-    public const TYPE_INT64 = 2;
-    public const TYPE_DOUBLE = 3;
-    public const TYPE_CURRENCY = 4;
+    const TYPE_DEFAULT = 0;
+    const TYPE_INT32 = 1;
+    const TYPE_INT64 = 2;
+    const TYPE_DOUBLE = 3;
+    const TYPE_CURRENCY = 4;
 
     /* Numeric attribute constants */
-    public const PARSE_INT_ONLY = 0;
-    public const GROUPING_USED = 1;
-    public const DECIMAL_ALWAYS_SHOWN = 2;
-    public const MAX_INTEGER_DIGITS = 3;
-    public const MIN_INTEGER_DIGITS = 4;
-    public const INTEGER_DIGITS = 5;
-    public const MAX_FRACTION_DIGITS = 6;
-    public const MIN_FRACTION_DIGITS = 7;
-    public const FRACTION_DIGITS = 8;
-    public const MULTIPLIER = 9;
-    public const GROUPING_SIZE = 10;
-    public const ROUNDING_MODE = 11;
-    public const ROUNDING_INCREMENT = 12;
-    public const FORMAT_WIDTH = 13;
-    public const PADDING_POSITION = 14;
-    public const SECONDARY_GROUPING_SIZE = 15;
-    public const SIGNIFICANT_DIGITS_USED = 16;
-    public const MIN_SIGNIFICANT_DIGITS = 17;
-    public const MAX_SIGNIFICANT_DIGITS = 18;
-    public const LENIENT_PARSE = 19;
+    const PARSE_INT_ONLY = 0;
+    const GROUPING_USED = 1;
+    const DECIMAL_ALWAYS_SHOWN = 2;
+    const MAX_INTEGER_DIGITS = 3;
+    const MIN_INTEGER_DIGITS = 4;
+    const INTEGER_DIGITS = 5;
+    const MAX_FRACTION_DIGITS = 6;
+    const MIN_FRACTION_DIGITS = 7;
+    const FRACTION_DIGITS = 8;
+    const MULTIPLIER = 9;
+    const GROUPING_SIZE = 10;
+    const ROUNDING_MODE = 11;
+    const ROUNDING_INCREMENT = 12;
+    const FORMAT_WIDTH = 13;
+    const PADDING_POSITION = 14;
+    const SECONDARY_GROUPING_SIZE = 15;
+    const SIGNIFICANT_DIGITS_USED = 16;
+    const MIN_SIGNIFICANT_DIGITS = 17;
+    const MAX_SIGNIFICANT_DIGITS = 18;
+    const LENIENT_PARSE = 19;
 
     /* Text attribute constants */
-    public const POSITIVE_PREFIX = 0;
-    public const POSITIVE_SUFFIX = 1;
-    public const NEGATIVE_PREFIX = 2;
-    public const NEGATIVE_SUFFIX = 3;
-    public const PADDING_CHARACTER = 4;
-    public const CURRENCY_CODE = 5;
-    public const DEFAULT_RULESET = 6;
-    public const PUBLIC_RULESETS = 7;
+    const POSITIVE_PREFIX = 0;
+    const POSITIVE_SUFFIX = 1;
+    const NEGATIVE_PREFIX = 2;
+    const NEGATIVE_SUFFIX = 3;
+    const PADDING_CHARACTER = 4;
+    const CURRENCY_CODE = 5;
+    const DEFAULT_RULESET = 6;
+    const PUBLIC_RULESETS = 7;
 
     /* Format symbol constants */
-    public const DECIMAL_SEPARATOR_SYMBOL = 0;
-    public const GROUPING_SEPARATOR_SYMBOL = 1;
-    public const PATTERN_SEPARATOR_SYMBOL = 2;
-    public const PERCENT_SYMBOL = 3;
-    public const ZERO_DIGIT_SYMBOL = 4;
-    public const DIGIT_SYMBOL = 5;
-    public const MINUS_SIGN_SYMBOL = 6;
-    public const PLUS_SIGN_SYMBOL = 7;
-    public const CURRENCY_SYMBOL = 8;
-    public const INTL_CURRENCY_SYMBOL = 9;
-    public const MONETARY_SEPARATOR_SYMBOL = 10;
-    public const EXPONENTIAL_SYMBOL = 11;
-    public const PERMILL_SYMBOL = 12;
-    public const PAD_ESCAPE_SYMBOL = 13;
-    public const INFINITY_SYMBOL = 14;
-    public const NAN_SYMBOL = 15;
-    public const SIGNIFICANT_DIGIT_SYMBOL = 16;
-    public const MONETARY_GROUPING_SEPARATOR_SYMBOL = 17;
+    const DECIMAL_SEPARATOR_SYMBOL = 0;
+    const GROUPING_SEPARATOR_SYMBOL = 1;
+    const PATTERN_SEPARATOR_SYMBOL = 2;
+    const PERCENT_SYMBOL = 3;
+    const ZERO_DIGIT_SYMBOL = 4;
+    const DIGIT_SYMBOL = 5;
+    const MINUS_SIGN_SYMBOL = 6;
+    const PLUS_SIGN_SYMBOL = 7;
+    const CURRENCY_SYMBOL = 8;
+    const INTL_CURRENCY_SYMBOL = 9;
+    const MONETARY_SEPARATOR_SYMBOL = 10;
+    const EXPONENTIAL_SYMBOL = 11;
+    const PERMILL_SYMBOL = 12;
+    const PAD_ESCAPE_SYMBOL = 13;
+    const INFINITY_SYMBOL = 14;
+    const NAN_SYMBOL = 15;
+    const SIGNIFICANT_DIGIT_SYMBOL = 16;
+    const MONETARY_GROUPING_SEPARATOR_SYMBOL = 17;
 
     /* Rounding mode values used by NumberFormatter::setAttribute() with NumberFormatter::ROUNDING_MODE attribute */
-    public const ROUND_CEILING = 0;
-    public const ROUND_FLOOR = 1;
-    public const ROUND_DOWN = 2;
-    public const ROUND_UP = 3;
-    public const ROUND_HALFEVEN = 4;
-    public const ROUND_HALFDOWN = 5;
-    public const ROUND_HALFUP = 6;
+    const ROUND_CEILING = 0;
+    const ROUND_FLOOR = 1;
+    const ROUND_DOWN = 2;
+    const ROUND_UP = 3;
+    const ROUND_HALFEVEN = 4;
+    const ROUND_HALFDOWN = 5;
+    const ROUND_HALFUP = 6;
 
     /* Pad position values used by NumberFormatter::setAttribute() with NumberFormatter::PADDING_POSITION attribute */
-    public const PAD_BEFORE_PREFIX = 0;
-    public const PAD_AFTER_PREFIX = 1;
-    public const PAD_BEFORE_SUFFIX = 2;
-    public const PAD_AFTER_SUFFIX = 3;
+    const PAD_BEFORE_PREFIX = 0;
+    const PAD_AFTER_PREFIX = 1;
+    const PAD_BEFORE_SUFFIX = 2;
+    const PAD_AFTER_SUFFIX = 3;
 
     /**
      * The error code from the last operation.
@@ -165,7 +165,7 @@ abstract class NumberFormatter
     /**
      * The supported styles to the constructor $styles argument.
      */
-    private const SUPPORTED_STYLES = [
+    private static $supportedStyles = [
         'CURRENCY' => self::CURRENCY,
         'DECIMAL' => self::DECIMAL,
     ];
@@ -173,7 +173,7 @@ abstract class NumberFormatter
     /**
      * Supported attributes to the setAttribute() $attr argument.
      */
-    private const SUPPORTED_ATTRIBUTES = [
+    private static $supportedAttributes = [
         'FRACTION_DIGITS' => self::FRACTION_DIGITS,
         'GROUPING_USED' => self::GROUPING_USED,
         'ROUNDING_MODE' => self::ROUNDING_MODE,
@@ -184,7 +184,7 @@ abstract class NumberFormatter
      * NumberFormatter::ROUNDING_MODE. NumberFormatter::ROUND_DOWN
      * and NumberFormatter::ROUND_UP does not have a PHP only equivalent.
      */
-    private const ROUNDING_MODES = [
+    private static $roundingModes = [
         'ROUND_HALFEVEN' => self::ROUND_HALFEVEN,
         'ROUND_HALFDOWN' => self::ROUND_HALFDOWN,
         'ROUND_HALFUP' => self::ROUND_HALFUP,
@@ -200,7 +200,7 @@ abstract class NumberFormatter
      *
      * @see https://php.net/round
      */
-    private const PHP_ROUNDING_MAP = [
+    private static $phpRoundingMap = [
         self::ROUND_HALFDOWN => \PHP_ROUND_HALF_DOWN,
         self::ROUND_HALFEVEN => \PHP_ROUND_HALF_EVEN,
         self::ROUND_HALFUP => \PHP_ROUND_HALF_UP,
@@ -211,7 +211,7 @@ abstract class NumberFormatter
      * PHP's round() function, but there's an equivalent. Keys are rounding
      * modes, values does not matter.
      */
-    private const CUSTOM_ROUNDING_LIST = [
+    private static $customRoundingList = [
         self::ROUND_CEILING => true,
         self::ROUND_FLOOR => true,
         self::ROUND_DOWN => true,
@@ -230,12 +230,12 @@ abstract class NumberFormatter
      */
     private static $int64Max = 9223372036854775807;
 
-    private const EN_SYMBOLS = [
+    private static $enSymbols = [
         self::DECIMAL => ['.', ',', ';', '%', '0', '#', '-', '+', '¤', '¤¤', '.', 'E', '‰', '*', '∞', 'NaN', '@', ','],
         self::CURRENCY => ['.', ',', ';', '%', '0', '#', '-', '+', '¤', '¤¤', '.', 'E', '‰', '*', '∞', 'NaN', '@', ','],
     ];
 
-    private const EN_TEXT_ATTRIBUTES = [
+    private static $enTextAttributes = [
         self::DECIMAL => ['', '', '-', '', ' ', 'XXX', ''],
         self::CURRENCY => ['¤', '', '-¤', '', ' ', 'XXX'],
     ];
@@ -257,14 +257,14 @@ abstract class NumberFormatter
      * @throws MethodArgumentValueNotImplementedException When the $style is not supported
      * @throws MethodArgumentNotImplementedException      When the pattern value is different than null
      */
-    public function __construct(?string $locale = 'en', int $style = null, $pattern = null)
+    public function __construct($locale = 'en', $style = null, $pattern = null)
     {
         if ('en' !== $locale && null !== $locale) {
             throw new MethodArgumentValueNotImplementedException(__METHOD__, 'locale', $locale, 'Only the locale "en" is supported');
         }
 
-        if (!\in_array($style, self::SUPPORTED_STYLES)) {
-            $message = sprintf('The available styles are: %s.', implode(', ', array_keys(self::SUPPORTED_STYLES)));
+        if (!\in_array($style, self::$supportedStyles)) {
+            $message = sprintf('The available styles are: %s.', implode(', ', array_keys(self::$supportedStyles)));
             throw new MethodArgumentValueNotImplementedException(__METHOD__, 'style', $style, $message);
         }
 
@@ -272,7 +272,7 @@ abstract class NumberFormatter
             throw new MethodArgumentNotImplementedException(__METHOD__, 'pattern');
         }
 
-        $this->style = $style;
+        $this->style = null !== $style ? (int) $style : null;
     }
 
     /**
@@ -286,7 +286,7 @@ abstract class NumberFormatter
      *                             NumberFormat::PATTERN_RULEBASED. It must conform to  the syntax
      *                             described in the ICU DecimalFormat or ICU RuleBasedNumberFormat documentation
      *
-     * @return static
+     * @return self
      *
      * @see https://php.net/numberformatter.create
      * @see http://www.icu-project.org/apiref/icu4c/classDecimalFormat.html#_details
@@ -298,7 +298,7 @@ abstract class NumberFormatter
      */
     public static function create($locale = 'en', $style = null, $pattern = null)
     {
-        return new static($locale, $style, $pattern);
+        return new self($locale, $style, $pattern);
     }
 
     /**
@@ -318,8 +318,8 @@ abstract class NumberFormatter
             return $this->format($value);
         }
 
-        $symbol = Currencies::getSymbol($currency, 'en');
-        $fractionDigits = Currencies::getFractionDigits($currency);
+        $symbol = Intl::getCurrencyBundle()->getCurrencySymbol($currency, 'en');
+        $fractionDigits = Intl::getCurrencyBundle()->getFractionDigits($currency);
 
         $value = $this->roundCurrency($value, $currency);
 
@@ -397,7 +397,7 @@ abstract class NumberFormatter
      */
     public function getAttribute($attr)
     {
-        return $this->attributes[$attr] ?? null;
+        return isset($this->attributes[$attr]) ? $this->attributes[$attr] : null;
     }
 
     /**
@@ -466,7 +466,7 @@ abstract class NumberFormatter
      */
     public function getSymbol($attr)
     {
-        return \array_key_exists($this->style, self::EN_SYMBOLS) && \array_key_exists($attr, self::EN_SYMBOLS[$this->style]) ? self::EN_SYMBOLS[$this->style][$attr] : false;
+        return \array_key_exists($this->style, self::$enSymbols) && \array_key_exists($attr, self::$enSymbols[$this->style]) ? self::$enSymbols[$this->style][$attr] : false;
     }
 
     /**
@@ -480,7 +480,7 @@ abstract class NumberFormatter
      */
     public function getTextAttribute($attr)
     {
-        return \array_key_exists($this->style, self::EN_TEXT_ATTRIBUTES) && \array_key_exists($attr, self::EN_TEXT_ATTRIBUTES[$this->style]) ? self::EN_TEXT_ATTRIBUTES[$this->style][$attr] : false;
+        return \array_key_exists($this->style, self::$enTextAttributes) && \array_key_exists($attr, self::$enTextAttributes[$this->style]) ? self::$enTextAttributes[$this->style][$attr] : false;
     }
 
     /**
@@ -536,7 +536,7 @@ abstract class NumberFormatter
             // value is not valid if grouping is used, but digits are not grouped in groups of three
             if ($error = isset($matches['grouping']) && !preg_match('/^-?(?:\d{1,3}+)?(?:(?:,\d{3})++|\d*+)(?:\.\d*+)?$/', $value)) {
                 // the position on error is 0 for positive and 1 for negative numbers
-                $position = str_starts_with($value, '-') ? 1 : 0;
+                $position = 0 === strpos($value, '-') ? 1 : 0;
             }
         } else {
             $error = true;
@@ -579,29 +579,29 @@ abstract class NumberFormatter
     {
         $attr = (int) $attr;
 
-        if (!\in_array($attr, self::SUPPORTED_ATTRIBUTES)) {
+        if (!\in_array($attr, self::$supportedAttributes)) {
             $message = sprintf(
                 'The available attributes are: %s',
-                implode(', ', array_keys(self::SUPPORTED_ATTRIBUTES))
+                implode(', ', array_keys(self::$supportedAttributes))
             );
 
             throw new MethodArgumentValueNotImplementedException(__METHOD__, 'attr', $value, $message);
         }
 
-        if (self::SUPPORTED_ATTRIBUTES['ROUNDING_MODE'] === $attr && $this->isInvalidRoundingMode($value)) {
+        if (self::$supportedAttributes['ROUNDING_MODE'] === $attr && $this->isInvalidRoundingMode($value)) {
             $message = sprintf(
                 'The supported values for ROUNDING_MODE are: %s',
-                implode(', ', array_keys(self::ROUNDING_MODES))
+                implode(', ', array_keys(self::$roundingModes))
             );
 
             throw new MethodArgumentValueNotImplementedException(__METHOD__, 'attr', $value, $message);
         }
 
-        if (self::SUPPORTED_ATTRIBUTES['GROUPING_USED'] === $attr) {
+        if (self::$supportedAttributes['GROUPING_USED'] === $attr) {
             $value = $this->normalizeGroupingUsedValue($value);
         }
 
-        if (self::SUPPORTED_ATTRIBUTES['FRACTION_DIGITS'] === $attr) {
+        if (self::$supportedAttributes['FRACTION_DIGITS'] === $attr) {
             $value = $this->normalizeFractionDigitsValue($value);
             if ($value < 0) {
                 // ignore negative values but do not raise an error
@@ -686,20 +686,25 @@ abstract class NumberFormatter
      *
      * The only actual rounding data as of this writing, is CHF.
      *
+     * @param float  $value    The numeric currency value
+     * @param string $currency The 3-letter ISO 4217 currency code indicating the currency to use
+     *
+     * @return float The rounded numeric currency value
+     *
      * @see http://en.wikipedia.org/wiki/Swedish_rounding
      * @see http://www.docjar.com/html/api/com/ibm/icu/util/Currency.java.html#1007
      */
-    private function roundCurrency(float $value, string $currency): float
+    private function roundCurrency($value, $currency)
     {
-        $fractionDigits = Currencies::getFractionDigits($currency);
-        $roundingIncrement = Currencies::getRoundingIncrement($currency);
+        $fractionDigits = Intl::getCurrencyBundle()->getFractionDigits($currency);
+        $roundingIncrement = Intl::getCurrencyBundle()->getRoundingIncrement($currency);
 
         // Round with the formatter rounding mode
         $value = $this->round($value, $fractionDigits);
 
         // Swiss rounding
         if (0 < $roundingIncrement && 0 < $fractionDigits) {
-            $roundingFactor = $roundingIncrement / 10 ** $fractionDigits;
+            $roundingFactor = $roundingIncrement / pow(10, $fractionDigits);
             $value = round($value / $roundingFactor) * $roundingFactor;
         }
 
@@ -709,19 +714,20 @@ abstract class NumberFormatter
     /**
      * Rounds a value.
      *
-     * @param int|float $value The value to round
+     * @param int|float $value     The value to round
+     * @param int       $precision The number of decimal digits to round to
      *
      * @return int|float The rounded value
      */
-    private function round($value, int $precision)
+    private function round($value, $precision)
     {
         $precision = $this->getUninitializedPrecision($value, $precision);
 
         $roundingModeAttribute = $this->getAttribute(self::ROUNDING_MODE);
-        if (isset(self::PHP_ROUNDING_MAP[$roundingModeAttribute])) {
-            $value = round($value, $precision, self::PHP_ROUNDING_MAP[$roundingModeAttribute]);
-        } elseif (isset(self::CUSTOM_ROUNDING_LIST[$roundingModeAttribute])) {
-            $roundingCoef = 10 ** $precision;
+        if (isset(self::$phpRoundingMap[$roundingModeAttribute])) {
+            $value = round($value, $precision, self::$phpRoundingMap[$roundingModeAttribute]);
+        } elseif (isset(self::$customRoundingList[$roundingModeAttribute])) {
+            $roundingCoef = pow(10, $precision);
             $value *= $roundingCoef;
             $value = (float) (string) $value;
 
@@ -749,9 +755,12 @@ abstract class NumberFormatter
     /**
      * Formats a number.
      *
-     * @param int|float $value The numeric value to format
+     * @param int|float $value     The numeric value to format
+     * @param int       $precision The number of decimal digits to use
+     *
+     * @return string The formatted number
      */
-    private function formatNumber($value, int $precision): string
+    private function formatNumber($value, $precision)
     {
         $precision = $this->getUninitializedPrecision($value, $precision);
 
@@ -761,9 +770,12 @@ abstract class NumberFormatter
     /**
      * Returns the precision value if the DECIMAL style is being used and the FRACTION_DIGITS attribute is uninitialized.
      *
-     * @param int|float $value The value to get the precision from if the FRACTION_DIGITS attribute is uninitialized
+     * @param int|float $value     The value to get the precision from if the FRACTION_DIGITS attribute is uninitialized
+     * @param int       $precision The precision value to returns if the FRACTION_DIGITS attribute is initialized
+     *
+     * @return int The precision value
      */
-    private function getUninitializedPrecision($value, int $precision): int
+    private function getUninitializedPrecision($value, $precision)
     {
         if (self::CURRENCY === $this->style) {
             return $precision;
@@ -781,8 +793,12 @@ abstract class NumberFormatter
 
     /**
      * Check if the attribute is initialized (value set by client code).
+     *
+     * @param string $attr The attribute name
+     *
+     * @return bool true if the value was set by client, false otherwise
      */
-    private function isInitializedAttribute(string $attr): bool
+    private function isInitializedAttribute($attr)
     {
         return isset($this->initializedAttributes[$attr]);
     }
@@ -791,11 +807,14 @@ abstract class NumberFormatter
      * Returns the numeric value using the $type to convert to the right data type.
      *
      * @param mixed $value The value to be converted
+     * @param int   $type  The type to convert. Can be TYPE_DOUBLE (float) or TYPE_INT32 (int)
      *
      * @return int|float|false The converted value
      */
-    private function convertValueDataType($value, int $type)
+    private function convertValueDataType($value, $type)
     {
+        $type = (int) $type;
+
         if (self::TYPE_DOUBLE === $type) {
             $value = (float) $value;
         } elseif (self::TYPE_INT32 === $type) {
@@ -810,6 +829,8 @@ abstract class NumberFormatter
     /**
      * Convert the value data type to int or returns false if the value is out of the integer value range.
      *
+     * @param mixed $value The value to be converted
+     *
      * @return int|false The converted value
      */
     private function getInt32Value($value)
@@ -823,6 +844,8 @@ abstract class NumberFormatter
 
     /**
      * Convert the value data type to int or returns false if the value is out of the integer value range.
+     *
+     * @param mixed $value The value to be converted
      *
      * @return int|float|false The converted value
      */
@@ -841,10 +864,14 @@ abstract class NumberFormatter
 
     /**
      * Check if the rounding mode is invalid.
+     *
+     * @param int $value The rounding mode value to check
+     *
+     * @return bool true if the rounding mode is invalid, false otherwise
      */
-    private function isInvalidRoundingMode(int $value): bool
+    private function isInvalidRoundingMode($value)
     {
-        if (\in_array($value, self::ROUNDING_MODES, true)) {
+        if (\in_array($value, self::$roundingModes, true)) {
             return false;
         }
 
@@ -854,16 +881,24 @@ abstract class NumberFormatter
     /**
      * Returns the normalized value for the GROUPING_USED attribute. Any value that can be converted to int will be
      * cast to Boolean and then to int again. This way, negative values are converted to 1 and string values to 0.
+     *
+     * @param mixed $value The value to be normalized
+     *
+     * @return int The normalized value for the attribute (0 or 1)
      */
-    private function normalizeGroupingUsedValue($value): int
+    private function normalizeGroupingUsedValue($value)
     {
         return (int) (bool) (int) $value;
     }
 
     /**
      * Returns the normalized value for the FRACTION_DIGITS attribute.
+     *
+     * @param mixed $value The value to be normalized
+     *
+     * @return int The normalized value for the attribute
      */
-    private function normalizeFractionDigitsValue($value): int
+    private function normalizeFractionDigitsValue($value)
     {
         return (int) $value;
     }

@@ -28,7 +28,6 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Domain\Category\Query;
 
 use PrestaShop\PrestaShop\Core\Domain\Language\ValueObject\LanguageId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 
 /**
  * Provides Category tree list where each category holds its child categories
@@ -36,40 +35,24 @@ use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 final class GetCategoriesTree
 {
     /**
-     * @var LanguageId
+     * @var LanguageId|null
      */
     private $languageId;
 
     /**
-     * @var ShopId
-     */
-    private $shopId;
-
-    /**
-     * @param int $languageId
-     * @param int $shopId
+     * @param int|null $languageId
      */
     public function __construct(
-        int $languageId,
-        int $shopId
+        ?int $languageId = null
     ) {
-        $this->languageId = new LanguageId($languageId);
-        $this->shopId = new ShopId($shopId);
+        $this->languageId = $languageId ? new LanguageId($languageId) : null;
     }
 
     /**
-     * @return LanguageId
+     * @return LanguageId|null
      */
-    public function getLanguageId(): LanguageId
+    public function getLanguageId(): ?LanguageId
     {
         return $this->languageId;
-    }
-
-    /**
-     * @return ShopId
-     */
-    public function getShopId(): ShopId
-    {
-        return $this->shopId;
     }
 }

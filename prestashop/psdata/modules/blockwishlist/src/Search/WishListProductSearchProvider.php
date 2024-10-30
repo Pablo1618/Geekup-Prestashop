@@ -1,21 +1,21 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ * 2007-2020 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
- * that is bundled with this package in the file LICENSE.md.
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2020 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ * International Registered Trademark & Property of PrestaShop SA
  */
 
 namespace PrestaShop\Module\BlockWishList\Search;
@@ -31,10 +31,10 @@ use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchProviderInterface;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
-use PrestaShop\PrestaShop\Core\Product\Search\SortOrdersCollection;
+use PrestaShop\PrestaShop\Core\Product\Search\SortOrderFactory;
 use Product;
 use Shop;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Validate;
 use WishList;
 
@@ -54,9 +54,9 @@ class WishListProductSearchProvider implements ProductSearchProviderInterface
     private $wishList;
 
     /**
-     * @var SortOrdersCollection
+     * @var SortOrderFactory
      */
-    private $sortOrdersCollection;
+    private $sortOrderFactory;
 
     /**
      * @var TranslatorInterface the translator
@@ -70,12 +70,12 @@ class WishListProductSearchProvider implements ProductSearchProviderInterface
     public function __construct(
         Db $db,
         WishList $wishList,
-        SortOrdersCollection $sortOrdersCollection,
+        SortOrderFactory $sortOrderFactory,
         TranslatorInterface $translator
     ) {
         $this->db = $db;
         $this->wishList = $wishList;
-        $this->sortOrdersCollection = $sortOrdersCollection;
+        $this->sortOrderFactory = $sortOrderFactory;
         $this->translator = $translator;
     }
 
@@ -92,7 +92,7 @@ class WishListProductSearchProvider implements ProductSearchProviderInterface
         $result = new ProductSearchResult();
         $result->setProducts($this->getProductsOrCount($context, $query, 'products'));
         $result->setTotalProductsCount($this->getProductsOrCount($context, $query, 'count'));
-        $sortOrders = $this->sortOrdersCollection->getDefaults();
+        $sortOrders = $this->sortOrderFactory->getDefaultSortOrders();
         $sortOrders[] = (new SortOrder('wishlist_product', 'id_wishlist_product', 'DESC'))->setLabel($this->translator->trans('Last added', [], 'Modules.Blockwishlist.Shop'));
         $result->setAvailableSortOrders($sortOrders);
 
@@ -136,7 +136,7 @@ class WishListProductSearchProvider implements ProductSearchProviderInterface
                 $querySearch->select('product_attribute_shop.minimal_quantity AS product_attribute_minimal_quantity, IFNULL(product_attribute_shop.`id_product_attribute`,0) AS id_product_attribute');
             }
         } else {
-            $querySearch->select('COUNT(DISTINCT wp.id_product)');
+            $querySearch->select('COUNT(wp.id_product)');
         }
 
         $querySearch->from('product', 'p');
@@ -173,8 +173,6 @@ class WishListProductSearchProvider implements ProductSearchProviderInterface
                 $querySearch->orderBy($sortOrder . ' ' . $sortWay);
             }
             $querySearch->limit((int) $query->getResultsPerPage(), ((int) $query->getPage() - 1) * (int) $query->getResultsPerPage());
-            $querySearch->groupBy('p.id_product');
-
             $products = $this->db->executeS($querySearch);
 
             if (empty($products)) {

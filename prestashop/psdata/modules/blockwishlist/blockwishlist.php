@@ -1,21 +1,21 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ * 2007-2020 PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Academic Free License version 3.0
- * that is bundled with this package in the file LICENSE.md.
+ * This source file is subject to the Academic Free License 3.0 (AFL-3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
  * https://opensource.org/licenses/AFL-3.0
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2007-2020 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
+ * International Registered Trademark & Property of PrestaShop SA
  */
 
 use PrestaShop\Module\BlockWishList\Database\Install;
@@ -72,7 +72,7 @@ class BlockWishList extends Module
     {
         $this->name = 'blockwishlist';
         $this->tab = 'front_office_features';
-        $this->version = '3.0.1';
+        $this->version = '2.1.2';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
 
@@ -81,7 +81,7 @@ class BlockWishList extends Module
         $this->displayName = $this->trans('Wishlist', [], 'Modules.Blockwishlist.Admin');
         $this->description = $this->trans('Allow customers to create wishlists to save their favorite products for later.', [], 'Modules.Blockwishlist.Admin');
         $this->ps_versions_compliancy = [
-            'min' => '8.0.0',
+            'min' => '1.7.6.0',
             'max' => _PS_VERSION_,
         ];
     }
@@ -235,12 +235,8 @@ class BlockWishList extends Module
             return;
         }
 
-        /*
-         * Because we don't know which product attributes were related to deleted attribute
-         * since they are already gone from database, we just remove any leftovers.
-         */
-        WishList::removeNonExistingProductAttributesFromWishlist();
-        Statistics::removeNonExistingProductAttributesFromStatistics();
+        WishList::removeProductFromWishlist(null, $params['id_product_attribute']);
+        Statistics::removeProductFromStatistics(null, $params['id_product_attribute']);
     }
 
     public function hookDeleteProductAttribute(array $params)
@@ -316,7 +312,6 @@ class BlockWishList extends Module
             'deleteProductUrl' => $this->context->link->getModuleLink('blockwishlist', 'action', ['action' => 'deleteProductFromWishlist']),
             'addUrl' => $this->context->link->getModuleLink('blockwishlist', 'action', ['action' => 'addProductToWishlist']),
             'newWishlistCTA' => Configuration::get('blockwishlist_CreateButtonLabel', $this->context->language->id),
-            'wishlistsTitlePage' => Configuration::get('blockwishlist_WishlistPageName', $this->context->language->id),
         ]);
 
         return $this->fetch('module:blockwishlist/views/templates/hook/displayHeader.tpl');

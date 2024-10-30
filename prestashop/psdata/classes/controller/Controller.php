@@ -23,8 +23,6 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-
-use PrestaShopBundle\Translation\TranslatorComponent;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -34,8 +32,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 abstract class ControllerCore
 {
-    public const SERVICE_LOCALE_REPOSITORY = 'prestashop.core.localization.locale.repository';
-    public const SERVICE_MULTISTORE_FEATURE = 'prestashop.adapter.multistore_feature';
+    const SERVICE_LOCALE_REPOSITORY = 'prestashop.core.localization.locale.repository';
 
     /**
      * @var Context
@@ -143,7 +140,7 @@ abstract class ControllerCore
     public $php_self;
 
     /**
-     * @var TranslatorComponent
+     * @var PrestaShopBundle\Translation\Translator
      */
     protected $translator;
 
@@ -165,16 +162,6 @@ abstract class ControllerCore
     abstract public function viewAccess();
 
     /**
-     * Errors displayed after post processing
-     *
-     * @var array<string|int, string|bool>
-     */
-    public $errors = [];
-
-    /** @var string */
-    public $layout;
-
-    /**
      * Initialize the page.
      *
      * @throws Exception
@@ -188,7 +175,7 @@ abstract class ControllerCore
             ]
         );
 
-        if (_PS_MODE_DEV_ && $this->controller_type == 'admin' && !($this instanceof AdminLegacyLayoutControllerCore)) {
+        if (_PS_MODE_DEV_ && $this->controller_type == 'admin') {
             set_error_handler([__CLASS__, 'myErrorHandler']);
         }
 
@@ -346,17 +333,9 @@ abstract class ControllerCore
 
     protected function trans($id, array $parameters = [], $domain = null, $locale = null)
     {
-        if (isset($parameters['_raw'])) {
-            @trigger_error(
-                'The _raw parameter is deprecated and will be removed in the next major version.',
-                E_USER_DEPRECATED
-            );
-            unset($parameters['_raw']);
+        $parameters['legacy'] = 'htmlspecialchars';
 
-            return $this->translator->trans($id, $parameters, $domain, $locale);
-        }
-
-        return htmlspecialchars($this->translator->trans($id, $parameters, $domain, $locale), ENT_NOQUOTES);
+        return $this->translator->trans($id, $parameters, $domain, $locale);
     }
 
     /**
@@ -380,7 +359,7 @@ abstract class ControllerCore
     }
 
     /**
-     * Sets page footer display.
+     * Sets page header display.
      *
      * @param bool $display
      */
@@ -440,7 +419,7 @@ abstract class ControllerCore
      * @param int|null $offset
      * @param bool $check_path
      *
-     * @return void
+     * @return true
      */
     public function addCSS($css_uri, $css_media_type = 'all', $offset = null, $check_path = true)
     {
@@ -597,7 +576,7 @@ abstract class ControllerCore
 
         foreach ($component as $ui) {
             $ui_path = Media::getJqueryUIPath($ui, $theme, $check_dependencies);
-            $this->addCSS($ui_path['css'], 'all');
+            $this->addCSS($ui_path['css'], 'all', false);
             $this->addJS($ui_path['js'], false);
         }
     }
@@ -606,7 +585,7 @@ abstract class ControllerCore
      * Adds jQuery plugin(s) to queued JS file list.
      *
      * @param string|array $name
-     * @param string|null $folder
+     * @param string null $folder
      * @param bool $css
      */
     public function addJqueryPlugin($name, $folder = null, $css = true)
@@ -696,7 +675,7 @@ abstract class ControllerCore
     /**
      * Custom error handler.
      *
-     * @param int $errno
+     * @param string $errno
      * @param string $errstr
      * @param string $errfile
      * @param int $errline
@@ -705,13 +684,7 @@ abstract class ControllerCore
      */
     public static function myErrorHandler($errno, $errstr, $errfile, $errline)
     {
-        /**
-         * Prior to PHP 8.0.0, the $errno value was always 0 if the expression which caused the diagnostic was prepended by the @ error-control operator.
-         *
-         * @see https://www.php.net/manual/fr/function.set-error-handler.php
-         * @see https://www.php.net/manual/en/language.operators.errorcontrol.php
-         */
-        if (!(error_reporting() & $errno)) {
+        if (error_reporting() === 0) {
             return false;
         }
 
@@ -719,6 +692,8 @@ abstract class ControllerCore
             case E_USER_ERROR:
             case E_ERROR:
                 die('Fatal error: ' . $errstr . ' in ' . $errfile . ' on line ' . $errline);
+
+                break;
             case E_USER_WARNING:
             case E_WARNING:
                 $type = 'Warning';
@@ -789,7 +764,7 @@ abstract class ControllerCore
          * use 'actionAjaxDie'.$controller.$method.'Before' instead
          */
         Hook::exec('actionBeforeAjaxDie' . $controller . $method, ['value' => $value]);
-        Hook::exec('actionAjaxDie' . $controller . $method . 'Before', ['value' => &$value]);
+        Hook::exec('actionAjaxDie' . $controller . $method . 'Before', ['value' => $value]);
         header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
 
         echo $value;
@@ -838,15 +813,5 @@ abstract class ControllerCore
     public function getContainer()
     {
         return $this->container;
-    }
-
-    /**
-     * Check if multistore feature is enabled.
-     *
-     * @return bool
-     */
-    public function isMultistoreEnabled(): bool
-    {
-        return $this->get(static::SERVICE_MULTISTORE_FEATURE)->isUsed();
     }
 }

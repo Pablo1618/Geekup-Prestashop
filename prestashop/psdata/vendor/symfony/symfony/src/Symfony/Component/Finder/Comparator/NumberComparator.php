@@ -39,10 +39,10 @@ class NumberComparator extends Comparator
      *
      * @throws \InvalidArgumentException If the test is not understood
      */
-    public function __construct(?string $test)
+    public function __construct($test)
     {
-        if (null === $test || !preg_match('#^\s*(==|!=|[<>]=?)?\s*([0-9\.]+)\s*([kmg]i?)?\s*$#i', $test, $matches)) {
-            throw new \InvalidArgumentException(sprintf('Don\'t understand "%s" as a number test.', $test ?? 'null'));
+        if (!preg_match('#^\s*(==|!=|[<>]=?)?\s*([0-9\.]+)\s*([kmg]i?)?\s*$#i', $test, $matches)) {
+            throw new \InvalidArgumentException(sprintf('Don\'t understand "%s" as a number test.', $test));
         }
 
         $target = $matches[2];
@@ -74,6 +74,6 @@ class NumberComparator extends Comparator
         }
 
         $this->setTarget($target);
-        $this->setOperator($matches[1] ?? '==');
+        $this->setOperator(isset($matches[1]) ? $matches[1] : '==');
     }
 }

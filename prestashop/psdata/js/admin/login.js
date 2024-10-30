@@ -58,7 +58,7 @@ $(document).ready(function() {
 			}
 		}
 	});
-
+	
 	$("#reset_password_form").validate({
 		rules: {
 			"reset_passwd": {
@@ -226,7 +226,7 @@ function doAjaxForgot() {
 		$.ajax({
 			type: 'POST',
 			headers: {'cache-control': 'no-cache'},
-			url: 'index.php?rand=' + new Date().getTime(),
+			url: 'ajax-tab.php' + '?rand=' + new Date().getTime(),
 			async: true,
 			dataType: 'json',
 			data: {
@@ -257,7 +257,7 @@ function doAjaxReset() {
 		$.ajax({
 			type: 'POST',
 			headers: {'cache-control': 'no-cache'},
-			url: 'index.php?rand=' + new Date().getTime(),
+			url: 'ajax-tab.php' + '?rand=' + new Date().getTime(),
 			async: true,
 			dataType: 'json',
 			data: {
@@ -287,18 +287,8 @@ function doAjaxReset() {
 }
 
 function displayErrors(errors) {
-	if (errors.length > 1) {
-		// If there were multiple issues, we display an error list
-		str_errors = '<p><strong>' + more_errors + '</strong></p><ol>';
-		for (var error in errors) {
-			if (error != 'indexOf') {
-				str_errors += '<li>' + errors[error] + '</li>';
-			}
-		}
-		str_errors += '</ol>';
-	} else {
-		// Otherwise, just the first error in the list
-		str_errors = '<p>' + errors[0] + '</p>';
-	}
-	$('#error').html(str_errors).removeClass('hide').fadeIn('slow');
+	str_errors = '<p><strong>' + (errors.length > 1 ? more_errors : one_error) + '</strong></p><ol>';
+	for (var error in errors) //IE6 bug fix
+		if (error != 'indexOf') str_errors += '<li>' + errors[error] + '</li>';
+	$('#error').html(str_errors + '</ol>').removeClass('hide').fadeIn('slow');
 }

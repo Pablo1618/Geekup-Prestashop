@@ -28,17 +28,15 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Product;
 
-use PrestaShop\PrestaShop\Adapter\Shop\Url\ProductPreviewProvider;
 use PrestaShop\PrestaShop\Adapter\Shop\Url\ProductProvider;
-use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
-use PrestaShopBundle\Form\Admin\Type\ButtonCollectionType;
 use PrestaShopBundle\Form\Admin\Type\IconButtonType;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class FooterType extends TranslatorAwareType
 {
@@ -53,44 +51,20 @@ class FooterType extends TranslatorAwareType
     private $router;
 
     /**
-     * @var ProductPreviewProvider
-     */
-    protected $productPreviewUrlProvider;
-
-    /**
-     * @var FeatureInterface
-     */
-    private $multistoreFeature;
-
-    /**
-     * @var int|null
-     */
-    private $contextShopId;
-
-    /**
      * @param TranslatorInterface $translator
      * @param array $locales
      * @param ProductProvider $productUrlProvider
-     * @param ProductPreviewProvider $productPreviewUrlProvider
      * @param RouterInterface $router
-     * @param FeatureInterface $multistoreFeature
-     * @param int|null $contextShopId
      */
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
         ProductProvider $productUrlProvider,
-        ProductPreviewProvider $productPreviewUrlProvider,
-        RouterInterface $router,
-        FeatureInterface $multistoreFeature,
-        ?int $contextShopId
+        RouterInterface $router
     ) {
         parent::__construct($translator, $locales);
         $this->productUrlProvider = $productUrlProvider;
-        $this->productPreviewUrlProvider = $productPreviewUrlProvider;
         $this->router = $router;
-        $this->contextShopId = $contextShopId;
-        $this->multistoreFeature = $multistoreFeature;
     }
 
     /**
@@ -98,120 +72,95 @@ class FooterType extends TranslatorAwareType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $productId = $options['product_id'];
-
-        $deleteUrl = $this->router->generate('admin_products_delete_from_all_shops', [
-            'productId' => $productId,
-        ]);
-        $duplicateUrl = $this->router->generate('admin_products_duplicate_shop', [
-            'productId' => $productId,
-            'shopId' => $this->contextShopId,
-        ]);
-        $editUrl = $this->router->generate('admin_products_edit', [
-            'productId' => $productId,
-        ]);
-        $productPreviewUrl = $this->productPreviewUrlProvider->getUrl($productId, $options['active']);
-        // We use a placeholder {friendly-url} as the rewrite part so that it can be replaced dynamically by js
-        $seoUrl = $this->productUrlProvider->getUrl($productId, '{friendly-url}');
-
-        $duplicateLabel = $this->trans('Duplicate', 'Admin.Actions');
-        if ($this->multistoreFeature->isActive()) {
-            $duplicateLabel = $this->trans('Duplicate for current store', 'Admin.Actions');
-        }
+        $productId = !empty($options['product_id']) ? (int) $options['product_id'] : null;
+        $deleteUrl = $productId ? $this->router->generate('admin_product_unit_action', [
+            'action' => 'delete',
+            'id' => $productId,
+        ]) : null;
+        $seoUrl = $productId ? $this->productUrlProvider->getUrl($productId, '{friendly-url}') : null;
+        $standardPageUrl = $productId ? $this->router->generate('admin_product_form', ['id' => $productId]) : $this->router->generate('admin_product_new');
+        $duplicateUrl = $productId ? $this->router->generate('admin_product_unit_action', [
+            'action' => 'duplicate',
+            'id' => $productId,
+        ]) : null;
 
         $builder
-            ->add('actions', ButtonCollectionType::class, [
-                'buttons' => [
-                    'catalog' => [
-                        'type' => IconButtonType::class,
-                        'options' => [
-                            'label' => $this->trans('Go to catalog', 'Admin.Catalog.Feature'),
-                            'type' => 'link',
-                            'icon' => 'arrow_back_ios',
-                            'attr' => [
-                                'class' => 'btn-outline-secondary border-white go-to-catalog-button',
-                                'href' => $this->router->generate('admin_products_index', ['offset' => 'last', 'limit' => 'last']),
-                            ],
-                        ],
-                    ],
-                    'new_product' => [
-                        'type' => IconButtonType::class,
-                        'options' => [
-                            'label' => $this->trans('New product', 'Admin.Catalog.Feature'),
-                            'icon' => 'add',
-                            'type' => 'link',
-                            'attr' => [
-                                'class' => 'btn-outline-secondary new-product-button',
-                                'href' => $this->router->generate('admin_products_create', ['shopId' => $this->contextShopId]),
-                            ],
-                        ],
-                    ],
-                    'delete' => [
-                        'type' => IconButtonType::class,
-                        'options' => [
-                            'label' => $this->trans('Delete', 'Admin.Actions'),
-                            'icon' => 'delete',
-                            'attr' => [
-                                'class' => 'tooltip-link delete-product-button btn-outline-secondary',
-                                'data-modal-title' => $this->trans('Permanently delete this product?', 'Admin.Catalog.Notification'),
-                                'data-modal-apply' => $this->trans('Delete', 'Admin.Actions'),
-                                'data-modal-cancel' => $this->trans('Cancel', 'Admin.Actions'),
-                                'data-confirm-button-class' => 'btn-danger',
-                                'data-button-url' => $deleteUrl,
-                            ],
-                        ],
-                    ],
-                    'duplicate_product' => [
-                        'type' => IconButtonType::class,
-                        'options' => [
-                            'label' => $duplicateLabel,
-                            'icon' => 'content_copy',
-                            'attr' => [
-                                'class' => 'btn-outline-secondary duplicate-product-button',
-                                'data-modal-title' => $this->trans('Duplicate product?', 'Admin.Catalog.Notification'),
-                                'data-modal-apply' => $duplicateLabel,
-                                'data-modal-cancel' => $this->trans('Cancel', 'Admin.Actions'),
-                                'data-confirm-button-class' => 'btn-primary',
-                                'data-button-url' => $duplicateUrl,
-                            ],
-                        ],
-                    ],
-                    'preview' => [
-                        'type' => IconButtonType::class,
-                        'options' => [
-                            'label' => $this->trans('Preview', 'Admin.Actions'),
-                            'icon' => 'visibility',
-                            'type' => 'link',
-                            'attr' => [
-                                'target' => '_blank',
-                                'href' => $productPreviewUrl,
-                                'class' => 'btn-outline-secondary preview-url-button',
-                                'data-seo-url' => $seoUrl,
-                            ],
-                        ],
-                    ],
-                ],
-                // Only first catalog button is displayed by default, the rest are in a dropdown
-                'inline_buttons_limit' => 1,
-            ])
-            ->add('cancel', IconButtonType::class, [
-                'label' => $this->trans('Cancel', 'Admin.Actions'),
+            ->add('catalog', IconButtonType::class, [
+                'label' => $this->trans('Go to catalog', 'Admin.Catalog.Feature'),
                 'type' => 'link',
-                'icon' => 'close',
+                'icon' => 'arrow_back_ios',
                 'attr' => [
-                    'href' => $editUrl,
-                    'class' => 'btn-secondary cancel-button',
-                    'disabled' => true,
+                    'class' => 'btn-outline-secondary',
+                    'href' => $this->router->generate('admin_product_catalog', ['offset' => 'last', 'limit' => 'last']),
+                ],
+            ])
+            ->add('preview', IconButtonType::class, [
+                'label' => $this->trans('Preview', 'Admin.Actions'),
+                'icon' => 'remove_red_eye',
+                'attr' => [
+                    'class' => 'btn-outline-secondary preview-url-button',
+                    'data-seo-url' => $seoUrl,
+                    'disabled' => empty($productId),
+                ],
+            ])
+            ->add('standard_page', IconButtonType::class, [
+                'label' => $this->trans('Back to standard page', 'Admin.Catalog.Feature'),
+                'type' => 'link',
+                'attr' => [
+                    'class' => 'btn-outline-secondary',
+                    'href' => $standardPageUrl,
+                ],
+            ])
+            ->add('delete', IconButtonType::class, [
+                'icon' => 'delete',
+                'label' => $this->trans('Delete', 'Admin.Actions'),
+                'attr' => [
+                    'class' => 'tooltip-link delete-product-button btn-outline-secondary',
+                    'data-modal-title' => $this->trans('Permanently delete this product.', 'Admin.Catalog.Help'),
+                    'data-modal-message' => $this->trans('Are you sure you want to delete this item?', 'Admin.Notifications.Warning'),
+                    'data-modal-apply' => $this->trans('Delete', 'Admin.Actions'),
+                    'data-modal-cancel' => $this->trans('Cancel', 'Admin.Actions'),
+                    'data-remove-url' => $deleteUrl,
+                    'data-toggle' => 'pstooltip',
+                    'data-placement' => 'left',
+                    'title' => $this->trans('Permanently delete this product.', 'Admin.Catalog.Help'),
+                    'disabled' => empty($productId),
+                ],
+            ])
+            ->add('active', SwitchType::class, [
+                'label' => false,
+                'choices' => [
+                    $this->trans('Offline', 'Admin.Global') => false,
+                    $this->trans('Online', 'Admin.Global') => true,
                 ],
             ])
             ->add('save', SubmitType::class, [
-                'label' => $options['active'] ? $this->trans('Save and publish', 'Admin.Actions') : $this->trans('Save', 'Admin.Actions'),
+                'label' => $this->trans('Save', 'Admin.Actions'),
                 'attr' => [
                     'data-toggle' => 'pstooltip',
-                    'accesskey' => 's',
                     'disabled' => true,
                     'title' => $this->trans('Save the product and stay on the current page: ALT+SHIFT+S', 'Admin.Catalog.Help'),
                     'class' => 'btn-primary product-form-save-button',
+                ],
+            ])
+            ->add('duplicate_product', IconButtonType::class, [
+                'label' => $this->trans('Duplicate', 'Admin.Actions'),
+                'type' => 'link',
+                'icon' => 'content_copy',
+                'attr' => [
+                    'class' => 'btn-outline-secondary',
+                    'href' => $duplicateUrl,
+                    'disabled' => empty($productId),
+                ],
+            ])
+            ->add('new_product', IconButtonType::class, [
+                'label' => $this->trans('New product on experimental page', 'Admin.Catalog.Feature'),
+                'type' => 'link',
+                'icon' => 'add_circle_outline',
+                'attr' => [
+                    'class' => 'btn-outline-secondary',
+                    'href' => $this->router->generate('admin_products_v2_create'),
+                    'disabled' => empty($productId),
                 ],
             ])
         ;
@@ -225,21 +174,14 @@ class FooterType extends TranslatorAwareType
         parent::configureOptions($resolver);
         $resolver
             ->setDefaults([
-                'active' => false,
+                'product_id' => null,
                 'required' => false,
                 'label' => false,
                 'attr' => [
-                    'class' => 'footer-buttons-container',
-                ],
-                'row_attr' => [
-                    'class' => 'product-footer-left',
+                    'class' => 'product-footer-right',
                 ],
             ])
-            ->setRequired([
-                'product_id',
-            ])
-            ->setAllowedTypes('product_id', 'int')
-            ->setAllowedTypes('active', ['bool'])
+            ->setAllowedTypes('product_id', ['null', 'int'])
         ;
     }
 }

@@ -24,19 +24,18 @@
  *#}
 
 {% trans_default_domain 'Admin.International.Feature' %}
-{% form_theme copyLanguageForm '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig' %}
+{% form_theme copyLanguageForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
 
 {% block copy_language %}
   {{ form_start(copyLanguageForm, {action: path('admin_international_translations_copy_language')}) }}
 
   <div class="card">
     <h3 class="card-header">
-      <i class="material-icons">file_copy</i>
-      {{ 'Copy'|trans({}, 'Admin.Actions') }}
+      <i class="material-icons">file_copy</i> {{ 'Copy'|trans({}, 'Admin.Actions') }}
     </h3>
 
-    <div class="card-body">
-      <div class="form-wrapper">
+    <div class="card-block row">
+      <div class="card-text">
         <div class="row">
           <div class="col-sm">
             <div class="alert alert-info" role="alert">
@@ -49,7 +48,9 @@
           </div>
         </div>
         <div class="form-group row">
-          {{ form_label(copyLanguageForm.from_language) }}
+          <label class="form-control-label">
+            {{ form_label(copyLanguageForm.from_language) }}
+          </label>
           <div class="col-sm">
             <div class="input-group">
               {{ form_errors(copyLanguageForm.from_language) }}
@@ -65,7 +66,9 @@
         </div>
 
         <div class="form-group row">
-          {{ form_label(copyLanguageForm.to_language) }}
+          <label class="form-control-label">
+            {{ form_label(copyLanguageForm.to_language) }}
+          </label>
           <div class="col-sm">
             <div class="input-group">
               {{ form_errors(copyLanguageForm.to_language) }}

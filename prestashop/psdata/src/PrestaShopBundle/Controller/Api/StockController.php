@@ -69,14 +69,6 @@ class StockController extends ApiController
         }
 
         try {
-            $queryParams = $request->query->all();
-
-            if (isset($queryParams['keywords']) && !is_array($queryParams['keywords'])) {
-                // 'keywords' exists in the parameters and is not array, so it must be converted into an array
-                $queryParams['keywords'] = explode(',', $queryParams['keywords']);
-                $request->query->replace($queryParams);
-            }
-
             $queryParamsCollection = $this->queryParams->fromRequest($request);
         } catch (InvalidPaginationParamsException $exception) {
             return $this->handleException(new BadRequestHttpException($exception->getMessage(), $exception));
@@ -207,7 +199,7 @@ class StockController extends ApiController
      *
      * @return void
      */
-    private function guardAgainstMissingDeltaParameter(Request $request): void
+    private function guardAgainstMissingDeltaParameter(Request $request)
     {
         $message = 'The "delta" parameter is required';
 
@@ -228,7 +220,7 @@ class StockController extends ApiController
      *
      * @return array
      */
-    private function guardAgainstInvalidRequestContent(string $content, string $message): array
+    private function guardAgainstInvalidRequestContent($content, $message)
     {
         $decodedContent = $this->guardAgainstInvalidJsonBody($content);
 
@@ -241,8 +233,10 @@ class StockController extends ApiController
 
     /**
      * @param Request $request
+     *
+     * @return mixed
      */
-    private function guardAgainstInvalidBulkEditionRequest(Request $request): void
+    private function guardAgainstInvalidBulkEditionRequest(Request $request)
     {
         if (strlen($request->getContent()) == 0) {
             $message = 'The request body should contain a JSON-encoded array of product identifiers and deltas';
@@ -255,26 +249,20 @@ class StockController extends ApiController
 
     /**
      * @param Request $request
+     *
+     * @return mixed
      */
-    private function guardAgainstMissingParametersInBulkEditionRequest(Request $request): void
+    private function guardAgainstMissingParametersInBulkEditionRequest(Request $request)
     {
         $decodedContent = $this->guardAgainstInvalidJsonBody($request->getContent());
 
-        $messageMissingParameters = 'Each item of JSON-encoded array in the request body should contain ' .
+        $message = 'Each item of JSON-encoded array in the request body should contain ' .
             'a product id ("product_id"), a quantity delta ("delta"). ' .
             'The item of index #%d is invalid.';
-        $messageEmptyData = $this->container->get('translator')->trans(
-            'Value cannot be 0.',
-            [],
-            'Admin.Notifications.Error'
-        );
 
-        array_walk($decodedContent, function ($item, $index) use ($messageMissingParameters, $messageEmptyData) {
-            if (!array_key_exists('product_id', $item) || !array_key_exists('delta', $item)) {
-                throw new BadRequestHttpException(sprintf($messageMissingParameters, $index));
-            }
-            if ($item['delta'] == 0) {
-                throw new BadRequestHttpException(sprintf($messageEmptyData, $index));
+        array_walk($decodedContent, function ($item, $index) use ($message) {
+            if (!array_key_exists('product_id', $item) || !array_key_exists('delta', $item) || $item['delta'] == 0) {
+                throw new BadRequestHttpException(sprintf($message, $index));
             }
         });
     }

@@ -17,12 +17,10 @@ use Symfony\Component\VarDumper\Cloner\Stub;
  * Casts PDO related classes to array representation.
  *
  * @author Nicolas Grekas <p@tchwork.com>
- *
- * @final since Symfony 4.4
  */
 class PdoCaster
 {
-    private const PDO_ATTRIBUTES = [
+    private static $pdoAttributes = [
         'CASE' => [
             \PDO::CASE_LOWER => 'LOWER',
             \PDO::CASE_NATURAL => 'NATURAL',
@@ -65,7 +63,7 @@ class PdoCaster
         $errmode = $c->getAttribute(\PDO::ATTR_ERRMODE);
         $c->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        foreach (self::PDO_ATTRIBUTES as $k => $v) {
+        foreach (self::$pdoAttributes as $k => $v) {
             if (!isset($k[0])) {
                 $k = $v;
                 $v = [];

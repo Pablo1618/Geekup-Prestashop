@@ -1,24 +1,40 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Tools\Console\Command\ClearCache;
 
 use Doctrine\ORM\Cache;
-use Doctrine\ORM\Tools\Console\Command\AbstractEntityManagerCommand;
-use InvalidArgumentException;
+use Doctrine\ORM\Cache\Region\DefaultRegion;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-use function sprintf;
-
 /**
  * Command to clear a query cache region.
+ *
+ * @since   2.5
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
  */
-class QueryRegionCommand extends AbstractEntityManagerCommand
+class QueryRegionCommand extends Command
 {
     /**
      * {@inheritdoc}
@@ -28,10 +44,9 @@ class QueryRegionCommand extends AbstractEntityManagerCommand
         $this->setName('orm:clear-cache:region:query')
              ->setDescription('Clear a second-level cache query region')
              ->addArgument('region-name', InputArgument::OPTIONAL, 'The query region to clear.')
-             ->addOption('em', null, InputOption::VALUE_REQUIRED, 'Name of the entity manager to operate on')
              ->addOption('all', null, InputOption::VALUE_NONE, 'If defined, all query regions will be deleted/invalidated.')
              ->addOption('flush', null, InputOption::VALUE_NONE, 'If defined, all cache entries will be flushed.')
-             ->setHelp(<<<'EOT'
+             ->setHelp(<<<EOT
 The <info>%command.name%</info> command is meant to clear a second-level cache query region for an associated Entity Manager.
 It is possible to delete/invalidate all query region, a specific query region or flushes the cache provider.
 
@@ -60,14 +75,12 @@ EOT
 
     /**
      * {@inheritdoc}
-     *
-     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $ui = new SymfonyStyle($input, $output);
 
-        $em    = $this->getEntityManager($input);
+        $em    = $this->getHelper('em')->getEntityManager();
         $name  = $input->getArgument('region-name');
         $cache = $em->getCache();
 
@@ -75,14 +88,22 @@ EOT
             $name = Cache::DEFAULT_QUERY_REGION_NAME;
         }
 
-        if (! $cache instanceof Cache) {
-            throw new InvalidArgumentException('No second-level cache is configured on the given EntityManager.');
+        if ( ! $cache instanceof Cache) {
+            throw new \InvalidArgumentException('No second-level cache is configured on the given EntityManager.');
         }
 
         if ($input->getOption('flush')) {
-            $cache->getQueryCache($name)
-                ->getRegion()
-                ->evictAll();
+            $queryCache  = $cache->getQueryCache($name);
+            $queryRegion = $queryCache->getRegion();
+
+            if ( ! $queryRegion instanceof DefaultRegion) {
+                throw new \InvalidArgumentException(sprintf(
+                    'The option "--flush" expects a "Doctrine\ORM\Cache\Region\DefaultRegion", but got "%s".',
+                    is_object($queryRegion) ? get_class($queryRegion) : gettype($queryRegion)
+                ));
+            }
+
+            $queryRegion->getCache()->flushAll();
 
             $ui->comment(
                 sprintf(

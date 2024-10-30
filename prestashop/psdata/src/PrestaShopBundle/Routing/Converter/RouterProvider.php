@@ -26,6 +26,7 @@
 
 namespace PrestaShopBundle\Routing\Converter;
 
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -33,8 +34,10 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class RouterProvider extends AbstractLegacyRouteProvider
 {
-    public const LEGACY_LINK_ROUTE_ATTRIBUTE = '_legacy_link';
-    public const FEATURE_FLAG_NAME = '_legacy_feature_flag';
+    /**
+     * @var LegacyRoute[]
+     */
+    private $legacyRoutes;
 
     /**
      * @var RouterInterface
@@ -42,19 +45,13 @@ class RouterProvider extends AbstractLegacyRouteProvider
     private $router;
 
     /**
-     * @var LegacyRouteFactory
+     * RouterProvider constructor.
+     *
+     * @param RouterInterface $router
      */
-    private $factory;
-
-    /**
-     * @var array|null
-     */
-    private $legacyRoutes;
-
-    public function __construct(RouterInterface $router, LegacyRouteFactory $factory)
+    public function __construct(RouterInterface $router)
     {
         $this->router = $router;
-        $this->factory = $factory;
     }
 
     /**
@@ -62,14 +59,29 @@ class RouterProvider extends AbstractLegacyRouteProvider
      */
     public function getLegacyRoutes()
     {
-        if (null !== $this->legacyRoutes) {
-            return $this->legacyRoutes;
+        if (null == $this->legacyRoutes) {
+            $this->legacyRoutes = $this->buildLegacyRoutes();
         }
 
-        $this->legacyRoutes = $this->factory->buildFromCollection(
-            $this->router->getRouteCollection()
-        );
-
         return $this->legacyRoutes;
+    }
+
+    /**
+     * @return array
+     */
+    private function buildLegacyRoutes()
+    {
+        $legacyRoutes = [];
+        /** @var Route $route */
+        foreach ($this->router->getRouteCollection() as $routeName => $route) {
+            $routeDefaults = $route->getDefaults();
+            if (empty($routeDefaults['_legacy_link'])) {
+                continue;
+            }
+
+            $legacyRoutes[$routeName] = LegacyRoute::buildLegacyRoute($routeName, $routeDefaults);
+        }
+
+        return $legacyRoutes;
     }
 }

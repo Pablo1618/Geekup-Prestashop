@@ -54,7 +54,9 @@ final class ImportDirectory
      */
     public function getDir()
     {
-        return $this->configuration->get('_PS_ADMIN_DIR_') . DIRECTORY_SEPARATOR . 'import' . DIRECTORY_SEPARATOR;
+        return ($this->configuration->get('_PS_HOST_MODE_') ?
+                $this->configuration->get('_PS_ROOT_DIR_') :
+                $this->configuration->get('_PS_ADMIN_DIR_')) . DIRECTORY_SEPARATOR . 'import' . DIRECTORY_SEPARATOR;
     }
 
     /**

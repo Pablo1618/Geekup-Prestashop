@@ -1,43 +1,29 @@
 services:
-  _defaults:
-    public: true
+    _defaults:
+        public: true
 
-  PrestaShop\PrestaShop\Adapter\Product\Stock\Validate\StockAvailableValidator: ~
+    prestashop.adapter.product.stock.validate.stock_available_validator:
+        class: PrestaShop\PrestaShop\Adapter\Product\Stock\Validate\StockAvailableValidator
 
-  PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository:
-    autowire: true
-    public: false
-    arguments:
-      - '@doctrine.dbal.default_connection'
-      - '%database_prefix%'
+    prestashop.adapter.product.stock.repository.stock_available_repository:
+        class: PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            - '%database_prefix%'
+            - '@prestashop.adapter.product.stock.validate.stock_available_validator'
 
-  PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockMovementRepository:
-    arguments:
-      - '@doctrine.dbal.default_connection'
-      - '%database_prefix%'
+    prestashop.adapter.product.stock.command_handler.update_product_stock_information_handler:
+        class: PrestaShop\PrestaShop\Adapter\Product\Stock\CommandHandler\UpdateProductStockInformationHandler
+        arguments:
+            - '@prestashop.adapter.product.stock.update.product_stock_updater'
+        tags:
+            - name: tactician.handler
+              command: PrestaShop\PrestaShop\Core\Domain\Product\Stock\Command\UpdateProductStockInformationCommand
 
-  PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\MovementReasonRepository:
-    arguments:
-      - '@PrestaShop\PrestaShop\Core\ConfigurationInterface'
-
-  PrestaShop\PrestaShop\Adapter\Product\Stock\QueryHandler\GetProductStockMovementsHandler:
-    arguments:
-      - '@PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository'
-      - '@PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockMovementRepository'
-      - '@translator'
-    tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Product\Stock\Query\GetProductStockMovements
-
-  PrestaShop\PrestaShop\Adapter\Product\Stock\QueryHandler\GetCombinationStockMovementsHandler:
-    arguments:
-      - '@PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository'
-      - '@PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockMovementRepository'
-      - '@translator'
-    tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Product\Stock\Query\GetCombinationStockMovements
-
-  PrestaShop\PrestaShop\Adapter\Product\Stock\Update\ProductStockUpdater:
-    autowire: true
-    public: false
+    prestashop.adapter.product.stock.update.product_stock_updater:
+        class: PrestaShop\PrestaShop\Adapter\Product\Stock\Update\ProductStockUpdater
+        arguments:
+            - '@prestashop.core.stock.stock_manager'
+            - '@prestashop.adapter.product.repository.product_repository'
+            - '@prestashop.adapter.product.stock.repository.stock_available_repository'
+            - "@=service('prestashop.adapter.legacy.configuration').getBoolean('PS_ADVANCED_STOCK_MANAGEMENT')"

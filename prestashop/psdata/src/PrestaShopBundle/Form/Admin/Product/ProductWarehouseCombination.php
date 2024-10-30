@@ -34,22 +34,23 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This form class is responsible to generate the basic product Warehouse combinations form.
  */
 class ProductWarehouseCombination extends CommonAbstractType
 {
     private $translator;
+    private $contextLegacy;
 
     /**
      * Constructor.
      *
      * @param object $translator
+     * @param object $legacyContext
      */
-    public function __construct($translator)
+    public function __construct($translator, $legacyContext)
     {
         $this->translator = $translator;
+        $this->contextLegacy = $legacyContext->getContext();
     }
 
     /**

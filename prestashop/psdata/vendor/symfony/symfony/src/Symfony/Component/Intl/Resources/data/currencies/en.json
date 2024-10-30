@@ -797,8 +797,8 @@
             "Papua New Guinean Kina"
         ],
         "PHP": [
-            "₱",
-            "Philippine Peso"
+            "PHP",
+            "Philippine Piso"
         ],
         "PKR": [
             "PKR",
@@ -895,10 +895,6 @@
         "SKK": [
             "SKK",
             "Slovak Koruna"
-        ],
-        "SLE": [
-            "SLE",
-            "Sierra Leonean New Leone"
         ],
         "SLL": [
             "SLL",
@@ -1048,10 +1044,6 @@
             "VEB",
             "Venezuelan Bolívar (1871–2008)"
         ],
-        "VED": [
-            "VED",
-            "Bolívar Soberano"
-        ],
         "VEF": [
             "VEF",
             "Venezuelan Bolívar (2008–2018)"
@@ -1097,7 +1089,7 @@
             "French UIC-Franc"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "West African CFA Franc"
         ],
         "XPF": [

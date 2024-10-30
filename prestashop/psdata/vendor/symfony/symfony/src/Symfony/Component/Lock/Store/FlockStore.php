@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Lock\Store;
 
-use Symfony\Component\Lock\BlockingStoreInterface;
 use Symfony\Component\Lock\Exception\InvalidArgumentException;
 use Symfony\Component\Lock\Exception\LockConflictedException;
 use Symfony\Component\Lock\Exception\LockStorageException;
@@ -19,7 +18,7 @@ use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\StoreInterface;
 
 /**
- * FlockStore is a PersistingStoreInterface implementation using the FileSystem flock.
+ * FlockStore is a StoreInterface implementation using the FileSystem flock.
  *
  * Original implementation in \Symfony\Component\Filesystem\LockHandler.
  *
@@ -28,7 +27,7 @@ use Symfony\Component\Lock\StoreInterface;
  * @author Romain Neutron <imprec@gmail.com>
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class FlockStore implements StoreInterface, BlockingStoreInterface
+class FlockStore implements StoreInterface
 {
     private $lockPath;
 
@@ -37,7 +36,7 @@ class FlockStore implements StoreInterface, BlockingStoreInterface
      *
      * @throws LockStorageException If the lock directory doesn’t exist or is not writable
      */
-    public function __construct(string $lockPath = null)
+    public function __construct($lockPath = null)
     {
         if (null === $lockPath) {
             $lockPath = sys_get_temp_dir();
@@ -65,7 +64,7 @@ class FlockStore implements StoreInterface, BlockingStoreInterface
         $this->lock($key, true);
     }
 
-    private function lock(Key $key, bool $blocking)
+    private function lock(Key $key, $blocking)
     {
         // The lock is maybe already acquired.
         if ($key->hasState(__CLASS__)) {
@@ -74,7 +73,7 @@ class FlockStore implements StoreInterface, BlockingStoreInterface
 
         $fileName = sprintf('%s/sf.%s.%s.lock',
             $this->lockPath,
-            substr(preg_replace('/[^a-z0-9\._-]+/i', '-', $key), 0, 50),
+            preg_replace('/[^a-z0-9\._-]+/i', '-', $key),
             strtr(substr(base64_encode(hash('sha256', $key, true)), 0, 7), '/', '_')
         );
 

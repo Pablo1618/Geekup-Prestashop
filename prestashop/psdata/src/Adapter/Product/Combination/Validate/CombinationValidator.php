@@ -31,6 +31,7 @@ namespace PrestaShop\PrestaShop\Adapter\Product\Combination\Validate;
 use Combination;
 use PrestaShop\PrestaShop\Adapter\AbstractObjectModelValidator;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductConstraintException;
+use PrestaShop\PrestaShop\Core\Domain\Product\Stock\Exception\ProductStockConstraintException;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 
 /**
@@ -90,8 +91,12 @@ class CombinationValidator extends AbstractObjectModelValidator
         $this->validateCombinationProperty($combination, 'low_stock_threshold', ProductConstraintException::INVALID_LOW_STOCK_THRESHOLD);
         $this->validateCombinationProperty($combination, 'low_stock_alert', ProductConstraintException::INVALID_LOW_STOCK_ALERT);
         $this->validateCombinationProperty($combination, 'available_date', ProductConstraintException::INVALID_AVAILABLE_DATE);
-        $this->validateCombinationLocalizedProperty($combination, 'available_later', ProductConstraintException::INVALID_AVAILABLE_LATER);
-        $this->validateCombinationLocalizedProperty($combination, 'available_now', ProductConstraintException::INVALID_AVAILABLE_NOW);
+        $this->validateObjectModelProperty(
+            $combination,
+            'quantity',
+            ProductStockConstraintException::class,
+            ProductStockConstraintException::INVALID_QUANTITY
+        );
     }
 
     /**
@@ -105,22 +110,5 @@ class CombinationValidator extends AbstractObjectModelValidator
     private function validateCombinationProperty(Combination $combination, string $property, int $errorCode): void
     {
         $this->validateObjectModelProperty($combination, $property, ProductConstraintException::class, $errorCode);
-    }
-
-    /**
-     * @param Combination $combination
-     * @param string $property
-     * @param int $errorCode
-     *
-     * @throws ProductConstraintException
-     */
-    private function validateCombinationLocalizedProperty(Combination $combination, string $property, int $errorCode = 0): void
-    {
-        $this->validateObjectModelLocalizedProperty(
-            $combination,
-            $property,
-            ProductConstraintException::class,
-            $errorCode
-        );
     }
 }

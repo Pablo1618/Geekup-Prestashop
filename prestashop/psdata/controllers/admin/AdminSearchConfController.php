@@ -29,7 +29,6 @@
  */
 class AdminSearchConfControllerCore extends AdminController
 {
-    /** @var bool */
     protected $toolbar_scroll = false;
 
     public function __construct()
@@ -125,6 +124,12 @@ class AdminSearchConfControllerCore extends AdminController
             'search' => [
                 'title' => $this->trans('Search', [], 'Admin.Shopparameters.Feature'),
                 'icon' => 'icon-search',
+                'info' => '<div class="alert alert-info">' .
+                    $this->trans('We are thrilled to introduce you to the fuzzy search, one of the new features from 1.7.7! Please note that it is still in beta version, so feel free to share improvement ideas on GitHub to have it enhanced.',
+                        [],
+                        'Admin.Shopparameters.Notification') .
+                    '</div>' . '<p><a href="https://github.com/PrestaShop/PrestaShop/issues/new?template=bug_report.md" target="_blank" class="btn-link"><i class="icon-external-link-sign"></i> Signaler un problème sur GitHub</a><br>'
+                    . '<a href="https://github.com/PrestaShop/PrestaShop/issues/new?template=feature_request.md" target="_blank"><i class="icon-external-link-sign"></i> Proposer une idée d\'amélioration sur GitHub</a>',
                 'fields' => [
                     'PS_SEARCH_START' => [
                         'title' => $this->trans('Search within word', [], 'Admin.Shopparameters.Feature'),
@@ -387,13 +392,11 @@ class AdminSearchConfControllerCore extends AdminController
 
     /**
      * Function used to render the options for this controller.
-     *
-     * @return string|void
      */
     public function renderOptions()
     {
         if ($this->fields_options && is_array($this->fields_options)) {
-            $helper = new HelperOptions();
+            $helper = new HelperOptions($this);
             $this->setHelperDisplay($helper);
             $helper->toolbar_scroll = true;
             $helper->toolbar_btn = ['save' => [
@@ -462,32 +465,14 @@ class AdminSearchConfControllerCore extends AdminController
         }
 
         if (!count($this->errors)) {
-            // Search existing aliases
-            $alias = new Alias();
-            $alias->search = trim($search);
-            $existingAliases = explode(',', $alias->getAliases());
-
-            // New alias
-            $newAliases = array_diff($aliases, $existingAliases);
-            foreach ($newAliases as $alias) {
+            foreach ($aliases as $alias) {
                 $obj = new Alias(null, trim($alias), trim($search));
                 $obj->save();
-            }
-
-            // Removed alias
-            $removedAliases = array_diff($existingAliases, $aliases);
-            foreach ($removedAliases as $alias) {
-                $obj = new Alias(null, trim($alias), trim($search));
-                $obj->delete();
             }
         }
 
         if (empty($this->errors)) {
-            if (Tools::getValue('id_alias')) {
-                $this->confirmations[] = $this->trans('Update successful', [], 'Admin.Notifications.Success');
-            } else {
-                $this->confirmations[] = $this->trans('Successful creation', [], 'Admin.Notifications.Success');
-            }
+            $this->confirmations[] = $this->trans('Creation successful', [], 'Admin.Shopparameters.Notification');
         }
     }
 

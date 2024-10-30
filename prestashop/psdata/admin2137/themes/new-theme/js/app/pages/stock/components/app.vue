@@ -30,7 +30,6 @@
   >
     <StockHeader />
     <Search
-      ref="search"
       @search="onSearch"
       @applyFilter="applyFilter"
     />
@@ -54,69 +53,38 @@
   </div>
 </template>
 
-<script lang="ts">
-  import {defineComponent} from 'vue';
-  import PSPagination from '@app/widgets/ps-pagination.vue';
-  import StockHeader from './header/stock-header.vue';
-  import Search, {SearchInstanceType} from './header/search.vue';
-  import LowFilter from './header/filters/low-filter.vue';
-  import {FiltersInstanceType} from './header/filters.vue';
-
-  /* eslint-disable camelcase */
-  export interface StockFilters {
-    active?: string;
-    suppliers?: Array<number>;
-    categories?: Array<number>;
-    date_add?: Array<any>;
-    id_employee?: Array<number>;
-    id_stock_mvt_reason?: Array<number>;
-    order?: string;
-    page_size?: number,
-    page_index?: number;
-    keywords?: any;
-    low_stock?: number | boolean | string;
-  }
-  /* eslint-enable camelcase */
+<script>
+  import PSPagination from '@app/widgets/ps-pagination';
+  import StockHeader from './header/stock-header';
+  import Search from './header/search';
+  import LowFilter from './header/filters/low-filter';
 
   const FIRST_PAGE = 1;
 
-  export default defineComponent({
+  export default {
     name: 'App',
     computed: {
-      isReady(): boolean {
+      isReady() {
         return this.$store.state.isReady;
       },
-      pagesCount(): number {
+      pagesCount() {
         return this.$store.state.totalPages;
       },
-      currentPagination(): number {
+      currentPagination() {
         return this.$store.state.pageIndex;
       },
-      isOverview(): boolean {
+      isOverview() {
         return this.$route.name === 'overview';
       },
-      isMovements(): boolean {
-        return this.$route.name === 'movements';
-      },
-      searchRef(): SearchInstanceType {
-        return <SearchInstanceType>(this.$refs.search);
-      },
-      filtersRef(): FiltersInstanceType {
-        return this.searchRef?.filtersRef;
-      },
-    },
-    beforeMount() {
-      this.$store.dispatch('getTranslations');
     },
     methods: {
-      onPageChanged(pageIndex: number): void {
+      onPageChanged(pageIndex) {
         this.$store.dispatch('updatePageIndex', pageIndex);
-        this.fetch(this.$store.state.sort);
+        this.fetch('asc');
       },
-      fetch(sortDirection?: string): void {
-        const action = this.isOverview ? 'getStock' : 'getMovements';
-        const sorting = sortDirection === 'desc' ? ' desc' : '';
-
+      fetch(sortDirection) {
+        const action = this.$route.name === 'overview' ? 'getStock' : 'getMovements';
+        const sorting = (sortDirection === 'desc') ? ' desc' : '';
         this.$store.dispatch('isLoading');
 
         this.filters = {
@@ -129,24 +97,23 @@
 
         this.$store.dispatch(action, this.filters);
       },
-      onSearch(keywords: any): void {
+      onSearch(keywords) {
         this.$store.dispatch('updateKeywords', keywords);
         this.resetPagination();
         this.fetch();
       },
-      applyFilter(filters: StockFilters): void {
+      applyFilter(filters) {
         this.filters = filters;
         this.resetPagination();
         this.fetch();
       },
-      resetFilters(): void {
-        this.filtersRef?.reset();
+      resetFilters() {
         this.filters = {};
       },
-      resetPagination(): void {
+      resetPagination() {
         this.$store.dispatch('updatePageIndex', FIRST_PAGE);
       },
-      onLowStockChecked(isChecked: boolean): void {
+      onLowStockChecked(isChecked) {
         this.filters = {...this.filters, low_stock: isChecked};
         this.fetch();
       },
@@ -157,16 +124,16 @@
       PSPagination,
       LowFilter,
     },
-    data: (): {filters: StockFilters} => ({
+    data: () => ({
       filters: {},
     }),
-  });
+  };
 </script>
 
 <style lang="scss" type="text/scss">
-// hide the layout header
-#main-div > .header-toolbar {
-  height: 0;
-  display: none;
-}
+  // hide the layout header
+  #main-div > .header-toolbar {
+    height: 0;
+    display: none;
+  }
 </style>

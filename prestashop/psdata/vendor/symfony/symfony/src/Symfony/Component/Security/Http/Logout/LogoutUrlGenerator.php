@@ -47,8 +47,21 @@ class LogoutUrlGenerator
      * @param string|null $csrfParameter The CSRF token parameter name
      * @param string|null $context       The listener context
      */
-    public function registerListener($key, $logoutPath, $csrfTokenId, $csrfParameter, CsrfTokenManagerInterface $csrfTokenManager = null, string $context = null)
+    public function registerListener($key, $logoutPath, $csrfTokenId, $csrfParameter, CsrfTokenManagerInterface $csrfTokenManager = null/*, string $context = null*/)
     {
+        if (\func_num_args() >= 6) {
+            $context = func_get_arg(5);
+        } else {
+            if (__CLASS__ !== static::class) {
+                $r = new \ReflectionMethod($this, __FUNCTION__);
+                if (__CLASS__ !== $r->getDeclaringClass()->getName()) {
+                    @trigger_error(sprintf('The "%s()" method will have a 6th `string $context = null` argument in version 4.0. Not defining it is deprecated since Symfony 3.3.', __METHOD__), \E_USER_DEPRECATED);
+                }
+            }
+
+            $context = null;
+        }
+
         $this->listeners[$key] = [$logoutPath, $csrfTokenId, $csrfParameter, $csrfTokenManager, $context];
     }
 
@@ -88,11 +101,14 @@ class LogoutUrlGenerator
     /**
      * Generates the logout URL for the firewall.
      *
+     * @param string|null $key           The firewall key or null to use the current firewall key
+     * @param int         $referenceType The type of reference (one of the constants in UrlGeneratorInterface)
+     *
      * @return string The logout URL
      */
-    private function generateLogoutUrl(?string $key, int $referenceType): string
+    private function generateLogoutUrl($key, $referenceType)
     {
-        [$logoutPath, $csrfTokenId, $csrfParameter, $csrfTokenManager] = $this->getListener($key);
+        list($logoutPath, $csrfTokenId, $csrfParameter, $csrfTokenManager) = $this->getListener($key);
 
         if (null === $logoutPath) {
             throw new \LogicException('Unable to generate the logout URL without a path.');
@@ -106,10 +122,6 @@ class LogoutUrlGenerator
             }
 
             $request = $this->requestStack->getCurrentRequest();
-
-            if (!$request) {
-                throw new \LogicException('Unable to generate the logout URL without a Request.');
-            }
 
             $url = UrlGeneratorInterface::ABSOLUTE_URL === $referenceType ? $request->getUriForPath($logoutPath) : $request->getBaseUrl().$logoutPath;
 
@@ -128,9 +140,13 @@ class LogoutUrlGenerator
     }
 
     /**
+     * @param string|null $key The firewall key or null use the current firewall key
+     *
+     * @return array The logout listener found
+     *
      * @throws \InvalidArgumentException if no LogoutListener is registered for the key or could not be found automatically
      */
-    private function getListener(?string $key): array
+    private function getListener($key)
     {
         if (null !== $key) {
             if (isset($this->listeners[$key])) {
@@ -158,7 +174,7 @@ class LogoutUrlGenerator
         }
 
         // Fetch from injected current firewall information, if possible
-        [$key, $context] = $this->currentFirewall;
+        list($key, $context) = $this->currentFirewall;
 
         if (isset($this->listeners[$key])) {
             return $this->listeners[$key];

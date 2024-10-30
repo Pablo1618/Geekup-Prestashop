@@ -57,8 +57,7 @@ interface UserProviderInterface
      *
      * @return UserInterface
      *
-     * @throws UnsupportedUserException  if the user is not supported
-     * @throws UsernameNotFoundException if the user is not found
+     * @throws UnsupportedUserException if the user is not supported
      */
     public function refreshUser(UserInterface $user);
 

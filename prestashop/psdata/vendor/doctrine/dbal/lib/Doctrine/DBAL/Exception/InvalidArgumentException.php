@@ -2,14 +2,12 @@
 
 namespace Doctrine\DBAL\Exception;
 
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\DBALException;
 
 /**
  * Exception to be thrown when invalid arguments are passed to any DBAL API
- *
- * @psalm-immutable
  */
-class InvalidArgumentException extends Exception
+class InvalidArgumentException extends DBALException
 {
     /**
      * @return self

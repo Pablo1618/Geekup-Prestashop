@@ -61,7 +61,7 @@ class HandleCommandVoter extends Voter
      *
      * @return bool
      */
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
+    protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
         $allowedRoles = $this->getAllowedRoles(get_class($subject));
 

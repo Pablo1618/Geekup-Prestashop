@@ -1,3 +1,0 @@
-<?php //PrestaShopBundle%255CEntity%255CFeatureFlag%2523disable
-
-return [PHP_INT_MAX, []];

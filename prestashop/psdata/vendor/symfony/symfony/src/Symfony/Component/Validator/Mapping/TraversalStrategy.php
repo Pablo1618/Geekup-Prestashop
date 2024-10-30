@@ -33,18 +33,18 @@ class TraversalStrategy
      * Specifies that a node's value should be iterated only if it is an
      * instance of {@link \Traversable}.
      */
-    public const IMPLICIT = 1;
+    const IMPLICIT = 1;
 
     /**
      * Specifies that a node's value should never be iterated.
      */
-    public const NONE = 2;
+    const NONE = 2;
 
     /**
      * Specifies that a node's value should always be iterated. If the value is
      * not an instance of {@link \Traversable}, an exception should be thrown.
      */
-    public const TRAVERSE = 4;
+    const TRAVERSE = 4;
 
     /**
      * Not instantiable.

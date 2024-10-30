@@ -36,12 +36,18 @@ use PrestaShop\PrestaShop\Core\PDF\Exception\MissingDataException;
 use PrestaShop\PrestaShop\Core\PDF\Exception\PdfException;
 use PrestaShop\PrestaShop\Core\PDF\PDFGeneratorInterface;
 use PrestaShopException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Responsible for generating CreditSlip PDF
  */
 final class CreditSlipPdfGenerator implements PDFGeneratorInterface
 {
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
     /**
      * @var string
      */
@@ -53,13 +59,16 @@ final class CreditSlipPdfGenerator implements PDFGeneratorInterface
     private $connection;
 
     /**
+     * @param TranslatorInterface $translator
      * @param string $dbPrefix
      * @param Connection $connection
      */
     public function __construct(
+        TranslatorInterface $translator,
         $dbPrefix,
         Connection $connection
     ) {
+        $this->translator = $translator;
         $this->dbPrefix = $dbPrefix;
         $this->connection = $connection;
     }

@@ -229,7 +229,7 @@ interface FormConfigInterface
     /**
      * Returns all options passed during the construction of the form.
      *
-     * @return array<string, mixed> The passed options
+     * @return array The passed options
      */
     public function getOptions();
 

@@ -29,7 +29,6 @@ namespace PrestaShop\PrestaShop\Adapter\SqlManager;
 use ErrorException;
 use PrestaShop\PrestaShop\Adapter\Entity\RequestSql;
 use PrestaShopDatabaseException;
-use PrestaShopException;
 
 /**
  * Class SqlQueryValidator is responsible for validating Request SQL model data.
@@ -56,7 +55,13 @@ class SqlQueryValidator
             if (!$validate || count($requestSql->error_sql)) {
                 $errors = $this->getErrors($requestSql->error_sql);
             }
-        } catch (ErrorException|PrestaShopException|PrestaShopDatabaseException $e) {
+        } catch (ErrorException $e) {
+            $errors[] = [
+                'key' => 'Bad SQL query',
+                'parameters' => [],
+                'domain' => 'Admin.Notifications.Error',
+            ];
+        } catch (PrestaShopDatabaseException $e) {
             $errors[] = [
                 'key' => 'Bad SQL query',
                 'parameters' => [],
@@ -70,7 +75,7 @@ class SqlQueryValidator
     /**
      * Get request sql errors.
      *
-     * @param array<string, string|array<string>> $sqlErrors
+     * @param array $sqlErrors
      *
      * @return array
      */

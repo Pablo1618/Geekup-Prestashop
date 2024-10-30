@@ -58,6 +58,7 @@ class InvoicesController extends FrameworkBundleAdminController
 
         return [
             'layoutTitle' => $this->trans('Invoices', 'Admin.Navigation.Menu'),
+            'requireAddonsSearch' => true,
             'enableSidebar' => true,
             'help_link' => $this->generateSidebarLink($legacyController),
             'generateByDateForm' => $byDateForm->createView(),
@@ -131,7 +132,7 @@ class InvoicesController extends FrameworkBundleAdminController
     private function processForm(FormHandlerInterface $formHandler, Request $request)
     {
         $form = $formHandler->getForm();
-        $form->handleRequest($request);
+        $form->submit($request->request->get($form->getName()));
 
         if ($form->isSubmitted()) {
             if ($errors = $formHandler->save($form->getData())) {

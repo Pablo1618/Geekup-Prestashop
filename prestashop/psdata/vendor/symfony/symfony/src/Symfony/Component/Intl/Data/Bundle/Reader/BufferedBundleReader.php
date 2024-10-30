@@ -26,9 +26,10 @@ class BufferedBundleReader implements BundleReaderInterface
     /**
      * Buffers a given reader.
      *
-     * @param int $bufferSize The number of entries to store in the buffer
+     * @param BundleReaderInterface $reader     The reader to buffer
+     * @param int                   $bufferSize The number of entries to store in the buffer
      */
-    public function __construct(BundleReaderInterface $reader, int $bufferSize)
+    public function __construct(BundleReaderInterface $reader, $bufferSize)
     {
         $this->reader = $reader;
         $this->buffer = new RingBuffer($bufferSize);

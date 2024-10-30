@@ -39,7 +39,7 @@ class BaseDrawing implements IComparable
     /**
      * Worksheet.
      *
-     * @var null|Worksheet
+     * @var Worksheet
      */
     protected $worksheet;
 
@@ -190,7 +190,7 @@ class BaseDrawing implements IComparable
     /**
      * Get Worksheet.
      *
-     * @return null|Worksheet
+     * @return Worksheet
      */
     public function getWorksheet()
     {
@@ -203,9 +203,11 @@ class BaseDrawing implements IComparable
      * @param Worksheet $pValue
      * @param bool $pOverrideOld If a Worksheet has already been assigned, overwrite it and remove image from old Worksheet?
      *
+     * @throws PhpSpreadsheetException
+     *
      * @return $this
      */
-    public function setWorksheet(?Worksheet $pValue = null, $pOverrideOld = false)
+    public function setWorksheet(Worksheet $pValue = null, $pOverrideOld = false)
     {
         if ($this->worksheet === null) {
             // Add drawing to \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
@@ -218,7 +220,7 @@ class BaseDrawing implements IComparable
                 $iterator = $this->worksheet->getDrawingCollection()->getIterator();
 
                 while ($iterator->valid()) {
-                    if ($iterator->current()->getHashCode() === $this->getHashCode()) {
+                    if ($iterator->current()->getHashCode() == $this->getHashCode()) {
                         $this->worksheet->getDrawingCollection()->offsetUnset($iterator->key());
                         $this->worksheet = null;
 
@@ -330,7 +332,7 @@ class BaseDrawing implements IComparable
         // Resize proportional?
         if ($this->resizeProportional && $pValue != 0) {
             $ratio = $this->height / ($this->width != 0 ? $this->width : 1);
-            $this->height = (int) round($ratio * $pValue);
+            $this->height = round($ratio * $pValue);
         }
 
         // Set width
@@ -361,7 +363,7 @@ class BaseDrawing implements IComparable
         // Resize proportional?
         if ($this->resizeProportional && $pValue != 0) {
             $ratio = $this->width / ($this->height != 0 ? $this->height : 1);
-            $this->width = (int) round($ratio * $pValue);
+            $this->width = round($ratio * $pValue);
         }
 
         // Set height
@@ -392,10 +394,10 @@ class BaseDrawing implements IComparable
         $yratio = $height / ($this->height != 0 ? $this->height : 1);
         if ($this->resizeProportional && !($width == 0 || $height == 0)) {
             if (($xratio * $this->height) < $height) {
-                $this->height = (int) ceil($xratio * $this->height);
+                $this->height = ceil($xratio * $this->height);
                 $this->width = $width;
             } else {
-                $this->width = (int) ceil($yratio * $this->width);
+                $this->width = ceil($yratio * $this->width);
                 $this->height = $height;
             }
         } else {
@@ -471,7 +473,7 @@ class BaseDrawing implements IComparable
      *
      * @return $this
      */
-    public function setShadow(?Drawing\Shadow $pValue = null)
+    public function setShadow(Drawing\Shadow $pValue = null)
     {
         $this->shadow = $pValue;
 
@@ -517,7 +519,10 @@ class BaseDrawing implements IComparable
         }
     }
 
-    public function setHyperlink(?Hyperlink $pHyperlink = null): void
+    /**
+     * @param null|Hyperlink $pHyperlink
+     */
+    public function setHyperlink(Hyperlink $pHyperlink = null)
     {
         $this->hyperlink = $pHyperlink;
     }

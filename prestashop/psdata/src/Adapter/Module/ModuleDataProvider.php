@@ -33,7 +33,7 @@ use PhpParser;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
 use PrestaShop\PrestaShop\Core\Addon\Module\AddonListFilterDeviceStatus;
 use Psr\Log\LoggerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Tools;
 use Validate;
 
@@ -52,7 +52,7 @@ class ModuleDataProvider
     /**
      * Translator.
      *
-     * @var TranslatorInterface
+     * @var \Symfony\Component\Translation\TranslatorInterface
      */
     private $translator;
 
@@ -93,14 +93,7 @@ class ModuleDataProvider
      */
     public function findByName($name)
     {
-        $result = Db::getInstance()->getRow(
-            sprintf(
-                'SELECT `id_module` as `id`, `active`, `version` FROM `%smodule` WHERE `name` = "%s"',
-                _DB_PREFIX_,
-                pSQL($name)
-            )
-        );
-        /** @var array{id: string, active: string, version: string}|false|null $result */
+        $result = Db::getInstance()->getRow('SELECT `id_module` as `id`, `active`, `version` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = "' . pSQL($name) . '"');
         if ($result) {
             $result['installed'] = 1;
             $result['active'] = $this->isEnabled($name);
@@ -108,7 +101,7 @@ class ModuleDataProvider
             $lastAccessDate = '0000-00-00 00:00:00';
 
             if (!Tools::isPHPCLI() && null !== $this->entityManager && $this->employeeID) {
-                $moduleID = (int) $result['id'];
+                $moduleID = isset($result['id']) ? (int) $result['id'] : 0;
 
                 $qb = $this->entityManager->createQueryBuilder();
                 $qb->select('mh')
@@ -128,43 +121,7 @@ class ModuleDataProvider
             return $result;
         }
 
-        return [
-            'installed' => 0,
-        ];
-    }
-
-    /**
-     * Return installed modules along with their id, name and version
-     * If a specific shop is selected, active and active_on_mobile keys are added
-     *
-     * @return array
-     */
-    public function getInstalled(): array
-    {
-        $select = 'SELECT m.`id_module` as id, m.`name`, m.`version`, 1 as installed';
-        $from = ' FROM `' . _DB_PREFIX_ . 'module` m';
-
-        $id_shops = (new Context())->getContextListShopID();
-        if (count($id_shops) > 0) {
-            $select .= ', ms.`enable_device` as active_on_mobile';
-            $from .= ' LEFT JOIN `' . _DB_PREFIX_ . 'module_shop` ms ON ms.`id_module` = m.`id_module`';
-            $from .= ' AND ms.`id_shop` IN (' . implode(',', array_map('intval', $id_shops)) . ')';
-        }
-
-        $results = Db::getInstance()->executeS($select . $from);
-        $modules = [];
-
-        /** @var array{id: int, name:string, version: string, installed: int}|array{id: int, name:string, version: string, installed: int, active:int, active_on_mobile: int} $module */
-        foreach ($results as $module) {
-            $module['installed'] = (bool) $module['installed'];
-            if (array_key_exists('active_on_mobile', $module)) {
-                $module['active_on_mobile'] = (bool) ($module['active_on_mobile'] & AddonListFilterDeviceStatus::DEVICE_MOBILE);
-            }
-            $module['active'] = $this->isModuleActive($module['id'], $id_shops);
-            $modules[$module['name']] = $module;
-        }
-
-        return $modules;
+        return ['installed' => 0];
     }
 
     /**
@@ -201,7 +158,7 @@ class ModuleDataProvider
     /**
      * Check if a module is enabled in the current shop context.
      *
-     * @param string $name The technical module name
+     * @param bool $name The technical module name
      *
      * @return bool True if enable
      */
@@ -229,32 +186,16 @@ class ModuleDataProvider
     }
 
     /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function isInstalledAndActive(string $name): bool
-    {
-        return (bool) $this->getModuleIdByName($name, true);
-    }
-
-    /**
      * Returns the Module Id
      *
      * @param string $name The technical module name
-     * @param bool $activeModulesOnly Should we return the module only if it's active ?
      *
      * @return int the Module Id, or 0 if not found
      */
-    public function getModuleIdByName($name, bool $activeModulesOnly = false)
+    public function getModuleIdByName($name)
     {
-        $sqlQuery = 'SELECT `id_module` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = "' . pSQL($name) . '"';
-        if ($activeModulesOnly) {
-            $sqlQuery .= ' AND `active` = 1';
-        }
-
         return (int) Db::getInstance()->getValue(
-            $sqlQuery
+            'SELECT `id_module` FROM `' . _DB_PREFIX_ . 'module` WHERE `name` = "' . pSQL($name) . '"'
         );
     }
 
@@ -367,19 +308,5 @@ class ModuleDataProvider
         }
 
         return false;
-    }
-
-    /**
-     * Checks if the module is active on at least one shop of the context.
-     */
-    private function isModuleActive(int $id, array $id_shops): bool
-    {
-        $result = Db::getInstance()->getRow('SELECT m.`active`, ms.`id_module` as `shop_active`, ms.`enable_device` as `enable_device`
-            FROM `' . _DB_PREFIX_ . 'module` m
-            LEFT JOIN `' . _DB_PREFIX_ . 'module_shop` ms ON m.`id_module` = ms.`id_module`
-            WHERE m.`id_module` = ' . $id . '
-            AND ms.`id_shop` IN (' . implode(',', $id_shops) . ')');
-
-        return !empty($result);
     }
 }

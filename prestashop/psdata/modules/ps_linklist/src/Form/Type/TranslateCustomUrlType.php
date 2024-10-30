@@ -20,13 +20,13 @@
 
 namespace PrestaShop\Module\LinkList\Form\Type;
 
-use PrestaShopBundle\Form\Admin\Type\TranslatableType;
+use PrestaShopBundle\Form\Admin\Type\TranslateTextType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
  * Class TranslatableUrlType.
  */
-class TranslateCustomUrlType extends TranslatableType
+class TranslateCustomUrlType extends TranslateTextType
 {
     /**
      * {@inheritdoc}

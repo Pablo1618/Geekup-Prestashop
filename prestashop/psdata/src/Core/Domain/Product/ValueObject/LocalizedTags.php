@@ -91,9 +91,7 @@ class LocalizedTags
      */
     private function setTags(array $tags): void
     {
-        $this->tags = [];
-
-        foreach ($tags as $tag) {
+        foreach ($tags as $key => $tag) {
             //skip empty value
             if (empty($tag)) {
                 continue;

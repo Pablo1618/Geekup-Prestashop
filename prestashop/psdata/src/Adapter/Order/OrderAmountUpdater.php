@@ -348,9 +348,9 @@ class OrderAmountUpdater
             }
         }
 
-        if (!$cart->isVirtualCart() && !empty($order->id_carrier)) {
+        if (!$cart->isVirtualCart() && isset($order->id_carrier)) {
             $carrier = new Carrier((int) $order->id_carrier, (int) $cart->id_lang);
-            if (Validate::isLoadedObject($carrier)) {
+            if (null !== $carrier && Validate::isLoadedObject($carrier)) {
                 $taxAddressId = (int) $order->{$this->getOrderConfiguration('PS_TAX_ADDRESS_TYPE', $order)};
                 $order->carrier_tax_rate = $carrier->getTaxesRate(new Address($taxAddressId));
             }
@@ -371,7 +371,7 @@ class OrderAmountUpdater
         $cartProducts = $cart->getProducts(true, false, null, true, $this->keepOrderPrices);
         foreach ($order->getCartProducts() as $orderProduct) {
             $orderDetail = new OrderDetail($orderProduct['id_order_detail'], null, $this->contextStateManager->getContext());
-            $cartProduct = $this->getProductFromCart($cartProducts, (int) $orderDetail->product_id, (int) $orderDetail->product_attribute_id, (int) $orderDetail->id_customization);
+            $cartProduct = $this->getProductFromCart($cartProducts, (int) $orderDetail->product_id, (int) $orderDetail->product_attribute_id);
 
             $this->orderDetailUpdater->updateOrderDetail(
                 $orderDetail,
@@ -389,18 +389,17 @@ class OrderAmountUpdater
      *
      * @return array
      */
-    private function getProductFromCart(array $cartProducts, int $productId, int $productAttributeId, int $customizationId = 0): array
+    private function getProductFromCart(array $cartProducts, int $productId, int $productAttributeId): array
     {
-        $cartProduct = array_reduce($cartProducts, function ($carry, $item) use ($productId, $productAttributeId, $customizationId) {
+        $cartProduct = array_reduce($cartProducts, function ($carry, $item) use ($productId, $productAttributeId) {
             if (null !== $carry) {
                 return $carry;
             }
 
             $productMatch = $item['id_product'] == $productId;
             $combinationMatch = $item['id_product_attribute'] == $productAttributeId;
-            $customizationMatch = $item['id_customization'] == $customizationId;
 
-            return $productMatch && $combinationMatch && $customizationMatch ? $item : null;
+            return $productMatch && $combinationMatch ? $item : null;
         });
 
         // This shouldn't happen, if it does something was not done before updating the Order (removing an OrderDetail maybe)

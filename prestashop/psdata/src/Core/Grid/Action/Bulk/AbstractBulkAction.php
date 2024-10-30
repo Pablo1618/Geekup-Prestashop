@@ -46,11 +46,6 @@ abstract class AbstractBulkAction implements BulkActionInterface
     private $options;
 
     /**
-     * @var string
-     */
-    protected $icon = '';
-
-    /**
      * @param string $id
      */
     public function __construct($id)
@@ -104,26 +99,6 @@ abstract class AbstractBulkAction implements BulkActionInterface
         }
 
         return $this->options;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIcon(): string
-    {
-        return $this->icon;
-    }
-
-    /**
-     * @param string $icon
-     *
-     * @return static
-     */
-    public function setIcon(string $icon): self
-    {
-        $this->icon = $icon;
-
-        return $this;
     }
 
     /**

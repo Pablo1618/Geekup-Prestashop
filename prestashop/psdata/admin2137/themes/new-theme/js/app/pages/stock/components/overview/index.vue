@@ -32,28 +32,27 @@
   </section>
 </template>
 
-<script lang="ts">
-  import {defineComponent} from 'vue';
-  import ProductsActions from './products-actions.vue';
-  import ProductsTable from './products-table.vue';
+<script>
+  import ProductsActions from './products-actions';
+  import ProductsTable from './products-table';
 
-  const DEFAULT_SORT = 'desc';
+  const DEFAULT_SORT = 'asc';
 
-  export default defineComponent({
+  export default {
     computed: {
-      isLoading(): boolean {
+      isLoading() {
         return this.$store.state.isLoading;
       },
     },
     methods: {
-      sort(sortDirection: string): void {
+      sort(sortDirection) {
         this.$emit('fetch', sortDirection);
       },
     },
     mounted() {
       this.$store.dispatch('updatePageIndex', 1);
       this.$store.dispatch('updateKeywords', []);
-      this.$store.dispatch('updateOrder', 'product_id');
+      this.$store.dispatch('updateOrder', 'product');
       this.$store.dispatch('isLoading');
       this.$emit('resetFilters');
       this.$emit('fetch', DEFAULT_SORT);
@@ -62,5 +61,5 @@
       ProductsActions,
       ProductsTable,
     },
-  });
+  };
 </script>

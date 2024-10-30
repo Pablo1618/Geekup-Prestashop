@@ -94,7 +94,7 @@ class Filters extends ParameterBag implements SearchCriteriaInterface
     public function getOrderWay()
     {
         $orderWay = $this->get('sortOrder');
-        if (!Validate::isOrderWay($orderWay)) {
+        if (!Validate::isOrderWay(strtoupper($orderWay))) {
             return null;
         }
 

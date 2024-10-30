@@ -46,13 +46,11 @@
   </div>
 </template>
 
-<script lang="ts">
-  import {defineComponent, PropType} from 'vue';
-
-  export default defineComponent({
+<script>
+  export default {
     props: {
       items: {
-        type: Array as PropType<Array<Record<string, any>>>,
+        type: Array,
         required: true,
       },
       itemId: {
@@ -67,19 +65,15 @@
       },
     },
     methods: {
-      onChange(): void {
+      onChange() {
         this.$emit('change', {
           value: this.selected,
           itemId: this.itemId,
         });
       },
     },
-    data() {
-      return {
-        selected: 'default',
-      };
-    },
-  });
+    data: () => ({selected: 'default'}),
+  };
 </script>
 
 <style lang="scss" scoped>

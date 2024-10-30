@@ -11,6 +11,8 @@
 
 namespace Symfony\Bridge\Doctrine\Form\ChoiceList;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
+use Doctrine\Common\Persistence\ObjectManager as LegacyObjectManager;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Form\Exception\RuntimeException;
@@ -35,7 +37,11 @@ class IdReader
      */
     private $associationIdReader;
 
-    public function __construct(ObjectManager $om, ClassMetadata $classMetadata)
+    /**
+     * @param ObjectManager|LegacyObjectManager $om
+     * @param ClassMetadata|LegacyClassMetadata $classMetadata
+     */
+    public function __construct($om, $classMetadata)
     {
         $ids = $classMetadata->getIdentifierFieldNames();
         $idType = $classMetadata->getTypeOfField(current($ids));
@@ -63,7 +69,7 @@ class IdReader
      * @return bool returns `true` if the class has a single-column ID and
      *              `false` otherwise
      */
-    public function isSingleId(): bool
+    public function isSingleId()
     {
         return $this->singleId;
     }
@@ -74,7 +80,7 @@ class IdReader
      * @return bool returns `true` if the class has a single-column integer ID
      *              and `false` otherwise
      */
-    public function isIntId(): bool
+    public function isIntId()
     {
         return $this->intId;
     }
@@ -116,7 +122,7 @@ class IdReader
      *
      * @return string The name of the ID field
      */
-    public function getIdField(): string
+    public function getIdField()
     {
         return $this->idField;
     }

@@ -11,9 +11,8 @@
 
 namespace Symfony\Bundle\MonologBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\ChildDefinition;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -37,14 +36,6 @@ class AddProcessorsPass implements CompilerPassInterface
 
                 if (!empty($tag['handler'])) {
                     $definition = $container->findDefinition(sprintf('monolog.handler.%s', $tag['handler']));
-                    $parentDef = $definition;
-                    while (!$parentDef->getClass() && $parentDef instanceof ChildDefinition) {
-                        $parentDef = $container->findDefinition($parentDef->getParent());
-                    }
-                    $class = $container->getParameterBag()->resolveValue($parentDef->getClass());
-                    if (!method_exists($class, 'pushProcessor')) {
-                        throw new \InvalidArgumentException(sprintf('The "%s" handler does not accept processors', $tag['handler']));
-                    }
                 } elseif (!empty($tag['channel'])) {
                     if ('app' === $tag['channel']) {
                         $definition = $container->getDefinition('monolog.logger');

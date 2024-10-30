@@ -6,7 +6,7 @@
         ],
         "AED": [
             "AED",
-            "dírham dels Emirats Àrabs Units"
+            "dírham de la UEA"
         ],
         "AFA": [
             "AFA",
@@ -22,11 +22,11 @@
         ],
         "ALL": [
             "ALL",
-            "lek"
+            "lek albanès"
         ],
         "AMD": [
             "AMD",
-            "dram"
+            "dram armeni"
         ],
         "ANG": [
             "ANG",
@@ -106,7 +106,7 @@
         ],
         "BDT": [
             "BDT",
-            "taka"
+            "taka de Bangla Desh"
         ],
         "BEC": [
             "BEC",
@@ -130,7 +130,7 @@
         ],
         "BGN": [
             "BGN",
-            "lev"
+            "lev búlgar"
         ],
         "BGO": [
             "BGO",
@@ -266,7 +266,7 @@
         ],
         "CNY": [
             "CNY",
-            "iuan"
+            "iuan xinès"
         ],
         "COP": [
             "COP",
@@ -391,7 +391,7 @@
         ],
         "GBP": [
             "£",
-            "lliura esterlina"
+            "lliura esterlina britànica"
         ],
         "GEK": [
             "GEK",
@@ -399,7 +399,7 @@
         ],
         "GEL": [
             "GEL",
-            "lari"
+            "lari georgià"
         ],
         "GHC": [
             "GHC",
@@ -435,7 +435,7 @@
         ],
         "GTQ": [
             "GTQ",
-            "quetzal"
+            "quetzal guatemalenc"
         ],
         "GWE": [
             "GWE",
@@ -455,7 +455,7 @@
         ],
         "HNL": [
             "HNL",
-            "lempira"
+            "lempira hondurenya"
         ],
         "HRD": [
             "HRD",
@@ -463,15 +463,15 @@
         ],
         "HRK": [
             "HRK",
-            "kuna"
+            "kuna croata"
         ],
         "HTG": [
             "HTG",
-            "gourde"
+            "gourde haitià"
         ],
         "HUF": [
             "HUF",
-            "fòrint"
+            "fòrint hongarès"
         ],
         "IDR": [
             "IDR",
@@ -527,7 +527,7 @@
         ],
         "JPY": [
             "¥",
-            "ien"
+            "ien japonès"
         ],
         "KES": [
             "KES",
@@ -571,7 +571,7 @@
         ],
         "KZT": [
             "KZT",
-            "tenge"
+            "tenge kazakh"
         ],
         "LAK": [
             "LAK",
@@ -591,7 +591,7 @@
         ],
         "LSL": [
             "LSL",
-            "loti"
+            "loti de Lesotho"
         ],
         "LTL": [
             "LTL",
@@ -655,7 +655,7 @@
         ],
         "MKD": [
             "MKD",
-            "dinar macedoni"
+            "denar macedoni"
         ],
         "MKN": [
             "MKN",
@@ -719,7 +719,7 @@
         ],
         "MYR": [
             "MYR",
-            "ringgit"
+            "ringgit de Malàisia"
         ],
         "MZE": [
             "MZE",
@@ -771,7 +771,7 @@
         ],
         "PAB": [
             "PAB",
-            "balboa"
+            "balboa panameny"
         ],
         "PEI": [
             "PEI",
@@ -779,7 +779,7 @@
         ],
         "PEN": [
             "PEN",
-            "sol"
+            "sol peruà"
         ],
         "PES": [
             "PES",
@@ -787,7 +787,7 @@
         ],
         "PGK": [
             "PGK",
-            "kina"
+            "kina de Papua Nova Guinea"
         ],
         "PHP": [
             "PHP",
@@ -799,7 +799,7 @@
         ],
         "PLN": [
             "PLN",
-            "zloty"
+            "zloty polonès"
         ],
         "PLZ": [
             "PLZ",
@@ -811,7 +811,7 @@
         ],
         "PYG": [
             "PYG",
-            "guaraní"
+            "guaraní paraguaià"
         ],
         "QAR": [
             "QAR",
@@ -835,7 +835,7 @@
         ],
         "RUB": [
             "RUB",
-            "ruble"
+            "ruble rus"
         ],
         "RUR": [
             "RUR",
@@ -935,7 +935,7 @@
         ],
         "THB": [
             "฿",
-            "baht"
+            "baht tailandès"
         ],
         "TJR": [
             "TJR",
@@ -987,7 +987,7 @@
         ],
         "UAH": [
             "UAH",
-            "hrívnia"
+            "hrívnia ucraïnesa"
         ],
         "UAK": [
             "UAK",
@@ -1078,7 +1078,7 @@
             "franc UIC francès"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "franc CFA BCEAO"
         ],
         "XPF": [

@@ -67,11 +67,6 @@ class OrderPreviewProductDetail
     private $location;
 
     /**
-     * @var int
-     */
-    private $id;
-
-    /**
      * @param string $name
      * @param string $reference
      * @param string $location
@@ -79,7 +74,6 @@ class OrderPreviewProductDetail
      * @param string $unitPrice
      * @param string $totalPrice
      * @param string $totalTax
-     * @param int $id
      */
     public function __construct(
         string $name,
@@ -88,8 +82,7 @@ class OrderPreviewProductDetail
         int $quantity,
         string $unitPrice,
         string $totalPrice,
-        string $totalTax,
-        int $id
+        string $totalTax
     ) {
         $this->name = $name;
         $this->quantity = $quantity;
@@ -98,7 +91,6 @@ class OrderPreviewProductDetail
         $this->totalTax = $totalTax;
         $this->reference = $reference;
         $this->location = $location;
-        $this->id = $id;
     }
 
     /**
@@ -155,13 +147,5 @@ class OrderPreviewProductDetail
     public function getLocation(): string
     {
         return $this->location;
-    }
-
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
     }
 }

@@ -73,7 +73,7 @@ final class UpdateOrderShippingDetailsHandler extends AbstractOrderHandler imple
 
         $trackingNumber = $command->getShippingTrackingNumber();
         $carrierId = $command->getNewCarrierId();
-        $oldTrackingNumber = $order->getShippingNumber();
+        $oldTrackingNumber = $order->shipping_number;
 
         $this->contextStateManager
             ->setLanguage(new Language($order->id_lang));
@@ -107,6 +107,11 @@ final class UpdateOrderShippingDetailsHandler extends AbstractOrderHandler imple
             //load fresh order carrier because updated just before
             $orderCarrier = new OrderCarrier((int) $order->getIdOrderCarrier());
 
+            // update shipping number
+            // Keep these two following lines for backward compatibility, remove on 1.6 version
+            $order->shipping_number = $trackingNumber;
+            $order->update();
+
             // Update order_carrier
             $orderCarrier->tracking_number = pSQL($trackingNumber);
             if (!$orderCarrier->update()) {
@@ -122,7 +127,6 @@ final class UpdateOrderShippingDetailsHandler extends AbstractOrderHandler imple
                 $customer = new Customer((int) $order->id_customer);
                 $carrier = new Carrier((int) $order->id_carrier, (int) $order->getAssociatedLanguage()->getId());
 
-                // Hook called only for the shop concerned
                 Hook::exec('actionAdminOrdersTrackingNumberUpdate', [
                     'order' => $order,
                     'customer' => $customer,

@@ -80,13 +80,17 @@
 						</div>
 					{/if}
 				</div>
-				{if !$first_message.id_employee}
-					{include file="./message.tpl" message=$first_message initial=true}
-				{/if}
+				<div class="row">
+					<div class="col-sm-12">
+						{if !$first_message.id_employee}
+							{include file="./message.tpl" message=$first_message initial=true}
+						{/if}
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
-	<div class="row" data-role="thread-messages">
+	<div class="row">
 		{foreach $messages as $message}
 			{include file="./message.tpl" message=$message initial=false}
 		{/foreach}
@@ -160,11 +164,10 @@
 	{
 		$.ajax({
 			type: 'POST',
-			url: 'index.php',
+			url: 'ajax-tab.php',
 			async: true,
 			dataType: 'json',
 			data: {
-        ajax: 1,
 				controller: 'AdminCustomerThreads',
 				action: 'markAsRead',
 				token : '{$token|escape:'html':'UTF-8'}',

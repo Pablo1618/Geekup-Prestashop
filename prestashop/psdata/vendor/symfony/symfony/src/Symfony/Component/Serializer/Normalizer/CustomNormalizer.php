@@ -17,10 +17,12 @@ use Symfony\Component\Serializer\SerializerAwareTrait;
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */
-class CustomNormalizer implements NormalizerInterface, DenormalizerInterface, SerializerAwareInterface, CacheableSupportsMethodInterface
+class CustomNormalizer implements NormalizerInterface, DenormalizerInterface, SerializerAwareInterface
 {
     use ObjectToPopulateTrait;
     use SerializerAwareTrait;
+
+    private $cache = [];
 
     /**
      * {@inheritdoc}
@@ -35,7 +37,7 @@ class CustomNormalizer implements NormalizerInterface, DenormalizerInterface, Se
      */
     public function denormalize($data, $type, $format = null, array $context = [])
     {
-        $object = $this->extractObjectToPopulate($type, $context) ?? new $type();
+        $object = $this->extractObjectToPopulate($type, $context) ?: new $type();
         $object->denormalize($this->serializer, $data, $format, $context);
 
         return $object;
@@ -65,14 +67,14 @@ class CustomNormalizer implements NormalizerInterface, DenormalizerInterface, Se
      */
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return is_subclass_of($type, DenormalizableInterface::class);
-    }
+        if (isset($this->cache[$type])) {
+            return $this->cache[$type];
+        }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function hasCacheableSupportsMethod(): bool
-    {
-        return __CLASS__ === static::class;
+        if (!class_exists($type)) {
+            return $this->cache[$type] = false;
+        }
+
+        return $this->cache[$type] = is_subclass_of($type, 'Symfony\Component\Serializer\Normalizer\DenormalizableInterface');
     }
 }

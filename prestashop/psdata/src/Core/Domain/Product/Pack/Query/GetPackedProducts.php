@@ -28,10 +28,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\Product\Pack\Query;
 
-use PrestaShop\PrestaShop\Core\Domain\Language\ValueObject\LanguageId;
-use PrestaShop\PrestaShop\Core\Domain\Product\Pack\ValueObject\PackId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\InvalidShopConstraintException;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 
 /**
  * Retrieves product from a pack
@@ -39,61 +36,23 @@ use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 class GetPackedProducts
 {
     /**
-     * @var PackId
+     * @var ProductId
      */
     private $packId;
 
     /**
-     * @var LanguageId
+     * @param int $packId id of product which represents the pack
      */
-    protected $languageId;
-
-    /**
-     * @var ShopConstraint
-     */
-    private $shopConstraint;
-
-    public function __construct(int $packId, int $languageId, ShopConstraint $shopConstraint)
+    public function __construct(int $packId)
     {
-        $this->assertShopConstraintIsSupported($shopConstraint);
-        $this->packId = new PackId($packId);
-        $this->languageId = new LanguageId($languageId);
-        $this->shopConstraint = $shopConstraint;
+        $this->packId = new ProductId($packId);
     }
 
     /**
-     * @return PackId
+     * @return ProductId
      */
-    public function getPackId(): PackId
+    public function getPackId(): ProductId
     {
         return $this->packId;
-    }
-
-    /**
-     * @return LanguageId
-     */
-    public function getLanguageId(): LanguageId
-    {
-        return $this->languageId;
-    }
-
-    /**
-     * @return ShopConstraint
-     */
-    public function getShopConstraint(): ShopConstraint
-    {
-        return $this->shopConstraint;
-    }
-
-    /**
-     * @param ShopConstraint $shopConstraint
-     */
-    private function assertShopConstraintIsSupported(ShopConstraint $shopConstraint): void
-    {
-        if ($shopConstraint->getShopId()) {
-            return;
-        }
-
-        throw new InvalidShopConstraintException('Only single shop constraint is supported');
     }
 }

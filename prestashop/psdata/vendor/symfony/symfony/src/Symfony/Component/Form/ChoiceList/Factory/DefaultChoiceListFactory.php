@@ -48,21 +48,14 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
     public function createView(ChoiceListInterface $list, $preferredChoices = null, $label = null, $index = null, $groupBy = null, $attr = null)
     {
         $preferredViews = [];
-        $preferredViewsOrder = [];
         $otherViews = [];
         $choices = $list->getChoices();
         $keys = $list->getOriginalKeys();
 
-        if (!\is_callable($preferredChoices)) {
-            if (empty($preferredChoices)) {
-                $preferredChoices = null;
-            } else {
-                // make sure we have keys that reflect order
-                $preferredChoices = array_values($preferredChoices);
-                $preferredChoices = static function ($choice) use ($preferredChoices) {
-                    return array_search($choice, $preferredChoices, true);
-                };
-            }
+        if (!\is_callable($preferredChoices) && !empty($preferredChoices)) {
+            $preferredChoices = function ($choice) use ($preferredChoices) {
+                return \in_array($choice, $preferredChoices, true);
+            };
         }
 
         // The names are generated from an incrementing integer by default
@@ -70,52 +63,27 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
             $index = 0;
         }
 
-        // If $groupBy is a callable returning a string
-        // choices are added to the group with the name returned by the callable.
-        // If $groupBy is a callable returning an array
-        // choices are added to the groups with names returned by the callable
-        // If the callable returns null, the choice is not added to any group
+        // If $groupBy is a callable, choices are added to the group with the
+        // name returned by the callable. If the callable returns null, the
+        // choice is not added to any group
         if (\is_callable($groupBy)) {
             foreach ($choices as $value => $choice) {
-                self::addChoiceViewsGroupedByCallable(
+                self::addChoiceViewGroupedBy(
                     $groupBy,
                     $choice,
-                    $value,
+                    (string) $value,
                     $label,
                     $keys,
                     $index,
                     $attr,
                     $preferredChoices,
                     $preferredViews,
-                    $preferredViewsOrder,
                     $otherViews
                 );
             }
-
-            // Remove empty group views that may have been created by
-            // addChoiceViewsGroupedByCallable()
-            foreach ($preferredViews as $key => $view) {
-                if ($view instanceof ChoiceGroupView && 0 === \count($view->choices)) {
-                    unset($preferredViews[$key]);
-                }
-            }
-
-            foreach ($otherViews as $key => $view) {
-                if ($view instanceof ChoiceGroupView && 0 === \count($view->choices)) {
-                    unset($otherViews[$key]);
-                }
-            }
-
-            foreach ($preferredViewsOrder as $key => $groupViewsOrder) {
-                if ($groupViewsOrder) {
-                    $preferredViewsOrder[$key] = min($groupViewsOrder);
-                } else {
-                    unset($preferredViewsOrder[$key]);
-                }
-            }
         } else {
             // Otherwise use the original structure of the choices
-            self::addChoiceViewsFromStructuredValues(
+            self::addChoiceViewsGroupedBy(
                 $list->getStructuredValues(),
                 $label,
                 $choices,
@@ -124,26 +92,33 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
                 $attr,
                 $preferredChoices,
                 $preferredViews,
-                $preferredViewsOrder,
                 $otherViews
             );
         }
 
-        uksort($preferredViews, static function ($a, $b) use ($preferredViewsOrder): int {
-            return isset($preferredViewsOrder[$a], $preferredViewsOrder[$b])
-                ? $preferredViewsOrder[$a] <=> $preferredViewsOrder[$b]
-                : 0;
-        });
+        // Remove any empty group view that may have been created by
+        // addChoiceViewGroupedBy()
+        foreach ($preferredViews as $key => $view) {
+            if ($view instanceof ChoiceGroupView && 0 === \count($view->choices)) {
+                unset($preferredViews[$key]);
+            }
+        }
+
+        foreach ($otherViews as $key => $view) {
+            if ($view instanceof ChoiceGroupView && 0 === \count($view->choices)) {
+                unset($otherViews[$key]);
+            }
+        }
 
         return new ChoiceListView($otherViews, $preferredViews);
     }
 
-    private static function addChoiceView($choice, string $value, $label, array $keys, &$index, $attr, ?callable $isPreferred, array &$preferredViews, array &$preferredViewsOrder, array &$otherViews)
+    private static function addChoiceView($choice, $value, $label, $keys, &$index, $attr, $isPreferred, &$preferredViews, &$otherViews)
     {
         // $value may be an integer or a string, since it's stored in the array
         // keys. We want to guarantee it's a string though.
         $key = $keys[$value];
-        $nextIndex = \is_int($index) ? $index++ : $index($choice, $key, $value);
+        $nextIndex = \is_int($index) ? $index++ : \call_user_func($index, $choice, $key, $value);
 
         // BC normalize label to accept a false value
         if (null === $label) {
@@ -152,7 +127,7 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
         } elseif (false !== $label) {
             // If "choice_label" is set to false and "expanded" is true, the value false
             // should be passed on to the "label" option of the checkboxes/radio buttons
-            $dynamicLabel = $label($choice, $key, $value);
+            $dynamicLabel = \call_user_func($label, $choice, $key, $value);
             $label = false === $dynamicLabel ? false : (string) $dynamicLabel;
         }
 
@@ -162,21 +137,20 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
             $label,
             // The attributes may be a callable or a mapping from choice indices
             // to nested arrays
-            \is_callable($attr) ? $attr($choice, $key, $value) : ($attr[$key] ?? [])
+            \is_callable($attr) ? \call_user_func($attr, $choice, $key, $value) : (isset($attr[$key]) ? $attr[$key] : [])
         );
 
         // $isPreferred may be null if no choices are preferred
-        if (null !== $isPreferred && false !== $preferredKey = $isPreferred($choice, $key, $value)) {
+        if ($isPreferred && \call_user_func($isPreferred, $choice, $key, $value)) {
             $preferredViews[$nextIndex] = $view;
-            $preferredViewsOrder[$nextIndex] = $preferredKey;
+        } else {
+            $otherViews[$nextIndex] = $view;
         }
-
-        $otherViews[$nextIndex] = $view;
     }
 
-    private static function addChoiceViewsFromStructuredValues(array $values, $label, array $choices, array $keys, &$index, $attr, ?callable $isPreferred, array &$preferredViews, array &$preferredViewsOrder, array &$otherViews)
+    private static function addChoiceViewsGroupedBy($groupBy, $label, $choices, $keys, &$index, $attr, $isPreferred, &$preferredViews, &$otherViews)
     {
-        foreach ($values as $key => $value) {
+        foreach ($groupBy as $key => $value) {
             if (null === $value) {
                 continue;
             }
@@ -186,7 +160,7 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
                 $preferredViewsForGroup = [];
                 $otherViewsForGroup = [];
 
-                self::addChoiceViewsFromStructuredValues(
+                self::addChoiceViewsGroupedBy(
                     $value,
                     $label,
                     $choices,
@@ -195,7 +169,6 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
                     $attr,
                     $isPreferred,
                     $preferredViewsForGroup,
-                    $preferredViewsOrder,
                     $otherViewsForGroup
                 );
 
@@ -220,17 +193,16 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
                 $attr,
                 $isPreferred,
                 $preferredViews,
-                $preferredViewsOrder,
                 $otherViews
             );
         }
     }
 
-    private static function addChoiceViewsGroupedByCallable(callable $groupBy, $choice, string $value, $label, array $keys, &$index, $attr, ?callable $isPreferred, array &$preferredViews, array &$preferredViewsOrder, array &$otherViews)
+    private static function addChoiceViewGroupedBy($groupBy, $choice, $value, $label, $keys, &$index, $attr, $isPreferred, &$preferredViews, &$otherViews)
     {
-        $groupLabels = $groupBy($choice, $keys[$value], $value);
+        $groupLabel = \call_user_func($groupBy, $choice, $keys[$value], $value);
 
-        if (null === $groupLabels) {
+        if (null === $groupLabel) {
             // If the callable returns null, don't group the choice
             self::addChoiceView(
                 $choice,
@@ -241,38 +213,31 @@ class DefaultChoiceListFactory implements ChoiceListFactoryInterface
                 $attr,
                 $isPreferred,
                 $preferredViews,
-                $preferredViewsOrder,
                 $otherViews
             );
 
             return;
         }
 
-        $groupLabels = \is_array($groupLabels) ? array_map('strval', $groupLabels) : [(string) $groupLabels];
+        $groupLabel = (string) $groupLabel;
 
-        foreach ($groupLabels as $groupLabel) {
-            // Initialize the group views if necessary. Unnecessarily built group
-            // views will be cleaned up at the end of createView()
-            if (!isset($preferredViews[$groupLabel])) {
-                $preferredViews[$groupLabel] = new ChoiceGroupView($groupLabel);
-                $otherViews[$groupLabel] = new ChoiceGroupView($groupLabel);
-            }
-            if (!isset($preferredViewsOrder[$groupLabel])) {
-                $preferredViewsOrder[$groupLabel] = [];
-            }
-
-            self::addChoiceView(
-                $choice,
-                $value,
-                $label,
-                $keys,
-                $index,
-                $attr,
-                $isPreferred,
-                $preferredViews[$groupLabel]->choices,
-                $preferredViewsOrder[$groupLabel],
-                $otherViews[$groupLabel]->choices
-            );
+        // Initialize the group views if necessary. Unnecessarily built group
+        // views will be cleaned up at the end of createView()
+        if (!isset($preferredViews[$groupLabel])) {
+            $preferredViews[$groupLabel] = new ChoiceGroupView($groupLabel);
+            $otherViews[$groupLabel] = new ChoiceGroupView($groupLabel);
         }
+
+        self::addChoiceView(
+            $choice,
+            $value,
+            $label,
+            $keys,
+            $index,
+            $attr,
+            $isPreferred,
+            $preferredViews[$groupLabel]->choices,
+            $otherViews[$groupLabel]->choices
+        );
     }
 }

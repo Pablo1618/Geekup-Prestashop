@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Validator\Mapping\Factory;
 
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 use Symfony\Component\Validator\Mapping\Cache\CacheInterface;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -52,17 +51,12 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
     /**
      * Creates a new metadata factory.
      *
-     * @param CacheItemPoolInterface|null $cache The cache for persisting metadata
-     *                                           between multiple PHP requests
+     * @param LoaderInterface|null $loader The loader for configuring new metadata
+     * @param CacheInterface|null  $cache  The cache for persisting metadata
+     *                                     between multiple PHP requests
      */
-    public function __construct(LoaderInterface $loader = null, $cache = null)
+    public function __construct(LoaderInterface $loader = null, CacheInterface $cache = null)
     {
-        if ($cache instanceof CacheInterface) {
-            @trigger_error(sprintf('Passing a "%s" to "%s" is deprecated in Symfony 4.4 and will trigger a TypeError in 5.0. Please pass an implementation of "%s" instead.', \get_class($cache), __METHOD__, CacheItemPoolInterface::class), \E_USER_DEPRECATED);
-        } elseif (!$cache instanceof CacheItemPoolInterface && null !== $cache) {
-            throw new \TypeError(sprintf('Expected an instance of "%s", got "%s".', CacheItemPoolInterface::class, \is_object($cache) ? \get_class($cache) : \gettype($cache)));
-        }
-
         $this->loader = $loader;
         $this->cache = $cache;
     }
@@ -98,24 +92,11 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
             throw new NoSuchMetadataException(sprintf('The class or interface "%s" does not exist.', $class));
         }
 
-        $cacheItem = null;
-        if ($this->cache instanceof CacheInterface) {
-            if ($metadata = $this->cache->read($class)) {
-                // Include constraints from the parent class
-                $this->mergeConstraints($metadata);
+        if (null !== $this->cache && false !== ($metadata = $this->cache->read($class))) {
+            // Include constraints from the parent class
+            $this->mergeConstraints($metadata);
 
-                return $this->loadedClasses[$class] = $metadata;
-            }
-        } elseif (null !== $this->cache) {
-            $cacheItem = $this->cache->getItem($this->escapeClassName($class));
-            if ($cacheItem->isHit()) {
-                $metadata = $cacheItem->get();
-
-                // Include constraints from the parent class
-                $this->mergeConstraints($metadata);
-
-                return $this->loadedClasses[$class] = $metadata;
-            }
+            return $this->loadedClasses[$class] = $metadata;
         }
 
         $metadata = new ClassMetadata($class);
@@ -124,10 +105,8 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
             $this->loader->loadClassMetadata($metadata);
         }
 
-        if ($this->cache instanceof CacheInterface) {
+        if (null !== $this->cache) {
             $this->cache->write($metadata);
-        } elseif (null !== $cacheItem) {
-            $this->cache->save($cacheItem->set($metadata));
         }
 
         // Include constraints from the parent class
@@ -173,18 +152,5 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
         $class = ltrim(\is_object($value) ? \get_class($value) : $value, '\\');
 
         return class_exists($class) || interface_exists($class, false);
-    }
-
-    /**
-     * Replaces backslashes by dots in a class name.
-     */
-    private function escapeClassName(string $class): string
-    {
-        if (str_contains($class, '@')) {
-            // anonymous class: replace all PSR6-reserved characters
-            return str_replace(["\0", '\\', '/', '@', ':', '{', '}', '(', ')'], '.', $class);
-        }
-
-        return str_replace('\\', '.', $class);
     }
 }

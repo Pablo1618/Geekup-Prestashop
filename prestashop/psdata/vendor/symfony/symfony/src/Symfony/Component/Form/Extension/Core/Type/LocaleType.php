@@ -14,8 +14,7 @@ namespace Symfony\Component\Form\Extension\Core\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
-use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
-use Symfony\Component\Intl\Locales;
+use Symfony\Component\Intl\Intl;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -29,8 +28,6 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
      * {@link \Symfony\Component\Intl\Intl::getLocaleBundle()}.
      *
      * @var ArrayChoiceList
-     *
-     * @deprecated since Symfony 4.1
      */
     private $choiceList;
 
@@ -41,17 +38,16 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
     {
         $resolver->setDefaults([
             'choice_loader' => function (Options $options) {
-                $choiceTranslationLocale = $options['choice_translation_locale'];
+                if ($options['choices']) {
+                    @trigger_error(sprintf('Using the "choices" option in %s has been deprecated since Symfony 3.3 and will be ignored in 4.0. Override the "choice_loader" option instead or set it to null.', __CLASS__), \E_USER_DEPRECATED);
 
-                return new IntlCallbackChoiceLoader(function () use ($choiceTranslationLocale) {
-                    return array_flip(Locales::getNames($choiceTranslationLocale));
-                });
+                    return null;
+                }
+
+                return $this;
             },
             'choice_translation_domain' => false,
-            'choice_translation_locale' => null,
         ]);
-
-        $resolver->setAllowedTypes('choice_translation_locale', ['null', 'string']);
     }
 
     /**
@@ -72,29 +68,21 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated since Symfony 4.1
      */
     public function loadChoiceList($value = null)
     {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.1, use the "choice_loader" option instead.', __METHOD__), \E_USER_DEPRECATED);
-
         if (null !== $this->choiceList) {
             return $this->choiceList;
         }
 
-        return $this->choiceList = new ArrayChoiceList(array_flip(Locales::getNames()), $value);
+        return $this->choiceList = new ArrayChoiceList(array_flip(Intl::getLocaleBundle()->getLocaleNames()), $value);
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated since Symfony 4.1
      */
     public function loadChoicesForValues(array $values, $value = null)
     {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.1, use the "choice_loader" option instead.', __METHOD__), \E_USER_DEPRECATED);
-
         // Optimize
         $values = array_filter($values);
         if (empty($values)) {
@@ -106,13 +94,9 @@ class LocaleType extends AbstractType implements ChoiceLoaderInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated since Symfony 4.1
      */
     public function loadValuesForChoices(array $choices, $value = null)
     {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.1, use the "choice_loader" option instead.', __METHOD__), \E_USER_DEPRECATED);
-
         // Optimize
         $choices = array_filter($choices);
         if (empty($choices)) {

@@ -11,22 +11,30 @@
 
 namespace Symfony\Bundle\FrameworkBundle\CacheWarmer;
 
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
+use Symfony\Component\Cache\Adapter\ProxyAdapter;
 use Symfony\Component\Config\Resource\ClassExistenceResource;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 abstract class AbstractPhpFileCacheWarmer implements CacheWarmerInterface
 {
     private $phpArrayFile;
+    private $fallbackPool;
 
     /**
-     * @param string $phpArrayFile The PHP file where metadata are cached
+     * @param string                 $phpArrayFile The PHP file where metadata are cached
+     * @param CacheItemPoolInterface $fallbackPool The pool where runtime-discovered metadata are cached
      */
-    public function __construct(string $phpArrayFile)
+    public function __construct($phpArrayFile, CacheItemPoolInterface $fallbackPool)
     {
         $this->phpArrayFile = $phpArrayFile;
+        if (!$fallbackPool instanceof AdapterInterface) {
+            $fallbackPool = new ProxyAdapter($fallbackPool);
+        }
+        $this->fallbackPool = $fallbackPool;
     }
 
     /**
@@ -58,7 +66,13 @@ abstract class AbstractPhpFileCacheWarmer implements CacheWarmerInterface
         // so here we un-serialize the values first
         $values = array_map(function ($val) { return null !== $val ? unserialize($val) : null; }, $arrayAdapter->getValues());
 
-        $this->warmUpPhpArrayAdapter(new PhpArrayAdapter($this->phpArrayFile, new NullAdapter()), $values);
+        $this->warmUpPhpArrayAdapter(new PhpArrayAdapter($this->phpArrayFile, $this->fallbackPool), $values);
+
+        foreach ($values as $k => $v) {
+            $item = $this->fallbackPool->getItem($k);
+            $this->fallbackPool->saveDeferred($item->set($v));
+        }
+        $this->fallbackPool->commit();
     }
 
     protected function warmUpPhpArrayAdapter(PhpArrayAdapter $phpArrayAdapter, array $values)
@@ -69,7 +83,7 @@ abstract class AbstractPhpFileCacheWarmer implements CacheWarmerInterface
     /**
      * @internal
      */
-    final protected function ignoreAutoloadException(string $class, \Exception $exception): void
+    final protected function ignoreAutoloadException($class, \Exception $exception)
     {
         try {
             ClassExistenceResource::throwOnRequiredClass($class, $exception);

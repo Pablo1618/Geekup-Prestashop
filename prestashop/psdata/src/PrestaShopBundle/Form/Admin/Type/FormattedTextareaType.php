@@ -27,72 +27,33 @@
 namespace PrestaShopBundle\Form\Admin\Type;
 
 use PrestaShopBundle\Form\Validator\Constraints\TinyMceMaxLength;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class enabling TinyMCE on a Textarea field.
  */
-class FormattedTextareaType extends TranslatorAwareType
+class FormattedTextareaType extends AbstractType
 {
     /**
-     * Max size of UTF-8 content in MySQL text columns
+     * Max size of UTF-8 content in MySQL text column
      */
-    public const LIMIT_TINYTEXT_UTF8 = 84;
     public const LIMIT_TEXT_UTF8 = 21844;
-    public const LIMIT_MEDIUMTEXT_UTF8 = 5592414;
-    public const LIMIT_LONGTEXT_UTF8 = 1431655764;
-
-    /**
-     * Max size of UTF-8 MB4 content in MySQL text columns
-     */
-    public const LIMIT_TINYTEXT_UTF8_MB4 = 63;
-    public const LIMIT_TEXT_UTF8_MB4 = 16383;
-    public const LIMIT_MEDIUMTEXT_UTF8_MB4 = 4194303;
-    public const LIMIT_LONGTEXT_UTF8_MB4 = 1073741823;
 
     /**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver
-            ->setDefined(['message'])
-            ->setDefaults([
-                'autoload' => true, // Start automatically TinyMCE
-                'limit' => self::LIMIT_TEXT_UTF8,
-            ])
-            ->setAllowedTypes('limit', 'int')
-            ->setAllowedTypes('autoload', 'bool')
-            ->setAllowedTypes('message', ['string', 'null'])
-            ->setNormalizer('constraints', function (Options $options, $constraints) {
-                $limit = $options->offsetGet('limit');
-                // provide message from options if exists, or default one
-                $message = $options->offsetExists('message') ? $options->offsetGet('message') : $this->trans(
-                    'This field cannot be longer than %limit% characters.',
-                    'Admin.Notifications.Error',
-                    [
-                        '%limit%' => $limit,
-                    ]
-                );
-                foreach ($constraints as $constraint) {
-                    if ($constraint instanceof TinyMceMaxLength) {
-                        // this means the TinyMceMaxLength constraint was overridden by child form, so we don't need to do anything
-                        return $constraints;
-                    }
-                }
-                // add length constraint
-                $constraints[] = new TinyMceMaxLength([
-                    'max' => $limit,
-                    'message' => $message,
-                ]);
-
-                return $constraints;
-            })
-        ;
+        $resolver->setDefaults([
+            'autoload' => true, // Start automatically TinyMCE
+            'limit' => self::LIMIT_TEXT_UTF8,
+        ]);
+        $resolver->setAllowedTypes('limit', 'int');
+        $resolver->setAllowedTypes('autoload', 'bool');
     }
 
     /**
@@ -100,7 +61,6 @@ class FormattedTextareaType extends TranslatorAwareType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        parent::buildView($view, $form, $options);
         if (!isset($view->vars['attr']['class'])) {
             $view->vars['attr']['class'] = '';
         }
@@ -109,6 +69,11 @@ class FormattedTextareaType extends TranslatorAwareType
             $view->vars['attr']['class'] .= ' autoload_rte';
         }
         $view->vars['attr']['counter'] = $options['limit'];
+        $view->vars['constraints'] = [
+            new TinyMceMaxLength([
+                'max' => $options['limit'],
+            ]),
+        ];
     }
 
     /**

@@ -16,21 +16,20 @@ namespace Symfony\Component\PropertyInfo;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  *
- * @final
+ * @final since version 3.3
  */
 class Type
 {
-    public const BUILTIN_TYPE_INT = 'int';
-    public const BUILTIN_TYPE_FLOAT = 'float';
-    public const BUILTIN_TYPE_STRING = 'string';
-    public const BUILTIN_TYPE_BOOL = 'bool';
-    public const BUILTIN_TYPE_RESOURCE = 'resource';
-    public const BUILTIN_TYPE_OBJECT = 'object';
-    public const BUILTIN_TYPE_ARRAY = 'array';
-    public const BUILTIN_TYPE_NULL = 'null';
-    public const BUILTIN_TYPE_FALSE = 'false';
-    public const BUILTIN_TYPE_CALLABLE = 'callable';
-    public const BUILTIN_TYPE_ITERABLE = 'iterable';
+    const BUILTIN_TYPE_INT = 'int';
+    const BUILTIN_TYPE_FLOAT = 'float';
+    const BUILTIN_TYPE_STRING = 'string';
+    const BUILTIN_TYPE_BOOL = 'bool';
+    const BUILTIN_TYPE_RESOURCE = 'resource';
+    const BUILTIN_TYPE_OBJECT = 'object';
+    const BUILTIN_TYPE_ARRAY = 'array';
+    const BUILTIN_TYPE_NULL = 'null';
+    const BUILTIN_TYPE_CALLABLE = 'callable';
+    const BUILTIN_TYPE_ITERABLE = 'iterable';
 
     /**
      * List of PHP builtin types.
@@ -46,7 +45,6 @@ class Type
         self::BUILTIN_TYPE_OBJECT,
         self::BUILTIN_TYPE_ARRAY,
         self::BUILTIN_TYPE_CALLABLE,
-        self::BUILTIN_TYPE_FALSE,
         self::BUILTIN_TYPE_NULL,
         self::BUILTIN_TYPE_ITERABLE,
     ];
@@ -59,9 +57,14 @@ class Type
     private $collectionValueType;
 
     /**
+     * @param string      $builtinType
+     * @param bool        $nullable
+     * @param string|null $class
+     * @param bool        $collection
+     *
      * @throws \InvalidArgumentException
      */
-    public function __construct(string $builtinType, bool $nullable = false, string $class = null, bool $collection = false, self $collectionKeyType = null, self $collectionValueType = null)
+    public function __construct($builtinType, $nullable = false, $class = null, $collection = false, self $collectionKeyType = null, self $collectionValueType = null)
     {
         if (!\in_array($builtinType, self::$builtinTypes)) {
             throw new \InvalidArgumentException(sprintf('"%s" is not a valid PHP type.', $builtinType));
@@ -79,13 +82,20 @@ class Type
      * Gets built-in type.
      *
      * Can be bool, int, float, string, array, object, resource, null, callback or iterable.
+     *
+     * @return string
      */
-    public function getBuiltinType(): string
+    public function getBuiltinType()
     {
         return $this->builtinType;
     }
 
-    public function isNullable(): bool
+    /**
+     * Allows null value?
+     *
+     * @return bool
+     */
+    public function isNullable()
     {
         return $this->nullable;
     }
@@ -94,13 +104,20 @@ class Type
      * Gets the class name.
      *
      * Only applicable if the built-in type is object.
+     *
+     * @return string|null
      */
-    public function getClassName(): ?string
+    public function getClassName()
     {
         return $this->class;
     }
 
-    public function isCollection(): bool
+    /**
+     * Is collection?
+     *
+     * @return bool
+     */
+    public function isCollection()
     {
         return $this->collection;
     }
@@ -109,8 +126,10 @@ class Type
      * Gets collection key type.
      *
      * Only applicable for a collection type.
+     *
+     * @return self|null
      */
-    public function getCollectionKeyType(): ?self
+    public function getCollectionKeyType()
     {
         return $this->collectionKeyType;
     }
@@ -119,8 +138,10 @@ class Type
      * Gets collection value type.
      *
      * Only applicable for a collection type.
+     *
+     * @return self|null
      */
-    public function getCollectionValueType(): ?self
+    public function getCollectionValueType()
     {
         return $this->collectionValueType;
     }

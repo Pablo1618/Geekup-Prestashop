@@ -40,7 +40,7 @@ use PrestaShop\PrestaShop\Core\Domain\Order\CommandHandler\SendProcessOrderEmail
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderEmailSendException;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderException;
 use PrestaShopException;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Handles SendProcessOrderEmail command using legacy object model
@@ -136,7 +136,7 @@ class SendProcessOrderEmailHandler implements SendProcessOrderEmailHandlerInterf
         $customer = new Customer($customerIdValue);
 
         if ($customer->id !== $customerIdValue) {
-            throw new CustomerNotFoundException(sprintf('Customer #%d not found', $customerIdValue));
+            throw new CustomerNotFoundException(new CustomerId($customerIdValue), sprintf('Customer #%s not found', $customerIdValue));
         }
 
         return $customer;

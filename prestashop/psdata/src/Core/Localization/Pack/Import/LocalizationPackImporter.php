@@ -26,9 +26,10 @@
 
 namespace PrestaShop\PrestaShop\Core\Localization\Pack\Import;
 
+use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Localization\Pack\Factory\LocalizationPackFactoryInterface;
 use PrestaShop\PrestaShop\Core\Localization\Pack\Loader\LocalizationPackLoaderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class LocalizationPackImporter is responsible for importing localization pack.
@@ -56,21 +57,29 @@ final class LocalizationPackImporter implements LocalizationPackImporterInterfac
     private $translator;
 
     /**
+     * @var ConfigurationInterface
+     */
+    private $configuration;
+
+    /**
      * @param LocalizationPackLoaderInterface $remoteLocalizationPackLoader
      * @param LocalizationPackLoaderInterface $localLocalizationPackLoader
      * @param LocalizationPackFactoryInterface $localizationPackFactory
      * @param TranslatorInterface $translator
+     * @param ConfigurationInterface $configuration
      */
     public function __construct(
         LocalizationPackLoaderInterface $remoteLocalizationPackLoader,
         LocalizationPackLoaderInterface $localLocalizationPackLoader,
         LocalizationPackFactoryInterface $localizationPackFactory,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        ConfigurationInterface $configuration
     ) {
         $this->remoteLocalizationPackLoader = $remoteLocalizationPackLoader;
         $this->localLocalizationPackLoader = $localLocalizationPackLoader;
         $this->localizationPackFactory = $localizationPackFactory;
         $this->translator = $translator;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -85,7 +94,7 @@ final class LocalizationPackImporter implements LocalizationPackImporterInterfac
 
         $pack = null;
 
-        if ($config->shouldDownloadPackData()) {
+        if ($config->shouldDownloadPackData() || $this->configuration->get('_PS_HOST_MODE_')) {
             $pack = $this->remoteLocalizationPackLoader->getLocalizationPack(
                 $config->getCountryIsoCode()
             );

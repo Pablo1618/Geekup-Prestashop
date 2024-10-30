@@ -24,8 +24,6 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-use PrestaShop\PrestaShop\Core\Image\ImageFormatConfiguration;
-
 /**
  * @property Store $object
  */
@@ -132,12 +130,6 @@ class AdminStoresControllerCore extends AdminController
         return parent::renderList();
     }
 
-    /**
-     * @return string|void
-     *
-     * @throws PrestaShopDatabaseException
-     * @throws SmartyException
-     */
     public function renderForm()
     {
         if (!($obj = $this->loadObject(true))) {
@@ -298,7 +290,7 @@ class AdminStoresControllerCore extends AdminController
         if (Shop::isFeatureActive()) {
             $this->fields_form['input'][] = [
                 'type' => 'shop',
-                'label' => $this->trans('Store association', [], 'Admin.Global'),
+                'label' => $this->trans('Shop association', [], 'Admin.Global'),
                 'name' => 'checkBoxShopAsso',
             ];
         }
@@ -314,7 +306,7 @@ class AdminStoresControllerCore extends AdminController
 
         $hours = [];
 
-        $hours_temp = $this->getFieldValue($obj, 'hours');
+        $hours_temp = ($this->getFieldValue($obj, 'hours'));
         if (is_array($hours_temp) && !empty($hours_temp)) {
             $langs = Language::getLanguages(false);
             $hours_temp = array_map('json_decode', $hours_temp);
@@ -358,9 +350,9 @@ class AdminStoresControllerCore extends AdminController
             /* If the selected country does not contain states */
             $id_state = (int) Tools::getValue('id_state');
             $id_country = (int) Tools::getValue('id_country');
-            $country = new Country($id_country);
+            $country = new Country((int) $id_country);
 
-            if ($id_country && !(int) $country->contains_states && $id_state) {
+            if ($id_country && $country && !(int) $country->contains_states && $id_state) {
                 $this->errors[] = $this->trans('You\'ve selected a state for a country that does not contain states.', [], 'Admin.Advparameters.Notification');
             }
 
@@ -386,7 +378,6 @@ class AdminStoresControllerCore extends AdminController
                 $this->errors[] = $this->trans('The Zip/Postal code is invalid.', [], 'Admin.Notifications.Error');
             }
             /* Store hours */
-            $encodedHours = [];
             foreach ($langs as $lang) {
                 $hours = [];
                 for ($i = 1; $i < 8; ++$i) {
@@ -400,7 +391,7 @@ class AdminStoresControllerCore extends AdminController
                 }
                 $encodedHours[$lang['id_lang']] = json_encode($hours);
             }
-            $_POST['hours'] = (1 < count($langs)) ? $encodedHours : json_encode($hours ?? []);
+            $_POST['hours'] = (1 < count($langs)) ? $encodedHours : json_encode($hours);
         }
 
         if (!count($this->errors)) {
@@ -413,43 +404,25 @@ class AdminStoresControllerCore extends AdminController
     protected function postImage($id)
     {
         $ret = parent::postImage($id);
-
-        // Should we generate high DPI images?
         $generate_hight_dpi_images = (bool) Configuration::get('PS_HIGHT_DPI');
 
-        /*
-        * Let's resolve which formats we will use for image generation.
-        *
-        * In case of .jpg images, the actual format inside is decided by ImageManager.
-        */
-        $configuredImageFormats = $this->get(ImageFormatConfiguration::class)->getGenerationFormats();
-
-        if (($id_store = (int) Tools::getValue('id_store')) && count($_FILES) && file_exists(_PS_STORE_IMG_DIR_ . $id_store . '.jpg')) {
+        if (($id_store = (int) Tools::getValue('id_store')) && isset($_FILES) && count($_FILES) && file_exists(_PS_STORE_IMG_DIR_ . $id_store . '.jpg')) {
             $images_types = ImageType::getImagesTypes('stores');
             foreach ($images_types as $image_type) {
-                foreach ($configuredImageFormats as $imageFormat) {
-                    // For JPG images, we let Imagemanager decide what to do and choose between JPG/PNG.
-                    // For webp and avif extensions, we want it to follow our command and ignore the original format.
-                    $forceFormat = ($imageFormat !== 'jpg');
+                ImageManager::resize(
+                    _PS_STORE_IMG_DIR_ . $id_store . '.jpg',
+                    _PS_STORE_IMG_DIR_ . $id_store . '-' . stripslashes($image_type['name']) . '.jpg',
+                    (int) $image_type['width'],
+                    (int) $image_type['height']
+                );
+
+                if ($generate_hight_dpi_images) {
                     ImageManager::resize(
                         _PS_STORE_IMG_DIR_ . $id_store . '.jpg',
-                        _PS_STORE_IMG_DIR_ . $id_store . '-' . stripslashes($image_type['name']) . '.' . $imageFormat,
-                        (int) $image_type['width'],
-                        (int) $image_type['height'],
-                        $imageFormat,
-                        $forceFormat
+                        _PS_STORE_IMG_DIR_ . $id_store . '-' . stripslashes($image_type['name']) . '2x.jpg',
+                        (int) $image_type['width'] * 2,
+                        (int) $image_type['height'] * 2
                     );
-
-                    if ($generate_hight_dpi_images) {
-                        ImageManager::resize(
-                            _PS_STORE_IMG_DIR_ . $id_store . '.jpg',
-                            _PS_STORE_IMG_DIR_ . $id_store . '-' . stripslashes($image_type['name']) . '2x.' . $imageFormat,
-                            (int) $image_type['width'] * 2,
-                            (int) $image_type['height'] * 2,
-                            $imageFormat,
-                            $forceFormat
-                        );
-                    }
                 }
             }
         }
@@ -473,7 +446,7 @@ class AdminStoresControllerCore extends AdminController
 
         $formFields = [
             'PS_SHOP_NAME' => [
-                'title' => $this->trans('Store name', [], 'Admin.Shopparameters.Feature'),
+                'title' => $this->trans('Shop name', [], 'Admin.Shopparameters.Feature'),
                 'hint' => $this->trans('Displayed in emails and page titles.', [], 'Admin.Shopparameters.Feature'),
                 'validation' => 'isGenericName',
                 'required' => true,

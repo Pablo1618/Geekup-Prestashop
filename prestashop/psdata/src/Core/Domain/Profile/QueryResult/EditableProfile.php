@@ -80,8 +80,6 @@ class EditableProfile
     }
 
     /**
-     * @deprecated Since PrestaShop 8.1, this method only returns string (and not null values)
-     *
      * @return string|null
      */
     public function getAvatarUrl(): ?string

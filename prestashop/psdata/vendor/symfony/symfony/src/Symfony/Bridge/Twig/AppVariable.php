@@ -111,9 +111,8 @@ class AppVariable
         if (null === $this->requestStack) {
             throw new \RuntimeException('The "app.session" variable is not available.');
         }
-        $request = $this->getRequest();
 
-        return $request && $request->hasSession() ? $request->getSession() : null;
+        return ($request = $this->getRequest()) ? $request->getSession() : null;
     }
 
     /**
@@ -155,7 +154,8 @@ class AppVariable
     public function getFlashes($types = null)
     {
         try {
-            if (null === $session = $this->getSession()) {
+            $session = $this->getSession();
+            if (null === $session) {
                 return [];
             }
         } catch (\RuntimeException $e) {

@@ -36,7 +36,11 @@
 
 {% block content %}
 
-  {{ include('@PrestaShop/Admin/Common/Grid/grid_panel.html.twig', {'grid': currencyGrid }) }}
+  <div class="row">
+    <div class="col">
+      {{ include('@PrestaShop/Admin/Common/Grid/grid_panel.html.twig', {'grid': currencyGrid }) }}
+    </div>
+  </div>
 
   {% block exchange_rates_block %}
     <div class="row">

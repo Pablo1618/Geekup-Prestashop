@@ -26,10 +26,40 @@
 
 namespace PrestaShop\PrestaShop\Core\Grid\Column\Type;
 
+use PrestaShop\PrestaShop\Core\Grid\Column\AbstractColumn;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
 /**
- * @deprecated since 8.1 and will be removed in next major.
- * Use \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BooleanColumn instead.
+ * Boolean column allows adding boolean columns (Yes/No, On/Off and etc) to grid
  */
-final class BooleanColumn extends \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BooleanColumn
+final class BooleanColumn extends AbstractColumn
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getType()
+    {
+        return 'boolean';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver
+            ->setRequired([
+                'field',
+                'true_name',
+                'false_name',
+            ])
+            ->setDefaults([
+                'clickable' => false,
+            ])
+            ->setAllowedTypes('field', 'string')
+            ->setAllowedTypes('true_name', 'string')
+            ->setAllowedTypes('false_name', 'string')
+            ->setAllowedTypes('clickable', 'bool')
+        ;
+    }
 }

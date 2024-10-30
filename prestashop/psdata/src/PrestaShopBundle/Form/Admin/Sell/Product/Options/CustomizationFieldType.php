@@ -37,8 +37,8 @@ use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CustomizationFieldType extends TranslatorAwareType
 {
@@ -81,10 +81,6 @@ class CustomizationFieldType extends TranslatorAwareType
             ])
             ->add('required', SwitchType::class, [
                 'label' => $this->trans('Required', 'Admin.Global'),
-                'choices' => [
-                    $this->trans('Not Required', 'Admin.Global') => false,
-                    $this->trans('Required', 'Admin.Global') => true,
-                ],
                 'default_empty_data' => false,
             ])
             ->add('remove', IconButtonType::class, [

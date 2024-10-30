@@ -31,9 +31,6 @@ use PrestaShop\PrestaShop\Core\Domain\Category\ValueObject\CategoryId;
 
 /**
  * Class EditRootCategoryCommand edits given root category.
- *
- * @todo: "root" keyword should be replaced by "home" to avoid confusion between the actual "root" category and "home" category.
- *         This command is actually handling the Home category edition, as the actual "root" category doesn't exist from UX perspective
  */
 class EditRootCategoryCommand
 {
@@ -56,11 +53,6 @@ class EditRootCategoryCommand
      * @var string[]
      */
     private $localizedDescriptions;
-
-    /**
-     * @var string[]|null
-     */
-    private $localizedAdditionalDescriptions;
 
     /**
      * @var bool
@@ -176,26 +168,6 @@ class EditRootCategoryCommand
     public function setLocalizedDescriptions(array $localizedDescriptions)
     {
         $this->localizedDescriptions = $localizedDescriptions;
-
-        return $this;
-    }
-
-    /**
-     * @return string[]|null
-     */
-    public function getLocalizedAdditionalDescriptions(): ?array
-    {
-        return $this->localizedAdditionalDescriptions;
-    }
-
-    /**
-     * @param string[] $localizedAdditionalDescriptions
-     *
-     * @return $this
-     */
-    public function setLocalizedAdditionalDescriptions(array $localizedAdditionalDescriptions): self
-    {
-        $this->localizedAdditionalDescriptions = $localizedAdditionalDescriptions;
 
         return $this;
     }

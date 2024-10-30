@@ -65,8 +65,7 @@ final class GetOrderStateForEditingHandler implements GetOrderStateForEditingHan
             (bool) $orderState->shipped,
             (bool) $orderState->paid,
             (bool) $orderState->delivery,
-            $orderState->template,
-            (bool) $orderState->deleted
+            $orderState->template
         );
     }
 }

@@ -29,7 +29,7 @@ interface AuthenticationProviderInterface extends AuthenticationManagerInterface
      *
      * @var string
      */
-    public const USERNAME_NONE_PROVIDED = 'NONE_PROVIDED';
+    const USERNAME_NONE_PROVIDED = 'NONE_PROVIDED';
 
     /**
      * Checks whether this provider supports the given token.

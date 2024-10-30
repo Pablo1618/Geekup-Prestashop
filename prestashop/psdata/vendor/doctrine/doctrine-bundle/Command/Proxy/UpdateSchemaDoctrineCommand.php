@@ -13,21 +13,22 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class UpdateSchemaDoctrineCommand extends UpdateCommand
 {
-    protected function configure(): void
+    /**
+     * {@inheritDoc}
+     */
+    protected function configure()
     {
         parent::configure();
 
         $this
-            ->setName('doctrine:schema:update');
-
-        if ($this->getDefinition()->hasOption('em')) {
-            return;
-        }
-
-        $this->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command');
+            ->setName('doctrine:schema:update')
+            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    /**
+     * {@inheritDoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         DoctrineCommandHelper::setApplicationEntityManager($this->getApplication(), $input->getOption('em'));
 

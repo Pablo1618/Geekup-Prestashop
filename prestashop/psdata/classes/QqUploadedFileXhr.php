@@ -25,17 +25,10 @@
  */
 
 /**
- * @deprecated deprecated since version 8.1, will be dropped in 9.0
- *
  * Handle file uploads via XMLHttpRequest.
  */
 class QqUploadedFileXhrCore
 {
-    public function __construct()
-    {
-        @trigger_error('This class is deprecated since 8.1 and will be dropped in 9.0.', E_USER_DEPRECATED);
-    }
-
     /**
      * Save the file to the specified path.
      *
@@ -76,7 +69,11 @@ class QqUploadedFileXhrCore
                     }
                 }
             }
-            $image->cover = !Image::getCover($image->id_product);
+            if (!Image::getCover($image->id_product)) {
+                $image->cover = 1;
+            } else {
+                $image->cover = 0;
+            }
 
             if (($validate = $image->validateFieldsLang(false, true)) !== true) {
                 return ['error' => $validate];

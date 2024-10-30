@@ -23,6 +23,8 @@ use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\AddProcessorsPass;
 use Symfony\Bundle\MonologBundle\DependencyInjection\Compiler\FixEmptyLoggerPass;
 
 /**
+ * Bundle.
+ *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */
 class MonologBundle extends Bundle

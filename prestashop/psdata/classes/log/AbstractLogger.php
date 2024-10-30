@@ -23,7 +23,7 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-abstract class AbstractLoggerCore implements PrestaShopLoggerInterface
+abstract class AbstractLoggerCore
 {
     public $level;
     protected $level_value = [
@@ -32,6 +32,11 @@ abstract class AbstractLoggerCore implements PrestaShopLoggerInterface
         2 => 'WARNING',
         3 => 'ERROR',
     ];
+
+    const DEBUG = 0;
+    const INFO = 1;
+    const WARNING = 2;
+    const ERROR = 3;
 
     public function __construct($level = self::INFO)
     {
@@ -45,37 +50,28 @@ abstract class AbstractLoggerCore implements PrestaShopLoggerInterface
     /**
      * Log the message.
      *
-     * @param string $message
-     * @param int $level
+     * @param string message
+     * @param level
      */
     abstract protected function logMessage($message, $level);
 
     /**
      * Check the level and log the message if needed.
      *
-     * @param string $message
-     * @param int $level
+     * @param string message
+     * @param level
      */
     public function log($message, $level = self::DEBUG)
     {
         if ($level >= $this->level) {
             $this->logMessage($message, $level);
         }
-
-        Hook::exec(
-            'actionLoggerLogMessage',
-            [
-                'message' => $message,
-                'level' => $level,
-                'isLogged' => $level >= $this->level,
-            ]
-        );
     }
 
     /**
      * Log a debug message.
      *
-     * @param string $message
+     * @param string message
      */
     public function logDebug($message)
     {
@@ -85,7 +81,7 @@ abstract class AbstractLoggerCore implements PrestaShopLoggerInterface
     /**
      * Log an info message.
      *
-     * @param string $message
+     * @param string message
      */
     public function logInfo($message)
     {
@@ -95,7 +91,7 @@ abstract class AbstractLoggerCore implements PrestaShopLoggerInterface
     /**
      * Log a warning message.
      *
-     * @param string $message
+     * @param string message
      */
     public function logWarning($message)
     {
@@ -105,7 +101,7 @@ abstract class AbstractLoggerCore implements PrestaShopLoggerInterface
     /**
      * Log an error message.
      *
-     * @param string $message
+     * @param string message
      */
     public function logError($message)
     {

@@ -49,7 +49,6 @@ textarea {
 
 textarea:focus,
 input[type="text"]:focus,
-input[type="number"]:focus,
 input[type="password"]:focus,
 input[type="datetime"]:focus,
 input[type="datetime-local"]:focus,
@@ -57,6 +56,7 @@ input[type="date"]:focus,
 input[type="month"]:focus,
 input[type="time"]:focus,
 input[type="week"]:focus,
+input[type="number"]:focus,
 input[type="email"]:focus,
 input[type="url"]:focus,
 input[type="search"]:focus,
@@ -70,7 +70,6 @@ input[type="color"]:focus,
 
 textarea:hover,
 input[type="text"]:hover,
-input[type="number"]:hover,
 input[type="password"]:focus,
 input[type="datetime"]:hover,
 input[type="datetime-local"]:hover,
@@ -78,6 +77,7 @@ input[type="date"]:hover,
 input[type="month"]:hover,
 input[type="time"]:hover,
 input[type="week"]:hover,
+input[type="number"]:hover,
 input[type="email"]:hover,
 input[type="url"]:hover,
 input[type="search"]:hover,
@@ -264,7 +264,6 @@ input[type="color"]:hover,
 .form-group {
   @media (max-width: $screen-lg) {
     input[type="text"],
-    input[type="number"],
     input[type="search"],
     input[type="password"],
     textarea,
@@ -276,7 +275,6 @@ input[type="color"]:hover,
       margin: 4px 0;
 
       input[type="text"],
-      input[type="number"],
       input[type="search"],
       input[type="password"],
       textarea,
@@ -303,7 +301,6 @@ input[type="color"]:hover,
 }
 
 input[type="text"],
-input[type="number"],
 input[type="search"],
 input[type="password"],
 input[type="email"],
@@ -331,18 +328,5 @@ input[type="tel"] {
     .btn[id^="add_condition_"] {
       white-space: nowrap;
     }
-  }
-}
-
-.modal-checkbox {
-  input {
-    margin: 0;
-    margin-right: 5px;
-    vertical-align: middle;
-  }
-
-  label {
-    margin-bottom: 0;
-    vertical-align: middle;
   }
 }

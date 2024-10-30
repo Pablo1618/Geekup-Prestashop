@@ -57,7 +57,7 @@ class ProductSupplierCore extends ObjectModel
     public $id_currency;
 
     /**
-     * @var float The unit price tax excluded of the product
+     * @var string The unit price tax excluded of the product
      * */
     public $product_supplier_price_te;
 
@@ -92,13 +92,33 @@ class ProductSupplierCore extends ObjectModel
     ];
 
     /**
+     * @see ObjectModel::delete()
+     */
+    public function delete()
+    {
+        $res = parent::delete();
+
+        if ($res && $this->id_product_attribute == 0) {
+            $items = ProductSupplier::getSupplierCollection($this->id_product, false);
+            foreach ($items as $item) {
+                /** @var ProductSupplier $item */
+                if ($item->id_product_attribute > 0) {
+                    $item->delete();
+                }
+            }
+        }
+
+        return $res;
+    }
+
+    /**
      * For a given product and supplier, gets the product supplier reference.
      *
      * @param int $idProduct Product ID
      * @param int $idProductAttribute Product Attribute ID
      * @param int $idSupplier Supplier ID
      *
-     * @return string|false Product Supplier reference
+     * @return string Product Supplier reference
      */
     public static function getProductSupplierReference($idProduct, $idProductAttribute, $idSupplier)
     {
@@ -123,7 +143,7 @@ class ProductSupplierCore extends ObjectModel
      * @param int $idSupplier Supplier ID
      * @param bool $withCurrency Optional With currency
      *
-     * @return string|array
+     * @return string
      */
     public static function getProductSupplierPrice($idProduct, $idProductAttribute, $idSupplier, $withCurrency = false)
     {
@@ -163,6 +183,7 @@ class ProductSupplierCore extends ObjectModel
      */
     public static function getIdByProductAndSupplier($idProduct, $idProductAttribute, $idSupplier)
     {
+        // build query
         $query = new DbQuery();
         $query->select('ps.id_product_supplier');
         $query->from('product_supplier', 'ps');
@@ -172,14 +193,14 @@ class ProductSupplierCore extends ObjectModel
 			AND ps.id_supplier = ' . (int) $idSupplier
         );
 
-        return (int) Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
     }
 
     /**
      * For a given product, retrieves its suppliers.
      *
      * @param int $idProduct
-     * @param bool $groupBySupplier
+     * @param int $groupBySupplier
      *
      * @return PrestaShopCollection Collection of ProductSupplier
      */
@@ -198,17 +219,16 @@ class ProductSupplierCore extends ObjectModel
     /**
      * For a given Supplier, Product, returns the purchased price.
      *
-     * @param int|null $idSupplier
-     * @param int|null $idProduct
+     * @param int $idProduct
      * @param int $idProductAttribute Optional
      * @param bool $convertedPrice Optional
      *
-     * @return float|null
+     * @return array keys: price_te, id_currency
      */
     public static function getProductPrice($idSupplier, $idProduct, $idProductAttribute = 0, $convertedPrice = false)
     {
         if (null === $idSupplier || null === $idProduct) {
-            return null;
+            return;
         }
 
         $query = new DbQuery();
@@ -219,7 +239,7 @@ class ProductSupplierCore extends ObjectModel
 
         $row = Db::getInstance(_PS_USE_SQL_SLAVE_)->getRow($query);
         if (empty($row)) {
-            return null;
+            return;
         }
 
         if ($convertedPrice) {

@@ -25,28 +25,21 @@
  */
 class PdfInvoiceControllerCore extends FrontController
 {
-    /** @var string */
     public $php_self = 'pdf-invoice';
-    /** @var bool */
     protected $display_header = false;
-    /** @var bool */
     protected $display_footer = false;
-    /** @var bool */
+
     public $content_only = true;
-    /** @var string */
-    protected $template = '';
+
+    protected $template;
     public $filename;
-    /** @var Order */
-    public $order;
 
     public function postProcess()
     {
-        // If the customer is not logged in AND no secure key was passed
         if (!$this->context->customer->isLogged() && !Tools::getValue('secure_key')) {
             Tools::redirect('index.php?controller=authentication&back=pdf-invoice');
         }
 
-        // If built-in invoicing is disabled
         if (!(int) Configuration::get('PS_INVOICE')) {
             die($this->trans('Invoices are disabled in this shop.', [], 'Shop.Notifications.Error'));
         }
@@ -56,18 +49,11 @@ class PdfInvoiceControllerCore extends FrontController
             $order = new Order((int) $id_order);
         }
 
-        // If the order doesn't exist
         if (!isset($order) || !Validate::isLoadedObject($order)) {
             die($this->trans('The invoice was not found.', [], 'Shop.Notifications.Error'));
         }
 
-        // Check if the user is not trying to download an invoice of an order of different customer
-        // Either the ID of the customer in context must match the customer in order OR a secure_key matching the one on the order must be provided
-        if (Tools::isSubmit('secure_key') && $order->secure_key != Tools::getValue('secure_key')) {
-            die($this->trans('The invoice was not found.', [], 'Shop.Notifications.Error'));
-        }
-
-        if (!Tools::isSubmit('secure_key') && (!isset($this->context->customer->id) || $order->id_customer != $this->context->customer->id)) {
+        if ((isset($this->context->customer->id) && $order->id_customer != $this->context->customer->id) || (Tools::isSubmit('secure_key') && $order->secure_key != Tools::getValue('secure_key'))) {
             die($this->trans('The invoice was not found.', [], 'Shop.Notifications.Error'));
         }
 
@@ -78,11 +64,6 @@ class PdfInvoiceControllerCore extends FrontController
         $this->order = $order;
     }
 
-    /**
-     * @return bool|void
-     *
-     * @throws PrestaShopException
-     */
     public function display()
     {
         $order_invoice_list = $this->order->getInvoicesCollection();

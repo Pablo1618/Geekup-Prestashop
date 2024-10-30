@@ -30,7 +30,7 @@ class TacticianExtension extends ConfigurableExtension
         $this->configureLogger($mergedConfig, $container);
     }
 
-    public function getAlias(): string
+    public function getAlias()
     {
         return 'tactician';
     }

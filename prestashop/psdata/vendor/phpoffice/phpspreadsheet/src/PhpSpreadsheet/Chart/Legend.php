@@ -52,9 +52,10 @@ class Legend
      * Create a new Legend.
      *
      * @param string $position
+     * @param null|Layout $layout
      * @param bool $overlay
      */
-    public function __construct($position = self::POSITION_RIGHT, ?Layout $layout = null, $overlay = false)
+    public function __construct($position = self::POSITION_RIGHT, Layout $layout = null, $overlay = false)
     {
         $this->setPosition($position);
         $this->layout = $layout;
@@ -131,10 +132,18 @@ class Legend
      * Set allow overlay of other elements?
      *
      * @param bool $overlay
+     *
+     * @return bool
      */
-    public function setOverlay($overlay): void
+    public function setOverlay($overlay)
     {
+        if (!is_bool($overlay)) {
+            return false;
+        }
+
         $this->overlay = $overlay;
+
+        return true;
     }
 
     /**

@@ -28,10 +28,8 @@ namespace PrestaShop\PrestaShop\Adapter\Supplier\CommandHandler;
 
 use Address;
 use Db;
-use PrestaShop\PrestaShop\Adapter\Product\Update\ProductSupplierUpdater;
 use PrestaShop\PrestaShop\Adapter\Supplier\SupplierAddressProvider;
 use PrestaShop\PrestaShop\Adapter\Supplier\SupplierOrderValidator;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\Supplier\Exception\CannotDeleteSupplierAddressException;
 use PrestaShop\PrestaShop\Core\Domain\Supplier\Exception\CannotDeleteSupplierException;
 use PrestaShop\PrestaShop\Core\Domain\Supplier\Exception\CannotDeleteSupplierProductRelationException;
@@ -63,26 +61,18 @@ abstract class AbstractDeleteSupplierHandler
     private $supplierAddressProvider;
 
     /**
-     * @var ProductSupplierUpdater
-     */
-    private $productSupplierUpdater;
-
-    /**
      * @param SupplierOrderValidator $supplierOrderValidator
      * @param SupplierAddressProvider $supplierAddressProvider
-     * @param ProductSupplierUpdater $productSupplierUpdater
      * @param string $dbPrefix
      */
     public function __construct(
         SupplierOrderValidator $supplierOrderValidator,
         SupplierAddressProvider $supplierAddressProvider,
-        ProductSupplierUpdater $productSupplierUpdater,
-        string $dbPrefix
+        $dbPrefix
     ) {
         $this->supplierOrderValidator = $supplierOrderValidator;
         $this->dbPrefix = $dbPrefix;
         $this->supplierAddressProvider = $supplierAddressProvider;
-        $this->productSupplierUpdater = $productSupplierUpdater;
     }
 
     /**
@@ -103,31 +93,15 @@ abstract class AbstractDeleteSupplierHandler
             }
 
             if ($this->hasPendingOrders($supplierId)) {
-                throw new CannotDeleteSupplierException(
-                    sprintf(
-                        'Supplier with id %d cannot be deleted due to it has pending orders',
-                        $supplierId->getValue()
-                    ),
-                    CannotDeleteSupplierException::HAS_PENDING_ORDERS
-                );
+                throw new CannotDeleteSupplierException($supplierId->getValue(), sprintf('Supplier with id %s cannot be deleted due to it has pending orders', $supplierId->getValue()), CannotDeleteSupplierException::HAS_PENDING_ORDERS);
             }
 
             if (false === $this->deleteProductSupplierRelation($supplierId)) {
-                throw new CannotDeleteSupplierProductRelationException(
-                    sprintf(
-                        'Unable to delete suppliers with id "%d" product relation from product_supplier table',
-                        $supplierId->getValue()
-                    )
-                );
+                throw new CannotDeleteSupplierProductRelationException(sprintf('Unable to delete suppliers with id "%s" product relation from product_supplier table', $supplierId->getValue()));
             }
 
             if (1 >= count($entity->getAssociatedShops()) && false === $this->deleteSupplierAddress($supplierId)) {
-                throw new CannotDeleteSupplierAddressException(
-                    sprintf(
-                        'Unable to set deleted flag for supplier with id "%d" address',
-                        $supplierId->getValue()
-                    )
-                );
+                throw new CannotDeleteSupplierAddressException(sprintf('Unable to set deleted flag for supplier with id "%s" address', $supplierId->getValue()));
             }
 
             if (false === $entity->delete()) {
@@ -148,21 +122,8 @@ abstract class AbstractDeleteSupplierHandler
     private function deleteProductSupplierRelation(SupplierId $supplierId)
     {
         $sql = 'DELETE FROM `' . $this->dbPrefix . 'product_supplier` WHERE `id_supplier`=' . $supplierId->getValue();
-        $removedRelations = Db::getInstance()->execute($sql);
 
-        // Fetch all products which had this supplier as default
-        $sql = 'SELECT id_product FROM `' . $this->dbPrefix . 'product` WHERE `id_supplier` = ' . $supplierId->getValue();
-        $result = Db::getInstance()->executeS($sql);
-        if (!empty($result)) {
-            $orphanProductIds = [];
-            foreach ($result as $product) {
-                $orphanProductIds[] = new ProductId((int) $product['id_product']);
-            }
-
-            $this->productSupplierUpdater->resetSupplierAssociations($orphanProductIds);
-        }
-
-        return $removedRelations;
+        return Db::getInstance()->execute($sql);
     }
 
     /**

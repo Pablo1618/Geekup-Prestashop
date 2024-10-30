@@ -302,7 +302,7 @@
         ],
         "CZK": [
             "CZK",
-            "Koruna Ceko"
+            "Koruna Cheska"
         ],
         "DDM": [
             "DDM",
@@ -326,7 +326,7 @@
         ],
         "DZD": [
             "DZD",
-            "Dinar Aljazair"
+            "Dinar Algeria"
         ],
         "ECS": [
             "ECS",
@@ -530,7 +530,7 @@
         ],
         "KGS": [
             "KGS",
-            "Som Kirgizstan"
+            "Som Kirgistan"
         ],
         "KHR": [
             "KHR",
@@ -566,7 +566,7 @@
         ],
         "KZT": [
             "KZT",
-            "Tenge Kazakhstan"
+            "Tenge Kazakstan"
         ],
         "LAK": [
             "LAK",
@@ -798,7 +798,7 @@
         ],
         "PLN": [
             "PLN",
-            "Zloty Polandia"
+            "Polandia Zloty"
         ],
         "PLZ": [
             "PLZ",
@@ -950,7 +950,7 @@
         ],
         "TMT": [
             "TMT",
-            "Manat Turkmenistan"
+            "Manat Turkimenistan"
         ],
         "TND": [
             "TND",
@@ -1058,7 +1058,7 @@
         ],
         "XAF": [
             "FCFA",
-            "Franc CFA Afrika Tengah"
+            "Franc CFA BEAC"
         ],
         "XCD": [
             "EC$",
@@ -1077,8 +1077,8 @@
             "Franc UIC Perancis"
         ],
         "XOF": [
-            "F CFA",
-            "Franc CFA Afrika Barat"
+            "CFA",
+            "Franc CFA BCEAO"
         ],
         "XPF": [
             "CFPF",

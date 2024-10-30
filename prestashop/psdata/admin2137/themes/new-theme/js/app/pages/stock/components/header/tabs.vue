@@ -54,19 +54,15 @@
   </div>
 </template>
 
-<script lang="ts">
-  import {defineComponent} from 'vue';
-  import translate from '@app/pages/stock/mixins/translate';
-
-  export default defineComponent({
-    mixins: [translate],
+<script>
+  export default {
     computed: {
-      isOverview(): boolean {
+      isOverview() {
         return this.$route.name === 'overview';
       },
-      isMovements(): boolean {
+      isMovements() {
         return this.$route.name === 'movements';
       },
     },
-  });
+  };
 </script>

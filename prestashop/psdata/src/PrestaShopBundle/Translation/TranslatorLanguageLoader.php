@@ -34,11 +34,11 @@ use PrestaShopBundle\Translation\Loader\SqlTranslationLoader;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
 use Symfony\Component\Translation\Translator as BaseTranslatorComponent;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class TranslatorLanguageLoader
 {
-    public const TRANSLATION_DIR = _PS_ROOT_DIR_ . '/translations';
+    public const TRANSLATION_DIR = _PS_ROOT_DIR_ . '/app/Resources/translations';
     private const MODULE_TRANSLATION_FILENAME_PATTERN = '#^%s[A-Z][\w.-]+\.%s\.xlf$#';
 
     /**

@@ -23,31 +23,27 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *-->
 <template>
-  <div data-role="currency-format-edit-modal">
-    <modal
-      confirmation
-      :modal-title="modalTitle"
-      @close="$emit('close')"
-      @confirm="$emit('applyCustomization', customData)"
-      v-if="language !== null"
-      class=""
-    >
-      <template #body>
-        <currency-format-form
-          :language="language"
-          @formatChange="customData = $event"
-        />
-      </template>
-    </modal>
-  </div>
+  <modal
+    confirmation
+    :modal-title="modalTitle"
+    @close="$emit('close')"
+    @confirm="$emit('applyCustomization', customData)"
+    v-if="language !== null"
+  >
+    <template slot="body">
+      <currency-format-form
+        :language="language"
+        @input="customData = $event"
+      />
+    </template>
+  </modal>
 </template>
 
 <script>
-  import Modal from '@PSVue/components/Modal';
-  import {defineComponent} from 'vue';
+  import Modal from '@vue/components/Modal';
   import CurrencyFormatForm from './CurrencyFormatForm';
 
-  export default defineComponent({
+  export default {
     name: 'CurrencyModal',
     data: () => ({
       customData: null,
@@ -68,7 +64,7 @@
         return this.$t('modal.title') + (this.language !== null ? ` + ${this.language.name}` : '');
       },
     },
-  });
+  };
 </script>
 
 <style lang="scss" scoped>

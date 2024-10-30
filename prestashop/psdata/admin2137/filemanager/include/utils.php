@@ -64,31 +64,8 @@ function rename_folder($old_path, $name, $transliteration)
     }
 }
 
-/**
- * Gets file extension from filepath
- * test.example.jpg returns jpg
- * test.example returns example
- *
- * @param $path
- * @return array|string|string[]|null
- */
-function getFileExtension($path)
-{
-    if (!is_file($path)) {
-        return null;
-    }
-
-    return pathinfo($path, PATHINFO_EXTENSION) ?: null;
-}
-
 function create_img_gd($imgfile, $imgthumb, $newwidth, $newheight="")
 {
-    if (getFileExtension($imgfile) === 'svg') {
-        copy($imgfile, $imgthumb);
-
-        return true;
-    }
-
     if (image_check_memory_usage($imgfile, $newwidth, $newheight)) {
         require_once 'php_image_magician.php';
         $magicianObj = new imageLib($imgfile);
@@ -103,12 +80,6 @@ function create_img_gd($imgfile, $imgthumb, $newwidth, $newheight="")
 
 function create_img($imgfile, $imgthumb, $newwidth, $newheight="")
 {
-    if (getFileExtension($imgfile) === 'svg') {
-        copy($imgfile, $imgthumb);
-
-        return true;
-    }
-
     if (image_check_memory_usage($imgfile, $newwidth, $newheight)) {
         require_once 'php_image_magician.php';
         $magicianObj = new imageLib($imgfile);
@@ -116,9 +87,9 @@ function create_img($imgfile, $imgthumb, $newwidth, $newheight="")
         $magicianObj -> saveImage($imgthumb, 80);
 
         return true;
+    } else {
+        return false;
     }
-
-    return false;
 }
 
 function makeSize($size)
@@ -171,8 +142,12 @@ function check_files_extensions_on_path($path, $ext)
 {
     if (!is_dir($path)) {
         $fileinfo = pathinfo($path);
-        if (!in_array(mb_strtolower($fileinfo['extension']), $ext)) {
-            unlink($path);
+        if (function_exists('mb_strtolower')) {
+            if (!in_array(mb_strtolower($fileinfo['extension']), $ext)) {
+                unlink($path);
+            } elseif (!in_array(Tools::strtolower($fileinfo['extension']), $ext)) {
+                unlink($path);
+            }
         }
     } else {
         $files = scandir($path, SCANDIR_SORT_NONE);
@@ -186,8 +161,12 @@ function check_files_extensions_on_phar($phar, &$files, $basepath, $ext)
 {
     foreach ($phar as $file) {
         if ($file->isFile()) {
-            if (in_array(mb_strtolower($file->getExtension()), $ext)) {
-                $files[] = $basepath.$file->getFileName();
+            if (function_exists('mb_strtolower')) {
+                if (in_array(mb_strtolower($file->getExtension()), $ext)) {
+                    $files[] = $basepath.$file->getFileName();
+                } elseif (in_array(Tools::strtolower($file->getExtension()), $ext)) {
+                    $files[] = $basepath.$file->getFileName();
+                }
             }
         } elseif ($file->isDir()) {
             $iterator = new DirectoryIterator($file);
@@ -224,6 +203,24 @@ function fix_filename($str, $transliteration)
 function fix_dirname($str)
 {
     return str_replace('~', ' ', dirname(str_replace(' ', '~', $str)));
+}
+
+function fix_strtoupper($str)
+{
+    if (function_exists('mb_strtoupper')) {
+        return mb_strtoupper($str);
+    } else {
+        return strtoupper($str);
+    }
+}
+
+function fix_strtolower($str)
+{
+    if (function_exists('mb_strtoupper')) {
+        return mb_strtolower($str);
+    } else {
+        return strtolower($str);
+    }
 }
 
 function fix_path($path, $transliteration)
@@ -271,47 +268,33 @@ function config_loading($current_path, $fld)
     return false;
 }
 
-/**
- * Check if memory is enough to process image
- *
- * @param string $img
- * @param int $max_breedte
- * @param int $max_hoogte
- *
- * @return bool
- */
 function image_check_memory_usage($img, $max_breedte, $max_hoogte)
 {
-	if (file_exists($img))
-	{
-		$K64 = 65536; // number of bytes in 64K
-		$memory_usage = memory_get_usage();
-		if(ini_get('memory_limit') > 0 ){
-			
-			$mem = ini_get('memory_limit');
-			$memory_limit = 0;
-			if (strpos($mem, 'M') !== false) $memory_limit = abs(intval(str_replace(array('M'), '', $mem) * 1024 * 1024));
-			if (strpos($mem, 'G') !== false) $memory_limit = abs(intval(str_replace(array('G'), '', $mem) * 1024 * 1024 * 1024));
-			
-			$image_properties = getimagesize($img);
-			$image_width = $image_properties[0];
-			$image_height = $image_properties[1];
-			if (isset($image_properties['bits']))
-				$image_bits = $image_properties['bits'];
-			else
-				$image_bits = 0;
-			$image_memory_usage = $K64 + ($image_width * $image_height * ($image_bits >> 3) * 2);
-			$thumb_memory_usage = $K64 + ($max_breedte * $max_hoogte * ($image_bits >> 3) * 2);
-			$memory_needed = abs(intval($memory_usage + $image_memory_usage + $thumb_memory_usage));
+    if (file_exists($img)) {
+        $K64 = 65536;    // number of bytes in 64K
+    $memory_usage = memory_get_usage();
+        $memory_limit = abs((int) (str_replace('M', '', ini_get('memory_limit'))*1024*1024));
+        $image_properties = getimagesize($img);
+        $image_width = $image_properties[0];
+        $image_height = $image_properties[1];
+        $image_bits = $image_properties['bits'];
+        $image_memory_usage = $K64 + ($image_width * $image_height * ($image_bits)  * 2);
+        $thumb_memory_usage = $K64 + ($max_breedte * $max_hoogte * ($image_bits) * 2);
+        $memory_needed = (int) ($memory_usage + $image_memory_usage + $thumb_memory_usage);
 
-			if ($memory_needed > $memory_limit)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
+        if ($memory_needed > $memory_limit) {
+            ini_set('memory_limit', ((int) ($memory_needed/1024/1024)+5) . 'M');
+            if (ini_get('memory_limit') == ((int) ($memory_needed/1024/1024)+5) . 'M') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
 }
 
 function endsWith($haystack, $needle)

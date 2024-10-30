@@ -51,7 +51,6 @@ class RouteCollection implements \IteratorAggregate, \Countable
      *
      * @return \ArrayIterator|Route[] An \ArrayIterator object for iterating over routes
      */
-    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new \ArrayIterator($this->routes);
@@ -62,7 +61,6 @@ class RouteCollection implements \IteratorAggregate, \Countable
      *
      * @return int The number of routes
      */
-    #[\ReturnTypeWillChange]
     public function count()
     {
         return \count($this->routes);
@@ -71,7 +69,8 @@ class RouteCollection implements \IteratorAggregate, \Countable
     /**
      * Adds a route.
      *
-     * @param string $name The route name
+     * @param string $name  The route name
+     * @param Route  $route A Route instance
      */
     public function add($name, Route $route)
     {
@@ -99,7 +98,7 @@ class RouteCollection implements \IteratorAggregate, \Countable
      */
     public function get($name)
     {
-        return $this->routes[$name] ?? null;
+        return isset($this->routes[$name]) ? $this->routes[$name] : null;
     }
 
     /**
@@ -141,10 +140,6 @@ class RouteCollection implements \IteratorAggregate, \Countable
      */
     public function addPrefix($prefix, array $defaults = [], array $requirements = [])
     {
-        if (null === $prefix) {
-            @trigger_error(sprintf('Passing null as $prefix to %s is deprecated in Symfony 4.4 and will trigger a TypeError in 5.0.', __METHOD__), \E_USER_DEPRECATED);
-        }
-
         $prefix = trim(trim($prefix), '/');
 
         if ('' === $prefix) {
@@ -156,23 +151,6 @@ class RouteCollection implements \IteratorAggregate, \Countable
             $route->addDefaults($defaults);
             $route->addRequirements($requirements);
         }
-    }
-
-    /**
-     * Adds a prefix to the name of all the routes within in the collection.
-     */
-    public function addNamePrefix(string $prefix)
-    {
-        $prefixedRoutes = [];
-
-        foreach ($this->routes as $name => $route) {
-            $prefixedRoutes[$prefix.$name] = $route;
-            if (null !== $name = $route->getDefault('_canonical_route')) {
-                $route->setDefault('_canonical_route', $prefix.$name);
-            }
-        }
-
-        $this->routes = $prefixedRoutes;
     }
 
     /**
@@ -241,6 +219,8 @@ class RouteCollection implements \IteratorAggregate, \Countable
      * Adds options to all routes.
      *
      * An existing option value under the same name in a route will be overridden.
+     *
+     * @param array $options An array of options
      */
     public function addOptions(array $options)
     {

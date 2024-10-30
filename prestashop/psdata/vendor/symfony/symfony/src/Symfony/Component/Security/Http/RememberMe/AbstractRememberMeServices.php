@@ -22,7 +22,6 @@ use Symfony\Component\Security\Core\Exception\CookieTheftException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
 use Symfony\Component\Security\Http\ParameterBagUtils;
 
@@ -33,7 +32,7 @@ use Symfony\Component\Security\Http\ParameterBagUtils;
  */
 abstract class AbstractRememberMeServices implements RememberMeServicesInterface, LogoutHandlerInterface
 {
-    public const COOKIE_DELIMITER = ':';
+    const COOKIE_DELIMITER = ':';
 
     protected $logger;
     protected $options = [
@@ -46,9 +45,13 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
     private $userProviders;
 
     /**
+     * @param string          $secret
+     * @param string          $providerKey
+     * @param LoggerInterface $logger
+     *
      * @throws \InvalidArgumentException
      */
-    public function __construct(array $userProviders, string $secret, string $providerKey, array $options = [], LoggerInterface $logger = null)
+    public function __construct(array $userProviders, $secret, $providerKey, array $options = [], LoggerInterface $logger = null)
     {
         if (empty($secret)) {
             throw new \InvalidArgumentException('$secret must not be empty.');
@@ -90,10 +93,12 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
      * Implementation of RememberMeServicesInterface. Detects whether a remember-me
      * cookie was set, decodes it, and hands it to subclasses for further processing.
      *
+     * @return TokenInterface|null
+     *
      * @throws CookieTheftException
      * @throws \RuntimeException
      */
-    final public function autoLogin(Request $request): ?TokenInterface
+    final public function autoLogin(Request $request)
     {
         if (($cookie = $request->attributes->get(self::COOKIE_ATTR_NAME)) && null === $cookie->getValue()) {
             return null;
@@ -227,7 +232,7 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
      */
     abstract protected function onLoginSuccess(Request $request, Response $response, TokenInterface $token);
 
-    final protected function getUserProvider(string $class): UserProviderInterface
+    final protected function getUserProvider($class)
     {
         foreach ($this->userProviders as $provider) {
             if ($provider->supportsClass($class)) {
@@ -260,7 +265,7 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
     protected function encodeCookie(array $cookieParts)
     {
         foreach ($cookieParts as $cookiePart) {
-            if (str_contains($cookiePart, self::COOKIE_DELIMITER)) {
+            if (false !== strpos($cookiePart, self::COOKIE_DELIMITER)) {
                 throw new \InvalidArgumentException(sprintf('$cookieParts should not contain the cookie delimiter "%s".', self::COOKIE_DELIMITER));
             }
         }
@@ -277,7 +282,7 @@ abstract class AbstractRememberMeServices implements RememberMeServicesInterface
             $this->logger->debug('Clearing remember-me cookie.', ['name' => $this->options['name']]);
         }
 
-        $request->attributes->set(self::COOKIE_ATTR_NAME, new Cookie($this->options['name'], null, 1, $this->options['path'], $this->options['domain'], $this->options['secure'] ?? $request->isSecure(), $this->options['httponly'], false, $this->options['samesite']));
+        $request->attributes->set(self::COOKIE_ATTR_NAME, new Cookie($this->options['name'], null, 1, $this->options['path'], $this->options['domain'], $this->options['secure'], $this->options['httponly'], false, $this->options['samesite']));
     }
 
     /**

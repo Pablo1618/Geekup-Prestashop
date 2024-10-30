@@ -132,7 +132,6 @@ final class CategoryFormDataHandler implements FormDataHandlerInterface
         );
 
         $command->setLocalizedDescriptions($data['description']);
-        $command->setLocalizedAdditionalDescriptions($data['additional_description']);
         $command->setLocalizedMetaTitles($data['meta_title']);
         $command->setLocalizedMetaDescriptions($data['meta_description']);
         $command->setLocalizedMetaKeywords($data['meta_keyword']);
@@ -161,7 +160,6 @@ final class CategoryFormDataHandler implements FormDataHandlerInterface
         $command->setLocalizedNames($data['name']);
         $command->setParentCategoryId($data['id_parent']);
         $command->setLocalizedDescriptions($data['description']);
-        $command->setLocalizedAdditionalDescriptions($data['additional_description']);
         $command->setLocalizedMetaTitles($data['meta_title']);
         $command->setLocalizedMetaDescriptions($data['meta_description']);
         $command->setLocalizedMetaKeywords($data['meta_keyword']);

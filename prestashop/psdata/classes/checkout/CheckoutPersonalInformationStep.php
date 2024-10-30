@@ -23,7 +23,7 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CheckoutPersonalInformationStepCore extends AbstractCheckoutStep
 {
@@ -33,17 +33,6 @@ class CheckoutPersonalInformationStepCore extends AbstractCheckoutStep
 
     private $show_login_form = false;
 
-    /**
-     * @var bool
-     */
-    public $logged_in;
-
-    /**
-     * @param Context $context
-     * @param TranslatorInterface $translator
-     * @param CustomerLoginForm $loginForm
-     * @param CustomerForm $registerForm
-     */
     public function __construct(
         Context $context,
         TranslatorInterface $translator,

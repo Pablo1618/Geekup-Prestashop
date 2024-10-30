@@ -14,7 +14,6 @@ namespace Symfony\Component\Validator\Constraints;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
  * Validates whether the value is a valid ISBN-10 or ISBN-13.
@@ -40,8 +39,8 @@ class IsbnValidator extends ConstraintValidator
             return;
         }
 
-        if (!\is_scalar($value) && !(\is_object($value) && method_exists($value, '__toString'))) {
-            throw new UnexpectedValueException($value, 'string');
+        if (!is_scalar($value) && !(\is_object($value) && method_exists($value, '__toString'))) {
+            throw new UnexpectedTypeException($value, 'string');
         }
 
         $value = (string) $value;
@@ -163,7 +162,8 @@ class IsbnValidator extends ConstraintValidator
         }
 
         for ($i = 1; $i < 12; $i += 2) {
-            $checkSum += $isbn[$i] * 3;
+            $checkSum += $isbn[$i]
+            * 3;
         }
 
         return 0 === $checkSum % 10 ? true : Isbn::CHECKSUM_FAILED_ERROR;

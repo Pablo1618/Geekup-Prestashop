@@ -1,56 +1,80 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Query;
 
 use Doctrine\Common\Collections\ArrayCollection;
+
+use Doctrine\Common\Collections\Expr\ExpressionVisitor;
 use Doctrine\Common\Collections\Expr\Comparison;
 use Doctrine\Common\Collections\Expr\CompositeExpression;
-use Doctrine\Common\Collections\Expr\ExpressionVisitor;
 use Doctrine\Common\Collections\Expr\Value;
-use RuntimeException;
-
-use function count;
-use function str_replace;
-use function str_starts_with;
 
 /**
  * Converts Collection expressions to Query expressions.
+ *
+ * @author Kirill chEbba Chebunin <iam@chebba.org>
+ * @since 2.4
  */
 class QueryExpressionVisitor extends ExpressionVisitor
 {
-    /** @var array<string,string> */
+    /**
+     * @var array
+     */
     private static $operatorMap = [
         Comparison::GT => Expr\Comparison::GT,
         Comparison::GTE => Expr\Comparison::GTE,
         Comparison::LT  => Expr\Comparison::LT,
-        Comparison::LTE => Expr\Comparison::LTE,
+        Comparison::LTE => Expr\Comparison::LTE
     ];
 
-    /** @var mixed[] */
+    /**
+     * @var array
+     */
     private $queryAliases;
 
-    /** @var Expr */
+    /**
+     * @var Expr
+     */
     private $expr;
 
-    /** @var list<mixed> */
+    /**
+     * @var array
+     */
     private $parameters = [];
 
     /**
-     * @param mixed[] $queryAliases
+     * Constructor
+     *
+     * @param array $queryAliases
      */
     public function __construct($queryAliases)
     {
         $this->queryAliases = $queryAliases;
-        $this->expr         = new Expr();
+        $this->expr = new Expr();
     }
 
     /**
      * Gets bound parameters.
      * Filled after {@link dispach()}.
      *
-     * @return ArrayCollection<int, mixed>
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getParameters()
     {
@@ -76,7 +100,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
      */
     private static function convertComparisonOperator($criteriaOperator)
     {
-        return self::$operatorMap[$criteriaOperator] ?? null;
+        return isset(self::$operatorMap[$criteriaOperator]) ? self::$operatorMap[$criteriaOperator] : null;
     }
 
     /**
@@ -90,7 +114,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
             $expressionList[] = $this->dispatch($child);
         }
 
-        switch ($expr->getType()) {
+        switch($expr->getType()) {
             case CompositeExpression::TYPE_AND:
                 return new Expr\Andx($expressionList);
 
@@ -98,7 +122,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
                 return new Expr\Orx($expressionList);
 
             default:
-                throw new RuntimeException('Unknown composite ' . $expr->getType());
+                throw new \RuntimeException("Unknown composite " . $expr->getType());
         }
     }
 
@@ -107,14 +131,15 @@ class QueryExpressionVisitor extends ExpressionVisitor
      */
     public function walkComparison(Comparison $comparison)
     {
-        if (! isset($this->queryAliases[0])) {
+
+        if ( ! isset($this->queryAliases[0])) {
             throw new QueryException('No aliases are set before invoking walkComparison().');
         }
 
         $field = $this->queryAliases[0] . '.' . $comparison->getField();
 
-        foreach ($this->queryAliases as $alias) {
-            if (str_starts_with($comparison->getField() . '.', $alias . '.')) {
+        foreach($this->queryAliases as $alias) {
+            if(strpos($comparison->getField() . '.', $alias . '.') === 0) {
                 $field = $comparison->getField();
                 break;
             }
@@ -129,7 +154,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
             }
         }
 
-        $parameter   = new Parameter($parameterName, $this->walkValue($comparison->getValue()));
+        $parameter = new Parameter($parameterName, $this->walkValue($comparison->getValue()));
         $placeholder = ':' . $parameterName;
 
         switch ($comparison->getOperator()) {
@@ -137,52 +162,42 @@ class QueryExpressionVisitor extends ExpressionVisitor
                 $this->parameters[] = $parameter;
 
                 return $this->expr->in($field, $placeholder);
-
             case Comparison::NIN:
                 $this->parameters[] = $parameter;
 
                 return $this->expr->notIn($field, $placeholder);
-
             case Comparison::EQ:
             case Comparison::IS:
                 if ($this->walkValue($comparison->getValue()) === null) {
                     return $this->expr->isNull($field);
                 }
-
                 $this->parameters[] = $parameter;
 
                 return $this->expr->eq($field, $placeholder);
-
             case Comparison::NEQ:
                 if ($this->walkValue($comparison->getValue()) === null) {
                     return $this->expr->isNotNull($field);
                 }
-
                 $this->parameters[] = $parameter;
 
                 return $this->expr->neq($field, $placeholder);
-
             case Comparison::CONTAINS:
                 $parameter->setValue('%' . $parameter->getValue() . '%', $parameter->getType());
                 $this->parameters[] = $parameter;
 
                 return $this->expr->like($field, $placeholder);
-
             case Comparison::MEMBER_OF:
                 return $this->expr->isMemberOf($comparison->getField(), $comparison->getValue()->getValue());
-
             case Comparison::STARTS_WITH:
                 $parameter->setValue($parameter->getValue() . '%', $parameter->getType());
                 $this->parameters[] = $parameter;
 
                 return $this->expr->like($field, $placeholder);
-
             case Comparison::ENDS_WITH:
                 $parameter->setValue('%' . $parameter->getValue(), $parameter->getType());
                 $this->parameters[] = $parameter;
 
                 return $this->expr->like($field, $placeholder);
-
             default:
                 $operator = self::convertComparisonOperator($comparison->getOperator());
                 if ($operator) {
@@ -195,7 +210,7 @@ class QueryExpressionVisitor extends ExpressionVisitor
                     );
                 }
 
-                throw new RuntimeException('Unknown comparison operator: ' . $comparison->getOperator());
+                throw new \RuntimeException("Unknown comparison operator: " . $comparison->getOperator());
         }
     }
 

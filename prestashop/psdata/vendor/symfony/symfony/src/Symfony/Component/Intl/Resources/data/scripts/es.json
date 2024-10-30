@@ -33,9 +33,9 @@
         "Glag": "glagolítico",
         "Goth": "gótico",
         "Grek": "griego",
-        "Gujr": "guyaratí",
+        "Gujr": "gujarati",
         "Guru": "gurmuji",
-        "Hanb": "han con bopomofo",
+        "Hanb": "hanb",
         "Hang": "hangul",
         "Hani": "han",
         "Hano": "hanunoo",
@@ -123,6 +123,7 @@
         "Zsye": "emojis",
         "Zsym": "símbolos",
         "Zxxx": "no escrito",
-        "Zyyy": "común"
+        "Zyyy": "común",
+        "Zzzz": "alfabeto desconocido"
     }
 }

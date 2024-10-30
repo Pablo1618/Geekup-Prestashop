@@ -31,7 +31,7 @@ use PrestaShop\PrestaShop\Adapter\Entity\Tools;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Email\EmailConfigurationTesterInterface;
 use PrestaShop\PrestaShop\Core\Email\MailOption;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class EmailConfigurationTester is responsible for sending test email.
@@ -98,18 +98,14 @@ final class EmailConfigurationTester implements EmailConfigurationTesterInterfac
             Tools::htmlentitiesUTF8($config['smtp_username']),
             $password,
             Tools::htmlentitiesUTF8($config['smtp_port']),
-            Tools::htmlentitiesUTF8($config['smtp_encryption']),
-            (bool) $config['dkim_enable'],
-            (string) $config['dkim_key'],
-            (string) $config['dkim_domain'],
-            (string) $config['dkim_selector']
+            Tools::htmlentitiesUTF8($config['smtp_encryption'])
         );
 
         $errors = [];
 
         if (false === $result || is_string($result)) {
             $errors[] = $this->translator->trans(
-                'An error has occurred. Please check your configuration',
+                'Error: Please check your configuration',
                 [],
                 'Admin.Advparameters.Feature'
             );

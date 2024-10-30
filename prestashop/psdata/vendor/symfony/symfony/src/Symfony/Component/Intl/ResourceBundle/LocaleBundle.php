@@ -19,7 +19,7 @@ use Symfony\Component\Intl\Exception\MissingResourceException;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
- * @internal to be removed in 5.0.
+ * @internal
  */
 class LocaleBundle extends LocaleDataProvider implements LocaleBundleInterface
 {

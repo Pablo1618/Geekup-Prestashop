@@ -18,7 +18,7 @@ use Symfony\Component\Intl\Data\Bundle\Reader\BundleEntryReaderInterface;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
- * @internal to be removed in 5.0.
+ * @internal
  */
 class LocaleDataProvider
 {
@@ -28,9 +28,10 @@ class LocaleDataProvider
     /**
      * Creates a data provider that reads locale-related data from .res files.
      *
-     * @param string $path The path to the directory containing the .res files
+     * @param string                     $path   The path to the directory containing the .res files
+     * @param BundleEntryReaderInterface $reader The reader for reading the .res files
      */
-    public function __construct(string $path, BundleEntryReaderInterface $reader)
+    public function __construct($path, BundleEntryReaderInterface $reader)
     {
         $this->path = $path;
         $this->reader = $reader;

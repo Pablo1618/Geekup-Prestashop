@@ -40,9 +40,8 @@ class PreferencesConfiguration implements DataConfigurationInterface
      */
     private $configuration;
 
-    public function __construct(
-        Configuration $configuration
-    ) {
+    public function __construct(Configuration $configuration)
+    {
         $this->configuration = $configuration;
     }
 
@@ -91,8 +90,6 @@ class PreferencesConfiguration implements DataConfigurationInterface
                 ],
             ];
         }
-
-        $previousMultistoreFeatureState = $this->configuration->get('PS_MULTISHOP_FEATURE_ACTIVE');
 
         $this->configuration->set('PS_SSL_ENABLED', $configuration['enable_ssl']);
         $this->configuration->set('PS_SSL_ENABLED_EVERYWHERE', $configuration['enable_ssl_everywhere']);

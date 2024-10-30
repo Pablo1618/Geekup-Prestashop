@@ -438,8 +438,6 @@ class ProductComment extends ObjectModel
      * Report comment
      *
      * @return bool
-     *
-     * @deprecated 4.0.0 - migrated to controllers/front/ReportComment and src/Entity/ProductCommentReport
      */
     public static function reportComment($id_product_comment, $id_customer)
     {
@@ -452,8 +450,6 @@ class ProductComment extends ObjectModel
      * Comment already report
      *
      * @return bool
-     *
-     * @deprecated 4.0.0 - migrated to controllers/front/ReportComment and src/Entity/ProductCommentReport
      */
     public static function isAlreadyReport($id_product_comment, $id_customer)
     {
@@ -468,8 +464,6 @@ class ProductComment extends ObjectModel
      * Set comment usefulness
      *
      * @return bool
-     *
-     * @deprecated 4.0.0 - migrated to controllers/front/UpdateCommentUsefulness and src/Entity/ProductCommentUsefulness
      */
     public static function setCommentUsefulness($id_product_comment, $usefulness, $id_customer)
     {
@@ -482,8 +476,6 @@ class ProductComment extends ObjectModel
      * Usefulness already set
      *
      * @return bool
-     *
-     * @deprecated 4.0.0 - migrated to controllers/front/UpdateCommentUsefulness and src/Entity/ProductCommentUsefulness
      */
     public static function isAlreadyUsefulness($id_product_comment, $id_customer)
     {

@@ -21,8 +21,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  * A configurable builder for ValidatorInterface objects.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
- *
- * @deprecated since Symfony 4.2, use the ValidatorBuilder class instead
  */
 interface ValidatorBuilderInterface
 {

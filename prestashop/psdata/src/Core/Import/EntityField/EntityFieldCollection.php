@@ -27,7 +27,6 @@
 namespace PrestaShop\PrestaShop\Core\Import\EntityField;
 
 use ArrayIterator;
-use Traversable;
 
 /**
  * Class EntityFieldCollection defines an entity field collection.
@@ -102,7 +101,7 @@ final class EntityFieldCollection implements EntityFieldCollectionInterface
     /**
      * {@inheritdoc}
      */
-    public function offsetExists($offset): bool
+    public function offsetExists($offset)
     {
         return array_key_exists($offset, $this->entityFields);
     }
@@ -110,7 +109,6 @@ final class EntityFieldCollection implements EntityFieldCollectionInterface
     /**
      * {@inheritdoc}
      */
-    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->entityFields[$offset];
@@ -119,7 +117,7 @@ final class EntityFieldCollection implements EntityFieldCollectionInterface
     /**
      * {@inheritdoc}
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet($offset, $value)
     {
         $this->entityFields[$offset] = $value;
     }
@@ -127,7 +125,7 @@ final class EntityFieldCollection implements EntityFieldCollectionInterface
     /**
      * {@inheritdoc}
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset($offset)
     {
         unset($this->entityFields[$offset]);
     }
@@ -135,7 +133,7 @@ final class EntityFieldCollection implements EntityFieldCollectionInterface
     /**
      * {@inheritdoc}
      */
-    public function getIterator(): Traversable
+    public function getIterator()
     {
         return new ArrayIterator($this->entityFields);
     }
@@ -143,7 +141,7 @@ final class EntityFieldCollection implements EntityFieldCollectionInterface
     /**
      * {@inheritdoc}
      */
-    public function count(): int
+    public function count()
     {
         return count($this->entityFields);
     }

@@ -8,17 +8,21 @@
             "BTN",
             "ngultrum butanés"
         ],
-        "ETB": [
-            "ETB",
-            "birr"
-        ],
         "JPY": [
             "¥",
             "yen"
         ],
+        "KGS": [
+            "KGS",
+            "som kirguís"
+        ],
         "LAK": [
             "LAK",
             "kip laosiano"
+        ],
+        "STN": [
+            "STN",
+            "dobra santotomense"
         ],
         "THB": [
             "THB",

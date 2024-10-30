@@ -79,10 +79,7 @@ class ActionDispatcherLegacyHooksSubscriber implements EventSubscriberInterface
 
         $requestAttributes = $event->getRequest()->attributes;
         $controllerType = self::NA_CONTROLLER;
-        $controller = is_array($event->getController())
-            ? $event->getController()[0]
-            : $event->getController()
-        ;
+        $controller = $event->getController()[0];
 
         if ($controller instanceof FrameworkBundleAdminController) {
             $controllerType = self::BACK_OFFICE_CONTROLLER;

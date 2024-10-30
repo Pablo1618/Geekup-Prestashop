@@ -27,7 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter\Requirement;
 
 use ConfigurationTest;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Check system requirements of a PrestaShop website.
@@ -56,7 +56,9 @@ class CheckRequirements
     {
         $paramsRequiredResults = ConfigurationTest::check(ConfigurationTest::getDefaultTests());
 
-        $paramsOptionalResults = ConfigurationTest::check(ConfigurationTest::getDefaultTestsOp());
+        $isHostMode = defined('_PS_HOST_MODE_');
+
+        $paramsOptionalResults = !$isHostMode ? ConfigurationTest::check(ConfigurationTest::getDefaultTestsOp()) : [];
 
         $failRequired = in_array('fail', $paramsRequiredResults);
 
@@ -69,18 +71,21 @@ class CheckRequirements
             }
         }
 
-        $testsErrors = array_merge(
-            $this->fillMissingDescriptions($testsErrors, $paramsRequiredResults),
-            $this->fillMissingDescriptions($testsErrors, $paramsOptionalResults)
-        );
+        $testsErrors = $this->fillMissingDescriptions($testsErrors, $paramsRequiredResults);
 
         $results = [
             'failRequired' => $failRequired,
             'testsErrors' => $testsErrors,
             'testsRequired' => $paramsRequiredResults,
-            'failOptional' => in_array('fail', $paramsOptionalResults),
-            'testsOptional' => $paramsOptionalResults,
         ];
+
+        if (!$isHostMode) {
+            $results = array_merge($results, [
+                'testsErrors' => $this->fillMissingDescriptions($testsErrors, $paramsOptionalResults),
+                'failOptional' => in_array('fail', $paramsOptionalResults),
+                'testsOptional' => $paramsOptionalResults,
+            ]);
+        }
 
         return $results;
     }
@@ -101,7 +106,6 @@ class CheckRequirements
             'json' => $this->translator->trans('Enable the JSON extension on your server.', [], 'Admin.Advparameters.Notification'),
             'mbstring' => $this->translator->trans('Enable the Mbstring extension on your server.', [], 'Admin.Advparameters.Notification'),
             'openssl' => $this->translator->trans('Enable the OpenSSL extension on your server.', [], 'Admin.Advparameters.Notification'),
-            'openssl_key_generation' => $this->translator->trans('Unable to generate private keys using openssl_pkey_new. Check your OpenSSL configuration, especially the path to openssl.cafile.', [], 'Admin.Advparameters.Notification'),
             'pdo_mysql' => $this->translator->trans('Enable the PDO Mysql extension on your server.', [], 'Admin.Advparameters.Notification'),
             'simplexml' => $this->translator->trans('Enable the XML extension on your server.', [], 'Admin.Advparameters.Notification'),
             'zip' => $this->translator->trans('Enable the ZIP extension on your server.', [], 'Admin.Advparameters.Notification'),

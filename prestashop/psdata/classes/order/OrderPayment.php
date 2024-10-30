@@ -27,9 +27,6 @@ class OrderPaymentCore extends ObjectModel
 {
     public $order_reference;
     public $id_currency;
-    /**
-     * @var float
-     */
     public $amount;
     public $payment_method;
     public $conversion_rate;
@@ -41,29 +38,23 @@ class OrderPaymentCore extends ObjectModel
     public $date_add;
 
     /**
-     * @var int|null
-     */
-    public $id_employee;
-
-    /**
      * @see ObjectModel::$definition
      */
     public static $definition = [
         'table' => 'order_payment',
         'primary' => 'id_order_payment',
         'fields' => [
-            'order_reference' => ['type' => self::TYPE_STRING, 'size' => 9],
+            'order_reference' => ['type' => self::TYPE_STRING, 'validate' => 'isAnything', 'size' => 9],
             'id_currency' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true],
             'amount' => ['type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true],
             'payment_method' => ['type' => self::TYPE_STRING, 'validate' => 'isGenericName'],
             'conversion_rate' => ['type' => self::TYPE_FLOAT, 'validate' => 'isFloat'],
-            'transaction_id' => ['type' => self::TYPE_STRING, 'size' => 254],
-            'card_number' => ['type' => self::TYPE_STRING, 'size' => 254],
-            'card_brand' => ['type' => self::TYPE_STRING, 'size' => 254],
-            'card_expiration' => ['type' => self::TYPE_STRING, 'size' => 254],
-            'card_holder' => ['type' => self::TYPE_STRING, 'size' => 254],
+            'transaction_id' => ['type' => self::TYPE_STRING, 'validate' => 'isAnything', 'size' => 254],
+            'card_number' => ['type' => self::TYPE_STRING, 'validate' => 'isAnything', 'size' => 254],
+            'card_brand' => ['type' => self::TYPE_STRING, 'validate' => 'isAnything', 'size' => 254],
+            'card_expiration' => ['type' => self::TYPE_STRING, 'validate' => 'isAnything', 'size' => 254],
+            'card_holder' => ['type' => self::TYPE_STRING, 'validate' => 'isAnything', 'size' => 254],
             'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate'],
-            'id_employee' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'allow_null' => true],
         ],
     ];
 
@@ -81,7 +72,24 @@ class OrderPaymentCore extends ObjectModel
     /**
      * Get the detailed payment of an order.
      *
-     * @param string $order_reference
+     * @deprecated 1.5.3.0
+     *
+     * @param int $id_order
+     *
+     * @return array
+     */
+    public static function getByOrderId($id_order)
+    {
+        Tools::displayAsDeprecated();
+        $order = new Order($id_order);
+
+        return OrderPayment::getByOrderReference($order->reference);
+    }
+
+    /**
+     * Get the detailed payment of an order.
+     *
+     * @param int $order_reference
      *
      * @return array
      *
@@ -104,7 +112,7 @@ class OrderPaymentCore extends ObjectModel
      *
      * @param int $id_invoice Invoice ID
      *
-     * @return PrestaShopCollection|array Collection of OrderPayment
+     * @return PrestaShopCollection Collection of OrderPayment
      */
     public static function getByInvoiceId($id_invoice)
     {

@@ -30,7 +30,6 @@ namespace PrestaShop\PrestaShop\Core\Domain\Product\Command;
 
 use PrestaShop\PrestaShop\Core\Domain\Category\ValueObject\CategoryId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use RuntimeException;
 
 /**
@@ -54,25 +53,15 @@ class SetAssociatedProductCategoriesCommand
     private $categoryIds;
 
     /**
-     * @var ShopConstraint
-     */
-    private $shopConstraint;
-
-    /**
      * @param int $productId
      * @param int $defaultCategoryId
      * @param int[] $categoryIds
      */
-    public function __construct(
-        int $productId,
-        int $defaultCategoryId,
-        array $categoryIds,
-        ShopConstraint $shopConstraint
-    ) {
+    public function __construct(int $productId, int $defaultCategoryId, array $categoryIds)
+    {
         $this->setCategoryIds($categoryIds);
         $this->defaultCategoryId = new CategoryId($defaultCategoryId);
         $this->productId = new ProductId($productId);
-        $this->shopConstraint = $shopConstraint;
     }
 
     /**
@@ -97,14 +86,6 @@ class SetAssociatedProductCategoriesCommand
     public function getCategoryIds(): array
     {
         return $this->categoryIds;
-    }
-
-    /**
-     * @return ShopConstraint
-     */
-    public function getShopConstraint(): ShopConstraint
-    {
-        return $this->shopConstraint;
     }
 
     /**

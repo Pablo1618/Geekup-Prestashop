@@ -29,7 +29,6 @@
  */
 class AdminTagsControllerCore extends AdminController
 {
-    /** @var bool */
     public $bootstrap = true;
 
     public function __construct()
@@ -102,9 +101,7 @@ class AdminTagsControllerCore extends AdminController
     public function postProcess()
     {
         if ($this->access('edit') && Tools::getValue('submitAdd' . $this->table)) {
-            $id = (int) Tools::getValue($this->identifier);
-            $obj = new $this->className($id);
-            if (Validate::isLoadedObject($obj)) {
+            if (($id = (int) Tools::getValue($this->identifier)) && ($obj = new $this->className($id)) && Validate::isLoadedObject($obj)) {
                 /** @var Tag $obj */
                 $previous_products = $obj->getProducts();
                 $removed_products = [];
@@ -126,16 +123,10 @@ class AdminTagsControllerCore extends AdminController
         return parent::postProcess();
     }
 
-    /**
-     * @return string|void
-     *
-     * @throws SmartyException
-     */
     public function renderForm()
     {
-        /** @var Tag|null $obj */
-        $obj = $this->loadObject(true);
-        if (!$obj) {
+        /** @var Tag $obj */
+        if (!($obj = $this->loadObject(true))) {
             return;
         }
 

@@ -25,13 +25,9 @@
  */
 class DiscountControllerCore extends FrontController
 {
-    /** @var bool */
     public $auth = true;
-    /** @var string */
     public $php_self = 'discount';
-    /** @var string */
     public $authRedirection = 'discount';
-    /** @var bool */
     public $ssl = true;
 
     /**
@@ -45,8 +41,14 @@ class DiscountControllerCore extends FrontController
             Tools::redirect('index.php');
         }
 
+        $cart_rules = $this->getTemplateVarCartRules();
+
+        if (count($cart_rules) <= 0) {
+            $this->warning[] = $this->trans('You do not have any vouchers.', [], 'Shop.Notifications.Warning');
+        }
+
         $this->context->smarty->assign([
-            'cart_rules' => $this->getTemplateVarCartRules(),
+            'cart_rules' => $cart_rules,
         ]);
 
         parent::initContent();
@@ -74,10 +76,6 @@ class DiscountControllerCore extends FrontController
                 continue;
             }
 
-            if ($voucher['quantity'] === 0 || $voucher['quantity_for_user'] === 0) {
-                continue;
-            }
-
             $cart_rule = $this->buildCartRuleFromVoucher($voucher);
             $cart_rules[$key] = $cart_rule;
         }
@@ -100,7 +98,7 @@ class DiscountControllerCore extends FrontController
     }
 
     /**
-     * @param array $voucher
+     * @param $voucher
      *
      * @return mixed
      */
@@ -116,9 +114,9 @@ class DiscountControllerCore extends FrontController
     }
 
     /**
-     * @param bool $hasTaxIncluded
-     * @param float $amount
-     * @param int $currencyId
+     * @param $hasTaxIncluded
+     * @param $amount
+     * @param $currencyId
      *
      * @return string
      */
@@ -137,7 +135,7 @@ class DiscountControllerCore extends FrontController
     }
 
     /**
-     * @param float $percentage
+     * @param $percentage
      *
      * @return string
      */
@@ -188,7 +186,7 @@ class DiscountControllerCore extends FrontController
      */
     protected function buildCartRuleFromVoucher(array $voucher): array
     {
-        $voucher['voucher_date'] = Tools::displayDate($voucher['date_to'], false);
+        $voucher['voucher_date'] = Tools::displayDate($voucher['date_to'], null, false);
 
         if ((int) $voucher['minimum_amount'] === 0) {
             $voucher['voucher_minimal'] = $this->trans('None', [], 'Shop.Theme.Global');

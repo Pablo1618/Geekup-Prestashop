@@ -30,7 +30,6 @@ use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\FormDataProv
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\OptionProvider\FormOptionsProviderInterface;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormRegistryInterface;
 
 /**
  * Creates new form builders which are used to get forms for identifiable objects.
@@ -48,23 +47,15 @@ final class FormBuilderFactory implements FormBuilderFactoryInterface
     private $hookDispatcher;
 
     /**
-     * @var FormRegistryInterface
-     */
-    private $registry;
-
-    /**
      * @param FormFactoryInterface $formFactory
      * @param HookDispatcherInterface $hookDispatcher
-     * @param FormRegistryInterface $registry
      */
     public function __construct(
         FormFactoryInterface $formFactory,
-        HookDispatcherInterface $hookDispatcher,
-        FormRegistryInterface $registry
+        HookDispatcherInterface $hookDispatcher
     ) {
         $this->formFactory = $formFactory;
         $this->hookDispatcher = $hookDispatcher;
-        $this->registry = $registry;
     }
 
     /**
@@ -84,7 +75,6 @@ final class FormBuilderFactory implements FormBuilderFactoryInterface
             $this->hookDispatcher,
             $dataProvider,
             $formType,
-            $this->registry,
             $optionProvider
         );
     }

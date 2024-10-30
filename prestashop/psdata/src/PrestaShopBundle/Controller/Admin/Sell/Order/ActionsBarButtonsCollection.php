@@ -26,11 +26,15 @@
 
 namespace PrestaShopBundle\Controller\Admin\Sell\Order;
 
-use PrestaShop\PrestaShop\Core\Action\ActionsBarButtonsCollection as CoreActionsBarButtonsCollection;
+use PrestaShop\PrestaShop\Core\Data\AbstractTypedCollection;
 
-/**
- * @deprecated since 8.0 and will be removed in next major. Use PrestaShop\PrestaShop\Core\ActionBar\ActionsBarButtonsCollection instead
- */
-class ActionsBarButtonsCollection extends CoreActionsBarButtonsCollection
+class ActionsBarButtonsCollection extends AbstractTypedCollection
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected function getType()
+    {
+        return ActionsBarButtonInterface::class;
+    }
 }

@@ -22,10 +22,11 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *#}
-<div id="related-title">
-  <h2>{{ "Related product"|trans({}, 'Admin.Catalog.Feature') }}</h2>
+<div  id="related-title" class="row">
+  <div class="col-md-12">
+    <h2>{{ "Related product"|trans({}, 'Admin.Catalog.Feature') }}</h2>
+  </div>
 </div>
-
 <div id="related-content" class="row {{ form.vars.value.data|length == 0 ? 'hide':'' }}">
   <div class="col-xl-8 col-lg-11">
     <fieldset class="form-group">
@@ -38,7 +39,10 @@
       </fieldset>
   </div>
 </div>
-
-<button type="button" class="btn btn-outline-primary sensitive open {{ form.vars.value.data|length > 0 ? 'hide':'' }}" id="add-related-product-button">
-  <i class="material-icons">add_circle</i> {{ 'Add a related product'|trans({}, 'Admin.Catalog.Feature') }}
-</button>
+<div class="row">
+  <div class="col-md-4">
+    <button type="button" class="btn btn-outline-primary sensitive open {{ form.vars.value.data|length > 0 ? 'hide':'' }}" id="add-related-product-button">
+      <i class="material-icons">add_circle</i> {{ 'Add a related product'|trans({}, 'Admin.Catalog.Feature') }}
+    </button>
+  </div>
+</div>

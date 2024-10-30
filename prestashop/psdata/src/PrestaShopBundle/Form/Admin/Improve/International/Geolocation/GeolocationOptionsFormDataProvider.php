@@ -29,6 +29,8 @@ namespace PrestaShopBundle\Form\Admin\Improve\International\Geolocation;
 
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
+use PrestaShop\PrestaShop\Core\Geolocation\GeoLite\GeoLiteCityCheckerInterface;
+use PrestaShop\PrestaShop\Core\Validation\ValidatorInterface;
 
 /**
  * Class GeolocationOptionsFormDataProvider is responsible for handling geolocation form data.
@@ -41,11 +43,28 @@ final class GeolocationOptionsFormDataProvider implements FormDataProviderInterf
     private $dataConfiguration;
 
     /**
-     * @param DataConfigurationInterface $dataConfiguration
+     * @var GeoLiteCityCheckerInterface
      */
-    public function __construct(DataConfigurationInterface $dataConfiguration)
-    {
+    private $geoLiteCityChecker;
+
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    /**
+     * @param DataConfigurationInterface $dataConfiguration
+     * @param GeoLiteCityCheckerInterface $geoLiteCityChecker
+     * @param ValidatorInterface $validator
+     */
+    public function __construct(
+        DataConfigurationInterface $dataConfiguration,
+        GeoLiteCityCheckerInterface $geoLiteCityChecker,
+        ValidatorInterface $validator
+    ) {
         $this->dataConfiguration = $dataConfiguration;
+        $this->geoLiteCityChecker = $geoLiteCityChecker;
+        $this->validator = $validator;
     }
 
     /**
@@ -53,15 +72,7 @@ final class GeolocationOptionsFormDataProvider implements FormDataProviderInterf
      */
     public function getData()
     {
-        $configuration = $this->dataConfiguration->getConfiguration();
-
-        if (!empty($configuration['geolocation_countries'])) {
-            $configuration['geolocation_countries'] = explode(';', $configuration['geolocation_countries']);
-        } else {
-            $configuration['geolocation_countries'] = [];
-        }
-
-        return $configuration;
+        return $this->dataConfiguration->getConfiguration();
     }
 
     /**
@@ -82,8 +93,6 @@ final class GeolocationOptionsFormDataProvider implements FormDataProviderInterf
         if (!empty($errors)) {
             return $errors;
         }
-
-        $data['geolocation_countries'] = implode(';', $data['geolocation_countries']);
 
         return $this->dataConfiguration->updateConfiguration($data);
     }

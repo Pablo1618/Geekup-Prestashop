@@ -26,14 +26,10 @@
 
 namespace PrestaShopBundle\Form\Admin\Sell\Customer;
 
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CustomerName;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\FirstName;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\LastName;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\Password;
-use PrestaShop\PrestaShop\Core\Domain\ValueObject\Email as DomainEmail;
-use PrestaShop\PrestaShop\Core\Security\PasswordPolicyConfiguration;
-use PrestaShopBundle\Form\Admin\Type\ApeType;
 use PrestaShopBundle\Form\Admin\Type\EmailType;
 use PrestaShopBundle\Form\Admin\Type\Material\MaterialChoiceTableType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
@@ -46,12 +42,11 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Range;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Validate;
+use Symfony\Component\Validator\Constraints\Type;
 
 /**
  * Type is used to created form for customer add/edit actions
@@ -84,17 +79,11 @@ class CustomerType extends TranslatorAwareType
     private $isPartnerOffersEnabled;
 
     /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
-
-    /**
      * @param array $genderChoices
      * @param array $groupChoices
      * @param array $riskChoices
      * @param bool $isB2bFeatureEnabled
      * @param bool $isPartnerOffersEnabled
-     * @param ConfigurationInterface $configuration
      */
     public function __construct(
         TranslatorInterface $translator,
@@ -103,8 +92,7 @@ class CustomerType extends TranslatorAwareType
         array $groupChoices,
         array $riskChoices,
         $isB2bFeatureEnabled,
-        $isPartnerOffersEnabled,
-        ConfigurationInterface $configuration
+        $isPartnerOffersEnabled
     ) {
         parent::__construct($translator, $locales);
         $this->genderChoices = $genderChoices;
@@ -112,7 +100,6 @@ class CustomerType extends TranslatorAwareType
         $this->isB2bFeatureEnabled = $isB2bFeatureEnabled;
         $this->riskChoices = $riskChoices;
         $this->isPartnerOffersEnabled = $isPartnerOffersEnabled;
-        $this->configuration = $configuration;
     }
 
     /**
@@ -120,10 +107,6 @@ class CustomerType extends TranslatorAwareType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $minScore = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_SCORE);
-        $maxLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MAXIMUM_LENGTH);
-        $minLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_LENGTH);
-
         $builder
             ->add('gender_id', ChoiceType::class, [
                 'choices' => $this->genderChoices,
@@ -192,14 +175,6 @@ class CustomerType extends TranslatorAwareType
                     new NotBlank([
                         'message' => $this->trans('This field cannot be empty.', 'Admin.Notifications.Error'),
                     ]),
-                    new Length([
-                        'max' => DomainEmail::MAX_LENGTH,
-                        'maxMessage' => $this->trans(
-                            'This field cannot be longer than %limit% characters.',
-                            'Admin.Notifications.Error',
-                            ['%limit%' => DomainEmail::MAX_LENGTH]
-                        ),
-                    ]),
                     new Email([
                         'message' => $this->trans('This field is invalid.', 'Admin.Notifications.Error'),
                     ]),
@@ -207,11 +182,6 @@ class CustomerType extends TranslatorAwareType
             ])
             ->add('password', PasswordType::class, [
                 'label' => $this->trans('Password', 'Admin.Global'),
-                'attr' => [
-                    'data-minscore' => $minScore,
-                    'data-minlength' => $minLength,
-                    'data-maxlength' => $maxLength,
-                ],
                 'help' => $this->trans(
                     'Password should be at least %length% characters long.',
                     'Admin.Notifications.Info',
@@ -285,10 +255,6 @@ class CustomerType extends TranslatorAwareType
                 'required' => false,
                 'placeholder' => null,
                 'choices' => $this->groupChoices,
-                'attr' => [
-                    'data-toggle' => 'select2',
-                    'data-minimumResultsForSearch' => '7',
-                ],
             ])
         ;
 
@@ -302,9 +268,15 @@ class CustomerType extends TranslatorAwareType
                     'label' => $this->trans('SIRET', 'Admin.Orderscustomers.Feature'),
                     'required' => false,
                 ])
-                ->add('ape_code', ApeType::class, [
+                ->add('ape_code', TextType::class, [
                     'label' => $this->trans('APE', 'Admin.Orderscustomers.Feature'),
                     'required' => false,
+                    'constraints' => [
+                        new Type([
+                            'type' => 'alnum',
+                            'message' => $this->trans('This field is invalid.', 'Admin.Notifications.Error'),
+                        ]),
+                    ],
                 ])
                 ->add('website', TextType::class, [
                     'label' => $this->trans('Website', 'Admin.Orderscustomers.Feature'),
@@ -334,24 +306,6 @@ class CustomerType extends TranslatorAwareType
                     ),
                     'required' => false,
                     'invalid_message' => $this->trans('This field is invalid.', 'Admin.Notifications.Error'),
-                    'constraints' => [
-                        new Range([
-                            'min' => 0,
-                            'max' => Validate::MYSQL_UNSIGNED_INT_MAX,
-                            'minMessage' => $this->trans(
-                                '%s is invalid. Please enter an integer greater than or equal to 0.',
-                                'Admin.Notifications.Error'
-                            ),
-                            'maxMessage' => $this->trans(
-                                '%s is invalid. Please enter an integer lower than or equal to %s.',
-                                'Admin.Notifications.Error',
-                                [
-                                    '{{ value }}',
-                                    '{{ max }}',
-                                ]
-                            ),
-                        ]),
-                    ],
                 ])
                 ->add('risk_id', ChoiceType::class, [
                     'label' => $this->trans('Risk rating', 'Admin.Orderscustomers.Feature'),

@@ -34,9 +34,6 @@ class NotFoundActivationStrategy extends ErrorLevelActivationStrategy
         $this->exclude = '{('.implode('|', $excludedUrls).')}i';
     }
 
-    /**
-     * @return bool
-     */
     public function isHandlerActivated(array $record)
     {
         $isActivated = parent::isHandlerActivated($record);

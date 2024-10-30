@@ -63,7 +63,7 @@ class TaxRuleCore extends ObjectModel
     public static function deleteByGroupId($id_group)
     {
         if (empty($id_group)) {
-            die(Tools::displayError('Parameter "id_group" (id_tax_rules_group you want to delete) is invalid.'));
+            die(Tools::displayError());
         }
 
         return Db::getInstance()->execute(
@@ -112,9 +112,19 @@ class TaxRuleCore extends ObjectModel
     }
 
     /**
+     * @deprecated since 1.5
+     */
+    public static function deleteTaxRuleByIdCounty($id_county)
+    {
+        Tools::displayAsDeprecated();
+
+        return true;
+    }
+
+    /**
      * @param int $id_tax
      *
-     * @return int
+     * @return bool
      */
     public static function isTaxInUse($id_tax)
     {
@@ -130,7 +140,7 @@ class TaxRuleCore extends ObjectModel
     }
 
     /**
-     * @param string $zip_codes a range of zipcode (eg: 75000 / 75000-75015)
+     * @param string $zipcode a range of zipcode (eg: 75000 / 75000-75015)
      *
      * @return array an array containing two zipcode ordered by zipcode
      */

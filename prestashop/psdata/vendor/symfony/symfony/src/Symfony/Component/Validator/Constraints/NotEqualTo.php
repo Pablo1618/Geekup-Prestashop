@@ -20,7 +20,7 @@ namespace Symfony\Component\Validator\Constraints;
  */
 class NotEqualTo extends AbstractComparison
 {
-    public const IS_EQUAL_ERROR = 'aa2e33da-25c8-4d76-8c6c-812f02ea89dd';
+    const IS_EQUAL_ERROR = 'aa2e33da-25c8-4d76-8c6c-812f02ea89dd';
 
     protected static $errorNames = [
         self::IS_EQUAL_ERROR => 'IS_EQUAL_ERROR',

@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Security\Guard;
 
-use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -21,7 +21,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A utility class that does much of the *work* during the guard authentication process.
@@ -31,7 +30,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  *
- * @final
+ * @final since version 3.4
  */
 class GuardAuthenticatorHandler
 {
@@ -46,34 +45,34 @@ class GuardAuthenticatorHandler
     public function __construct(TokenStorageInterface $tokenStorage, EventDispatcherInterface $eventDispatcher = null, array $statelessProviderKeys = [])
     {
         $this->tokenStorage = $tokenStorage;
-
-        if (null !== $eventDispatcher && class_exists(LegacyEventDispatcherProxy::class)) {
-            $this->dispatcher = LegacyEventDispatcherProxy::decorate($eventDispatcher);
-        } else {
-            $this->dispatcher = $eventDispatcher;
-        }
-
+        $this->dispatcher = $eventDispatcher;
         $this->statelessProviderKeys = $statelessProviderKeys;
     }
 
     /**
      * Authenticates the given token in the system.
      */
-    public function authenticateWithToken(TokenInterface $token, Request $request, string $providerKey = null)
+    public function authenticateWithToken(TokenInterface $token, Request $request/*, string $providerKey */)
     {
+        $providerKey = \func_num_args() > 2 ? func_get_arg(2) : null;
+
         $this->migrateSession($request, $token, $providerKey);
         $this->tokenStorage->setToken($token);
 
         if (null !== $this->dispatcher) {
             $loginEvent = new InteractiveLoginEvent($request, $token);
-            $this->dispatcher->dispatch($loginEvent, SecurityEvents::INTERACTIVE_LOGIN);
+            $this->dispatcher->dispatch(SecurityEvents::INTERACTIVE_LOGIN, $loginEvent);
         }
     }
 
     /**
      * Returns the "on success" response for the given GuardAuthenticator.
+     *
+     * @param string $providerKey The provider (i.e. firewall) key
+     *
+     * @return Response|null
      */
-    public function handleAuthenticationSuccess(TokenInterface $token, Request $request, AuthenticatorInterface $guardAuthenticator, string $providerKey): ?Response
+    public function handleAuthenticationSuccess(TokenInterface $token, Request $request, GuardAuthenticatorInterface $guardAuthenticator, $providerKey)
     {
         $response = $guardAuthenticator->onAuthenticationSuccess($request, $token, $providerKey);
 
@@ -88,8 +87,12 @@ class GuardAuthenticatorHandler
     /**
      * Convenience method for authenticating the user and returning the
      * Response *if any* for success.
+     *
+     * @param string $providerKey The provider (i.e. firewall) key
+     *
+     * @return Response|null
      */
-    public function authenticateUserAndHandleSuccess(UserInterface $user, Request $request, AuthenticatorInterface $authenticator, string $providerKey): ?Response
+    public function authenticateUserAndHandleSuccess(UserInterface $user, Request $request, GuardAuthenticatorInterface $authenticator, $providerKey)
     {
         // create an authenticated token for the User
         $token = $authenticator->createAuthenticatedToken($user, $providerKey);
@@ -103,8 +106,12 @@ class GuardAuthenticatorHandler
     /**
      * Handles an authentication failure and returns the Response for the
      * GuardAuthenticator.
+     *
+     * @param string $providerKey The provider (i.e. firewall) key
+     *
+     * @return Response|null
      */
-    public function handleAuthenticationFailure(AuthenticationException $authenticationException, Request $request, AuthenticatorInterface $guardAuthenticator, string $providerKey): ?Response
+    public function handleAuthenticationFailure(AuthenticationException $authenticationException, Request $request, GuardAuthenticatorInterface $guardAuthenticator, $providerKey)
     {
         $response = $guardAuthenticator->onAuthenticationFailure($request, $authenticationException);
         if ($response instanceof Response || null === $response) {
@@ -125,7 +132,7 @@ class GuardAuthenticatorHandler
         $this->sessionStrategy = $sessionStrategy;
     }
 
-    private function migrateSession(Request $request, TokenInterface $token, ?string $providerKey)
+    private function migrateSession(Request $request, TokenInterface $token, $providerKey)
     {
         if (\in_array($providerKey, $this->statelessProviderKeys, true) || !$this->sessionStrategy || !$request->hasSession() || !$request->hasPreviousSession()) {
             return;

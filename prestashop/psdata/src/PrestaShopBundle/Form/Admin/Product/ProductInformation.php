@@ -50,12 +50,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This form class is responsible to generate the basic product information form.
  */
 class ProductInformation extends CommonAbstractType
@@ -103,6 +101,10 @@ class ProductInformation extends CommonAbstractType
     /**
      * @var ProductDataProvider
      */
+    private $productAdapter;
+    /**
+     * @var ProductDataProvider
+     */
     public $productDataProvider;
     /**
      * @var Router
@@ -137,6 +139,7 @@ class ProductInformation extends CommonAbstractType
         $this->translator = $translator;
         $this->router = $router;
         $this->productDataProvider = $productDataProvider;
+        $this->productAdapter = $this->productDataProvider;
         $this->categoryDataProvider = $categoryDataProvider;
         $this->manufacturerDataProvider = $manufacturerDataProvider;
         $this->featureDataProvider = $featureDataProvider;
@@ -215,21 +218,11 @@ class ProductInformation extends CommonAbstractType
             ])
             ->add('name', TranslateType::class, [
                 'type' => FormType\TextType::class,
-                'help' => $this->translator->trans(
-                    'Invalid characters are: %invalidCharacters%',
-                    ['%invalidCharacters%' => '<>;=#{}'],
-                    'Admin.Catalog.Feature'
-                ),
                 'options' => [
                     'constraints' => [
                         new Assert\Regex([
                             'pattern' => '/[<>;=#{}]/',
                             'match' => false,
-                            'message' => $this->translator->trans(
-                                'This field contains invalid characters: %invalidCharacters%',
-                                ['%invalidCharacters%' => '<>;=#{}'],
-                                'Admin.Catalog.Feature'
-                            ),
                         ]),
                         new Assert\NotBlank(),
                         new Assert\Length(['min' => 3, 'max' => 128]),

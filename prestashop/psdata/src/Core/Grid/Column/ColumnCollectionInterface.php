@@ -39,7 +39,7 @@ interface ColumnCollectionInterface extends Iterator, Countable
      *
      * @param ColumnInterface $column
      *
-     * @return static
+     * @return self
      */
     public function add(ColumnInterface $column);
 
@@ -49,7 +49,7 @@ interface ColumnCollectionInterface extends Iterator, Countable
      * @param string $id Column id
      * @param ColumnInterface $column
      *
-     * @return static
+     * @return self
      */
     public function addAfter($id, ColumnInterface $column);
 
@@ -57,7 +57,7 @@ interface ColumnCollectionInterface extends Iterator, Countable
      * @param string $id Column id
      * @param ColumnInterface $column
      *
-     * @return static
+     * @return self
      */
     public function addBefore($id, ColumnInterface $column);
 
@@ -66,7 +66,7 @@ interface ColumnCollectionInterface extends Iterator, Countable
      *
      * @param string $id
      *
-     * @return static
+     * @return self
      */
     public function remove($id);
 

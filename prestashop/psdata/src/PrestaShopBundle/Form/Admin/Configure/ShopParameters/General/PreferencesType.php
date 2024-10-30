@@ -27,13 +27,12 @@
 namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\General;
 
 use PrestaShop\PrestaShop\Adapter\Entity\Order;
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class returning the content of the form in the maintenance page.
@@ -57,14 +56,8 @@ class PreferencesType extends TranslatorAwareType
     private $isAllShopContext;
 
     /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
-
-    /**
      * @param TranslatorInterface $translator
      * @param array $locales
-     * @param ConfigurationInterface $configuration
      * @param bool $isMultistoreUsed
      * @param bool $isSingleShopContext
      * @param bool $isAllShopContext
@@ -72,7 +65,6 @@ class PreferencesType extends TranslatorAwareType
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
-        ConfigurationInterface $configuration,
         $isMultistoreUsed,
         $isSingleShopContext,
         $isAllShopContext
@@ -82,7 +74,6 @@ class PreferencesType extends TranslatorAwareType
         $this->isMultistoreUsed = $isMultistoreUsed;
         $this->isSingleShopContext = $isSingleShopContext;
         $this->isAllShopContext = $isAllShopContext;
-        $this->configuration = $configuration;
     }
 
     /**
@@ -95,8 +86,8 @@ class PreferencesType extends TranslatorAwareType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $configuration = $this->configuration;
-        $isSslEnabled = (bool) $configuration->get('PS_SSL_ENABLED');
+        $configuration = $this->getConfiguration();
+        $isSslEnabled = $configuration->getBoolean('PS_SSL_ENABLED');
 
         if ($this->isSecure) {
             $builder->add('enable_ssl', SwitchType::class, [
@@ -154,6 +145,7 @@ class PreferencesType extends TranslatorAwareType
             ->add(
                 'price_round_mode', ChoiceType::class, [
                     'placeholder' => false,
+                    'choices_as_values' => true,
                     'choices' => [
                         'Round up away from zero, when it is half way there (recommended)' => $configuration->get('PS_ROUND_HALF_UP'),
                         'Round down towards zero, when it is half way there' => $configuration->get('PS_ROUND_HALF_DOWN'),
@@ -170,6 +162,7 @@ class PreferencesType extends TranslatorAwareType
                 ])
             ->add('price_round_type', ChoiceType::class, [
                 'placeholder' => false,
+                'choices_as_values' => true,
                 'choices' => [
                     'Round on each item' => Order::ROUND_ITEM,
                     'Round on each line' => Order::ROUND_LINE,
@@ -209,12 +202,13 @@ class PreferencesType extends TranslatorAwareType
                 'disabled' => !$this->isContextDependantOptionEnabled(),
                 'label' => $this->trans('Enable Multistore', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans(
-                    'The multistore feature allows you to manage several front offices from a single back office. If this feature is enabled, a Multistore page is available in the Advanced Parameters menu.',
+                    'The multistore feature allows you to manage several e-shops with one Back Office. If this feature is enabled, a "Multistore" page will be available in the "Advanced Parameters" menu.',
                     'Admin.Shopparameters.Help'
                 ),
             ])
             ->add('shop_activity', ChoiceType::class, [
                 'required' => false,
+                'choices_as_values' => true,
                 'placeholder' => $this->trans('-- Please choose your main activity --', 'Install'),
                 'choices' => [
                     'Animals and Pets' => 2,
@@ -240,17 +234,13 @@ class PreferencesType extends TranslatorAwareType
                 ],
                 'label' => $this->trans('Main Shop Activity', 'Admin.Shopparameters.Feature'),
                 'choice_translation_domain' => 'Install',
-                'attr' => [
-                    'data-toggle' => 'select2',
-                    'data-minimumResultsForSearch' => '7',
-                ],
             ]);
     }
 
     /**
      * Enabled only if the form is accessed using HTTPS protocol.
      *
-     * @param bool $isSecure
+     * @var bool
      */
     public function setIsSecure($isSecure)
     {

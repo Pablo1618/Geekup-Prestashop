@@ -6,7 +6,7 @@
         ],
         "AED": [
             "AED",
-            "emiratisk dirham"
+            "Förenade Arabemiratens dirham"
         ],
         "AFA": [
             "AFA",
@@ -30,7 +30,7 @@
         ],
         "ANG": [
             "ANG",
-            "antillergulden"
+            "Nederländska Antillernas gulden"
         ],
         "AOA": [
             "AOA",
@@ -102,7 +102,7 @@
         ],
         "BBD": [
             "Bds$",
-            "barbadisk dollar"
+            "Barbados-dollar"
         ],
         "BDT": [
             "BDT",
@@ -146,7 +146,7 @@
         ],
         "BMD": [
             "BM$",
-            "bermudisk dollar"
+            "Bermuda-dollar"
         ],
         "BND": [
             "BND",
@@ -522,7 +522,7 @@
         ],
         "JMD": [
             "JM$",
-            "jamaicansk dollar"
+            "Jamaica-dollar"
         ],
         "JOD": [
             "JOD",
@@ -570,7 +570,7 @@
         ],
         "KYD": [
             "KYD",
-            "caymansk dollar"
+            "Cayman-dollar"
         ],
         "KZT": [
             "KZT",
@@ -886,7 +886,7 @@
         ],
         "SHP": [
             "SHP",
-            "sankthelenskt pund"
+            "S:t Helena-pund"
         ],
         "SIT": [
             "SIT",
@@ -982,11 +982,11 @@
         ],
         "TTD": [
             "TTD",
-            "Trinidaddollar"
+            "Trinidad och Tobago-dollar"
         ],
         "TWD": [
             "TWD",
-            "taiwanesisk dollar"
+            "Taiwandollar"
         ],
         "TZS": [
             "TZS",
@@ -1010,7 +1010,7 @@
         ],
         "USD": [
             "US$",
-            "amerikansk dollar"
+            "US-dollar"
         ],
         "USN": [
             "USN",
@@ -1089,7 +1089,7 @@
             "internationella järnvägsunionens franc"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "västafrikansk franc"
         ],
         "XPF": [

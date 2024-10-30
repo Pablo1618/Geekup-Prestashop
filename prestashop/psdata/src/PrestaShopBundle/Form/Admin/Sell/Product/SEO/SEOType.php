@@ -28,10 +28,6 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Product\SEO;
 
-use PrestaShop\PrestaShop\Adapter\LegacyContext;
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
-use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\TypedRegex;
-use PrestaShop\PrestaShop\Core\ConstraintValidator\TypedRegexValidator;
 use PrestaShop\PrestaShop\Core\Domain\Product\ProductSettings;
 use PrestaShopBundle\Form\Admin\Type\TextWithLengthCounterType;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
@@ -40,8 +36,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SEOType extends TranslatorAwareType
 {
@@ -61,38 +57,22 @@ class SEOType extends TranslatorAwareType
     private $forceFriendlyUrl;
 
     /**
-     * @var LegacyContext
-     */
-    private $legacyContext;
-
-    /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
-
-    /**
      * @param TranslatorInterface $translator
      * @param array $locales
      * @param RouterInterface $router
      * @param bool $friendlyUrlEnabled
-     * @param bool $forceFriendlyUrl
-     * @param LegacyContext $legacyContext
      */
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
         RouterInterface $router,
         bool $friendlyUrlEnabled,
-        bool $forceFriendlyUrl,
-        LegacyContext $legacyContext,
-        ConfigurationInterface $configuration
+        bool $forceFriendlyUrl
     ) {
         parent::__construct($translator, $locales);
         $this->router = $router;
         $this->friendlyUrlEnabled = $friendlyUrlEnabled;
         $this->forceFriendlyUrl = $forceFriendlyUrl;
-        $this->legacyContext = $legacyContext;
-        $this->configuration = $configuration;
     }
 
     /**
@@ -100,21 +80,15 @@ class SEOType extends TranslatorAwareType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        // Automatic update is only enabled when product is offline and the configuration is enabled
-        $automaticUrlUpdate = false;
-        if (!$options['active'] && (bool) $this->configuration->get('PS_FORCE_FRIENDLY_PRODUCT')) {
-            $automaticUrlUpdate = true;
-        }
-
         $builder
             ->add('serp', SerpType::class)
             ->add('meta_title', TranslatableType::class, [
                 'label' => $this->trans('Meta title', 'Admin.Catalog.Feature'),
-                'label_help_box' => $this->trans('Public title that may appear in the browser and search engines. The recommended length is about 60 characters (including spaces). If you leave it blank, the product name will be used.', 'Admin.Catalog.Help'),
+                'label_help_box' => $this->trans('Public title for the product page, and for search engines. Leave blank to use the product name. The number of remaining characters is displayed to the right of the field.', 'Admin.Catalog.Help'),
                 'required' => false,
                 'type' => TextWithLengthCounterType::class,
                 'help' => $this->trans(
-                    'Public title that may appear in the browser and search engines. The recommended length is about 60 characters (including spaces). If you leave it blank, the product name will be used.',
+                    'Public title for the product page, and for search engines. Leave blank to use the product name. The number of remaining characters is displayed to the right of the field.',
                     'Admin.Catalog.Help'
                 ),
                 'options' => [
@@ -135,15 +109,14 @@ class SEOType extends TranslatorAwareType
                         ]),
                     ],
                 ],
-                'modify_all_shops' => true,
             ])
             ->add('meta_description', TranslatableType::class, [
                 'label' => $this->trans('Meta description', 'Admin.Catalog.Feature'),
-                'label_help_box' => $this->trans('Summary for robots, that could appear in search engines. The recommended length is about 160 characters (including spaces). If you leave it blank, an excerpt from the short description will be used.', 'Admin.Catalog.Help'),
+                'label_help_box' => $this->trans('This description will appear in search engines. You need a single sentence, shorter than 160 characters (including spaces)', 'Admin.Catalog.Help'),
                 'required' => false,
                 'type' => TextWithLengthCounterType::class,
                 'help' => $this->trans(
-                    'Summary for robots, that could appear in search engines. The recommended length is about 160 characters (including spaces). If you leave it blank, an excerpt from the short description will be used.',
+                    'This description will appear in search engines. It should be a single sentence, shorter than 160 characters (including spaces).',
                     'Admin.Catalog.Help'
                 ),
                 'options' => [
@@ -164,7 +137,6 @@ class SEOType extends TranslatorAwareType
                         ]),
                     ],
                 ],
-                'modify_all_shops' => true,
             ])
             ->add('link_rewrite', TranslatableType::class, [
                 'label' => $this->trans('Friendly URL', 'Admin.Catalog.Feature'),
@@ -177,44 +149,12 @@ class SEOType extends TranslatorAwareType
                 ),
                 'alert_message' => $this->getFriendlyAlterMessages(),
                 'options' => [
-                    'constraints' => [
-                        new TypedRegex(TypedRegex::TYPE_LINK_REWRITE),
-                        new Length(['max' => ProductSettings::MAX_LINK_REWRITE_LENGTH]),
-                    ],
                     'attr' => [
                         'class' => 'serp-watched-url',
-                        'data-automatic-update' => (int) $automaticUrlUpdate,
                     ],
                 ],
-                'modify_all_shops' => true,
             ])
-            ->add('redirect_option', RedirectOptionType::class, [
-                'product_id' => $options['product_id'],
-            ])
-            ->add('tags', TranslatableType::class, [
-                'required' => false,
-                'label' => $this->trans('Tags', 'Admin.Catalog.Feature'),
-                'label_tag_name' => 'h3',
-                'label_subtitle' => $this->trans('Enter the keywords that customers might search for when looking for this product.', 'Admin.Catalog.Feature'),
-                'help' => sprintf(
-                    '%s %s',
-                    $this->trans('Separate each tag with a comma or press the Enter key.', 'Admin.Catalog.Help'),
-                    $this->trans('Invalid characters: %s', 'Admin.Notifications.Info', [TypedRegexValidator::GENERIC_NAME_CHARS])
-                ),
-                'external_link' => [
-                    'href' => $this->legacyContext->getAdminLink('AdminTags', true),
-                    'text' => $this->trans('[1]Manage all tags[/1]', 'Admin.Catalog.Feature'),
-                ],
-                'options' => [
-                    'constraints' => [
-                        new TypedRegex(TypedRegex::TYPE_GENERIC_NAME),
-                    ],
-                    'attr' => [
-                        'class' => 'js-taggable-field',
-                    ],
-                    'required' => false,
-                ],
-            ])
+            ->add('redirect_option', RedirectOptionType::class)
         ;
     }
 
@@ -227,7 +167,16 @@ class SEOType extends TranslatorAwareType
         $friendlyUrl = $this->router->generate('admin_metas_index') . '#meta_settings_set_up_urls_form';
         $productPreferencesUrl = $this->router->generate('admin_product_preferences') . '#configuration_fieldset_products';
 
-        if (!$this->friendlyUrlEnabled) {
+        if ($this->friendlyUrlEnabled) {
+            $alertMessages[] = sprintf(
+                '<strong>%s</strong> %s',
+                $this->trans('Friendly URLs are currently enabled.', 'Admin.Catalog.Notification'),
+                $this->trans('To disable it, go to [1]SEO and URLs[/1]', 'Admin.Catalog.Notification', [
+                    '[1]' => '<a target="_blank" href="' . $friendlyUrl . '">',
+                    '[/1]' => '</a>',
+                ])
+            );
+        } else {
             $alertMessages[] = sprintf(
                 '<strong>%s</strong> %s',
                 $this->trans('Friendly URLs are currently disabled.', 'Admin.Catalog.Notification'),
@@ -257,21 +206,11 @@ class SEOType extends TranslatorAwareType
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-        $resolver
-            ->setDefaults([
-                'label' => $this->trans('SEO', 'Admin.Catalog.Feature'),
-                'label_tab' => $this->trans('Search engine optimization', 'Admin.Catalog.Feature'),
-                'label_tag_name' => 'h3',
-                'label_subtitle' => $this->trans('Improve your ranking and how your product page will appear in search engines results.', 'Admin.Catalog.Feature'),
-                'required' => false,
-                'form_theme' => '@PrestaShop/Admin/Sell/Catalog/Product/FormTheme/product_seo.html.twig',
-                'active' => false,
-            ])
-            ->setRequired([
-                'product_id',
-            ])
-            ->setAllowedTypes('product_id', 'int')
-            ->setAllowedTypes('active', ['bool'])
-        ;
+        $resolver->setDefaults([
+            'label' => $this->trans('Search Engine Optimization', 'Admin.Catalog.Feature'),
+            'label_tag_name' => 'h2',
+            'label_subtitle' => $this->trans('Improve your ranking and how your product page will appear in search engines results.', 'Admin.Catalog.Feature'),
+            'required' => false,
+        ]);
     }
 }

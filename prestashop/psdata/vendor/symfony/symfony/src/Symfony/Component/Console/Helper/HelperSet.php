@@ -40,7 +40,8 @@ class HelperSet implements \IteratorAggregate
     /**
      * Sets a helper.
      *
-     * @param string $alias An alias
+     * @param HelperInterface $helper The helper instance
+     * @param string          $alias  An alias
      */
     public function set(HelperInterface $helper, $alias = null)
     {
@@ -98,9 +99,8 @@ class HelperSet implements \IteratorAggregate
     }
 
     /**
-     * @return \Traversable<Helper>
+     * @return Helper[]
      */
-    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new \ArrayIterator($this->helpers);

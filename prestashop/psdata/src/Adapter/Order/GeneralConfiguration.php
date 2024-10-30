@@ -26,48 +26,39 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Order;
 
-use PrestaShop\PrestaShop\Core\Configuration\AbstractMultistoreConfiguration;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use PrestaShop\PrestaShop\Adapter\Configuration;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 
 /**
  * General Settings configuration available in ShopParameters > Order Preferences.
  */
-class GeneralConfiguration extends AbstractMultistoreConfiguration
+class GeneralConfiguration implements DataConfigurationInterface
 {
     /**
-     * @var array<int, string>
+     * @var Configuration
      */
-    private const CONFIGURATION_FIELDS = [
-        'enable_final_summary',
-        'enable_guest_checkout',
-        'disable_reordering_option',
-        'purchase_minimum_value',
-        'recalculate_shipping_cost',
-        'allow_multishipping',
-        'allow_delayed_shipping',
-        'enable_tos',
-        'tos_cms_id',
-        'enable_backorder_status',
-    ];
+    private $configuration;
+
+    public function __construct(Configuration $configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getConfiguration()
     {
-        $shopConstraint = $this->getShopConstraint();
-
         return [
-            'enable_final_summary' => (bool) $this->configuration->get('PS_FINAL_SUMMARY_ENABLED', false, $shopConstraint),
-            'enable_guest_checkout' => (bool) $this->configuration->get('PS_GUEST_CHECKOUT_ENABLED', false, $shopConstraint),
-            'disable_reordering_option' => (bool) $this->configuration->get('PS_DISALLOW_HISTORY_REORDERING', false, $shopConstraint),
-            'purchase_minimum_value' => (float) $this->configuration->get('PS_PURCHASE_MINIMUM', 0, $shopConstraint),
-            'recalculate_shipping_cost' => (bool) $this->configuration->get('PS_ORDER_RECALCULATE_SHIPPING', false, $shopConstraint),
-            'allow_multishipping' => (bool) $this->configuration->get('PS_ALLOW_MULTISHIPPING', false, $shopConstraint),
-            'allow_delayed_shipping' => (bool) $this->configuration->get('PS_SHIP_WHEN_AVAILABLE', false, $shopConstraint),
-            'enable_tos' => (bool) $this->configuration->get('PS_CONDITIONS', false, $shopConstraint),
-            'tos_cms_id' => (int) $this->configuration->get('PS_CONDITIONS_CMS_ID', 0, $shopConstraint),
-            'enable_backorder_status' => (bool) $this->configuration->get('PS_ENABLE_BACKORDER_STATUS', false, $shopConstraint),
+            'enable_final_summary' => $this->configuration->getBoolean('PS_FINAL_SUMMARY_ENABLED'),
+            'enable_guest_checkout' => $this->configuration->getBoolean('PS_GUEST_CHECKOUT_ENABLED'),
+            'disable_reordering_option' => $this->configuration->getBoolean('PS_DISALLOW_HISTORY_REORDERING'),
+            'purchase_minimum_value' => $this->configuration->get('PS_PURCHASE_MINIMUM'),
+            'recalculate_shipping_cost' => $this->configuration->getBoolean('PS_ORDER_RECALCULATE_SHIPPING'),
+            'allow_multishipping' => $this->configuration->getBoolean('PS_ALLOW_MULTISHIPPING'),
+            'allow_delayed_shipping' => $this->configuration->getBoolean('PS_SHIP_WHEN_AVAILABLE'),
+            'enable_tos' => $this->configuration->getBoolean('PS_CONDITIONS'),
+            'tos_cms_id' => $this->configuration->get('PS_CONDITIONS_CMS_ID'),
         ];
     }
 
@@ -77,41 +68,35 @@ class GeneralConfiguration extends AbstractMultistoreConfiguration
     public function updateConfiguration(array $configuration)
     {
         if ($this->validateConfiguration($configuration)) {
-            $shopConstraint = $this->getShopConstraint();
-
-            $this->updateConfigurationValue('PS_FINAL_SUMMARY_ENABLED', 'enable_final_summary', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_GUEST_CHECKOUT_ENABLED', 'enable_guest_checkout', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_DISALLOW_HISTORY_REORDERING', 'disable_reordering_option', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_PURCHASE_MINIMUM', 'purchase_minimum_value', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_ORDER_RECALCULATE_SHIPPING', 'recalculate_shipping_cost', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_ALLOW_MULTISHIPPING', 'allow_multishipping', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_SHIP_WHEN_AVAILABLE', 'allow_delayed_shipping', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_CONDITIONS', 'enable_tos', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_CONDITIONS_CMS_ID', 'tos_cms_id', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_ENABLE_BACKORDER_STATUS', 'enable_backorder_status', $configuration, $shopConstraint);
+            $this->configuration->set('PS_FINAL_SUMMARY_ENABLED', $configuration['enable_final_summary']);
+            $this->configuration->set('PS_GUEST_CHECKOUT_ENABLED', $configuration['enable_guest_checkout']);
+            $this->configuration->set('PS_DISALLOW_HISTORY_REORDERING', $configuration['disable_reordering_option']);
+            $this->configuration->set('PS_PURCHASE_MINIMUM', $configuration['purchase_minimum_value']);
+            $this->configuration->set('PS_ORDER_RECALCULATE_SHIPPING', $configuration['recalculate_shipping_cost']);
+            $this->configuration->set('PS_ALLOW_MULTISHIPPING', $configuration['allow_multishipping']);
+            $this->configuration->set('PS_SHIP_WHEN_AVAILABLE', $configuration['allow_delayed_shipping']);
+            $this->configuration->set('PS_CONDITIONS', $configuration['enable_tos']);
+            $this->configuration->set('PS_CONDITIONS_CMS_ID', $configuration['tos_cms_id']);
         }
 
         return [];
     }
 
     /**
-     * @return OptionsResolver
+     * {@inheritdoc}
      */
-    protected function buildResolver(): OptionsResolver
+    public function validateConfiguration(array $configuration)
     {
-        $resolver = (new OptionsResolver())
-            ->setDefined(self::CONFIGURATION_FIELDS)
-            ->setAllowedTypes('enable_final_summary', 'bool')
-            ->setAllowedTypes('enable_guest_checkout', 'bool')
-            ->setAllowedTypes('disable_reordering_option', 'bool')
-            ->setAllowedTypes('purchase_minimum_value', 'float')
-            ->setAllowedTypes('recalculate_shipping_cost', 'bool')
-            ->setAllowedTypes('allow_multishipping', 'bool')
-            ->setAllowedTypes('allow_delayed_shipping', 'bool')
-            ->setAllowedTypes('enable_tos', 'bool')
-            ->setAllowedTypes('tos_cms_id', 'int')
-            ->setAllowedTypes('enable_backorder_status', 'bool');
-
-        return $resolver;
+        return isset(
+            $configuration['enable_final_summary'],
+            $configuration['enable_guest_checkout'],
+            $configuration['disable_reordering_option'],
+            $configuration['purchase_minimum_value'],
+            $configuration['recalculate_shipping_cost'],
+            $configuration['allow_multishipping'],
+            $configuration['allow_delayed_shipping'],
+            $configuration['enable_tos'],
+            $configuration['tos_cms_id']
+        );
     }
 }

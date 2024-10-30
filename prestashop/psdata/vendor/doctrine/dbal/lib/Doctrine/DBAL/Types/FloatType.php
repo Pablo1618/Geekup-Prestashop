@@ -11,15 +11,15 @@ class FloatType extends Type
      */
     public function getName()
     {
-        return Types::FLOAT;
+        return Type::FLOAT;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return $platform->getFloatDeclarationSQL($column);
+        return $platform->getFloatDeclarationSQL($fieldDeclaration);
     }
 
     /**

@@ -53,7 +53,7 @@ class DbQueryCore
      *
      * @param string $type SELECT|DELETE
      *
-     * @return $this
+     * @return DbQuery
      */
     public function type($type)
     {
@@ -71,7 +71,7 @@ class DbQueryCore
      *
      * @param string $fields List of fields to concat to other fields
      *
-     * @return $this
+     * @return DbQuery
      */
     public function select($fields)
     {
@@ -85,21 +85,15 @@ class DbQueryCore
     /**
      * Sets table for FROM clause.
      *
-     * @param string|DbQuery $table Table name
+     * @param string $table Table name
      * @param string|null $alias Table alias
      *
-     * @return $this
+     * @return DbQuery
      */
     public function from($table, $alias = null)
     {
         if (!empty($table)) {
-            if ($table instanceof DbQuery) {
-                $query = '(' . $table->build() . ')';
-            } else {
-                $query = '`' . _DB_PREFIX_ . $table . '`';
-            }
-
-            $this->query['from'][] = $query . ($alias ? ' ' . $alias : '');
+            $this->query['from'][] = '`' . _DB_PREFIX_ . $table . '`' . ($alias ? ' ' . $alias : '');
         }
 
         return $this;
@@ -111,7 +105,7 @@ class DbQueryCore
      *
      * @param string $join Complete string
      *
-     * @return $this
+     * @return DbQuery
      */
     public function join($join)
     {
@@ -129,7 +123,7 @@ class DbQueryCore
      * @param string|null $alias Table alias
      * @param string|null $on ON clause
      *
-     * @return $this
+     * @return DbQuery
      */
     public function leftJoin($table, $alias = null, $on = null)
     {
@@ -144,7 +138,7 @@ class DbQueryCore
      * @param string|null $alias Table alias
      * @param string|null $on ON clause
      *
-     * @return $this
+     * @return DbQuery
      */
     public function innerJoin($table, $alias = null, $on = null)
     {
@@ -158,7 +152,7 @@ class DbQueryCore
      * @param string|null $alias Table alias
      * @param string|null $on ON clause
      *
-     * @return $this
+     * @return DbQuery
      */
     public function leftOuterJoin($table, $alias = null, $on = null)
     {
@@ -171,7 +165,7 @@ class DbQueryCore
      * @param string $table Table name (without prefix)
      * @param string|null $alias Table alias
      *
-     * @return $this
+     * @return DbQuery
      */
     public function naturalJoin($table, $alias = null)
     {
@@ -185,7 +179,7 @@ class DbQueryCore
      * @param string|null $alias Table alias
      * @param string|null $on ON clause
      *
-     * @return $this
+     * @return DbQuery
      */
     public function rightJoin($table, $alias = null, $on = null)
     {
@@ -197,7 +191,7 @@ class DbQueryCore
      *
      * @param string $restriction
      *
-     * @return $this
+     * @return DbQuery
      */
     public function where($restriction)
     {
@@ -213,7 +207,7 @@ class DbQueryCore
      *
      * @param string $restriction
      *
-     * @return $this
+     * @return DbQuery
      */
     public function having($restriction)
     {
@@ -229,7 +223,7 @@ class DbQueryCore
      *
      * @param string $fields List of fields to sort. E.g. $this->order('myField, b.mySecondField DESC')
      *
-     * @return $this
+     * @return DbQuery
      */
     public function orderBy($fields)
     {
@@ -245,7 +239,7 @@ class DbQueryCore
      *
      * @param string $fields List of fields to group. E.g. $this->group('myField1, myField2')
      *
-     * @return $this
+     * @return DbQuery
      */
     public function groupBy($fields)
     {
@@ -262,7 +256,7 @@ class DbQueryCore
      * @param int $limit
      * @param int $offset
      *
-     * @return $this
+     * @return DbQuery
      */
     public function limit($limit, $offset = 0)
     {
@@ -336,15 +330,5 @@ class DbQueryCore
     public function __toString()
     {
         return $this->build();
-    }
-
-    /**
-     * Get query.
-     *
-     * @return array
-     */
-    public function getQuery(): array
-    {
-        return $this->query;
     }
 }

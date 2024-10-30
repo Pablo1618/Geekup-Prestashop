@@ -137,16 +137,6 @@ class NotificationCore
                 'status' => ((!empty($value['status'])) ? Tools::safeOutput($value['status']) : ''),
                 'customer_name' => $customerName,
                 'date_add' => isset($value['date_add']) ? Tools::displayDate($value['date_add']) : 0,
-                'order_view_url' => !empty($value['id_order'])
-                    ? Context::getContext()->link->getAdminLink(
-                        'AdminOrders',
-                        true,
-                        [
-                            'orderId' => $value['id_order'],
-                            'vieworder' => true,
-                        ]
-                    )
-                    : '',
                 'customer_view_url' => Context::getContext()->link->getAdminLink(
                     'AdminCustomers',
                     true,
@@ -155,16 +145,6 @@ class NotificationCore
                         'viewcustomer' => true,
                     ]
                 ),
-                'customer_thread_view_url' => !empty($value['id_customer_thread'])
-                    ? Context::getContext()->link->getAdminLink(
-                        'AdminCustomerThreads',
-                        true,
-                        [
-                            'customerThreadId' => $value['id_customer_thread'],
-                            'viewcustomer_thread' => true,
-                        ]
-                    )
-                    : '',
             ];
         }
 

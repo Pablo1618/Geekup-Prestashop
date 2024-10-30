@@ -4,7 +4,6 @@ namespace Doctrine\DBAL\Types;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-
 use function date_create_immutable;
 
 /**
@@ -17,7 +16,7 @@ class VarDateTimeImmutableType extends VarDateTimeType
      */
     public function getName()
     {
-        return Types::DATETIME_IMMUTABLE;
+        return Type::DATETIME_IMMUTABLE;
     }
 
     /**

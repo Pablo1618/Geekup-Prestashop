@@ -27,9 +27,10 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\OrderPreferences;
 
+use PrestaShop\PrestaShop\Adapter\CMS\CMSDataProvider;
 use PrestaShop\PrestaShop\Adapter\Order\GiftOptionsConfiguration;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class is responsible of managing the data manipulated using forms
@@ -47,12 +48,19 @@ class OrderPreferencesGiftOptionsFormDataProvider implements FormDataProviderInt
      */
     private $translator;
 
+    /**
+     * @var CMSDataProvider
+     */
+    private $cmsDataProvider;
+
     public function __construct(
         GiftOptionsConfiguration $giftOptionsConfiguration,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        CMSDataProvider $cmsDataProvider
     ) {
         $this->giftOptionsConfiguration = $giftOptionsConfiguration;
         $this->translator = $translator;
+        $this->cmsDataProvider = $cmsDataProvider;
     }
 
     /**

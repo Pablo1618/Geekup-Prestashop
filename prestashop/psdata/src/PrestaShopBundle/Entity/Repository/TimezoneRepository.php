@@ -42,6 +42,11 @@ class TimezoneRepository implements RepositoryInterface
     /**
      * @var string
      */
+    private $tablePrefix;
+
+    /**
+     * @var string
+     */
     private $timezoneTable;
 
     /**
@@ -51,6 +56,7 @@ class TimezoneRepository implements RepositoryInterface
     public function __construct(Connection $connection, $tablePrefix)
     {
         $this->connection = $connection;
+        $this->tablePrefix = $tablePrefix;
         $this->timezoneTable = $tablePrefix . 'timezone';
     }
 

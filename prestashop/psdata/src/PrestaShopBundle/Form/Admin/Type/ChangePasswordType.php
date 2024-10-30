@@ -26,9 +26,7 @@
 
 namespace PrestaShopBundle\Form\Admin\Type;
 
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Domain\Employee\ValueObject\Password;
-use PrestaShop\PrestaShop\Core\Security\PasswordPolicyConfiguration;
 use PrestaShopBundle\Translation\TranslatorAwareTrait;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
@@ -36,6 +34,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 
 /**
@@ -46,71 +45,33 @@ class ChangePasswordType extends AbstractType
     use TranslatorAwareTrait;
 
     /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
-
-    /**
-     * @param ConfigurationInterface $configuration
-     */
-    public function __construct(ConfigurationInterface $configuration)
-    {
-        $this->configuration = $configuration;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $maxLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MAXIMUM_LENGTH);
-        $minLength = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_LENGTH);
-        $minScore = $this->configuration->get(PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_SCORE);
-
         $builder
             ->add('change_password_button', ButtonType::class, [
-                'label' => $this->trans('Change password...', [], 'Admin.Actions'),
-                'attr' => [
-                    'class' => 'btn-outline-secondary js-change-password',
-                ],
+                'label' => false,
             ])
-            ->add('old_password', PasswordType::class, [
-                'label' => $this->trans('Current password', [], 'Admin.Advparameters.Feature'),
-                'required' => true,
-            ])
+            ->add('old_password', PasswordType::class)
             ->add('new_password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'constraints' => [
-                    $this->getLengthConstraint($maxLength, $minLength),
+                    $this->getLengthConstraint(Password::MAX_LENGTH, Password::MIN_LENGTH),
                 ],
-                'required' => true,
                 'first_options' => [
-                    'label' => $this->trans('New password', [], 'Admin.Advparameters.Feature'),
-                    'help' => $this->trans(
-                        'Password should be at least %num% characters long.',
-                        [
-                            '%num%' => Password::MIN_LENGTH,
-                        ],
-                        'Admin.Advparameters.Help'
-                    ),
                     'attr' => [
-                        'data-minscore' => $minScore,
-                        'data-minlength' => $minLength,
-                        'data-maxlength' => $maxLength,
+                        'data-password-too-short' => $this->getMinLengthValidationMessage(Password::MIN_LENGTH),
+                        'data-password-too-long' => $this->getMaxLengthValidationMessage(Password::MAX_LENGTH),
                     ],
                 ],
                 'second_options' => [
-                    'label' => $this->trans('Confirm password', [], 'Admin.Advparameters.Feature'),
-                    'help' => '',
                     'attr' => [
                         'data-invalid-password' => $this->trans(
-                            'The confirmation password doesn\'t match.',
+                            'Invalid password confirmation',
                             [],
                             'Admin.Notifications.Error'
                         ),
-                        'data-minscore' => $minScore,
-                        'data-minlength' => $minLength,
-                        'data-maxlength' => $maxLength,
                     ],
                 ],
             ])
@@ -118,19 +79,19 @@ class ChangePasswordType extends AbstractType
                 'label' => false,
                 'disabled' => true,
             ])
-            ->add('generate_password_button', ButtonType::class, [
-                'label' => $this->trans('Generate password', [], 'messages'),
-                'attr' => [
-                    'class' => 'btn-outline-secondary',
-                ],
-            ])
-            ->add('cancel_button', ButtonType::class, [
-                'label' => $this->trans('Cancel', [], 'Admin.Actions'),
-                'attr' => [
-                    'class' => 'btn-outline-secondary js-change-password-cancel',
-                ],
-            ])
+            ->add('generate_password_button', ButtonType::class)
+            ->add('cancel_button', ButtonType::class)
         ;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'required' => false,
+        ]);
     }
 
     /**
@@ -139,7 +100,7 @@ class ChangePasswordType extends AbstractType
      *
      * @return Length
      */
-    private function getLengthConstraint(int $maxLength, int $minLength = null): Length
+    private function getLengthConstraint($maxLength, $minLength = null)
     {
         $options = [
             'max' => $maxLength,
@@ -159,7 +120,7 @@ class ChangePasswordType extends AbstractType
      *
      * @return string
      */
-    private function getMinLengthValidationMessage(int $minLength): string
+    private function getMinLengthValidationMessage($minLength)
     {
         return $this->trans(
             'This field cannot be shorter than %limit% characters',
@@ -173,7 +134,7 @@ class ChangePasswordType extends AbstractType
      *
      * @return string
      */
-    private function getMaxLengthValidationMessage(int $maxLength): string
+    private function getMaxLengthValidationMessage($maxLength)
     {
         return $this->trans(
             'This field cannot be longer than %limit% characters',

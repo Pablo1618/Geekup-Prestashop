@@ -62,7 +62,7 @@ class MetaCore extends ObjectModel
      * Get pages.
      *
      * @param bool $excludeFilled
-     * @param bool|string $addPage
+     * @param bool $addPage
      *
      * @return array
      */
@@ -73,10 +73,7 @@ class MetaCore extends ObjectModel
             die(Tools::displayError(Context::getContext()->getTranslator()->trans('Cannot scan root directory', [], 'Admin.Notifications.Error')));
         }
 
-        $overrideDir = _PS_CORE_DIR_ . DIRECTORY_SEPARATOR . 'override' . DIRECTORY_SEPARATOR . 'controllers' . DIRECTORY_SEPARATOR . 'front' . DIRECTORY_SEPARATOR;
-        if (!is_dir($overrideDir)) {
-            $overrideFiles = [];
-        } elseif (!$overrideFiles = Tools::scandir($overrideDir, 'php', '', true)) {
+        if (!$overrideFiles = Tools::scandir(_PS_CORE_DIR_ . DIRECTORY_SEPARATOR . 'override' . DIRECTORY_SEPARATOR . 'controllers' . DIRECTORY_SEPARATOR . 'front' . DIRECTORY_SEPARATOR, 'php', '', true)) {
             die(Tools::displayError(Context::getContext()->getTranslator()->trans('Cannot scan "override" directory', [], 'Admin.Notifications.Error')));
         }
 
@@ -255,7 +252,7 @@ class MetaCore extends ObjectModel
     public function deleteSelection($selection)
     {
         if (!is_array($selection)) {
-            die(Tools::displayError('Parameter "selection" must be an array.'));
+            die(Tools::displayError());
         }
         $result = true;
         foreach ($selection as $id) {
@@ -333,7 +330,6 @@ class MetaCore extends ObjectModel
         $ret['meta_title'] = (isset($metas['title']) && $metas['title']) ? $metas['title'] : Configuration::get('PS_SHOP_NAME');
         $ret['meta_description'] = (isset($metas['description']) && $metas['description']) ? $metas['description'] : '';
         $ret['meta_keywords'] = (isset($metas['keywords']) && $metas['keywords']) ? $metas['keywords'] : '';
-        $ret = Meta::completeMetaTags($ret, $ret['meta_title']);
 
         return $ret;
     }
@@ -377,6 +373,10 @@ class MetaCore extends ObjectModel
      */
     public static function getCategoryMetas($idCategory, $idLang, $pageName, $title = '')
     {
+        if (!empty($title)) {
+            $title = ' - ' . $title;
+        }
+        $pageNumber = (int) Tools::getValue('page');
         $category = new Category($idCategory, $idLang);
 
         $cacheId = 'Meta::getCategoryMetas' . (int) $idCategory . '-' . (int) $idLang;
@@ -387,10 +387,15 @@ class MetaCore extends ObjectModel
                     $row['meta_description'] = strip_tags($row['description']);
                 }
 
-                if (is_string($title) && $title !== '') {
-                    $row['meta_title'] = $title;
+                // Paginate title
+                if (!empty($row['meta_title'])) {
+                    $row['meta_title'] = $title . $row['meta_title'] . (!empty($pageNumber) ? ' (' . $pageNumber . ')' : '');
                 } else {
-                    $row['meta_title'] = $row['meta_title'] ?: $row['name'];
+                    $row['meta_title'] = $row['name'] . (!empty($pageNumber) ? ' (' . $pageNumber . ')' : '');
+                }
+
+                if (!empty($title)) {
+                    $row['meta_title'] = $title . (!empty($pageNumber) ? ' (' . $pageNumber . ')' : '');
                 }
 
                 $result = Meta::completeMetaTags($row, $row['name']);
@@ -418,13 +423,15 @@ class MetaCore extends ObjectModel
      */
     public static function getManufacturerMetas($idManufacturer, $idLang, $pageName)
     {
+        $pageNumber = (int) Tools::getValue('page');
         $manufacturer = new Manufacturer($idManufacturer, $idLang);
         if (Validate::isLoadedObject($manufacturer)) {
             $row = Meta::getPresentedObject($manufacturer);
             if (!empty($row['meta_description'])) {
                 $row['meta_description'] = strip_tags($row['meta_description']);
             }
-            $row['meta_title'] = $row['meta_title'] ?: $row['name'];
+            $row['meta_title'] = ($row['meta_title'] ? $row['meta_title'] : $row['name']) . (!empty($pageNumber) ? ' (' . $pageNumber . ')' : '');
+            $row['meta_title'];
 
             return Meta::completeMetaTags($row, $row['meta_title']);
         }
@@ -519,28 +526,7 @@ class MetaCore extends ObjectModel
             $metaTags['meta_title'] = $defaultValue;
         }
 
-        if (!empty($context->controller) && method_exists($context->controller, 'getTemplateVarPagination')) {
-            $metaTags['meta_title'] = Meta::paginateTitle($metaTags['meta_title']);
-        }
-
         return $metaTags;
-    }
-
-    /**
-     * Add page number to title
-     *
-     * @param string $title
-     *
-     * @return string
-     */
-    public static function paginateTitle(string $title): string
-    {
-        $page_num = (int) Tools::getValue('page');
-        if ($page_num > 1) {
-            $title .= ' (' . $page_num . ')';
-        }
-
-        return $title;
     }
 
     /**

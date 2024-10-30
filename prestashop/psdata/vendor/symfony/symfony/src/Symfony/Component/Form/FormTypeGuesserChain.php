@@ -23,11 +23,15 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
      *
      * @throws UnexpectedTypeException if any guesser does not implement FormTypeGuesserInterface
      */
-    public function __construct(iterable $guessers)
+    public function __construct($guessers)
     {
+        if (!\is_array($guessers) && !$guessers instanceof \Traversable) {
+            throw new UnexpectedTypeException($guessers, 'array or Traversable');
+        }
+
         foreach ($guessers as $guesser) {
             if (!$guesser instanceof FormTypeGuesserInterface) {
-                throw new UnexpectedTypeException($guesser, FormTypeGuesserInterface::class);
+                throw new UnexpectedTypeException($guesser, 'Symfony\Component\Form\FormTypeGuesserInterface');
             }
 
             if ($guesser instanceof self) {
@@ -84,8 +88,10 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
      *
      * @param \Closure $closure The closure to execute. Accepts a guesser
      *                          as argument and should return a Guess instance
+     *
+     * @return Guess|null The guess with the highest confidence
      */
-    private function guess(\Closure $closure): ?Guess
+    private function guess(\Closure $closure)
     {
         $guesses = [];
 

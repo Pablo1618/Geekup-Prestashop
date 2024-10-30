@@ -28,8 +28,6 @@ use Symfony\Component\HttpKernel\UriSigner;
  * is not signed or if it is not an internal sub-request.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.3
  */
 class FragmentListener implements EventSubscriberInterface
 {
@@ -37,9 +35,10 @@ class FragmentListener implements EventSubscriberInterface
     private $fragmentPath;
 
     /**
-     * @param string $fragmentPath The path that triggers this listener
+     * @param UriSigner $signer       A UriSigner instance
+     * @param string    $fragmentPath The path that triggers this listener
      */
-    public function __construct(UriSigner $signer, string $fragmentPath = '/_fragment')
+    public function __construct(UriSigner $signer, $fragmentPath = '/_fragment')
     {
         $this->signer = $signer;
         $this->fragmentPath = $fragmentPath;
@@ -78,7 +77,7 @@ class FragmentListener implements EventSubscriberInterface
     protected function validateRequest(Request $request)
     {
         // is the Request safe?
-        if (!$request->isMethodSafe()) {
+        if (!$request->isMethodSafe(false)) {
             throw new AccessDeniedHttpException();
         }
 

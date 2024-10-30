@@ -35,7 +35,7 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class TranslatableType adds translatable inputs with custom inner type to forms.
@@ -141,7 +141,6 @@ class TranslatableType extends TranslatorAwareType
             }
         }
 
-        /** @var FormInterface $varsForm */
         $varsForm = $view->vars['errors']->getForm();
         $view->vars['errors'] = new FormErrorIterator($varsForm, $errors);
         $view->vars['locales'] = $options['locales'];
@@ -213,13 +212,17 @@ class TranslatableType extends TranslatorAwareType
      */
     private function getErrorsByLocale(FormView $view, FormInterface $form, array $locales)
     {
-        $formErrors = $form->getErrors(true);
-
-        if (0 === $formErrors->count()) {
+        if (count($locales) <= 1) {
             return null;
         }
 
-        if (1 === $formErrors->count()) {
+        $formErrors = $form->getErrors(true);
+
+        if (empty($formErrors)) {
+            return null;
+        }
+
+        if (1 === count($formErrors)) {
             $errorByLocale = $this->getSingleTranslatableErrorExcludingDefaultLocale(
                 $formErrors,
                 $form,
@@ -233,11 +236,13 @@ class TranslatableType extends TranslatorAwareType
             return [$errorByLocale];
         }
 
-        return $this->getTranslatableErrors(
+        $errorsByLocale = $this->getTranslatableErrors(
             $formErrors,
             $form,
             $locales
         );
+
+        return $errorsByLocale;
     }
 
     /**
@@ -297,9 +302,7 @@ class TranslatableType extends TranslatorAwareType
         $errorsByLocale = null;
         $iteration = 0;
         foreach ($form as $formItem) {
-            $doesLocaleExistForInvalidForm = isset($locales[$iteration])
-                && $formItem->isSubmitted()
-                && !$formItem->isValid();
+            $doesLocaleExistForInvalidForm = isset($locales[$iteration]) && !$formItem->isValid();
 
             if ($doesLocaleExistForInvalidForm) {
                 foreach ($formErrors as $formError) {

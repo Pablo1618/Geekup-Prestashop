@@ -22,10 +22,7 @@ class MethodNotAllowedException extends \RuntimeException implements ExceptionIn
 {
     protected $allowedMethods = [];
 
-    /**
-     * @param string[] $allowedMethods
-     */
-    public function __construct(array $allowedMethods, ?string $message = '', int $code = 0, \Throwable $previous = null)
+    public function __construct(array $allowedMethods, $message = null, $code = 0, \Exception $previous = null)
     {
         $this->allowedMethods = array_map('strtoupper', $allowedMethods);
 
@@ -35,7 +32,7 @@ class MethodNotAllowedException extends \RuntimeException implements ExceptionIn
     /**
      * Gets the allowed HTTP methods.
      *
-     * @return string[]
+     * @return array
      */
     public function getAllowedMethods()
     {

@@ -577,11 +577,6 @@ class XmlLoader
         $this->storeId($entity, $identifier, $entity_id);
     }
 
-    public function createEntityAttribute($identifier, array $data, array $data_lang = [])
-    {
-        $this->createEntity('attribute', $identifier, 'ProductAttribute', $data, $data_lang);
-    }
-
     public function createEntityConfiguration($identifier, array $data, array $data_lang)
     {
         if (Db::getInstance()->getValue('SELECT id_configuration FROM ' . _DB_PREFIX_ . 'configuration WHERE name = \'' . pSQL($data['name']) . '\'')) {
@@ -654,10 +649,6 @@ class XmlLoader
             $position[$data['id_parent']] = 0;
         }
         $data['position'] = $position[$data['id_parent']]++;
-        $data['icon'] = $data['icon'] ?? '';
-        $data['wording'] = $data['wording'] ?? '';
-        $data['wording_domain'] = $data['wording_domain'] ?? '';
-        $data['route_name'] = $data['route_name'] ?? '';
 
         // Generate primary key manually
         if (!$xml->fields['primary']) {
@@ -674,10 +665,6 @@ class XmlLoader
         } else {
             $entity_id = 0;
         }
-
-        // Make sure data are correctly ordered because some attributes are optional
-        // and Db::insert needs to have all data keys in the same order when using multiple insert
-        ksort($data);
 
         // Store INSERT queries in order to optimize install with grouped inserts
         $this->delayed_inserts[$entity][] = array_map('pSQL', $data);
@@ -1096,9 +1083,9 @@ class XmlLoader
         // Create list of fields
         foreach ($fields as $column => $info) {
             $field = $xml_fields->addChild('field');
-            $field->name = $column;
+            $field['name'] = $column;
             if (isset($info['relation'])) {
-                $field->relation = $info['relation'];
+                $field['relation'] = $info['relation'];
             }
         }
 
@@ -1205,7 +1192,7 @@ class XmlLoader
     public function getEntityContents($entity)
     {
         $xml = $this->fileLoader->load($entity);
-        $primary = !empty($xml->fields['primary']) ? (string) $xml->fields['primary'] : 'id_' . $entity;
+        $primary = (isset($xml->fields['primary']) && $xml->fields['primary']) ? (string) $xml->fields['primary'] : 'id_' . $entity;
         $is_multilang = $this->isMultilang($entity);
 
         // Check if current table is an association table (if multiple primary keys)
@@ -1224,22 +1211,22 @@ class XmlLoader
             $sql->leftJoin($entity . '_lang', 'b', 'a.' . $primary . ' = b.' . $primary);
         }
 
-        if (!empty($xml->fields['sql'])) {
+        if (isset($xml->fields['sql']) && $xml->fields['sql']) {
             $sql->where((string) $xml->fields['sql']);
         }
 
         if (!$is_association) {
             $sql->select('a.' . $primary);
-            if (empty($xml->fields['ordersql'])) {
+            if (!isset($xml->fields['ordersql']) || !$xml->fields['ordersql']) {
                 $sql->orderBy('a.' . $primary);
             }
         }
 
-        if ($is_multilang && empty($xml->fields['ordersql'])) {
+        if ($is_multilang && (!isset($xml->fields['ordersql']) || !$xml->fields['ordersql'])) {
             $sql->orderBy('b.id_lang');
         }
 
-        if (!empty($xml->fields['ordersql'])) {
+        if (isset($xml->fields['ordersql']) && $xml->fields['ordersql']) {
             $sql->orderBy((string) $xml->fields['ordersql']);
         }
 
@@ -1273,7 +1260,7 @@ class XmlLoader
                         $id .= '_' . $row[$key];
                     }
                 } else {
-                    $id = $this->generateId($entity, $row[$primary], $row, (!empty($xml->fields['id'])) ? (string) $xml->fields['id'] : null);
+                    $id = $this->generateId($entity, $row[$primary], $row, (isset($xml->fields['id']) && $xml->fields['id']) ? (string) $xml->fields['id'] : null);
                 }
 
                 if (!isset($nodes[$id])) {
@@ -1391,12 +1378,12 @@ class XmlLoader
         $types = array_merge($this->getColumns($entity), $this->getColumns($entity, true));
         foreach ($nodes as $id => $node) {
             $entity_node = $entities->addChild($entity);
-            $entity_node->id = $id;
+            $entity_node['id'] = $id;
             foreach ($node as $k => $v) {
-                if (!empty($types[$k])) {
+                if (isset($types[$k]) && $types[$k]) {
                     $entity_node->addChild($k, $v);
                 } else {
-                    $entity_node->{$k} = $v;
+                    $entity_node[$k] = $v;
                 }
             }
         }
@@ -1454,7 +1441,7 @@ class XmlLoader
         }
 
         $backup_path = $this->img_path . 'p/';
-        $from_path = _PS_PRODUCT_IMG_DIR_;
+        $from_path = _PS_PROD_IMG_DIR_;
         if (!is_dir($backup_path) && !mkdir($backup_path)) {
             $this->setError(sprintf('Cannot create directory <i>%s</i>', $backup_path));
         }

@@ -1,9 +1,11 @@
 {
     "Names": {
+        "Arab": "Basa Arab",
         "Cyrl": "Sirilik",
         "Hans": "Sederhana",
         "Hant": "Tradisional",
         "Latn": "Latin",
-        "Zxxx": "Non-tulisan"
+        "Zxxx": "Non-tulisan",
+        "Zzzz": "Skrip Teu Dipikaterang"
     }
 }

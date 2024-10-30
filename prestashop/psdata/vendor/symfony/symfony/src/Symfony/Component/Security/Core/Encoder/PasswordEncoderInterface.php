@@ -17,8 +17,6 @@ use Symfony\Component\Security\Core\Exception\BadCredentialsException;
  * PasswordEncoderInterface is the interface for all encoders.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @method bool needsRehash(string $encoded)
  */
 interface PasswordEncoderInterface
 {

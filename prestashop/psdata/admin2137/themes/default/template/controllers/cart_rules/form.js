@@ -29,13 +29,9 @@ function addProductRuleGroup() {
   product_rule_counters[product_rule_groups_counter] = 0;
 
   $.get(
-    'index.php',
+    'ajax-tab.php',
     {
-      ajax: 1,
-      controller: 'AdminCartRules',
-      token: currentToken,
-      newProductRuleGroup: 1,
-      product_rule_group_id: product_rule_groups_counter,
+      controller: 'AdminCartRules', token: currentToken, newProductRuleGroup: 1, product_rule_group_id: product_rule_groups_counter,
     },
     (content) => {
       if (content != '') $('#product_rule_group_table').append(content);
@@ -51,15 +47,9 @@ function addProductRule(product_rule_group_id) {
   product_rule_counters[product_rule_group_id] += 1;
   if ($(`#product_rule_type_${product_rule_group_id}`).val() != 0) {
     $.get(
-      'index.php',
+      'ajax-tab.php',
       {
-        ajax: 1,
-        controller: 'AdminCartRules',
-        token: currentToken,
-        newProductRule: 1,
-        product_rule_type: $(`#product_rule_type_${product_rule_group_id}`).val(),
-        product_rule_group_id,
-        product_rule_id: product_rule_counters[product_rule_group_id],
+        controller: 'AdminCartRules', token: currentToken, newProductRule: 1, product_rule_type: $(`#product_rule_type_${product_rule_group_id}`).val(), product_rule_group_id, product_rule_id: product_rule_counters[product_rule_group_id],
       },
       (content) => {
         if (content != '') $(`#product_rule_table_${product_rule_group_id}`).append(content);
@@ -255,9 +245,12 @@ $('#cart_rule_form').submit(() => {
   if ($('#customerFilter').val() == '') $('#id_customer').val('0');
 
   for (i in restrictions) {
-    $(`#${restrictions[i]}_select_2 option`).each(function (i) {
-      $(this).prop('selected', true);
-    });
+    if ($(`#${restrictions[i]}_select_1 option`).length == 0) $(`#${restrictions[i]}_restriction`).prop('checked', false);
+    else {
+      $(`#${restrictions[i]}_select_2 option`).each(function (i) {
+        $(this).prop('selected', true);
+      });
+    }
   }
 
   $('.product_rule_toselect option').each(function (i) {
@@ -267,7 +260,7 @@ $('#cart_rule_form').submit(() => {
 
 $('#reductionProductFilter')
   .autocomplete(
-    'index.php', {
+    'ajax-tab.php', {
       minChars: 2,
       max: 50,
       width: 500,
@@ -285,7 +278,6 @@ $('#reductionProductFilter')
         return mytab;
       },
       extraParams: {
-        ajax: 1,
         controller: 'AdminCartRules',
         token: currentToken,
         reductionProductFilter: 1,
@@ -299,7 +291,7 @@ $('#reductionProductFilter')
 
 $('#customerFilter')
   .autocomplete(
-    'index.php', {
+    'ajax-tab.php', {
       minChars: 2,
       max: 50,
       width: 500,
@@ -312,17 +304,11 @@ $('#customerFilter')
       parse(data) {
         const mytab = new Array();
 
-        for (let i = 0; i < data.length; i++) {
-          mytab[mytab.length] = {
-            data: data[i],
-            value: (data[i].shop_name ? `${data[i].cname} (${data[i].email}) [${data[i].shop_name}]` : `${data[i].cname} (${data[i].email})`),
-          };
-        }
+        for (let i = 0; i < data.length; i++) mytab[mytab.length] = {data: data[i], value: `${data[i].cname} (${data[i].email})`};
 
         return mytab;
       },
       extraParams: {
-        ajax: 1,
         controller: 'AdminCartRules',
         token: currentToken,
         customerFilter: 1,
@@ -398,11 +384,10 @@ function searchProducts() {
   $.ajax({
     type: 'POST',
     headers: {'cache-control': 'no-cache'},
-    url: `${'index.php' + '?rand='}${new Date().getTime()}`,
+    url: `${'ajax-tab.php' + '?rand='}${new Date().getTime()}`,
     async: true,
     dataType: 'json',
     data: {
-      ajax: 1,
       controller: 'AdminCartRules',
       token: currentToken,
       action: 'searchProducts',

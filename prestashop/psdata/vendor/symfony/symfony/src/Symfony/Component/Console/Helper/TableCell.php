@@ -24,8 +24,15 @@ class TableCell
         'colspan' => 1,
     ];
 
-    public function __construct(string $value = '', array $options = [])
+    /**
+     * @param string $value
+     */
+    public function __construct($value = '', array $options = [])
     {
+        if (is_numeric($value) && !\is_string($value)) {
+            $value = (string) $value;
+        }
+
         $this->value = $value;
 
         // check option names

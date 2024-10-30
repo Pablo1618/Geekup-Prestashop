@@ -26,28 +26,32 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Meta;
 
-use PrestaShop\PrestaShop\Core\Configuration\AbstractMultistoreConfiguration;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
+use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SEOOptionsDataConfiguration extends AbstractMultistoreConfiguration
+class SEOOptionsDataConfiguration implements DataConfigurationInterface
 {
     /**
-     * @var array<int, string>
+     * @var ConfigurationInterface
      */
-    private const CONFIGURATION_FIELDS = [
-        'product_attributes_in_title',
-    ];
+    private $configuration;
+
+    /**
+     * @param ConfigurationInterface $configuration
+     */
+    public function __construct(ConfigurationInterface $configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getConfiguration()
     {
-        $shopConstraint = $this->getShopConstraint();
-
         return [
-            'product_attributes_in_title' => (bool) $this->configuration->get('PS_PRODUCT_ATTRIBUTES_IN_TITLE', false, $shopConstraint),
+            'product_attributes_in_title' => (bool) $this->configuration->get('PS_PRODUCT_ATTRIBUTES_IN_TITLE'),
         ];
     }
 
@@ -59,9 +63,7 @@ class SEOOptionsDataConfiguration extends AbstractMultistoreConfiguration
         $errors = [];
         try {
             if ($this->validateConfiguration($configuration)) {
-                $shopConstraint = $this->getShopConstraint();
-
-                $this->updateConfigurationValue('PS_PRODUCT_ATTRIBUTES_IN_TITLE', 'product_attributes_in_title', $configuration, $shopConstraint);
+                $this->configuration->set('PS_PRODUCT_ATTRIBUTES_IN_TITLE', $configuration['product_attributes_in_title']);
             }
         } catch (CoreException $exception) {
             $errors[] = $exception->getMessage();
@@ -71,14 +73,12 @@ class SEOOptionsDataConfiguration extends AbstractMultistoreConfiguration
     }
 
     /**
-     * @return OptionsResolver
+     * {@inheritdoc}
      */
-    protected function buildResolver(): OptionsResolver
+    public function validateConfiguration(array $configuration)
     {
-        $resolver = (new OptionsResolver())
-            ->setDefined(self::CONFIGURATION_FIELDS)
-            ->setAllowedTypes('product_attributes_in_title', 'bool');
-
-        return $resolver;
+        return isset(
+            $configuration['product_attributes_in_title']
+        );
     }
 }

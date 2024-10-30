@@ -26,8 +26,6 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Tab;
 
-use PrestaShop\PrestaShop\Adapter\LegacyContext;
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use Profile;
 use Tab;
 
@@ -37,23 +35,23 @@ use Tab;
 class TabDataProvider
 {
     /**
-     * @var ConfigurationInterface
+     * @var int
      */
-    private $legacyConfiguration;
+    private $superAdminProfileId;
 
     /**
-     * @var LegacyContext
+     * @var int
      */
-    private $legacyContext;
+    private $contextEmployeeProfileId;
 
     /**
-     * @param LegacyContext $legacyContext
-     * @param ConfigurationInterface $legacyConfiguration
+     * @param int $contextEmployeeProfileId
+     * @param int $superAdminProfileId
      */
-    public function __construct(LegacyContext $legacyContext, ConfigurationInterface $legacyConfiguration)
+    public function __construct($contextEmployeeProfileId, $superAdminProfileId)
     {
-        $this->legacyContext = $legacyContext;
-        $this->legacyConfiguration = $legacyConfiguration;
+        $this->superAdminProfileId = $superAdminProfileId;
+        $this->contextEmployeeProfileId = $contextEmployeeProfileId;
     }
 
     /**
@@ -65,14 +63,7 @@ class TabDataProvider
      */
     public function getViewableTabsForContextEmployee($languageId)
     {
-        if ($this->legacyContext->getContext()->employee) {
-            return $this->getViewableTabs(
-                $this->legacyContext->getContext()->employee->id_profile,
-                $languageId
-            );
-        }
-
-        return [];
+        return $this->getViewableTabs($this->contextEmployeeProfileId, $languageId);
     }
 
     /**
@@ -128,7 +119,7 @@ class TabDataProvider
             return false;
         }
 
-        if ($profileId === (int) $this->legacyConfiguration->get('_PS_ADMIN_PROFILE_')) {
+        if ($profileId == $this->superAdminProfileId) {
             return true;
         }
 
@@ -139,15 +130,5 @@ class TabDataProvider
         }
 
         return false;
-    }
-
-    /**
-     * Reset static tab cache
-     *
-     * @return void
-     */
-    public function resetTabCache(): void
-    {
-        Tab::resetTabCache();
     }
 }

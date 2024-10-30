@@ -31,13 +31,12 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Action\Type\SubmitGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DateTimeColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Employee\EmployeeNameWithAvatarColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Status\SeverityLevelColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
-use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use PrestaShopBundle\Form\Admin\Type\DateRangeType;
 use PrestaShopBundle\Form\Admin\Type\LogSeverityChoiceType;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
@@ -49,19 +48,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 final class LogGridDefinitionFactory extends AbstractGridDefinitionFactory
 {
     public const GRID_ID = 'logs';
-
-    /**
-     * @var string Date format for the current user
-     */
-    private $contextDateFormat;
-
-    public function __construct(
-        HookDispatcherInterface $hookDispatcher,
-        string $contextDateFormat
-    ) {
-        parent::__construct($hookDispatcher);
-        $this->contextDateFormat = $contextDateFormat;
-    }
 
     /**
      * {@inheritdoc}
@@ -153,7 +139,7 @@ final class LogGridDefinitionFactory extends AbstractGridDefinitionFactory
                 (new DateTimeColumn('date_add'))
                     ->setName($this->trans('Date', [], 'Admin.Global'))
                     ->setOptions([
-                        'format' => $this->contextDateFormat,
+                        'format' => 'Y-m-d H:i',
                         'field' => 'date_add',
                     ])
             )

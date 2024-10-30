@@ -85,9 +85,9 @@
             </div>
 
             <TranslationInput
-              v-for="(translation, key, index) in translationsCatalog"
+              v-for="(translation, key) in translationsCatalog"
               :key="key"
-              :id="index"
+              :id="key"
               :translated="translation"
               :label="translation.default"
               :extra-info="getDomain(translation.tree_domain)"
@@ -119,16 +119,14 @@
   </transition>
 </template>
 
-<script lang="ts">
-  import PSButton from '@app/widgets/ps-button.vue';
-  import PSPagination from '@app/widgets/ps-pagination.vue';
-  import PSAlert from '@app/widgets/ps-alert.vue';
-  import {EventEmitter} from '@components/event-emitter';
-  import TranslationMixin from '@app/pages/translations/mixins/translate';
-  import {defineComponent} from 'vue';
-  import TranslationInput from './translation-input.vue';
+<script>
+  import PSButton from '@app/widgets/ps-button';
+  import PSPagination from '@app/widgets/ps-pagination';
+  import PSAlert from '@app/widgets/ps-alert';
+  import {EventBus} from '@app/utils/event-bus';
+  import TranslationInput from './translation-input';
 
-  export default defineComponent({
+  export default {
     props: {
       modal: {
         type: Object,
@@ -136,44 +134,43 @@
         default: () => ({}),
       },
     },
-    mixins: [TranslationMixin],
     data: () => ({
-      originalTranslations: [] as Array<Record<string, any>>,
-      modifiedTranslations: [] as Array<Record<string, any>>,
+      originalTranslations: [],
+      modifiedTranslations: [],
     }),
     computed: {
-      principalReady(): boolean {
+      principalReady() {
         return !this.$store.state.principalLoading;
       },
-      translationsCatalog(): any {
+      translationsCatalog() {
         return this.$store.getters.catalog.data.data;
       },
-      saveAction(): string {
+      saveAction() {
         return this.$store.getters.catalog.data.info ? this.$store.getters.catalog.data.info.edit_url : '';
       },
-      resetAction(): string {
+      resetAction() {
         return this.$store.getters.catalog.data.info ? this.$store.getters.catalog.data.info.reset_url : '';
       },
-      pagesCount(): number {
+      pagesCount() {
         return this.$store.getters.totalPages;
       },
-      currentPagination(): number {
+      currentPagination() {
         return this.$store.getters.pageIndex;
       },
-      currentDomain(): string {
+      currentDomain() {
         return this.$store.state.currentDomain;
       },
-      currentDomainTotalTranslations(): string {
+      currentDomainTotalTranslations() {
         /* eslint-disable max-len */
         return (this.$store.state.currentDomainTotalTranslations <= 1)
-          ? `- ${this.trans('label_total_domain_singular').replace('%nb_translation%', this.$store.state.currentDomainTotalTranslations.toString())}`
-          : `- ${this.trans('label_total_domain').replace('%nb_translations%', this.$store.state.currentDomainTotalTranslations.toString())}`;
+          ? `- ${this.trans('label_total_domain_singular').replace('%nb_translation%', this.$store.state.currentDomainTotalTranslations)}`
+          : `- ${this.trans('label_total_domain').replace('%nb_translations%', this.$store.state.currentDomainTotalTranslations)}`;
         /* eslint-enable max-len */
       },
-      currentDomainTotalMissingTranslations(): number {
+      currentDomainTotalMissingTranslations() {
         return this.$store.state.currentDomainTotalMissingTranslations;
       },
-      currentDomainTotalMissingTranslationsString(): string {
+      currentDomainTotalMissingTranslationsString() {
         let totalMissingTranslationsString = '';
 
         if (this.currentDomainTotalMissingTranslations) {
@@ -181,27 +178,27 @@
             totalMissingTranslationsString = this.trans('label_missing_singular');
           } else {
             totalMissingTranslationsString = this.trans('label_missing')
-              .replace('%d', <string><unknown> this.currentDomainTotalMissingTranslations);
+              .replace('%d', this.currentDomainTotalMissingTranslations);
           }
         }
 
         return totalMissingTranslationsString;
       },
-      noResult(): boolean {
+      noResult() {
         return (this.$store.getters.currentDomain === '' || typeof this.$store.getters.currentDomain === 'undefined');
       },
-      noResultInfo(): string {
+      noResultInfo() {
         return this.trans('no_result').replace('%s', this.$store.getters.searchTags.join(' - '));
       },
-      searchActive(): number {
+      searchActive() {
         return this.$store.getters.searchTags.length;
       },
-      searchInfo(): string {
+      searchInfo() {
         const transKey = (this.$store.state.totalTranslations <= 1) ? 'search_info_singular' : 'search_info';
 
         return this.trans(transKey)
           .replace('%s', this.$store.getters.searchTags.join(' - '))
-          .replace('%d', this.$store.state.totalTranslations.toString());
+          .replace('%d', this.$store.state.totalTranslations);
       },
     },
     methods: {
@@ -210,12 +207,12 @@
        * get the translations and reset the modified translations into the state
        * @param {Number} pageIndex
        */
-      changePage: function changePage(pageIndex: number): void {
+      changePage: function changePage(pageIndex) {
         this.$store.dispatch('updatePageIndex', pageIndex);
         this.fetch();
         this.$store.state.modifiedTranslations = [];
       },
-      isEdited(input: Record<string, any>): void {
+      isEdited(input) {
         if (input.translation.edited) {
           this.$store.state.modifiedTranslations[input.id] = input.translation;
         } else {
@@ -225,7 +222,7 @@
           );
         }
       },
-      onPageChanged(pageIndex: number): void {
+      onPageChanged(pageIndex) {
         if (this.edited()) {
           this.modal.showModal();
           this.modal.$once('save', () => {
@@ -239,21 +236,21 @@
           this.changePage(pageIndex);
         }
       },
-      fetch(): void {
+      fetch() {
         this.$store.dispatch('getCatalog', {
           url: this.$store.getters.catalog.info.current_url_without_pagination,
           page_size: this.$store.state.translationsPerPage,
           page_index: this.$store.getters.pageIndex,
         });
       },
-      getDomain(domains: Array<string>): string {
+      getDomain(domains) {
         let domain = '';
         domains.forEach((d) => {
           domain += `${d} > `;
         });
         return domain.slice(0, -3);
       },
-      saveTranslations(): void {
+      saveTranslations() {
         const modifiedTranslations = this.getModifiedTranslations();
 
         if (modifiedTranslations.length) {
@@ -264,11 +261,11 @@
           });
         }
       },
-      getModifiedTranslations(): Array<Record<string, any>> {
+      getModifiedTranslations() {
         this.modifiedTranslations = [];
         const targetTheme = (window.data.type === 'modules') ? '' : window.data.selected;
 
-        Object.values(this.$store.state.modifiedTranslations).forEach((translation: any): void => {
+        Object.values(this.$store.state.modifiedTranslations).forEach((translation) => {
           this.modifiedTranslations.push({
             default: translation.default,
             edited: translation.edited,
@@ -280,12 +277,12 @@
 
         return this.modifiedTranslations;
       },
-      edited(): boolean {
+      edited() {
         return Object.keys(this.$store.state.modifiedTranslations).length > 0;
       },
     },
     mounted() {
-      EventEmitter.on('resetTranslation', (el: Record<string, any>) => {
+      EventBus.$on('resetTranslation', (el) => {
         const translations = [];
 
         translations.push({
@@ -307,7 +304,7 @@
       PSPagination,
       PSAlert,
     },
-  });
+  };
 </script>
 
 <style lang="scss" scoped>

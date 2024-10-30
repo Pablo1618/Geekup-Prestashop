@@ -21,10 +21,14 @@ class CsrfToken
     private $id;
     private $value;
 
-    public function __construct(string $id, ?string $value)
+    /**
+     * @param string $id    The token ID
+     * @param string $value The actual token value
+     */
+    public function __construct($id, $value)
     {
-        $this->id = $id;
-        $this->value = $value ?? '';
+        $this->id = (string) $id;
+        $this->value = (string) $value;
     }
 
     /**

@@ -53,9 +53,6 @@ class PassVsprintfValidator extends ConstraintValidator
 
     private function countArgumentsOfTranslation($property)
     {
-        if (empty($property)) {
-            return 0;
-        }
         $matches = [];
         if (preg_match_all(Translator::$regexSprintfParams, $property, $matches) === false) {
             throw new Exception('Preg_match failed');

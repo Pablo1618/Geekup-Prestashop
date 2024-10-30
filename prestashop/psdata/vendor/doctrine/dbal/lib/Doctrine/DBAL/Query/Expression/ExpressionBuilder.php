@@ -3,8 +3,6 @@
 namespace Doctrine\DBAL\Query\Expression;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\Deprecations\Deprecation;
-
 use function func_get_arg;
 use function func_get_args;
 use function func_num_args;
@@ -41,29 +39,13 @@ class ExpressionBuilder
     }
 
     /**
-     * Creates a conjunction of the given expressions.
+     * Creates a conjunction of the given boolean expressions.
      *
-     * @param string|CompositeExpression $expression
-     * @param string|CompositeExpression ...$expressions
-     */
-    public function and($expression, ...$expressions): CompositeExpression
-    {
-        return CompositeExpression::and($expression, ...$expressions);
-    }
-
-    /**
-     * Creates a disjunction of the given expressions.
+     * Example:
      *
-     * @param string|CompositeExpression $expression
-     * @param string|CompositeExpression ...$expressions
-     */
-    public function or($expression, ...$expressions): CompositeExpression
-    {
-        return CompositeExpression::or($expression, ...$expressions);
-    }
-
-    /**
-     * @deprecated Use `and()` instead.
+     *     [php]
+     *     // (u.type = ?) AND (u.role = ?)
+     *     $expr->andX('u.type = ?', 'u.role = ?'));
      *
      * @param mixed $x Optional clause. Defaults = null, but requires
      *                 at least one defined when converting to string.
@@ -72,17 +54,17 @@ class ExpressionBuilder
      */
     public function andX($x = null)
     {
-        Deprecation::trigger(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/3851',
-            'ExpressionBuilder::andX() is deprecated, use ExpressionBuilder::and() instead.'
-        );
-
         return new CompositeExpression(CompositeExpression::TYPE_AND, func_get_args());
     }
 
     /**
-     * @deprecated Use `or()` instead.
+     * Creates a disjunction of the given boolean expressions.
+     *
+     * Example:
+     *
+     *     [php]
+     *     // (u.type = ?) OR (u.role = ?)
+     *     $qb->where($qb->expr()->orX('u.type = ?', 'u.role = ?'));
      *
      * @param mixed $x Optional clause. Defaults = null, but requires
      *                 at least one defined when converting to string.
@@ -91,12 +73,6 @@ class ExpressionBuilder
      */
     public function orX($x = null)
     {
-        Deprecation::trigger(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/3851',
-            'ExpressionBuilder::orX() is deprecated, use ExpressionBuilder::or() instead.'
-        );
-
         return new CompositeExpression(CompositeExpression::TYPE_OR, func_get_args());
     }
 
@@ -232,7 +208,7 @@ class ExpressionBuilder
     /**
      * Creates an IS NULL expression with the given arguments.
      *
-     * @param string $x The expression to be restricted by IS NULL.
+     * @param string $x The field in string format to be restricted by IS NULL.
      *
      * @return string
      */
@@ -244,7 +220,7 @@ class ExpressionBuilder
     /**
      * Creates an IS NOT NULL expression with the given arguments.
      *
-     * @param string $x The expression to be restricted by IS NOT NULL.
+     * @param string $x The field in string format to be restricted by IS NOT NULL.
      *
      * @return string
      */
@@ -297,7 +273,7 @@ class ExpressionBuilder
     /**
      * Creates a NOT IN () comparison expression with the given arguments.
      *
-     * @param string          $x The expression to be inspected by NOT IN() comparison.
+     * @param string          $x The field in string format to be inspected by NOT IN() comparison.
      * @param string|string[] $y The placeholder or the array of values to be used by NOT IN() comparison.
      *
      * @return string
@@ -310,8 +286,8 @@ class ExpressionBuilder
     /**
      * Quotes a given input parameter.
      *
-     * @param mixed    $input The parameter to be quoted.
-     * @param int|null $type  The type of the parameter.
+     * @param mixed       $input The parameter to be quoted.
+     * @param string|null $type  The type of the parameter.
      *
      * @return string
      */

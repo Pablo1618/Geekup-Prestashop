@@ -26,31 +26,36 @@
 
 namespace PrestaShop\PrestaShop\Core\MerchandiseReturn\Configuration;
 
-use PrestaShop\PrestaShop\Core\Configuration\AbstractMultistoreConfiguration;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
+use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 
 /**
  * Provides data configuration for merchandise returns options form
  */
-class MerchandiseReturnOptionsConfiguration extends AbstractMultistoreConfiguration
+final class MerchandiseReturnOptionsConfiguration implements DataConfigurationInterface
 {
-    private const CONFIGURATION_FIELDS = [
-        'enable_order_return',
-        'order_return_period_in_days',
-        'order_return_prefix',
-    ];
+    /**
+     * @var ConfigurationInterface
+     */
+    private $configuration;
+
+    /**
+     * @param ConfigurationInterface $configuration
+     */
+    public function __construct(ConfigurationInterface $configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getConfiguration()
     {
-        $shopConstraint = $this->getShopConstraint();
-
         return [
-            'enable_order_return' => (bool) $this->configuration->get('PS_ORDER_RETURN', null, $shopConstraint),
-            'order_return_period_in_days' => (int) $this->configuration->get('PS_ORDER_RETURN_NB_DAYS', null, $shopConstraint),
-            'order_return_prefix' => $this->configuration->get('PS_RETURN_PREFIX', null, $shopConstraint),
+            'enable_order_return' => (bool) $this->configuration->get('PS_ORDER_RETURN'),
+            'order_return_period_in_days' => (int) $this->configuration->get('PS_ORDER_RETURN_NB_DAYS'),
+            'order_return_prefix' => $this->configuration->get('PS_RETURN_PREFIX'),
         ];
     }
 
@@ -59,47 +64,28 @@ class MerchandiseReturnOptionsConfiguration extends AbstractMultistoreConfigurat
      */
     public function updateConfiguration(array $configuration)
     {
-        if (!$this->validateConfiguration($configuration)) {
-            return [
-                [
-                    'key' => 'Invalid configuration',
-                    'parameters' => [],
-                    'domain' => 'Admin.Notifications.Warning',
-                ],
-            ];
-        }
-        $shopConstraint = $this->getShopConstraint();
-        $this->updateConfigurationValue(
-            'PS_ORDER_RETURN',
-            'enable_order_return',
-            $configuration,
-            $shopConstraint
-        );
-        $this->updateConfigurationValue(
-            'PS_ORDER_RETURN_NB_DAYS',
-            'order_return_period_in_days',
-            $configuration,
-            $shopConstraint
-        );
-        $this->updateConfigurationValue(
-            'PS_RETURN_PREFIX',
-            'order_return_prefix',
-            $configuration,
-            $shopConstraint
-        );
+        $errors = [];
 
-        return [];
+        if (!$this->validateConfiguration($configuration)) {
+            $errors[] = [
+                'key' => 'Invalid configuration',
+                'parameters' => [],
+                'domain' => 'Admin.Notifications.Warning',
+            ];
+        } else {
+            $this->configuration->set('PS_ORDER_RETURN', $configuration['enable_order_return']);
+            $this->configuration->set('PS_ORDER_RETURN_NB_DAYS', $configuration['order_return_period_in_days']);
+            $this->configuration->set('PS_RETURN_PREFIX', $configuration['order_return_prefix']);
+        }
+
+        return $errors;
     }
 
     /**
-     * @return OptionsResolver
+     * {@inheritdoc}
      */
-    protected function buildResolver(): OptionsResolver
+    public function validateConfiguration(array $configuration)
     {
-        return (new OptionsResolver())
-            ->setDefined(self::CONFIGURATION_FIELDS)
-            ->setAllowedTypes('enable_order_return', 'bool')
-            ->setAllowedTypes('order_return_period_in_days', 'int')
-            ->setAllowedTypes('order_return_prefix', 'array');
+        return isset($configuration['enable_order_return']);
     }
 }

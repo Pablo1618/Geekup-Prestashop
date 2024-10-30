@@ -129,7 +129,6 @@ final class SqlRequestConfiguration implements DataConfigurationInterface
 
         $cleanedContent = false;
         $file = self::CUSTOM_DEFINES_FILE;
-        $content = '';
         if (is_readable(self::CUSTOM_DEFINES_FILE)) {
             $content = file_get_contents(self::CUSTOM_DEFINES_FILE);
             $cleanedContent = php_strip_whitespace(self::CUSTOM_DEFINES_FILE);
@@ -147,7 +146,7 @@ final class SqlRequestConfiguration implements DataConfigurationInterface
         $status = file_put_contents($file, preg_replace(self::PATTERN, $replacement, $content));
 
         if (function_exists('opcache_invalidate')) {
-            @opcache_invalidate($file);
+            opcache_invalidate($file);
         }
 
         return $status !== false;

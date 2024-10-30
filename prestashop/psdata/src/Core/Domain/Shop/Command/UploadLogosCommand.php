@@ -30,7 +30,6 @@ use PrestaShop\PrestaShop\Core\Domain\Exception\FileUploadException;
 use PrestaShop\PrestaShop\Core\Domain\Shop\DTO\ShopLogoSettings;
 use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\NotSupportedFaviconExtensionException;
 use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\NotSupportedLogoImageExtensionException;
-use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\NotSupportedMailAndInvoiceImageExtensionException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
@@ -91,12 +90,12 @@ class UploadLogosCommand
     /**
      * @param UploadedFile $uploadedInvoiceLogo
      *
-     * @throws NotSupportedMailAndInvoiceImageExtensionException
+     * @throws NotSupportedLogoImageExtensionException
      * @throws FileUploadException
      */
     public function setUploadedInvoiceLogo(UploadedFile $uploadedInvoiceLogo)
     {
-        $this->assertIsValidMailAndInvoiceImageExtension($uploadedInvoiceLogo);
+        $this->assertIsValidLogoImageExtension($uploadedInvoiceLogo);
         $this->assertNativeFileValidationDoesNotFail($uploadedInvoiceLogo);
 
         $this->uploadedInvoiceLogo = $uploadedInvoiceLogo;
@@ -113,12 +112,12 @@ class UploadLogosCommand
     /**
      * @param UploadedFile $uploadedMailLogo
      *
-     * @throws NotSupportedMailAndInvoiceImageExtensionException
+     * @throws NotSupportedLogoImageExtensionException
      * @throws FileUploadException
      */
     public function setUploadedMailLogo(UploadedFile $uploadedMailLogo)
     {
-        $this->assertIsValidMailAndInvoiceImageExtension($uploadedMailLogo);
+        $this->assertIsValidLogoImageExtension($uploadedMailLogo);
         $this->assertNativeFileValidationDoesNotFail($uploadedMailLogo);
 
         $this->uploadedMailLogo = $uploadedMailLogo;
@@ -154,32 +153,11 @@ class UploadLogosCommand
      *
      * @throws NotSupportedLogoImageExtensionException
      */
-    private function assertIsValidLogoImageExtension(UploadedFile $uploadedFile): void
+    private function assertIsValidLogoImageExtension(UploadedFile $uploadedFile)
     {
         $extension = $uploadedFile->getClientOriginalExtension();
         if (!in_array($extension, ShopLogoSettings::AVAILABLE_LOGO_IMAGE_EXTENSIONS, true)) {
-            throw new NotSupportedLogoImageExtensionException(sprintf(
-                'Not supported "%s" image logo extension. Supported extensions are "%s"',
-                $extension,
-                implode(',', ShopLogoSettings::AVAILABLE_LOGO_IMAGE_EXTENSIONS
-            )));
-        }
-    }
-
-    /**
-     * @param UploadedFile $uploadedFile
-     *
-     * @throws NotSupportedMailAndInvoiceImageExtensionException
-     */
-    private function assertIsValidMailAndInvoiceImageExtension(UploadedFile $uploadedFile): void
-    {
-        $extension = $uploadedFile->getClientOriginalExtension();
-        if (!in_array($extension, ShopLogoSettings::AVAILABLE_MAIL_AND_INVOICE_LOGO_IMAGE_EXTENSIONS, true)) {
-            throw new NotSupportedMailAndInvoiceImageExtensionException(sprintf(
-                'Not supported "%s" image logo extension. Supported extensions are "%s"',
-                $extension,
-                implode(',', ShopLogoSettings::AVAILABLE_MAIL_AND_INVOICE_LOGO_IMAGE_EXTENSIONS
-            )));
+            throw new NotSupportedLogoImageExtensionException(sprintf('Not supported "%s" image logo extension. Supported extensions are ""', implode(',', ShopLogoSettings::AVAILABLE_LOGO_IMAGE_EXTENSIONS)));
         }
     }
 
@@ -190,7 +168,7 @@ class UploadLogosCommand
      *
      * @throws FileUploadException
      */
-    private function assertNativeFileValidationDoesNotFail(UploadedFile $uploadedFile): void
+    private function assertNativeFileValidationDoesNotFail(UploadedFile $uploadedFile)
     {
         $errorCode = $uploadedFile->getError();
 

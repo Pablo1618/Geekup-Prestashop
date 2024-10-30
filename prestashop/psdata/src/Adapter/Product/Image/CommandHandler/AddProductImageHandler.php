@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Product\Image\CommandHandler;
 
-use PrestaShop\PrestaShop\Adapter\Image\ProductImageFileValidator;
+use PrestaShop\PrestaShop\Adapter\Image\ImageValidator;
 use PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Image\Uploader\ProductImageUploader;
 use PrestaShop\PrestaShop\Core\Domain\Product\Image\Command\AddProductImageCommand;
@@ -46,23 +46,36 @@ final class AddProductImageHandler implements AddProductImageHandlerInterface
     private $productImageUploader;
 
     /**
-     * @var ProductImageFileValidator
-     */
-    private $imageValidator;
-
-    /**
      * @var ProductImageRepository
      */
     private $productImageRepository;
 
+    /**
+     * @var array
+     */
+    private $contextShopIds;
+
+    /**
+     * @var ImageValidator
+     */
+    private $imageValidator;
+
+    /**
+     * @param ProductImageUploader $productImageUploader
+     * @param ProductImageRepository $productImageRepository
+     * @param ImageValidator $imageValidator
+     * @param array $contextShopIds
+     */
     public function __construct(
         ProductImageUploader $productImageUploader,
         ProductImageRepository $productImageRepository,
-        ProductImageFileValidator $imageValidator
+        ImageValidator $imageValidator,
+        array $contextShopIds
     ) {
         $this->productImageUploader = $productImageUploader;
-        $this->imageValidator = $imageValidator;
         $this->productImageRepository = $productImageRepository;
+        $this->contextShopIds = $contextShopIds;
+        $this->imageValidator = $imageValidator;
     }
 
     /**
@@ -70,12 +83,11 @@ final class AddProductImageHandler implements AddProductImageHandlerInterface
      */
     public function handle(AddProductImageCommand $command): ImageId
     {
-        $filePath = $command->getFilePath();
-        $this->imageValidator->assertFileUploadLimits($filePath);
-        $this->imageValidator->assertIsValidImageType($filePath);
+        $this->imageValidator->assertFileUploadLimits($command->getFilePath());
+        $this->imageValidator->assertIsValidImageType($command->getFilePath());
 
-        $image = $this->productImageRepository->create($command->getProductId(), $command->getShopConstraint());
-        $this->productImageUploader->upload($image, $filePath);
+        $image = $this->productImageRepository->create($command->getProductId(), $this->contextShopIds);
+        $this->productImageUploader->upload($image, $command->getFilePath());
 
         return new ImageId((int) $image->id);
     }

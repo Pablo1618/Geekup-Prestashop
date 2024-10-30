@@ -65,6 +65,7 @@ class ContactsController extends FrameworkBundleAdminController
                 'help_link' => $this->generateSidebarLink($request->attributes->get('_legacy_controller')),
                 'enableSidebar' => true,
                 'layoutTitle' => $this->trans('Contacts', 'Admin.Navigation.Menu'),
+                'requireAddonsSearch' => true,
                 'layoutHeaderToolbarBtn' => [
                     'add' => [
                         'desc' => $this->trans('Add new contact', 'Admin.Shopparameters.Feature'),
@@ -78,8 +79,6 @@ class ContactsController extends FrameworkBundleAdminController
     }
 
     /**
-     * @deprecated since 8.0 and will be removed in next major. Use CommonController:searchGridAction instead
-     *
      * Grid search action.
      *
      * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))")
@@ -132,7 +131,7 @@ class ContactsController extends FrameworkBundleAdminController
             if (null !== $result->getIdentifiableObjectId()) {
                 $this->addFlash(
                     'success',
-                    $this->trans('Successful creation', 'Admin.Notifications.Success')
+                    $this->trans('Successful creation.', 'Admin.Notifications.Success')
                 );
 
                 return $this->redirectToRoute('admin_contacts_index');
@@ -177,7 +176,7 @@ class ContactsController extends FrameworkBundleAdminController
             $result = $contactFormHandler->handleFor((int) $contactId, $contactForm);
 
             if ($result->isSubmitted() && $result->isValid()) {
-                $this->addFlash('success', $this->trans('Successful update', 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_contacts_index');
             }
@@ -219,7 +218,7 @@ class ContactsController extends FrameworkBundleAdminController
         } else {
             $this->addFlash(
                 'success',
-                $this->trans('Successful deletion', 'Admin.Notifications.Success')
+                $this->trans('Successful deletion.', 'Admin.Notifications.Success')
             );
         }
 
@@ -267,7 +266,7 @@ class ContactsController extends FrameworkBundleAdminController
     {
         return [
             ContactNotFoundException::class => $this->trans(
-                'The object cannot be loaded (or found).',
+                'The object cannot be loaded (or found)',
                 'Admin.Notifications.Error'
             ),
             ContactConstraintException::class => [
@@ -277,7 +276,7 @@ class ContactsController extends FrameworkBundleAdminController
                     [
                         sprintf(
                             '"%s"',
-                            $this->trans('Store association', 'Admin.Global')
+                            $this->trans('Shop association', 'Admin.Global')
                         ),
                     ]
                 ),

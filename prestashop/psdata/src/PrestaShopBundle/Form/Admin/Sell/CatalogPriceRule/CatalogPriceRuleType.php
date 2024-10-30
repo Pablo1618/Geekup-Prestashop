@@ -31,15 +31,15 @@ use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DateRange;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\Reduction;
 use PrestaShop\PrestaShop\Core\Domain\ValueObject\Reduction as ReductionVO;
 use PrestaShopBundle\Form\Admin\Type\DateRangeType;
-use PrestaShopBundle\Form\Admin\Type\PriceReductionType;
+use PrestaShopBundle\Form\Admin\Type\ReductionType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Defines catalog price rule form for create/edit actions
@@ -64,11 +64,6 @@ class CatalogPriceRuleType extends AbstractType
     /**
      * @var array
      */
-    private $currencyByIdChoicesAttributes;
-
-    /**
-     * @var array
-     */
     private $countryByIdChoices;
 
     /**
@@ -82,9 +77,9 @@ class CatalogPriceRuleType extends AbstractType
     private $shopByIdChoices;
 
     /**
-     * @var string
+     * @var array
      */
-    private $defaultCurrencySymbol;
+    private $taxInclusionChoices;
 
     /**
      * @param TranslatorInterface $translator
@@ -93,7 +88,7 @@ class CatalogPriceRuleType extends AbstractType
      * @param array $countryByIdChoices
      * @param array $groupByIdChoices
      * @param array $shopByIdChoices
-     * @param array $currencyByIdChoicesAttributes
+     * @param array $taxInclusionChoices
      */
     public function __construct(
         TranslatorInterface $translator,
@@ -102,17 +97,15 @@ class CatalogPriceRuleType extends AbstractType
         array $countryByIdChoices,
         array $groupByIdChoices,
         array $shopByIdChoices,
-        array $currencyByIdChoicesAttributes,
-        string $defaultCurrencySymbol
+        array $taxInclusionChoices
     ) {
         $this->translator = $translator;
         $this->isMultishopEnabled = $isMultishopEnabled;
         $this->currencyByIdChoices = $currencyByIdChoices;
-        $this->currencyByIdChoicesAttributes = $currencyByIdChoicesAttributes;
         $this->countryByIdChoices = $countryByIdChoices;
         $this->groupByIdChoices = $groupByIdChoices;
         $this->shopByIdChoices = $shopByIdChoices;
-        $this->defaultCurrencySymbol = $defaultCurrencySymbol;
+        $this->taxInclusionChoices = $taxInclusionChoices;
     }
 
     /**
@@ -130,10 +123,6 @@ class CatalogPriceRuleType extends AbstractType
                 'required' => false,
                 'placeholder' => false,
                 'choices' => $this->getModifiedCurrencyChoices(),
-                'choice_attr' => $this->currencyByIdChoicesAttributes,
-                'attr' => [
-                    'data-default-currency-symbol' => $this->defaultCurrencySymbol,
-                ],
             ])
             ->add('id_country', ChoiceType::class, [
                 'required' => false,
@@ -177,7 +166,6 @@ class CatalogPriceRuleType extends AbstractType
             ])
             ->add('date_range', DateRangeType::class, [
                 'date_format' => 'YYYY-MM-DD HH:mm:ss',
-                'placeholder' => $this->translator->trans('YYYY-MM-DD HH:mm:ss', [], 'Admin.Global'),
                 'constraints' => [
                     new DateRange([
                         'message' => $this->translator->trans(
@@ -188,7 +176,12 @@ class CatalogPriceRuleType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('reduction', PriceReductionType::class, [
+            ->add('include_tax', ChoiceType::class, [
+                'placeholder' => false,
+                'required' => false,
+                'choices' => $this->taxInclusionChoices,
+            ])
+            ->add('reduction', ReductionType::class, [
                 'constraints' => [
                     new Reduction([
                         'invalidPercentageValueMessage' => $this->translator->trans(

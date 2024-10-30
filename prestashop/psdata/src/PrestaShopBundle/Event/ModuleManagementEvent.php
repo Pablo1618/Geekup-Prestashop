@@ -26,31 +26,26 @@
 
 namespace PrestaShopBundle\Event;
 
-use PrestaShop\PrestaShop\Core\Module\ModuleInterface;
-use Symfony\Contracts\EventDispatcher\Event;
+use PrestaShop\PrestaShop\Adapter\Module\Module;
+use Symfony\Component\EventDispatcher\Event;
 
 class ModuleManagementEvent extends Event
 {
     public const INSTALL = 'module.install';
-    public const POST_INSTALL = 'module.post.install';
     public const UNINSTALL = 'module.uninstall';
     public const DISABLE = 'module.disable';
     public const ENABLE = 'module.enable';
-    public const ENABLE_MOBILE = 'module.enable.mobile';
-    public const DISABLE_MOBILE = 'module.disable.mobile';
     public const UPGRADE = 'module.upgrade';
     public const RESET = 'module.reset';
-    public const DELETE = 'module.delete';
 
-    /** @var ModuleInterface */
     private $module;
 
-    public function __construct(ModuleInterface $module)
+    public function __construct(Module $module)
     {
         $this->module = $module;
     }
 
-    public function getModule(): ModuleInterface
+    public function getModule()
     {
         return $this->module;
     }

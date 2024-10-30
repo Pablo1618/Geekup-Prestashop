@@ -22,13 +22,8 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *}
-
-<div id="profiling-links">
-  <span>Profiling</span>
+<div class="col-2">
   <ol>
-    <li>
-      <a href="#summary">Summary</a>
-    </li>
     <li>
       <a href="#stopwatch">Stopwatch SQL</a>
     </li>

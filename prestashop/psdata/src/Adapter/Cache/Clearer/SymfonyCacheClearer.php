@@ -26,13 +26,13 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Cache\Clearer;
 
-use AppKernel;
-use Exception;
 use Hook;
 use PrestaShop\PrestaShop\Core\Cache\Clearer\CacheClearerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Tools;
 
 /**
  * Class SymfonyCacheClearer clears Symfony cache directly from filesystem.
@@ -41,70 +41,50 @@ use Symfony\Component\Console\Output\NullOutput;
  */
 final class SymfonyCacheClearer implements CacheClearerInterface
 {
+    private $shutdownRegistered = false;
+
     /**
      * {@inheritdoc}
      */
     public function clear()
     {
-        /* @var AppKernel */
+        /*  @var KernelInterface */
         global $kernel;
-        if (!$kernel) {
+
+        if (empty($kernel)) {
+            Tools::clearSf2Cache();
+
             return;
         }
 
-        $cacheClearLocked = $kernel->locksCacheClear();
-        if (false === $cacheClearLocked) {
-            // The lock was not possible for some reason we should exit
+        if ($this->shutdownRegistered) {
             return;
         }
 
-        // If we reach here it means the clear lock file is locked, we register a shutdown function that will clear the cache once
-        // the current process is over.
+        $this->shutdownRegistered = true;
         register_shutdown_function(function () use ($kernel) {
-            try {
-                $cacheDir = $kernel->getCacheDir();
-                if (!file_exists($cacheDir)) {
-                    $kernel->unlocksCacheClear();
-
-                    return;
-                }
-
-                $environments = ['prod', 'dev'];
-                foreach ($environments as $environment) {
-                    try {
-                        $application = new Application($kernel);
-                        $application->setAutoExit(false);
-
-                        // Clear cache without warmup to be fast
-                        $input = new ArrayInput([
-                            'command' => 'cache:clear',
-                            '--no-warmup' => true,
-                            '--env' => $environment,
-                        ]);
-
-                        $output = new NullOutput();
-                        $application->doRun($input, $output);
-                    } catch (Exception $e) {
-                        // Do nothing but at least does not break the loop nor function
-                    }
-                }
-
-                // Warmup prod environment only (not needed for dev since many things are dynamic)
-                $application = new Application($kernel);
-                $application->setAutoExit(false);
-                $input = new ArrayInput([
-                    'command' => 'cache:warmup',
-                    '--no-optional-warmers' => true,
-                    '--env' => 'prod',
-                    '--no-debug' => true,
-                ]);
-
-                $output = new NullOutput();
-                $application->doRun($input, $output);
-            } finally {
-                Hook::exec('actionClearSf2Cache');
-                $kernel->unlocksCacheClear();
+            // The cache may have been removed by Tools::clearSf2Cache, it happens during install
+            // process, in which case we don't run the cache:clear command because it is not only
+            // useless it will simply fail as the container caches classes have been removed
+            $cacheDir = _PS_ROOT_DIR_ . '/var/cache/' . _PS_ENV_ . '/';
+            if (!file_exists($cacheDir)) {
+                return;
             }
+
+            $application = new Application($kernel);
+            $application->setAutoExit(false);
+
+            // Clear cache
+            $input = new ArrayInput([
+                'command' => 'cache:clear',
+                '--no-optional-warmers' => true,
+                '--env' => _PS_ENV_,
+            ]);
+
+            $output = new NullOutput();
+            $application->run($input, $output);
+
+            Hook::exec('actionClearSf2Cache');
         });
     }
 }

@@ -37,6 +37,11 @@ use Symfony\Component\Translation\MessageCatalogueInterface;
 class SearchProvider extends AbstractProvider implements UseDefaultCatalogueInterface, UseModuleInterface
 {
     /**
+     * @var string the "modules" directory path
+     */
+    private $modulesDirectory;
+
+    /**
      * @var ExternalModuleLegacySystemProvider
      */
     private $externalModuleLegacySystemProvider;
@@ -44,11 +49,30 @@ class SearchProvider extends AbstractProvider implements UseDefaultCatalogueInte
     public function __construct(
         LoaderInterface $databaseLoader,
         ExternalModuleLegacySystemProvider $externalModuleLegacySystemProvider,
-        $resourceDirectory
+        $resourceDirectory,
+        $modulesDirectory
     ) {
+        $this->modulesDirectory = $modulesDirectory;
         $this->externalModuleLegacySystemProvider = $externalModuleLegacySystemProvider;
 
         parent::__construct($databaseLoader, $resourceDirectory);
+    }
+
+    /**
+     * Get domain.
+     *
+     * @deprecated since 1.7.6, to be removed in the next major
+     *
+     * @return mixed
+     */
+    public function getDomain()
+    {
+        @trigger_error(
+            __METHOD__ . ' function is deprecated and will be removed in the next major',
+            E_USER_DEPRECATED
+        );
+
+        return $this->domain;
     }
 
     /**
@@ -110,6 +134,21 @@ class SearchProvider extends AbstractProvider implements UseDefaultCatalogueInte
         }
 
         return $xliffCatalogue;
+    }
+
+    /**
+     * @deprecated since 1.7.6, to be removed in the next major
+     *
+     * @return string
+     */
+    public function getModuleDirectory()
+    {
+        @trigger_error(
+            __METHOD__ . ' function is deprecated and will be removed in the next major',
+            E_USER_DEPRECATED
+        );
+
+        return $this->modulesDirectory;
     }
 
     /**

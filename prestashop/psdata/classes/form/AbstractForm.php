@@ -24,38 +24,20 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 use PrestaShop\PrestaShop\Core\Foundation\Templating\RenderableProxy;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 abstract class AbstractFormCore implements FormInterface
 {
-    /**
-     * @var Smarty
-     */
     private $smarty;
-    /**
-     * @var TranslatorInterface
-     */
     protected $translator;
-    /**
-     * @var ValidateConstraintTranslator
-     */
     protected $constraintTranslator;
-
-    /**
-     * @var FormFormatterInterface
-     */
-    protected $formatter;
 
     protected $action;
     protected $template;
 
-    /**
-     * @var array
-     */
+    protected $formatter;
+
     protected $formFields = [];
-    /**
-     * @var array[]
-     */
     protected $errors = ['' => []];
 
     public function __construct(
@@ -167,7 +149,7 @@ abstract class AbstractFormCore implements FormInterface
                         )
                     );
                 }
-            } else {
+            } elseif (!$field->isRequired()) {
                 if (!$field->getValue()) {
                     continue;
                 } elseif (!$this->checkFieldLength($field)) {
@@ -248,7 +230,7 @@ abstract class AbstractFormCore implements FormInterface
     /**
      * Validate field length
      *
-     * @param FormField $field the field to check
+     * @param $field the field to check
      *
      * @return bool
      */

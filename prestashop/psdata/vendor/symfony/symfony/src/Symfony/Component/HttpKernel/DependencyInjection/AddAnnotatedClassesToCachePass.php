@@ -12,10 +12,9 @@
 namespace Symfony\Component\HttpKernel\DependencyInjection;
 
 use Composer\Autoload\ClassLoader;
-use Symfony\Component\Debug\DebugClassLoader as LegacyDebugClassLoader;
+use Symfony\Component\Debug\DebugClassLoader;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\ErrorHandler\DebugClassLoader;
 use Symfony\Component\HttpKernel\Kernel;
 
 /**
@@ -37,15 +36,23 @@ class AddAnnotatedClassesToCachePass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $annotatedClasses = $this->kernel->getAnnotatedClassesToCompile();
+        $classes = [];
+        $annotatedClasses = [];
         foreach ($container->getExtensions() as $extension) {
             if ($extension instanceof Extension) {
+                if (\PHP_VERSION_ID < 70000) {
+                    $classes = array_merge($classes, $extension->getClassesToCompile());
+                }
                 $annotatedClasses = array_merge($annotatedClasses, $extension->getAnnotatedClassesToCompile());
             }
         }
 
         $existingClasses = $this->getClassesInComposerClassMaps();
 
+        if (\PHP_VERSION_ID < 70000) {
+            $classes = $container->getParameterBag()->resolveValue($classes);
+            $this->kernel->setClassCache($this->expandClasses($classes, $existingClasses));
+        }
         $annotatedClasses = $container->getParameterBag()->resolveValue($annotatedClasses);
         $this->kernel->setAnnotatedClassCache($this->expandClasses($annotatedClasses, $existingClasses));
     }
@@ -55,14 +62,16 @@ class AddAnnotatedClassesToCachePass implements CompilerPassInterface
      *
      * @param array $patterns The class patterns to expand
      * @param array $classes  The existing classes to match against the patterns
+     *
+     * @return array A list of classes derived from the patterns
      */
-    private function expandClasses(array $patterns, array $classes): array
+    private function expandClasses(array $patterns, array $classes)
     {
         $expanded = [];
 
         // Explicit classes declared in the patterns are returned directly
         foreach ($patterns as $key => $pattern) {
-            if (!str_ends_with($pattern, '\\') && !str_contains($pattern, '*')) {
+            if ('\\' !== substr($pattern, -1) && false === strpos($pattern, '*')) {
                 unset($patterns[$key]);
                 $expanded[] = ltrim($pattern, '\\');
             }
@@ -82,7 +91,7 @@ class AddAnnotatedClassesToCachePass implements CompilerPassInterface
         return array_unique($expanded);
     }
 
-    private function getClassesInComposerClassMaps(): array
+    private function getClassesInComposerClassMaps()
     {
         $classes = [];
 
@@ -91,7 +100,7 @@ class AddAnnotatedClassesToCachePass implements CompilerPassInterface
                 continue;
             }
 
-            if ($function[0] instanceof DebugClassLoader || $function[0] instanceof LegacyDebugClassLoader) {
+            if ($function[0] instanceof DebugClassLoader) {
                 $function = $function[0]->getClassLoader();
             }
 
@@ -103,7 +112,7 @@ class AddAnnotatedClassesToCachePass implements CompilerPassInterface
         return array_keys($classes);
     }
 
-    private function patternsToRegexps(array $patterns): array
+    private function patternsToRegexps($patterns)
     {
         $regexps = [];
 
@@ -125,12 +134,12 @@ class AddAnnotatedClassesToCachePass implements CompilerPassInterface
         return $regexps;
     }
 
-    private function matchAnyRegexps(string $class, array $regexps): bool
+    private function matchAnyRegexps($class, $regexps)
     {
-        $isTest = str_contains($class, 'Test');
+        $isTest = false !== strpos($class, 'Test');
 
         foreach ($regexps as $regex) {
-            if ($isTest && !str_contains($regex, 'Test')) {
+            if ($isTest && false === strpos($regex, 'Test')) {
                 continue;
             }
 

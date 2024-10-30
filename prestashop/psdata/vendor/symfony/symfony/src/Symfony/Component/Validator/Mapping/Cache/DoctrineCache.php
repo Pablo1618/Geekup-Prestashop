@@ -14,14 +14,10 @@ namespace Symfony\Component\Validator\Mapping\Cache;
 use Doctrine\Common\Cache\Cache;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
-@trigger_error(sprintf('The "%s" class is deprecated since Symfony 4.4.', DoctrineCache::class), \E_USER_DEPRECATED);
-
 /**
  * Adapts a Doctrine cache to a CacheInterface.
  *
  * @author Florian Voutzinos <florian@voutzinos.com>
- *
- * @deprecated since Symfony 4.4.
  */
 final class DoctrineCache implements CacheInterface
 {
@@ -40,7 +36,7 @@ final class DoctrineCache implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function has($class): bool
+    public function has($class)
     {
         return $this->cache->contains($class);
     }

@@ -40,7 +40,6 @@ use PrestaShop\PrestaShop\Core\Domain\Cart\Query\GetCartForViewing;
 use PrestaShop\PrestaShop\Core\Domain\Cart\QueryHandler\GetCartForViewingHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Cart\QueryResult\CartView;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
-use PrestaShop\PrestaShop\Core\Util\Sorter;
 use Product;
 use StockAvailable;
 use Validate;
@@ -118,10 +117,6 @@ final class GetCartForViewingHandler implements GetCartForViewingHandlerInterfac
             $total_shipping = $summary['total_shipping'];
         }
 
-        // Sort products by Reference ID (and if equals (like combination) by Supplier Reference)
-        $sorter = new Sorter();
-        $products = $sorter->natural($products, Sorter::ORDER_DESC, 'reference', 'supplier_reference');
-
         foreach ($products as &$product) {
             if ($tax_calculation_method == PS_TAX_EXC) {
                 $product['product_price'] = $product['price'];
@@ -173,22 +168,8 @@ final class GetCartForViewingHandler implements GetCartForViewingHandlerInterfac
 
         $orderInformation = [
             'id' => $order->id,
-            'placed_date' => (new DateTime($order->date_add))->format($context->language->date_format_full),
+            'placed_date' => (new DateTime($order->date_add))->format($context->language->date_format_lite),
         ];
-
-        // Prepare link to share this cart, if it was not ordered yet
-        $cartLink = null;
-        if (!Validate::isLoadedObject($order)) {
-            $cartLink = $context->link->getPageLink(
-                'cart',
-                false,
-                (int) $cart->getAssociatedLanguage()->getId(),
-                [
-                    'recover_cart' => $cart->id,
-                    'token_cart' => md5(_COOKIE_KEY_ . 'recover_cart_' . (int) $cart->id),
-                ]
-            );
-        }
 
         $cartSummary = [
             'products' => $products,
@@ -204,9 +185,6 @@ final class GetCartForViewingHandler implements GetCartForViewingHandlerInterfac
             'total' => $total_price,
             'total_formatted' => $this->locale->formatPrice($total_price, $currency->iso_code),
             'is_tax_included' => $tax_calculation_method == PS_TAX_INC,
-            'cart_link' => $cartLink,
-            'date_add' => (new DateTime($cart->date_add))->format($context->language->date_format_full),
-            'date_upd' => (new DateTime($cart->date_upd))->format($context->language->date_format_full),
         ];
 
         return new CartView($cart->id, $cart->id_currency, $customerInformation, $orderInformation, $cartSummary);

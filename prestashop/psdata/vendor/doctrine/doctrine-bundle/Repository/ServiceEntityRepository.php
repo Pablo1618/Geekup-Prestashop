@@ -6,8 +6,6 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use LogicException;
 
-use function sprintf;
-
 /**
  * Optional EntityRepository base class with a simplified constructor (for autowiring).
  *
@@ -16,22 +14,18 @@ use function sprintf;
  *
  * class YourEntityRepository extends ServiceEntityRepository
  * {
- *     public function __construct(ManagerRegistry $registry)
+ *     public function __construct(Registry $registry)
  *     {
  *         parent::__construct($registry, YourEntity::class);
  *     }
  * }
- *
- * @template T of object
- * @template-extends EntityRepository<T>
  */
 class ServiceEntityRepository extends EntityRepository implements ServiceEntityRepositoryInterface
 {
     /**
      * @param string $entityClass The class name of the entity this repository manages
-     * @psalm-param class-string<T> $entityClass
      */
-    public function __construct(ManagerRegistry $registry, string $entityClass)
+    public function __construct(ManagerRegistry $registry, $entityClass)
     {
         $manager = $registry->getManagerForClass($entityClass);
 

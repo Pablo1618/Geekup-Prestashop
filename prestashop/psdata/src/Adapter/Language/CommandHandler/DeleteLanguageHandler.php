@@ -26,7 +26,8 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Language\CommandHandler;
 
-use PrestaShop\PrestaShop\Adapter\File\RobotsTextFileGenerator;
+use Context;
+use Language;
 use PrestaShop\PrestaShop\Core\Domain\Language\Command\DeleteLanguageCommand;
 use PrestaShop\PrestaShop\Core\Domain\Language\CommandHandler\DeleteLanguageHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Language\Exception\DefaultLanguageException;
@@ -40,19 +41,6 @@ use Shop;
  */
 final class DeleteLanguageHandler extends AbstractLanguageHandler implements DeleteLanguageHandlerInterface
 {
-    /**
-     * @var RobotsTextFileGenerator
-     */
-    private $robotsTextFileGenerator;
-
-    /**
-     * @param RobotsTextFileGenerator $robotsTextFileGenerator
-     */
-    public function __construct(RobotsTextFileGenerator $robotsTextFileGenerator)
-    {
-        $this->robotsTextFileGenerator = $robotsTextFileGenerator;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -80,6 +68,5 @@ final class DeleteLanguageHandler extends AbstractLanguageHandler implements Del
         if (false === $language->delete()) {
             throw new LanguageException(sprintf('Failed to delete language "%s"', $language->iso_code));
         }
-        $this->robotsTextFileGenerator->generateFile();
     }
 }

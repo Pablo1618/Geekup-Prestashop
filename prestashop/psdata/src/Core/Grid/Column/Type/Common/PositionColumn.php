@@ -64,8 +64,6 @@ final class PositionColumn extends AbstractColumn
                 'update_method' => 'GET',
                 'record_route_params' => [],
                 'clickable' => true,
-                'required_filter' => null,
-                'display_offset' => 1,
             ])
             ->setAllowedTypes('id_field', 'string')
             ->setAllowedTypes('position_field', 'string')
@@ -74,9 +72,6 @@ final class PositionColumn extends AbstractColumn
             ->setAllowedTypes('update_method', 'string')
             ->setAllowedTypes('record_route_params', ['array'])
             ->setAllowedTypes('clickable', 'bool')
-            ->setAllowedTypes('required_filter', ['string', 'null'])
-            ->setAllowedTypes('display_offset', ['integer'])
-            ->setAllowedValues('update_method', ['GET', 'POST'])
-        ;
+            ->setAllowedValues('update_method', ['GET', 'POST']);
     }
 }

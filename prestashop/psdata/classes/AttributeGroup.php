@@ -29,7 +29,7 @@
  */
 class AttributeGroupCore extends ObjectModel
 {
-    /** @var string|string[] Name */
+    /** @var string Name */
     public $name;
     /** @var bool Whether the attribute group is a color group */
     public $is_color_group;
@@ -37,7 +37,8 @@ class AttributeGroupCore extends ObjectModel
     public $position;
     /** @var string Group type */
     public $group_type;
-    /** @var string|string[] Public Name */
+
+    /** @var string Public Name */
     public $public_name;
 
     /**
@@ -86,7 +87,11 @@ class AttributeGroupCore extends ObjectModel
      */
     public function add($autoDate = true, $nullValues = false)
     {
-        $this->is_color_group = $this->group_type == 'color';
+        if ($this->group_type == 'color') {
+            $this->is_color_group = 1;
+        } else {
+            $this->is_color_group = 0;
+        }
 
         if ($this->position <= 0) {
             $this->position = AttributeGroup::getHigherPosition() + 1;
@@ -110,7 +115,11 @@ class AttributeGroupCore extends ObjectModel
      */
     public function update($nullValues = false)
     {
-        $this->is_color_group = $this->group_type == 'color';
+        if ($this->group_type == 'color') {
+            $this->is_color_group = 1;
+        } else {
+            $this->is_color_group = 0;
+        }
 
         $return = parent::update($nullValues);
         Hook::exec('actionAttributeGroupSave', ['id_attribute_group' => $this->id]);
@@ -333,7 +342,7 @@ class AttributeGroupCore extends ObjectModel
      * Move a group attribute.
      *
      * @param bool $direction Up (1) or Down (0)
-     * @param int|null $position
+     * @param int $position
      *
      * @return bool Update result
      */

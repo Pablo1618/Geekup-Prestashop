@@ -71,7 +71,7 @@ final class ChainedFiltersBuilder extends AbstractFiltersBuilder
      */
     public function buildFilters(Filters $filters = null)
     {
-        if ($this->builders->count() === 0) {
+        if (empty($this->builders)) {
             return $filters;
         }
 

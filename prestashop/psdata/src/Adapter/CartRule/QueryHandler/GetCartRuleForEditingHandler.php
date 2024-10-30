@@ -45,7 +45,6 @@ use PrestaShop\PrestaShop\Core\Domain\CartRule\QueryResult\EditableCartRuleReduc
 use PrestaShop\PrestaShop\Core\Domain\CartRule\QueryResult\EditableCartRuleRestrictions;
 use PrestaShop\PrestaShop\Core\Domain\Currency\ValueObject\CurrencyId;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\CustomerId;
-use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\NoCustomerId;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime as DateTimeUtils;
@@ -79,8 +78,8 @@ final class GetCartRuleForEditingHandler extends AbstractCartRuleHandler impleme
             $cartRuleInformation,
             $cartRuleConditions,
             $cartRuleActions,
-            !DateTimeUtils::isNull($dateAdd) ? new DateTime($dateAdd) : null,
-            !DateTimeUtils::isNull($dateUpd) ? new DateTime($dateUpd) : null
+            $dateAdd !== DateTimeUtils::NULL_DATETIME ? new DateTime($dateAdd) : null,
+            $dateUpd !== DateTimeUtils::NULL_DATETIME ? new DateTime($dateUpd) : null
         );
     }
 
@@ -99,7 +98,7 @@ final class GetCartRuleForEditingHandler extends AbstractCartRuleHandler impleme
 
     private function getCartRuleConditions(CartRule $cartRule): EditableCartRuleConditions
     {
-        $customerId = (int) $cartRule->id_customer !== NoCustomerId::NO_CUSTOMER_ID_VALUE ? new CustomerId((int) $cartRule->id_customer) : new NoCustomerId();
+        $customerId = new CustomerId((int) $cartRule->id_customer);
         $dateFrom = $cartRule->date_from;
         $dateTo = $cartRule->date_to;
         $minimumAmountCurrencyId = $cartRule->minimum_amount_currency ? new CurrencyId((int) $cartRule->minimum_amount_currency) : null;
@@ -122,8 +121,8 @@ final class GetCartRuleForEditingHandler extends AbstractCartRuleHandler impleme
 
         return new EditableCartRuleConditions(
             $customerId,
-            !DateTimeUtils::isNull($dateFrom) ? new DateTime($dateFrom) : null,
-            !DateTimeUtils::isNull($dateTo) ? new DateTime($dateTo) : null,
+            $dateFrom !== DateTimeUtils::NULL_DATETIME ? new DateTime($dateFrom) : null,
+            $dateTo !== DateTimeUtils::NULL_DATETIME ? new DateTime($dateTo) : null,
             (int) $cartRule->quantity,
             (int) $cartRule->quantity_per_user,
             $cartRuleMinimum,

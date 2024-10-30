@@ -11,8 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\CacheWarmer;
 
-@trigger_error('The '.TemplatePathsCacheWarmer::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig instead.', \E_USER_DEPRECATED);
-
 use Symfony\Bundle\FrameworkBundle\Templating\Loader\TemplateLocator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmer;
@@ -21,8 +19,6 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmer;
  * Computes the association between template names and their paths on the disk.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class TemplatePathsCacheWarmer extends CacheWarmer
 {

@@ -15,15 +15,15 @@ class IntegerType extends Type implements PhpIntegerMappingType
      */
     public function getName()
     {
-        return Types::INTEGER;
+        return Type::INTEGER;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return $platform->getIntegerTypeDeclarationSQL($column);
+        return $platform->getIntegerTypeDeclarationSQL($fieldDeclaration);
     }
 
     /**

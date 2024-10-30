@@ -1,7 +1,5 @@
 <?php
-/*
-* Important - this file MUST implement all strings defined in base en.php file
-*/
+
 define('lang_Select', 'Vybrat');
 define('lang_Erase', 'Smazat');
 define('lang_Open', 'Otevřít');
@@ -53,8 +51,4 @@ define('lang_Date_type', 'd.m.Y');
 define('lang_OK', 'OK');
 define('lang_Cancel', 'Zrušit');
 define('lang_Sorting', 'řazení');
-define('lang_Show_url', 'zobrazit URL');
-define('lang_Extract', 'extrahovat zde');
-define('lang_File_info', 'informace o souboru');
-define('lang_Edit_image', 'upravit obrázek');
-define('lang_Duplicate', 'Duplikovat');
+define('lang_Duplicate', 'Duplicate');

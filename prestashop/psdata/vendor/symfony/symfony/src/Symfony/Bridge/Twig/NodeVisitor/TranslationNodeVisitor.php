@@ -22,28 +22,20 @@ use Twig\NodeVisitor\AbstractNodeVisitor;
  * TranslationNodeVisitor extracts translation messages.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class TranslationNodeVisitor extends AbstractNodeVisitor
 {
-    public const UNDEFINED_DOMAIN = '_undefined';
+    const UNDEFINED_DOMAIN = '_undefined';
 
     private $enabled = false;
     private $messages = [];
 
-    /**
-     * @return void
-     */
     public function enable()
     {
         $this->enabled = true;
         $this->messages = [];
     }
 
-    /**
-     * @return void
-     */
     public function disable()
     {
         $this->enabled = false;
@@ -57,8 +49,6 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
 
     /**
      * {@inheritdoc}
-     *
-     * @return Node
      */
     protected function doEnterNode(Node $node, Environment $env)
     {
@@ -99,8 +89,6 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
 
     /**
      * {@inheritdoc}
-     *
-     * @return Node|null
      */
     protected function doLeaveNode(Node $node, Environment $env)
     {
@@ -117,7 +105,12 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
         return 0;
     }
 
-    private function getReadDomainFromArguments(Node $arguments, int $index): ?string
+    /**
+     * @param int $index
+     *
+     * @return string|null
+     */
+    private function getReadDomainFromArguments(Node $arguments, $index)
     {
         if ($arguments->hasNode('domain')) {
             $argument = $arguments->getNode('domain');
@@ -130,7 +123,10 @@ class TranslationNodeVisitor extends AbstractNodeVisitor
         return $this->getReadDomainFromNode($argument);
     }
 
-    private function getReadDomainFromNode(Node $node): ?string
+    /**
+     * @return string|null
+     */
+    private function getReadDomainFromNode(Node $node)
     {
         if ($node instanceof ConstantExpression) {
             return $node->getAttribute('value');

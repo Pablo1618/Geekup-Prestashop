@@ -18,7 +18,7 @@ use Symfony\Component\Form\Exception\BadMethodCallException;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class FormError
+class FormError implements \Serializable
 {
     protected $messageTemplate;
     protected $messageParameters;
@@ -47,14 +47,9 @@ class FormError
      *
      * @see \Symfony\Component\Translation\Translator
      */
-    public function __construct(?string $message, string $messageTemplate = null, array $messageParameters = [], int $messagePluralization = null, $cause = null)
+    public function __construct($message, $messageTemplate = null, array $messageParameters = [], $messagePluralization = null, $cause = null)
     {
-        if (null === $message) {
-            @trigger_error(sprintf('Passing a null message when instantiating a "%s" is deprecated since Symfony 4.4.', __CLASS__), \E_USER_DEPRECATED);
-            $message = '';
-        }
-
-        $this->message = $message;
+        $this->message = (string) $message;
         $this->messageTemplate = $messageTemplate ?: $message;
         $this->messageParameters = $messageParameters;
         $this->messagePluralization = $messagePluralization;
@@ -116,6 +111,8 @@ class FormError
      *
      * This method must only be called once.
      *
+     * @param FormInterface $origin The form that caused this error
+     *
      * @throws BadMethodCallException If the method is called more than once
      */
     public function setOrigin(FormInterface $origin)
@@ -135,5 +132,31 @@ class FormError
     public function getOrigin()
     {
         return $this->origin;
+    }
+
+    /**
+     * @internal
+     */
+    public function serialize()
+    {
+        return serialize([
+            $this->message,
+            $this->messageTemplate,
+            $this->messageParameters,
+            $this->messagePluralization,
+            $this->cause,
+        ]);
+    }
+
+    /**
+     * @internal
+     */
+    public function unserialize($serialized)
+    {
+        if (\PHP_VERSION_ID >= 70000) {
+            list($this->message, $this->messageTemplate, $this->messageParameters, $this->messagePluralization, $this->cause) = unserialize($serialized, ['allowed_classes' => false]);
+        } else {
+            list($this->message, $this->messageTemplate, $this->messageParameters, $this->messagePluralization, $this->cause) = unserialize($serialized);
+        }
     }
 }

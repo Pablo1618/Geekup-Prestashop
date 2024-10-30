@@ -26,7 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Core\Cart;
 
-use CartCore;
+use Cart;
 use Currency;
 use PrestaShop\PrestaShop\Core\Localization\CLDR\ComputingPrecision;
 use Tools;
@@ -37,7 +37,7 @@ use Tools;
 class Calculator
 {
     /**
-     * @var CartCore
+     * @var \Cart
      */
     protected $cart;
 
@@ -84,12 +84,12 @@ class Calculator
     protected $computePrecision;
 
     /**
-     * @param CartCore $cart
+     * @param Cart $cart
      * @param int $carrierId
      * @param int|null $computePrecision
      * @param int|null $orderId
      */
-    public function __construct(CartCore $cart, $carrierId, ?int $computePrecision = null, ?int $orderId = null)
+    public function __construct(Cart $cart, $carrierId, ?int $computePrecision = null, ?int $orderId = null)
     {
         $this->setCart($cart);
         $this->setCarrierId($carrierId);
@@ -256,7 +256,7 @@ class Calculator
     }
 
     /**
-     * @param CartCore $cart
+     * @param Cart $cart
      *
      * @return Calculator
      */
@@ -294,7 +294,7 @@ class Calculator
     }
 
     /**
-     * @return CartCore
+     * @return \Cart
      */
     public function getCart()
     {

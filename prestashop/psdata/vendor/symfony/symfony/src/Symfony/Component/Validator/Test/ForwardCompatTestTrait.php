@@ -15,7 +15,10 @@ use PHPUnit\Framework\TestCase;
 
 // Auto-adapt to PHPUnit 8 that added a `void` return-type to the setUp/tearDown methods
 
-if ((new \ReflectionMethod(TestCase::class, 'tearDown'))->hasReturnType()) {
+if (method_exists(\ReflectionMethod::class, 'hasReturnType') && (new \ReflectionMethod(TestCase::class, 'tearDown'))->hasReturnType()) {
+    eval('
+    namespace Symfony\Component\Validator\Test;
+
     /**
      * @internal
      */
@@ -39,6 +42,7 @@ if ((new \ReflectionMethod(TestCase::class, 'tearDown'))->hasReturnType()) {
             $this->doTearDown();
         }
     }
+');
 } else {
     /**
      * @internal

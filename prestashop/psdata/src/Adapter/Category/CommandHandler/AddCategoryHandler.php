@@ -81,10 +81,6 @@ final class AddCategoryHandler extends AbstractObjectModelHandler implements Add
             $category->description = $command->getLocalizedDescriptions();
         }
 
-        if (null !== $command->getLocalizedAdditionalDescriptions()) {
-            $category->additional_description = $command->getLocalizedAdditionalDescriptions();
-        }
-
         if (null !== $command->getLocalizedMetaTitles()) {
             $category->meta_title = $command->getLocalizedMetaTitles();
         }
@@ -102,11 +98,11 @@ final class AddCategoryHandler extends AbstractObjectModelHandler implements Add
         }
 
         if (false === $category->validateFields(false)) {
-            throw new CannotAddCategoryException('Invalid data for creating category.');
+            throw new CannotAddCategoryException('Invalid category data');
         }
 
         if (false === $category->validateFieldsLang(false)) {
-            throw new CannotAddCategoryException('Invalid language data for creating category.');
+            throw new CannotAddCategoryException('Invalid category data');
         }
 
         if (false === $category->add()) {

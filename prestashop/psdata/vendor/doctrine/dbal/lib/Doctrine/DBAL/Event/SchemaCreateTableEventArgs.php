@@ -3,21 +3,20 @@
 namespace Doctrine\DBAL\Event;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Table;
-
 use function array_merge;
-use function func_get_args;
 use function is_array;
 
 /**
- * Event Arguments used when SQL queries for creating tables are generated inside {@link AbstractPlatform}.
+ * Event Arguments used when SQL queries for creating tables are generated inside Doctrine\DBAL\Platform\AbstractPlatform.
  */
 class SchemaCreateTableEventArgs extends SchemaEventArgs
 {
     /** @var Table */
     private $table;
 
-    /** @var mixed[][] */
+    /** @var Column[] */
     private $columns;
 
     /** @var mixed[] */
@@ -30,8 +29,8 @@ class SchemaCreateTableEventArgs extends SchemaEventArgs
     private $sql = [];
 
     /**
-     * @param mixed[][] $columns
-     * @param mixed[]   $options
+     * @param Column[] $columns
+     * @param mixed[]  $options
      */
     public function __construct(Table $table, array $columns, array $options, AbstractPlatform $platform)
     {
@@ -50,7 +49,7 @@ class SchemaCreateTableEventArgs extends SchemaEventArgs
     }
 
     /**
-     * @return mixed[][]
+     * @return Column[]
      */
     public function getColumns()
     {
@@ -74,15 +73,17 @@ class SchemaCreateTableEventArgs extends SchemaEventArgs
     }
 
     /**
-     * Passing multiple SQL statements as an array is deprecated. Pass each statement as an individual argument instead.
-     *
      * @param string|string[] $sql
      *
-     * @return SchemaCreateTableEventArgs
+     * @return \Doctrine\DBAL\Event\SchemaCreateTableEventArgs
      */
     public function addSql($sql)
     {
-        $this->sql = array_merge($this->sql, is_array($sql) ? $sql : func_get_args());
+        if (is_array($sql)) {
+            $this->sql = array_merge($this->sql, $sql);
+        } else {
+            $this->sql[] = $sql;
+        }
 
         return $this;
     }

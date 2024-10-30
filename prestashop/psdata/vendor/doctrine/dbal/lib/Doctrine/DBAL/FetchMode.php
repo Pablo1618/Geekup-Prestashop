@@ -6,8 +6,6 @@ use PDO;
 
 /**
  * Contains statement fetch modes.
- *
- * @deprecated Use one of the fetch- or iterate-related methods on the Statement.
  */
 final class FetchMode
 {
@@ -66,8 +64,6 @@ final class FetchMode
 
     /**
      * This class cannot be instantiated.
-     *
-     * @codeCoverageIgnore
      */
     private function __construct()
     {

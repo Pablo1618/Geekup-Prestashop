@@ -98,6 +98,7 @@ class SmartyCacheConfiguration implements DataConfigurationInterface
             $configuration['template_compilation'],
             $configuration['cache'],
             $configuration['multi_front_optimization'],
+            $configuration['caching_type'],
             $configuration['clear_cache'],
             $configuration['smarty_console'],
             $configuration['smarty_console_key']
@@ -118,8 +119,6 @@ class SmartyCacheConfiguration implements DataConfigurationInterface
 
         $cleanedContent = false;
         $file = self::CUSTOM_DEFINES_FILE;
-        $content = '';
-
         if (is_readable(self::CUSTOM_DEFINES_FILE)) {
             $content = file_get_contents(self::CUSTOM_DEFINES_FILE);
             $cleanedContent = php_strip_whitespace(self::CUSTOM_DEFINES_FILE);
@@ -137,7 +136,7 @@ class SmartyCacheConfiguration implements DataConfigurationInterface
         $status = file_put_contents($file, preg_replace(self::PATTERN, $replacement, $content));
 
         if (function_exists('opcache_invalidate')) {
-            @opcache_invalidate($file);
+            opcache_invalidate($file);
         }
 
         return $status !== false;

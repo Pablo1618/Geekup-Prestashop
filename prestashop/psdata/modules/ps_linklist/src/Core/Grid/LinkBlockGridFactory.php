@@ -28,7 +28,7 @@ use PrestaShop\PrestaShop\Core\Grid\Filter\GridFilterFormFactoryInterface;
 use PrestaShop\PrestaShop\Core\Grid\GridFactory;
 use PrestaShop\PrestaShop\Core\Grid\GridInterface;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class LinkBlockGridFactory.
@@ -116,14 +116,14 @@ final class LinkBlockGridFactory
      */
     private function buildGridFactoryByHook(array $hook)
     {
-        $definitionFactory = new LinkBlockDefinitionFactory($hook, $this->shopContext, $this->hookDispatcher);
+        $definitionFactory = new LinkBlockDefinitionFactory($hook, $this->shopContext);
         $definitionFactory->setTranslator($this->translator);
+        $definitionFactory->setHookDispatcher($this->hookDispatcher);
 
         return new GridFactory(
             $definitionFactory,
             $this->dataFactory,
-            $this->filterFormFactory,
-            $this->hookDispatcher
+            $this->filterFormFactory
         );
     }
 }

@@ -196,8 +196,12 @@ class Smarty_Internal_CacheResource_File extends Smarty_CacheResource
      */
     public function hasLock(Smarty $smarty, Smarty_Template_Cached $cached)
     {
-        clearstatcache(true, $cached->lock_id ?? '');
-        if (null !== $cached->lock_id && is_file($cached->lock_id)) {
+        if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
+            clearstatcache(true, $cached->lock_id);
+        } else {
+            clearstatcache();
+        }
+        if (is_file($cached->lock_id)) {
             $t = filemtime($cached->lock_id);
             return $t && (time() - $t < $smarty->locking_timeout);
         } else {

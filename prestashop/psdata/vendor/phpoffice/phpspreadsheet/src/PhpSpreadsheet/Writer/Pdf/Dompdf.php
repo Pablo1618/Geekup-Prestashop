@@ -20,11 +20,13 @@ class Dompdf extends Pdf
     /**
      * Save Spreadsheet to file.
      *
-     * @param string $filename Name of the file to save as
+     * @param string $pFilename Name of the file to save as
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    public function save($filename, int $flags = 0): void
+    public function save($pFilename)
     {
-        $fileHandle = parent::prepareForSave($filename);
+        $fileHandle = parent::prepareForSave($pFilename);
 
         //  Default PDF paper size
         $paperSize = 'LETTER'; //    Letter    (8.5 in. by 11 in.)
@@ -59,14 +61,18 @@ class Dompdf extends Pdf
 
         //  Create PDF
         $pdf = $this->createExternalWriterInstance();
-        $pdf->setPaper($paperSize, $orientation);
+        $pdf->setPaper(strtolower($paperSize), $orientation);
 
-        $pdf->loadHtml($this->generateHTMLAll());
+        $pdf->loadHtml(
+            $this->generateHTMLHeader(false) .
+            $this->generateSheetData() .
+            $this->generateHTMLFooter()
+        );
         $pdf->render();
 
         //  Write to file
         fwrite($fileHandle, $pdf->output());
 
-        parent::restoreStateAfterSave();
+        parent::restoreStateAfterSave($fileHandle);
     }
 }

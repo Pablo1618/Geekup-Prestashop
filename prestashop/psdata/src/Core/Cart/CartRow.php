@@ -27,7 +27,6 @@
 namespace PrestaShop\PrestaShop\Core\Cart;
 
 use Cart;
-use CartCore;
 use PrestaShop\PrestaShop\Adapter\AddressFactory;
 use PrestaShop\PrestaShop\Adapter\Cache\CacheAdapter;
 use PrestaShop\PrestaShop\Adapter\CoreException;
@@ -268,11 +267,11 @@ class CartRow
     /**
      * run initial row calculation.
      *
-     * @param CartCore $cart
+     * @param Cart $cart
      *
      * @throws CoreException
      */
-    public function processCalculation(CartCore $cart)
+    public function processCalculation(Cart $cart)
     {
         $rowData = $this->getRowData();
         $quantity = (int) $rowData['cart_quantity'];
@@ -298,7 +297,7 @@ class CartRow
         $this->isProcessed = true;
     }
 
-    protected function getProductPrice(CartCore $cart, $rowData)
+    protected function getProductPrice(Cart $cart, $rowData)
     {
         $productId = (int) $rowData['id_product'];
         $quantity = (int) $rowData['cart_quantity'];
@@ -334,9 +333,9 @@ class CartRow
 				WHERE `id_product` = ' . (int) $productId . '
 				AND `id_cart` = ' . (int) $cart->id;
                 $cartQuantity = (int) $this->databaseAdapter->getValue($sql, _PS_USE_SQL_SLAVE_);
-                $this->cacheAdapter->store($cacheId, (string) $cartQuantity);
+                $this->cacheAdapter->store($cacheId, $cartQuantity);
             } else {
-                $cartQuantity = (int) $this->cacheAdapter->retrieve($cacheId);
+                $cartQuantity = $this->cacheAdapter->retrieve($cacheId);
             }
         }
 
@@ -362,8 +361,7 @@ class CartRow
                     (int) $rowData['id_product_attribute'],
                     $computationParameters['withTaxes'],
                     true,
-                    $this->useEcotax,
-                    (int) $rowData['id_customization']
+                    $this->useEcotax
                 );
             }
             if (null === $productPrices[$productPrice]['value']) {

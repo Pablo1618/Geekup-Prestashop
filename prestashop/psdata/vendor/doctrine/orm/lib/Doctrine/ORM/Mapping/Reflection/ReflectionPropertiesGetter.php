@@ -1,6 +1,21 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Mapping\Reflection;
 
@@ -8,26 +23,29 @@ use Doctrine\Persistence\Mapping\ReflectionService;
 use ReflectionClass;
 use ReflectionProperty;
 
-use function array_combine;
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function call_user_func_array;
-
 /**
  * Utility class to retrieve all reflection instance properties of a given class, including
  * private inherited properties and transient properties.
  *
  * @private This API is for internal use only
+ *
+ * @author Marco Pivetta <ocramius@gmail.com>
  */
 final class ReflectionPropertiesGetter
 {
-    /** @var ReflectionProperty[][] indexed by class name and property internal name */
+    /**
+     * @var ReflectionProperty[][] indexed by class name and property internal name
+     */
     private $properties = [];
 
-    /** @var ReflectionService */
+    /**
+     * @var ReflectionService
+     */
     private $reflectionService;
 
+    /**
+     * @param ReflectionService $reflectionService
+     */
     public function __construct(ReflectionService $reflectionService)
     {
         $this->reflectionService = $reflectionService;
@@ -35,11 +53,12 @@ final class ReflectionPropertiesGetter
 
     /**
      * @param string $className
-     * @psalm-param class-string $className
      *
      * @return ReflectionProperty[] indexed by property internal name
+     *
+     * @psalm-param class-string $className
      */
-    public function getProperties($className): array
+    public function getProperties($className)
     {
         if (isset($this->properties[$className])) {
             return $this->properties[$className];
@@ -59,12 +78,13 @@ final class ReflectionPropertiesGetter
     }
 
     /**
-     * @psalm-param class-string $className
+     * @param string $className
      *
      * @return ReflectionClass[]
-     * @psalm-return list<ReflectionClass<object>>
+     *
+     * @psalm-return list<ReflectionClass>
      */
-    private function getHierarchyClasses(string $className): array
+    private function getHierarchyClasses($className) : array
     {
         $classes         = [];
         $parentClassName = $className;
@@ -73,8 +93,7 @@ final class ReflectionPropertiesGetter
             $classes[]       = $currentClass;
             $parentClassName = null;
 
-            $parentClass = $currentClass->getParentClass();
-            if ($parentClass) {
+            if ($parentClass = $currentClass->getParentClass()) {
                 $parentClassName = $parentClass->getName();
             }
         }
@@ -83,12 +102,14 @@ final class ReflectionPropertiesGetter
     }
 
     //  phpcs:disable SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedMethod
-
     /**
+     * @param ReflectionClass $reflectionClass
+     *
      * @return ReflectionProperty[]
+     *
      * @psalm-return array<string, ReflectionProperty>
      */
-    private function getClassProperties(ReflectionClass $reflectionClass): array
+    private function getClassProperties(ReflectionClass $reflectionClass) : array
     {
         //  phpcs:enable SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedMethod
         $properties = $reflectionClass->getProperties();
@@ -105,12 +126,22 @@ final class ReflectionPropertiesGetter
         );
     }
 
-    private function isInstanceProperty(ReflectionProperty $reflectionProperty): bool
+    /**
+     * @param ReflectionProperty $reflectionProperty
+     *
+     * @return bool
+     */
+    private function isInstanceProperty(ReflectionProperty $reflectionProperty)
     {
         return ! $reflectionProperty->isStatic();
     }
 
-    private function getAccessibleProperty(ReflectionProperty $property): ?ReflectionProperty
+    /**
+     * @param ReflectionProperty $property
+     *
+     * @return null|ReflectionProperty
+     */
+    private function getAccessibleProperty(ReflectionProperty $property)
     {
         return $this->reflectionService->getAccessibleProperty(
             $property->getDeclaringClass()->getName(),
@@ -118,7 +149,12 @@ final class ReflectionPropertiesGetter
         );
     }
 
-    private function getLogicalName(ReflectionProperty $property): string
+    /**
+     * @param ReflectionProperty $property
+     *
+     * @return string
+     */
+    private function getLogicalName(ReflectionProperty $property)
     {
         $propertyName = $property->getName();
 

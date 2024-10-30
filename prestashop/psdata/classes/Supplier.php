@@ -37,7 +37,7 @@ class SupplierCore extends ObjectModel
     /** @var string Name */
     public $name;
 
-    /** @var string|array<int, string> A short description for the discount */
+    /** @var array<string> A short description for the discount */
     public $description;
 
     /** @var string Object creation date */
@@ -49,13 +49,13 @@ class SupplierCore extends ObjectModel
     /** @var string Friendly URL */
     public $link_rewrite;
 
-    /** @var string|array<int, string> Meta title */
+    /** @var array<string> Meta title */
     public $meta_title;
 
-    /** @var string|array<int, string> Meta keywords */
+    /** @var array<string> Meta keywords */
     public $meta_keywords;
 
-    /** @var string|array<int, string> Meta description */
+    /** @var array<string> Meta description */
     public $meta_description;
 
     /** @var bool active */
@@ -75,7 +75,7 @@ class SupplierCore extends ObjectModel
             'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate'],
 
             /* Lang fields */
-            'description' => ['type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isCleanHtml', 'size' => 4194303],
+            'description' => ['type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isCleanHtml'],
             'meta_title' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => 255],
             'meta_description' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => 512],
             'meta_keywords' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => 255],
@@ -91,8 +91,8 @@ class SupplierCore extends ObjectModel
     /**
      * SupplierCore constructor.
      *
-     * @param int|null $id
-     * @param int|null $idLang
+     * @param null $id
+     * @param null $idLang
      */
     public function __construct($id = null, $idLang = null)
     {
@@ -104,13 +104,13 @@ class SupplierCore extends ObjectModel
 
     public function getLink()
     {
-        return Tools::str2url($this->name);
+        return Tools::link_rewrite($this->name);
     }
 
     /**
      * Return suppliers.
      *
-     * @return bool|array Suppliers
+     * @return array Suppliers
      */
     public static function getSuppliers($getNbProducts = false, $idLang = 0, $active = true, $p = false, $n = false, $allGroups = false, $withProduct = false)
     {
@@ -154,8 +154,9 @@ class SupplierCore extends ObjectModel
 					JOIN `' . _DB_PREFIX_ . 'product` p ON (ps.`id_product`= p.`id_product`)
 					' . Shop::addSqlAssociation('product', 'p') . '
 					LEFT JOIN `' . _DB_PREFIX_ . 'supplier` as m ON (m.`id_supplier`= p.`id_supplier`)
-					WHERE product_shop.`visibility` NOT IN ("none")' .
+					WHERE ps.id_product_attribute = 0' .
                     ($active ? ' AND product_shop.`active` = 1' : '') .
+                    ' AND product_shop.`visibility` NOT IN ("none")' .
                     ($allGroups ? '' : '
 					AND ps.`id_product` IN (
 						SELECT cp.`id_product`
@@ -183,7 +184,7 @@ class SupplierCore extends ObjectModel
         $nbSuppliers = count($suppliers);
         $rewriteSettings = (int) Configuration::get('PS_REWRITING_SETTINGS');
         for ($i = 0; $i < $nbSuppliers; ++$i) {
-            $suppliers[$i]['link_rewrite'] = ($rewriteSettings ? Tools::str2url($suppliers[$i]['name']) : 0);
+            $suppliers[$i]['link_rewrite'] = ($rewriteSettings ? Tools::link_rewrite($suppliers[$i]['name']) : 0);
         }
 
         return $suppliers;
@@ -261,17 +262,17 @@ class SupplierCore extends ObjectModel
     }
 
     /**
-     * @param int $idSupplier
-     * @param int $idLang
-     * @param int $p
-     * @param int $n
-     * @param string|null $orderBy
-     * @param string|null $orderWay
+     * @param $idSupplier
+     * @param $idLang
+     * @param $p
+     * @param $n
+     * @param null $orderBy
+     * @param null $orderWay
      * @param bool $getTotal
      * @param bool $active
      * @param bool $activeCategory
      *
-     * @return int|array|bool
+     * @return array|bool
      */
     public static function getProducts(
         $idSupplier,
@@ -301,11 +302,10 @@ class SupplierCore extends ObjectModel
         }
 
         if (!Validate::isOrderBy($orderBy) || !Validate::isOrderWay($orderWay)) {
-            die(Tools::displayError('Invalid sorting parameters provided.'));
+            die(Tools::displayError());
         }
 
         $sqlGroups = '';
-        $groups = [];
         if (Group::isFeatureActive()) {
             $groups = FrontController::getCurrentCustomerGroups();
             $sqlGroups = 'WHERE cg.`id_group` ' . (count($groups) ? 'IN (' . implode(',', $groups) . ')' : '=' . (int) Group::getCurrent()->id);
@@ -319,6 +319,7 @@ class SupplierCore extends ObjectModel
 			JOIN `' . _DB_PREFIX_ . 'product` p ON (ps.`id_product`= p.`id_product`)
 			' . Shop::addSqlAssociation('product', 'p') . '
 			WHERE ps.`id_supplier` = ' . (int) $idSupplier . '
+			AND ps.id_product_attribute = 0
 			' . ($active ? ' AND product_shop.`active` = 1' : '') . '
 			' . ($front ? ' AND product_shop.`visibility` IN ("both", "catalog")' : '') . '
 			AND p.`id_product` IN (
@@ -362,7 +363,8 @@ class SupplierCore extends ObjectModel
 					m.`name` AS manufacturer_name' . (Combination::isFeatureActive() ? ', product_attribute_shop.minimal_quantity AS product_attribute_minimal_quantity, IFNULL(product_attribute_shop.id_product_attribute,0) id_product_attribute' : '') . '
 				 FROM `' . _DB_PREFIX_ . 'product` p
 				' . Shop::addSqlAssociation('product', 'p') . '
-				JOIN `' . _DB_PREFIX_ . 'product_supplier` ps ON (ps.id_product = p.id_product) ' .
+				JOIN `' . _DB_PREFIX_ . 'product_supplier` ps ON (ps.id_product = p.id_product
+					AND ps.id_product_attribute = 0) ' .
                 (Combination::isFeatureActive() ? 'LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_shop` product_attribute_shop
 				ON (p.`id_product` = product_attribute_shop.`id_product` AND product_attribute_shop.`default_on` = 1 AND product_attribute_shop.id_shop=' . (int) $context->shop->id . ')' : '') . '
 				LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (p.`id_product` = pl.`id_product`
@@ -470,14 +472,11 @@ class SupplierCore extends ObjectModel
      */
     public function delete()
     {
-        $res = parent::delete();
-        if ($res) {
+        if (parent::delete()) {
             CartRule::cleanProductRuleIntegrity('suppliers', $this->id);
 
             return $this->deleteImage();
         }
-
-        return $res;
     }
 
     /**
@@ -501,6 +500,8 @@ class SupplierCore extends ObjectModel
         $query->where('id_product_attribute = ' . (int) $idProductAttribute);
         $res = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
 
-        return count($res) ? $res[0] : [];
+        if (count($res)) {
+            return $res[0];
+        }
     }
 }

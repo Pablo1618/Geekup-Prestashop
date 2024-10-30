@@ -25,11 +25,8 @@
  */
 
 /*
- * This file can be called using a cron to generate Google sitemap files automatically.
- * This file should no longer be used and will be removed in 5.0.0 version of this module.
- * Please update your cron tasks to use the new URL available in module settings.
+ * This file can be called using a cron to generate Google sitemap files automatically
  */
-trigger_error('This file should no longer be used and will be removed in 5.0.0 version of this module. Please update your cron tasks to use the new URL available in module settings.', E_USER_NOTICE);
 
 include dirname(__FILE__) . '/../../config/config.inc.php';
 

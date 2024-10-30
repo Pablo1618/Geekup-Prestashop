@@ -26,7 +26,7 @@
 </div>
 <div class="row">
 	<div class="col-lg-6">
-		{if $bulk_actions && $has_bulk_actions && !$hide_bulk_actions_btn}
+		{if $bulk_actions && $has_bulk_actions}
 		<div class="btn-group bulk-actions dropup">
 			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" {if $table}id="bulk_action_menu_{$table}"{/if}>
 				{l s='Bulk actions' d='Admin.Global'} <span class="caret"></span>
@@ -158,9 +158,6 @@
 {if isset($name_controller)}
 	{capture name=hookName assign=hookName}display{$name_controller|ucfirst}ListAfter{/capture}
 	{hook h=$hookName}
-{elseif isset($controller_name)}
-    {capture name=hookName assign=hookName}display{$controller_name|ucfirst}ListAfter{/capture}
-    {hook h=$hookName}
 {elseif isset($smarty.get.controller)}
 	{capture name=hookName assign=hookName}display{$smarty.get.controller|ucfirst|htmlentities}ListAfter{/capture}
 	{hook h=$hookName}

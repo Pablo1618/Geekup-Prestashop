@@ -118,7 +118,6 @@ class UpdateLicensesCommand extends Command
             ->files()
             ->name('*.' . $ext)
             ->in(_PS_ROOT_DIR_)
-            // Ignore folders
             ->exclude([
                 // versioning folders
                 '.git',
@@ -145,21 +144,14 @@ class UpdateLicensesCommand extends Command
                 'themes/starterTheme/assets/',
                 // tests folders
                 'tests/Resources/modules/',
-                'tests/Resources/modules_tests/override/',
                 'tests/Resources/themes/',
                 'tests/Resources/translations/',
-                'tests/Resources/ModulesOverrideInstallUninstallTest/',
+                'tests/resources/ModulesOverrideInstallUninstallTest/',
+                'tests-legacy/PrestaShopBundle/Twig/Fixtures/',
+                'tests-legacy/resources/',
                 'tests/E2E/',
-                'tests/Unit/Resources/config/',
                 'tests/Unit/Resources/assets/',
-                'tests/Unit/Resources/twig/',
                 'tests/UI/',
-            ])
-            // Ignore specific files
-            ->notPath([
-                // install
-                'install-dev/theme/js/sprintf.min.js',
-                'install-dev/theme/js/zxcvbn.js',
             ])
             ->ignoreDotFiles(false);
         $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);

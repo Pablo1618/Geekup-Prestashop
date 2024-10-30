@@ -33,7 +33,7 @@
             {$message.message_date}
           </div>
           <div class="col-sm-8">
-            {$message.message|escape:'html'|nl2br nofilter}
+            {$message.message nofilter}
           </div>
         </div>
       {/foreach}
@@ -55,7 +55,7 @@
         <div class="form-group row">
           <label class="col-md-3 form-control-label">{l s='Product' d='Shop.Forms.Labels'}</label>
           <div class="col-md-5">
-            <select name="id_product" class="form-control form-control-select" data-role="product">
+            <select name="id_product" class="form-control form-control-select">
               <option value="0">{l s='-- please choose --' d='Shop.Forms.Labels'}</option>
               {foreach from=$order.products item=product}
                 <option value="{$product.id_product}">{$product.name}</option>
@@ -67,7 +67,7 @@
         <div class="form-group row">
           <label class="col-md-3 form-control-label"></label>
           <div class="col-md-9">
-            <textarea rows="3" name="msgText" class="form-control" data-role="msg-text"></textarea>
+            <textarea rows="3" name="msgText" class="form-control"></textarea>
           </div>
         </div>
 

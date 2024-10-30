@@ -43,10 +43,7 @@ class DeliveryController extends FrameworkBundleAdminController
      * Main page for Delivery slips.
      *
      * @Template("@PrestaShop/Admin/Sell/Order/Delivery/slip.html.twig")
-     * @AdminSecurity(
-     *     "is_granted('read', request.get('_legacy_controller')) || is_granted('update', request.get('_legacy_controller')) || is_granted('create', request.get('_legacy_controller')) || is_granted('delete', request.get('_legacy_controller'))",
-     *     message="Access denied."
-     * )
+     * @AdminSecurity("is_granted(['read', 'update', 'create', 'delete'], request.get('_legacy_controller'))", message="Access denied.")
      *
      * @param Request $request
      *
@@ -60,9 +57,7 @@ class DeliveryController extends FrameworkBundleAdminController
         $form = $formHandler->getForm();
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()
-            && $this->isGranted('update', $request->attributes->get('_legacy_controller')
-        )) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $errors = $formHandler->save($form->getData());
             if (empty($errors)) {
                 $this->addFlash(
@@ -81,6 +76,7 @@ class DeliveryController extends FrameworkBundleAdminController
             'pdfForm' => $this->get('prestashop.adapter.order.delivery.slip.pdf.form_handler')->getForm()->createView(),
             'help_link' => $this->generateSidebarLink($request->attributes->get('_legacy_controller')),
             'layoutTitle' => $this->trans('Delivery Slips', 'Admin.Navigation.Menu'),
+            'requireAddonsSearch' => false,
             'requireBulkActions' => false,
             'showContentHeader' => true,
             'enableSidebar' => true,
@@ -90,10 +86,7 @@ class DeliveryController extends FrameworkBundleAdminController
     /**
      * Delivery slips PDF generator.
      *
-     * @AdminSecurity(
-     *     "is_granted('read', request.get('_legacy_controller')) || is_granted('update', request.get('_legacy_controller')) || is_granted('create', request.get('_legacy_controller')) || is_granted('delete', request.get('_legacy_controller'))",
-     *     message="Access denied."
-     * )
+     * @AdminSecurity("is_granted(['read', 'update', 'create', 'delete'], request.get('_legacy_controller'))", message="Access denied.")
      *
      * @param Request $request
      *

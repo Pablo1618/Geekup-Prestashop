@@ -28,7 +28,6 @@ namespace PrestaShop\PrestaShop\Core\Domain\CmsPageCategory\QueryResult;
 
 use ArrayIterator;
 use IteratorAggregate;
-use Traversable;
 
 /**
  * Transfers CMS Page Categories used for breadrumb
@@ -51,7 +50,7 @@ class Breadcrumb implements IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function getIterator(): Traversable
+    public function getIterator()
     {
         return new ArrayIterator($this->cmsPageCategories);
     }

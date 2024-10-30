@@ -69,16 +69,6 @@ class CombinationForEditing
     private $imageIds;
 
     /**
-     * @var string
-     */
-    private $coverThumbnailUrl;
-
-    /**
-     * @var bool
-     */
-    private $isDefault;
-
-    /**
      * @param int $combinationId
      * @param int $productId
      * @param string $name
@@ -86,8 +76,6 @@ class CombinationForEditing
      * @param CombinationPrices $prices
      * @param CombinationStock $stock
      * @param int[] $imageIds
-     * @param string $coverThumbnailUrl
-     * @param bool $isDefault
      */
     public function __construct(
         int $combinationId,
@@ -96,9 +84,7 @@ class CombinationForEditing
         CombinationDetails $options,
         CombinationPrices $prices,
         CombinationStock $stock,
-        array $imageIds,
-        string $coverThumbnailUrl,
-        bool $isDefault
+        array $imageIds
     ) {
         $this->combinationId = $combinationId;
         $this->productId = $productId;
@@ -107,8 +93,6 @@ class CombinationForEditing
         $this->stock = $stock;
         $this->prices = $prices;
         $this->imageIds = $imageIds;
-        $this->coverThumbnailUrl = $coverThumbnailUrl;
-        $this->isDefault = $isDefault;
     }
 
     /**
@@ -165,21 +149,5 @@ class CombinationForEditing
     public function getImageIds(): array
     {
         return $this->imageIds;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCoverThumbnailUrl(): string
-    {
-        return $this->coverThumbnailUrl;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDefault(): bool
-    {
-        return $this->isDefault;
     }
 }

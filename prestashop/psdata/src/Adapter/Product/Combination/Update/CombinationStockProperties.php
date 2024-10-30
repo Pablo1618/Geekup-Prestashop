@@ -27,14 +27,19 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Product\Combination\Update;
 
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\ValueObject\StockModification;
+use DateTimeInterface;
 
 class CombinationStockProperties
 {
     /**
-     * @var StockModification|null
+     * @var int|null
      */
-    private $stockModification;
+    private $quantity;
+
+    /**
+     * @var int|null
+     */
+    private $minimalQuantity;
 
     /**
      * @var string|null
@@ -42,23 +47,58 @@ class CombinationStockProperties
     private $location;
 
     /**
-     * @param StockModification|null $stockModification
+     * @var int|null
+     */
+    private $lowStockThreshold;
+
+    /**
+     * @var bool|null
+     */
+    private $lowStockAlertEnabled;
+
+    /**
+     * @var DateTimeInterface|null
+     */
+    private $availableDate;
+
+    /**
+     * @param int|null $quantity
+     * @param int|null $minimalQuantity
      * @param string|null $location
+     * @param int|null $lowStockThreshold
+     * @param bool|null $lowStockAlertEnabled
+     * @param DateTimeInterface|null $availableDate
      */
     public function __construct(
-        ?StockModification $stockModification = null,
-        ?string $location = null
+        ?int $quantity = null,
+        ?int $minimalQuantity = null,
+        ?string $location = null,
+        ?int $lowStockThreshold = null,
+        ?bool $lowStockAlertEnabled = null,
+        ?DateTimeInterface $availableDate = null
     ) {
-        $this->stockModification = $stockModification;
+        $this->quantity = $quantity;
+        $this->minimalQuantity = $minimalQuantity;
         $this->location = $location;
+        $this->lowStockThreshold = $lowStockThreshold;
+        $this->lowStockAlertEnabled = $lowStockAlertEnabled;
+        $this->availableDate = $availableDate;
     }
 
     /**
-     * @return StockModification|null
+     * @return int|null
      */
-    public function getStockModification(): ?StockModification
+    public function getQuantity(): ?int
     {
-        return $this->stockModification;
+        return $this->quantity;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getMinimalQuantity(): ?int
+    {
+        return $this->minimalQuantity;
     }
 
     /**
@@ -67,5 +107,29 @@ class CombinationStockProperties
     public function getLocation(): ?string
     {
         return $this->location;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getLowStockThreshold(): ?int
+    {
+        return $this->lowStockThreshold;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isLowStockAlertEnabled(): ?bool
+    {
+        return $this->lowStockAlertEnabled;
+    }
+
+    /**
+     * @return DateTimeInterface|null
+     */
+    public function getAvailableDate(): ?DateTimeInterface
+    {
+        return $this->availableDate;
     }
 }

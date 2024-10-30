@@ -28,7 +28,6 @@ namespace PrestaShop\PrestaShop\Adapter\Cart\CommandHandler;
 
 use Cart;
 use Configuration;
-use Currency;
 use Customer;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\CreateEmptyCustomerCartCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\CommandHandler\CreateEmptyCustomerCartHandlerInterface;
@@ -76,7 +75,7 @@ final class CreateEmptyCustomerCartHandler implements CreateEmptyCustomerCartHan
 
         $cart->id_shop = $customer->id_shop;
         $cart->id_lang = (int) Configuration::get('PS_LANG_DEFAULT');
-        $cart->id_currency = Currency::getDefaultCurrencyId();
+        $cart->id_currency = (int) Configuration::get('PS_CURRENCY_DEFAULT');
 
         $addresses = $customer->getAddresses($cart->id_lang);
         $addressId = !empty($addresses) ? (int) reset($addresses)['id_address'] : null;

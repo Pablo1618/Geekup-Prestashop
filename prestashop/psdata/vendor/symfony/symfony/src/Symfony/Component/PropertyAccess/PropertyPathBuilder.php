@@ -228,8 +228,12 @@ class PropertyPathBuilder
      * Resizes the path so that a chunk of length $cutLength is
      * removed at $offset and another chunk of length $insertionLength
      * can be inserted.
+     *
+     * @param int $offset          The offset where the removed chunk starts
+     * @param int $cutLength       The length of the removed chunk
+     * @param int $insertionLength The length of the inserted chunk
      */
-    private function resize(int $offset, int $cutLength, int $insertionLength)
+    private function resize($offset, $cutLength, $insertionLength)
     {
         // Nothing else to do in this case
         if ($insertionLength === $cutLength) {

@@ -28,28 +28,19 @@ namespace PrestaShop\PrestaShop\Adapter\Meta;
 
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\File\HtaccessFileGenerator;
-use PrestaShop\PrestaShop\Adapter\Shop\Context;
-use PrestaShop\PrestaShop\Core\Configuration\AbstractMultistoreConfiguration;
-use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class SetUpUrlsDataConfiguration is responsible for saving, validating and getting configurations related with urls
  * configuration located in Shop parameters -> Traffic & Seo -> Seo & Urls.
  */
-final class SetUpUrlsDataConfiguration extends AbstractMultistoreConfiguration
+final class SetUpUrlsDataConfiguration implements DataConfigurationInterface
 {
     /**
-     * @var array<int, string>
+     * @var Configuration
      */
-    private const CONFIGURATION_FIELDS = [
-        'friendly_url',
-        'accented_url',
-        'canonical_url_redirection',
-        'disable_apache_multiview',
-        'disable_apache_mod_security',
-    ];
+    private $configuration;
 
     /**
      * @var HtaccessFileGenerator
@@ -65,15 +56,15 @@ final class SetUpUrlsDataConfiguration extends AbstractMultistoreConfiguration
      * SetUpUrlsDataConfiguration constructor.
      *
      * @param Configuration $configuration
-     * @param Context $shopContext
-     * @param FeatureInterface $multistoreFeature
      * @param HtaccessFileGenerator $htaccessFileGenerator
      * @param TranslatorInterface $translator
      */
-    public function __construct(Configuration $configuration, Context $shopContext, FeatureInterface $multistoreFeature, HtaccessFileGenerator $htaccessFileGenerator, TranslatorInterface $translator)
-    {
-        parent::__construct($configuration, $shopContext, $multistoreFeature);
-
+    public function __construct(
+        Configuration $configuration,
+        HtaccessFileGenerator $htaccessFileGenerator,
+        TranslatorInterface $translator
+    ) {
+        $this->configuration = $configuration;
         $this->htaccessFileGenerator = $htaccessFileGenerator;
         $this->translator = $translator;
     }
@@ -83,14 +74,12 @@ final class SetUpUrlsDataConfiguration extends AbstractMultistoreConfiguration
      */
     public function getConfiguration()
     {
-        $shopConstraint = $this->getShopConstraint();
-
         return [
-            'friendly_url' => (bool) $this->configuration->get('PS_REWRITING_SETTINGS', false, $shopConstraint),
-            'accented_url' => (bool) $this->configuration->get('PS_ALLOW_ACCENTED_CHARS_URL', false, $shopConstraint),
-            'canonical_url_redirection' => (int) $this->configuration->get('PS_CANONICAL_REDIRECT', 0, $shopConstraint),
-            'disable_apache_multiview' => (bool) $this->configuration->get('PS_HTACCESS_DISABLE_MULTIVIEWS', false, $shopConstraint),
-            'disable_apache_mod_security' => (bool) $this->configuration->get('PS_HTACCESS_DISABLE_MODSEC', false, $shopConstraint),
+            'friendly_url' => $this->configuration->getBoolean('PS_REWRITING_SETTINGS'),
+            'accented_url' => $this->configuration->getBoolean('PS_ALLOW_ACCENTED_CHARS_URL'),
+            'canonical_url_redirection' => $this->configuration->get('PS_CANONICAL_REDIRECT'),
+            'disable_apache_multiview' => $this->configuration->getBoolean('PS_HTACCESS_DISABLE_MULTIVIEWS'),
+            'disable_apache_mod_security' => $this->configuration->getBoolean('PS_HTACCESS_DISABLE_MODSEC'),
         ];
     }
 
@@ -100,18 +89,15 @@ final class SetUpUrlsDataConfiguration extends AbstractMultistoreConfiguration
     public function updateConfiguration(array $configuration)
     {
         $errors = [];
-
         if ($this->validateConfiguration($configuration)) {
-            $shopConstraint = $this->getShopConstraint();
-
-            $this->updateConfigurationValue('PS_REWRITING_SETTINGS', 'friendly_url', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_ALLOW_ACCENTED_CHARS_URL', 'accented_url', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_CANONICAL_REDIRECT', 'canonical_url_redirection', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_HTACCESS_DISABLE_MULTIVIEWS', 'disable_apache_multiview', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_HTACCESS_DISABLE_MODSEC', 'disable_apache_mod_security', $configuration, $shopConstraint);
+            $this->configuration->set('PS_REWRITING_SETTINGS', $configuration['friendly_url']);
+            $this->configuration->set('PS_ALLOW_ACCENTED_CHARS_URL', $configuration['accented_url']);
+            $this->configuration->set('PS_CANONICAL_REDIRECT', $configuration['canonical_url_redirection']);
+            $this->configuration->set('PS_HTACCESS_DISABLE_MULTIVIEWS', $configuration['disable_apache_multiview']);
+            $this->configuration->set('PS_HTACCESS_DISABLE_MODSEC', $configuration['disable_apache_mod_security']);
 
             if (!$this->htaccessFileGenerator->generateFile($configuration['disable_apache_multiview'])) {
-                $this->updateConfigurationValue('PS_REWRITING_SETTINGS', 'friendly_url', ['friendly_url' => false], $shopConstraint);
+                $this->configuration->set('PS_REWRITING_SETTINGS', 0);
 
                 $errorMessage = $this->translator
                     ->trans(
@@ -144,18 +130,16 @@ final class SetUpUrlsDataConfiguration extends AbstractMultistoreConfiguration
     }
 
     /**
-     * @return OptionsResolver
+     * {@inheritdoc}
      */
-    protected function buildResolver(): OptionsResolver
+    public function validateConfiguration(array $configuration)
     {
-        $resolver = (new OptionsResolver())
-            ->setDefined(self::CONFIGURATION_FIELDS)
-            ->setAllowedTypes('friendly_url', 'bool')
-            ->setAllowedTypes('accented_url', 'bool')
-            ->setAllowedTypes('canonical_url_redirection', 'int')
-            ->setAllowedTypes('disable_apache_multiview', 'bool')
-            ->setAllowedTypes('disable_apache_mod_security', 'bool');
-
-        return $resolver;
+        return isset(
+            $configuration['friendly_url'],
+            $configuration['accented_url'],
+            $configuration['canonical_url_redirection'],
+            $configuration['disable_apache_multiview'],
+            $configuration['disable_apache_mod_security']
+        );
     }
 }

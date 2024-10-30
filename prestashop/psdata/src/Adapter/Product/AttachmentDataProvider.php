@@ -29,8 +29,6 @@ namespace PrestaShop\PrestaShop\Adapter\Product;
 use Db;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This class will provide data from DB / ORM about attachment.
  */
 class AttachmentDataProvider

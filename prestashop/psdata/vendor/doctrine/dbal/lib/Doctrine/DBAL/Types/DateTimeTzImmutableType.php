@@ -15,7 +15,7 @@ class DateTimeTzImmutableType extends DateTimeTzType
      */
     public function getName()
     {
-        return Types::DATETIMETZ_IMMUTABLE;
+        return Type::DATETIMETZ_IMMUTABLE;
     }
 
     /**

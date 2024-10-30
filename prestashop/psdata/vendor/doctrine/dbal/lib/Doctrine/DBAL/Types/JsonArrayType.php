@@ -3,7 +3,6 @@
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-
 use function is_resource;
 use function json_decode;
 use function stream_get_contents;
@@ -34,7 +33,7 @@ class JsonArrayType extends JsonType
      */
     public function getName()
     {
-        return Types::JSON_ARRAY;
+        return Type::JSON_ARRAY;
     }
 
     /**

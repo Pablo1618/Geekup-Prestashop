@@ -2,8 +2,6 @@
 
 namespace PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-use PhpOffice\PhpSpreadsheet\Document\Properties;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Shared\XMLWriter;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
@@ -11,6 +9,10 @@ class DocProps extends WriterPart
 {
     /**
      * Write docProps/app.xml to XML format.
+     *
+     * @param Spreadsheet $spreadsheet
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      *
      * @return string XML Output
      */
@@ -107,6 +109,10 @@ class DocProps extends WriterPart
     /**
      * Write docProps/core.xml to XML format.
      *
+     * @param Spreadsheet $spreadsheet
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     *
      * @return string XML Output
      */
     public function writeDocPropsCore(Spreadsheet $spreadsheet)
@@ -139,17 +145,13 @@ class DocProps extends WriterPart
         // dcterms:created
         $objWriter->startElement('dcterms:created');
         $objWriter->writeAttribute('xsi:type', 'dcterms:W3CDTF');
-        $created = $spreadsheet->getProperties()->getCreated();
-        $date = Date::dateTimeFromTimestamp("$created");
-        $objWriter->writeRawData($date->format(DATE_W3C));
+        $objWriter->writeRawData(date(DATE_W3C, $spreadsheet->getProperties()->getCreated()));
         $objWriter->endElement();
 
         // dcterms:modified
         $objWriter->startElement('dcterms:modified');
         $objWriter->writeAttribute('xsi:type', 'dcterms:W3CDTF');
-        $created = $spreadsheet->getProperties()->getModified();
-        $date = Date::dateTimeFromTimestamp("$created");
-        $objWriter->writeRawData($date->format(DATE_W3C));
+        $objWriter->writeRawData(date(DATE_W3C, $spreadsheet->getProperties()->getModified()));
         $objWriter->endElement();
 
         // dc:title
@@ -176,13 +178,17 @@ class DocProps extends WriterPart
     /**
      * Write docProps/custom.xml to XML format.
      *
-     * @return null|string XML Output
+     * @param Spreadsheet $spreadsheet
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     *
+     * @return string XML Output
      */
     public function writeDocPropsCustom(Spreadsheet $spreadsheet)
     {
         $customPropertyList = $spreadsheet->getProperties()->getCustomProperties();
         if (empty($customPropertyList)) {
-            return null;
+            return;
         }
 
         // Create XML writer
@@ -211,22 +217,21 @@ class DocProps extends WriterPart
             $objWriter->writeAttribute('name', $customProperty);
 
             switch ($propertyType) {
-                case Properties::PROPERTY_TYPE_INTEGER:
+                case 'i':
                     $objWriter->writeElement('vt:i4', $propertyValue);
 
                     break;
-                case Properties::PROPERTY_TYPE_FLOAT:
+                case 'f':
                     $objWriter->writeElement('vt:r8', $propertyValue);
 
                     break;
-                case Properties::PROPERTY_TYPE_BOOLEAN:
+                case 'b':
                     $objWriter->writeElement('vt:bool', ($propertyValue) ? 'true' : 'false');
 
                     break;
-                case Properties::PROPERTY_TYPE_DATE:
+                case 'd':
                     $objWriter->startElement('vt:filetime');
-                    $date = Date::dateTimeFromTimestamp("$propertyValue");
-                    $objWriter->writeRawData($date->format(DATE_W3C));
+                    $objWriter->writeRawData(date(DATE_W3C, $propertyValue));
                     $objWriter->endElement();
 
                     break;

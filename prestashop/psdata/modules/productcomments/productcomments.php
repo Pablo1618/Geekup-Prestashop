@@ -47,7 +47,7 @@ class ProductComments extends Module implements WidgetInterface
     {
         $this->name = 'productcomments';
         $this->tab = 'front_office_features';
-        $this->version = '7.0.0';
+        $this->version = '6.0.2';
         $this->author = 'PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -60,7 +60,7 @@ class ProductComments extends Module implements WidgetInterface
         $this->langId = $this->context->language->id;
         $this->shopId = $this->context->shop->id ? $this->context->shop->id : Configuration::get('PS_SHOP_DEFAULT');
 
-        $this->ps_versions_compliancy = ['min' => '1.7.8', 'max' => _PS_VERSION_];
+        $this->ps_versions_compliancy = ['min' => '1.7.7', 'max' => _PS_VERSION_];
     }
 
     public function install($keep = true)
@@ -169,10 +169,8 @@ class ProductComments extends Module implements WidgetInterface
     protected function _postProcess()
     {
         $id_product_comment = (int) Tools::getValue('id_product_comment');
-        $id_product_comment_criterion = (int) Tools::getValue('id_product_comment_criterion');
         $commentRepository = $this->get('product_comment_repository');
         $criterionRepository = $this->get('product_comment_criterion_repository');
-        $criterionFormHandler = $this->get('product_comment_criterion_form_data_handler');
 
         if (Tools::isSubmit('submitModerate')) {
             $errors = [];
@@ -209,20 +207,9 @@ class ProductComments extends Module implements WidgetInterface
             $commentRepository->deleteReports($id_product_comment);
         } elseif (Tools::isSubmit('deleteproductcomments')) {
             $comment = $commentRepository->find($id_product_comment);
-
-            if ($comment === null) {
-                $this->_html .= $this->displayError($this->trans('The comment cannot be deleted', [], 'Modules.Productcomments.Admin'));
-            } else {
-                $commentRepository->delete($comment);
-                Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], ['configure' => $this->name]));
-            }
+            $commentRepository->delete($comment);
         } elseif (Tools::isSubmit('submitEditCriterion')) {
-            if ($id_product_comment_criterion > 0) {
-                $criterion = $criterionRepository->find($id_product_comment_criterion);
-            } else {
-                $criterion = new ProductCommentCriterion();
-            }
-
+            $criterion = $criterionRepository->findRelation((int) Tools::getValue('id_product_comment_criterion'));
             $criterion->setType((int) Tools::getValue('id_product_comment_criterion_type'));
             $criterion->setActive(Tools::getValue('active'));
 
@@ -231,12 +218,7 @@ class ProductComments extends Module implements WidgetInterface
             foreach ($languages as $key => $value) {
                 $name[$value['id_lang']] = Tools::getValue('name_' . $value['id_lang']);
             }
-
-            if ($id_product_comment_criterion > 0) {
-                $criterionFormHandler->updateLangs($criterion, $name);
-            } else {
-                $criterionFormHandler->createLangs($criterion, $name);
-            }
+            $criterion->setNames($name);
 
             if (!$criterion->isValid()) {
                 $this->_html .= $this->displayError($this->trans('The criterion cannot be saved', [], 'Modules.Productcomments.Admin'));
@@ -250,18 +232,14 @@ class ProductComments extends Module implements WidgetInterface
                 }
             }
         } elseif (Tools::isSubmit('deleteproductcommentscriterion')) {
-            $criterion = $criterionRepository->find($id_product_comment_criterion);
+            $criterion = $criterionRepository->findRelation((int) Tools::getValue('id_product_comment_criterion'));
             if ($criterionRepository->delete($criterion)) {
-                Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], ['configure' => $this->name]));
-            } else {
-                $this->_html .= $this->displayError($this->trans('Criterion cannot be deleted', [], 'Modules.Productcomments.Admin'));
+                $this->_html .= $this->displayConfirmation($this->trans('Criterion deleted', [], 'Modules.Productcomments.Admin'));
             }
         } elseif (Tools::isSubmit('statusproductcommentscriterion')) {
-            $criterion = $criterionRepository->find($id_product_comment_criterion);
+            $criterion = $criterionRepository->findRelation((int) Tools::getValue('id_product_comment_criterion'));
             $criterion->setActive(!$criterion->isActive());
-            $criterionRepository->updateGeneral($criterion);
-
-            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], ['configure' => $this->name]));
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], ['configure' => $this->name, 'tab_module' => $this->tab, 'conf' => 4, 'module_name' => $this->name]));
         } elseif ($id_product_comment = (int) Tools::getValue('approveComment')) {
             $comment = $commentRepository->find($id_product_comment);
             $commentRepository->validate($comment, 1);
@@ -618,22 +596,16 @@ class ProductComments extends Module implements WidgetInterface
         ];
     }
 
-    public function getCriterionFieldsValues(int $id = 0)
+    public function getCriterionFieldsValues($id = 0)
     {
         $criterionRepos = $this->get('product_comment_criterion_repository');
-        $criterionFormProvider = $this->get('product_comment_criterion_form_data_provider');
-
-        if ($id > 0) {
-            $criterionData = $criterionFormProvider->getData($id);
-        } else {
-            $criterionData = $criterionFormProvider->getDefaultData();
-        }
+        $criterion = $criterionRepos->findRelation($id);
 
         return [
-            'name' => $criterionData['name'],
-            'id_product_comment_criterion_type' => $criterionData['type'],
-            'active' => $criterionData['active'],
-            'id_product_comment_criterion' => $id,
+            'name' => $criterion->getNames(),
+            'id_product_comment_criterion_type' => $criterion->getType(),
+            'active' => $criterion->isActive(),
+            'id_product_comment_criterion' => $criterion->getId(),
         ];
     }
 
@@ -724,7 +696,7 @@ class ProductComments extends Module implements WidgetInterface
 
         $criterionRepository = $this->get('product_comment_criterion_repository');
 
-        $criterion = $criterionRepository->find($id_criterion);
+        $criterion = $criterionRepository->findRelation($id_criterion);
         $selected_categories = $criterionRepository->getCategories($id_criterion);
 
         $product_table_values = Product::getSimpleProducts($this->langId);
@@ -1072,16 +1044,9 @@ class ProductComments extends Module implements WidgetInterface
             $idProduct = $this->context->controller->getProduct()->id;
             $variables = $this->getWidgetVariables($hookName, ['id_product' => $idProduct]);
 
-            switch (Tools::getValue('action')) {
-                case 'quickview':
-                    $filePath = $tplHookPath . 'product-additional-info-quickview.tpl';
-                    break;
-                case '':
-                    $filePath = $tplHookPath . 'product-additional-info.tpl';
-                    break;
-                default:    // 'refresh' and other unpredicted cases
-                    $filePath = '';
-            }
+            $filePath = 'quickview' === Tools::getValue('action')
+                ? $tplHookPath . 'product-additional-info-quickview.tpl'
+                : $tplHookPath . 'product-additional-info.tpl';
         }
 
         if (empty($variables) || empty($filePath)) {

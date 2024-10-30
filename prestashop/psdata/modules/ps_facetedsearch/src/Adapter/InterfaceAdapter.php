@@ -41,6 +41,16 @@ interface InterfaceAdapter
     public function setOrderDirection($direction);
 
     /**
+     * Set the limit and offset associated with the current search
+     *
+     * @param int|null $limit
+     * @param int $offset
+     *
+     * @return self
+     */
+    public function setLimit($limit, $offset = 0);
+
+    /**
      * Execute the search
      *
      * @return mixed

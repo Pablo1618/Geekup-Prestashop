@@ -29,7 +29,6 @@ namespace PrestaShop\PrestaShop\Adapter\Shop;
 use Context as LegacyContext;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Multistore\MultistoreContextCheckerInterface;
-use PrestaShop\PrestaShop\Core\Shop\ShopConstraintContextInterface;
 use PrestaShop\PrestaShop\Core\Shop\ShopContextInterface;
 use Shop;
 use ShopGroup;
@@ -37,7 +36,7 @@ use ShopGroup;
 /**
  * This class will provide legacy shop context.
  */
-class Context implements MultistoreContextCheckerInterface, ShopContextInterface, ShopConstraintContextInterface
+class Context implements MultistoreContextCheckerInterface, ShopContextInterface
 {
     /**
      * Get shops list.

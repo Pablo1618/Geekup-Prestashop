@@ -32,7 +32,7 @@
 		placeholder="{l s='search...'}" />
 </div>
 
-{if isset($typeahead_source) && isset($id) && isset($name)}
+{if isset($typeahead_source) && isset($id)}
 
 <script type="text/javascript">
 	$(document).ready(

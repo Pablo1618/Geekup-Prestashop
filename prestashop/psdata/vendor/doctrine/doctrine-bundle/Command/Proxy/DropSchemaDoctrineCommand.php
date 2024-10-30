@@ -12,22 +12,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class DropSchemaDoctrineCommand extends DropCommand
 {
-    protected function configure(): void
+    /**
+     * {@inheritDoc}
+     */
+    protected function configure()
     {
         parent::configure();
 
         $this
             ->setName('doctrine:schema:drop')
-            ->setDescription('Executes (or dumps) the SQL needed to drop the current database schema');
-
-        if ($this->getDefinition()->hasOption('em')) {
-            return;
-        }
-
-        $this->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command');
+            ->setDescription('Executes (or dumps) the SQL needed to drop the current database schema')
+            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    /**
+     * {@inheritDoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         DoctrineCommandHelper::setApplicationEntityManager($this->getApplication(), $input->getOption('em'));
 

@@ -24,6 +24,8 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 class FormRegistry implements FormRegistryInterface
 {
     /**
+     * Extensions.
+     *
      * @var FormExtensionInterface[]
      */
     private $extensions = [];
@@ -46,7 +48,8 @@ class FormRegistry implements FormRegistryInterface
     private $checkedTypes = [];
 
     /**
-     * @param FormExtensionInterface[] $extensions
+     * @param FormExtensionInterface[]         $extensions          An array of FormExtensionInterface
+     * @param ResolvedFormTypeFactoryInterface $resolvedTypeFactory The factory for resolved form types
      *
      * @throws UnexpectedTypeException if any extension does not implement FormExtensionInterface
      */
@@ -54,7 +57,7 @@ class FormRegistry implements FormRegistryInterface
     {
         foreach ($extensions as $extension) {
             if (!$extension instanceof FormExtensionInterface) {
-                throw new UnexpectedTypeException($extension, FormExtensionInterface::class);
+                throw new UnexpectedTypeException($extension, 'Symfony\Component\Form\FormExtensionInterface');
             }
         }
 
@@ -82,7 +85,7 @@ class FormRegistry implements FormRegistryInterface
                 if (!class_exists($name)) {
                     throw new InvalidArgumentException(sprintf('Could not load type "%s": class does not exist.', $name));
                 }
-                if (!is_subclass_of($name, FormTypeInterface::class)) {
+                if (!is_subclass_of($name, 'Symfony\Component\Form\FormTypeInterface')) {
                     throw new InvalidArgumentException(sprintf('Could not load type "%s": class does not implement "Symfony\Component\Form\FormTypeInterface".', $name));
                 }
 
@@ -96,9 +99,14 @@ class FormRegistry implements FormRegistryInterface
     }
 
     /**
-     * Wraps a type into a ResolvedFormTypeInterface implementation and connects it with its parent type.
+     * Wraps a type into a ResolvedFormTypeInterface implementation and connects
+     * it with its parent type.
+     *
+     * @param FormTypeInterface $type The type to resolve
+     *
+     * @return ResolvedFormTypeInterface The resolved type
      */
-    private function resolveType(FormTypeInterface $type): ResolvedFormTypeInterface
+    private function resolveType(FormTypeInterface $type)
     {
         $typeExtensions = [];
         $parentType = $type->getParent();

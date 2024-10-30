@@ -200,7 +200,6 @@ class CheckoutDeliveryStepCore extends AbstractCheckoutStep
         }
 
         $isComplete = true;
-        // Hook called only for the module concerned
         Hook::exec(
             'actionValidateStepComplete',
             [

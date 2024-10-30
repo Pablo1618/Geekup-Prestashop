@@ -26,65 +26,35 @@
 
 namespace PrestaShopBundle\EventListener;
 
-use Context;
-use Employee;
+use Language;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
-use PrestaShop\PrestaShop\Core\Domain\Configuration\ShopConfigurationInterface;
-use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 class UserLocaleListener
 {
-    /** @var Context|null */
     private $prestaShopContext;
 
-    /** @var ShopConfigurationInterface */
-    private $configuration;
-
-    /** @var LanguageRepositoryInterface */
-    private $langRepository;
-
-    /**
-     * @param LegacyContext $context
-     * @param ShopConfigurationInterface $configuration
-     * @param LanguageRepositoryInterface $langRepository
-     */
-    public function __construct(LegacyContext $context, ShopConfigurationInterface $configuration, LanguageRepositoryInterface $langRepository)
+    public function __construct(LegacyContext $context)
     {
         $this->prestaShopContext = $context->getContext();
-        $this->configuration = $configuration;
-        $this->langRepository = $langRepository;
     }
 
-    /**
-     * @param RequestEvent $event
-     *
-     * @return void
-     */
-    public function onKernelRequest(RequestEvent $event): void
+    public function onKernelRequest(GetResponseEvent $event)
     {
         if (isset($this->prestaShopContext->employee) && $this->prestaShopContext->employee->isLoggedBack()) {
             $request = $event->getRequest();
-            $locale = $this->getLocaleFromEmployee($this->prestaShopContext->employee);
+            $locale = $this->getLocaleFromEmployee();
             $request->setDefaultLocale($locale);
 
             $request->setLocale($locale);
         }
     }
 
-    /**
-     * @param Employee $employee
-     *
-     * @return string
-     */
-    private function getLocaleFromEmployee(Employee $employee): string
+    private function getLocaleFromEmployee()
     {
-        $employeeLanguage = $this->langRepository->find($employee->id_lang);
+        $employee = $this->prestaShopContext->employee;
+        $employeeLanguage = new Language($employee->id_lang);
 
-        if (!$employeeLanguage) {
-            $employeeLanguage = $this->langRepository->find($this->configuration->get('PS_LANG_DEFAULT'));
-        }
-
-        return $employeeLanguage->getLocale();
+        return $employeeLanguage->locale;
     }
 }

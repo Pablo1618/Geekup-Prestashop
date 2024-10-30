@@ -29,7 +29,7 @@
  */
 class PDFGeneratorCore extends TCPDF
 {
-    public const DEFAULT_FONT = 'helvetica';
+    const DEFAULT_FONT = 'helvetica';
 
     /**
      * @var string
@@ -90,7 +90,6 @@ class PDFGeneratorCore extends TCPDF
         'zh' => 'cid0cs',
         'tw' => 'cid0cs',
         'th' => 'freeserif',
-        'hy' => 'freeserif',
     ];
 
     /**
@@ -194,7 +193,7 @@ class PDFGeneratorCore extends TCPDF
      * Render HTML template.
      *
      * @param string $filename
-     * @param bool|string $display true:display to user, false:save, 'I','D','S' as fpdf display
+     * @param bool $display true:display to user, false:save, 'I','D','S' as fpdf display
      *
      * @throws PrestaShopException
      *

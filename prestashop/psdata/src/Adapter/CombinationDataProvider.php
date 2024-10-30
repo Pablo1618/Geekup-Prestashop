@@ -35,8 +35,6 @@ use Product;
 use Tax;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This class will provide data from DB / ORM about product combination.
  */
 class CombinationDataProvider

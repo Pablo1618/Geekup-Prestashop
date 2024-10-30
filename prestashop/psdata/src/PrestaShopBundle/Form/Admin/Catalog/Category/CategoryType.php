@@ -45,7 +45,7 @@ class CategoryType extends AbstractCategoryType
         // Root category is always disabled
         $disabledCategories = array_merge(
             [
-                (int) $this->configuration->get('PS_ROOT_CATEGORY'),
+                $this->getConfiguration()->getInt('PS_ROOT_CATEGORY'),
             ],
             $options['subcategories']
         );

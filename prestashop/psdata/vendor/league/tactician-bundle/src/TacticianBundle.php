@@ -9,7 +9,6 @@ use League\Tactician\Bundle\DependencyInjection\HandlerMapping\TypeHintMapping;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use League\Tactician\Bundle\DependencyInjection\Compiler;
 use League\Tactician\Bundle\DependencyInjection\TacticianExtension;
-use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class TacticianBundle extends Bundle
@@ -38,7 +37,7 @@ class TacticianBundle extends Bundle
         $container->addCompilerPass(new Compiler\CommandHandlerPass($this->handlerMapping));
     }
 
-    public function getContainerExtension(): ExtensionInterface
+    public function getContainerExtension()
     {
         return new TacticianExtension();
     }

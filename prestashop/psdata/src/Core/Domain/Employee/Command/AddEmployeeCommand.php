@@ -97,9 +97,6 @@ class AddEmployeeCommand
      * @param int $profileId
      * @param array $shopAssociation
      * @param bool $hasEnabledGravatar
-     * @param int $minLength
-     * @param int $maxLength
-     * @param int $minScore
      */
     public function __construct(
         $firstName,
@@ -111,10 +108,7 @@ class AddEmployeeCommand
         $active,
         $profileId,
         array $shopAssociation,
-        bool $hasEnabledGravatar,
-        int $minLength,
-        int $maxLength,
-        int $minScore
+        bool $hasEnabledGravatar = false
     ) {
         $this->firstName = new FirstName($firstName);
         $this->lastName = new LastName($lastName);
@@ -124,7 +118,7 @@ class AddEmployeeCommand
         $this->active = $active;
         $this->profileId = $profileId;
         $this->shopAssociation = $shopAssociation;
-        $this->plainPassword = new Password($plainPassword, $minLength, $maxLength, $minScore);
+        $this->plainPassword = new Password($plainPassword);
         $this->hasEnabledGravatar = $hasEnabledGravatar;
     }
 

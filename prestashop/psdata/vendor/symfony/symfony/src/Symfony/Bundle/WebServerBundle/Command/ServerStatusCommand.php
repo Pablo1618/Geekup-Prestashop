@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\WebServerBundle\Command;
 
 use Symfony\Bundle\WebServerBundle\WebServer;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,21 +24,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * the background.
  *
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
- *
- * @deprecated since Symfony 4.4, to be removed in 5.0; the new Symfony local server has more features, you can use it instead.
  */
-class ServerStatusCommand extends Command
+class ServerStatusCommand extends ServerCommand
 {
     protected static $defaultName = 'server:status';
-
-    private $pidFileDirectory;
-
-    public function __construct(string $pidFileDirectory = null)
-    {
-        $this->pidFileDirectory = $pidFileDirectory;
-
-        parent::__construct();
-    }
 
     /**
      * {@inheritdoc}
@@ -51,7 +39,7 @@ class ServerStatusCommand extends Command
                 new InputOption('pidfile', null, InputOption::VALUE_REQUIRED, 'PID file'),
                 new InputOption('filter', null, InputOption::VALUE_REQUIRED, 'The value to display (one of port, host, or address)'),
             ])
-            ->setDescription('Output the status of the local web server')
+            ->setDescription('Outputs the status of the local web server')
             ->setHelp(<<<'EOF'
 <info>%command.name%</info> shows the details of the given local web
 server, such as the address and port where it is listening to:
@@ -74,13 +62,11 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        @trigger_error('Using the WebserverBundle is deprecated since Symfony 4.4. The new Symfony local server has more features, you can use it instead.', \E_USER_DEPRECATED);
-
         $io = new SymfonyStyle($input, $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output);
-        $server = new WebServer($this->pidFileDirectory);
+        $server = new WebServer();
         if ($filter = $input->getOption('filter')) {
             if ($server->isRunning($input->getOption('pidfile'))) {
-                [$host, $port] = explode(':', $address = $server->getAddress($input->getOption('pidfile')));
+                list($host, $port) = explode(':', $address = $server->getAddress($input->getOption('pidfile')));
                 if ('address' === $filter) {
                     $output->write($address);
                 } elseif ('host' === $filter) {
@@ -103,6 +89,6 @@ EOF
             }
         }
 
-        return 0;
+        return null;
     }
 }

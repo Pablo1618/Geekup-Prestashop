@@ -30,12 +30,10 @@ use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Localization\CLDR\ComputingPrecision;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
-use PrestaShopBundle\Bridge\AdminController\LegacyControllerBridgeInterface;
 use PrestaShopBundle\Install\Language as InstallLanguage;
 use PrestaShopBundle\Translation\TranslatorComponent as Translator;
 use PrestaShopBundle\Translation\TranslatorLanguageLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -44,44 +42,41 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 /**
  * Class ContextCore.
  *
- * This class is responsible for holding all basic information about the environment,
- * the customer, cart, currency, language etc.
- *
  * @since 1.5.0.1
  */
 class ContextCore
 {
-    /** @var Context|null */
+    /** @var Context */
     protected static $instance;
 
-    /** @var Cart|null */
+    /** @var Cart */
     public $cart;
 
-    /** @var Customer|null */
+    /** @var Customer */
     public $customer;
 
-    /** @var Cookie|null */
+    /** @var Cookie */
     public $cookie;
 
     /** @var SessionInterface|null */
     public $session;
 
-    /** @var Link|null */
+    /** @var Link */
     public $link;
 
-    /** @var Country|null */
+    /** @var Country */
     public $country;
 
     /** @var Employee|null */
     public $employee;
 
-    /** @var AdminController|FrontController|LegacyControllerBridgeInterface|null */
+    /** @var AdminController|FrontController */
     public $controller;
 
     /** @var string */
     public $override_controller_name_for_translations;
 
-    /** @var Language|InstallLanguage|null */
+    /** @var Language|InstallLanguage */
     public $language;
 
     /** @var Currency|null */
@@ -97,29 +92,20 @@ class ContextCore
     /** @var Tab */
     public $tab;
 
-    /** @var Shop|null */
+    /** @var Shop */
     public $shop;
 
-    /** @var Shop */
-    public $tmpOldShop;
-
-    /** @var Smarty|null */
+    /** @var Smarty */
     public $smarty;
 
-    /** @var Mobile_Detect */
+    /** @var \Mobile_Detect */
     public $mobile_detect;
 
     /** @var int */
     public $mode;
 
-    /** @var ContainerBuilder|ContainerInterface|null */
+    /** @var ContainerBuilder */
     public $container;
-
-    /** @var float */
-    public $virtualTotalTaxExcluded = 0;
-
-    /** @var float */
-    public $virtualTotalTaxIncluded = 0;
 
     /** @var Translator */
     protected $translator = null;
@@ -141,25 +127,25 @@ class ContextCore
     protected $is_tablet = null;
 
     /** @var int */
-    public const DEVICE_COMPUTER = 1;
+    const DEVICE_COMPUTER = 1;
 
     /** @var int */
-    public const DEVICE_TABLET = 2;
+    const DEVICE_TABLET = 2;
 
     /** @var int */
-    public const DEVICE_MOBILE = 4;
+    const DEVICE_MOBILE = 4;
 
     /** @var int */
-    public const MODE_STD = 1;
+    const MODE_STD = 1;
 
     /** @var int */
-    public const MODE_STD_CONTRIB = 2;
+    const MODE_STD_CONTRIB = 2;
 
     /** @var int */
-    public const MODE_HOST_CONTRIB = 4;
+    const MODE_HOST_CONTRIB = 4;
 
     /** @var int */
-    public const MODE_HOST = 8;
+    const MODE_HOST = 8;
 
     /**
      * Sets Mobile_Detect tool object.
@@ -288,14 +274,14 @@ class ContextCore
         if (Tools::isSubmit('no_mobile_theme')) {
             Context::getContext()->cookie->no_mobile = true;
             if (Context::getContext()->cookie->id_guest) {
-                $guest = new Guest((int) Context::getContext()->cookie->id_guest);
+                $guest = new Guest(Context::getContext()->cookie->id_guest);
                 $guest->mobile_theme = false;
                 $guest->update();
             }
         } elseif (Tools::isSubmit('mobile_theme_ok')) {
             Context::getContext()->cookie->no_mobile = false;
             if (Context::getContext()->cookie->id_guest) {
-                $guest = new Guest((int) Context::getContext()->cookie->id_guest);
+                $guest = new Guest(Context::getContext()->cookie->id_guest);
                 $guest->mobile_theme = true;
                 $guest->update();
             }
@@ -303,7 +289,6 @@ class ContextCore
 
         return isset($_SERVER['HTTP_USER_AGENT'], Context::getContext()->cookie)
             && (bool) Configuration::get('PS_ALLOW_MOBILE_DEVICE')
-            && defined('_PS_THEME_MOBILE_DIR_')
             && @filemtime(_PS_THEME_MOBILE_DIR_)
             && !Context::getContext()->cookie->no_mobile;
     }
@@ -323,7 +308,8 @@ class ContextCore
     }
 
     /**
-     * @param Context $testInstance Unit testing purpose only
+     * @param $testInstance Context
+     * Unit testing purpose only
      */
     public static function setInstanceForTesting($testInstance)
     {
@@ -341,7 +327,7 @@ class ContextCore
     /**
      * Clone current context object.
      *
-     * @return static
+     * @return Context
      */
     public function cloneContext()
     {
@@ -349,86 +335,46 @@ class ContextCore
     }
 
     /**
-     * Updates customer in the context, updates the cookie and writes the updated cookie.
+     * Update context after customer login.
      *
      * @param Customer $customer Created customer
      */
     public function updateCustomer(Customer $customer)
     {
-        // Update the customer in context object
         $this->customer = $customer;
-
-        // Update basic information in the cookie
         $this->cookie->id_customer = (int) $customer->id;
         $this->cookie->customer_lastname = $customer->lastname;
         $this->cookie->customer_firstname = $customer->firstname;
         $this->cookie->passwd = $customer->passwd;
-        $this->cookie->logged = true;
-        $customer->logged = true;
+        $this->cookie->logged = 1;
+        $customer->logged = 1;
         $this->cookie->email = $customer->email;
-
-        // Don't confuse this with "id_guest" and Guest object, that's something completely different
         $this->cookie->is_guest = $customer->isGuest();
 
-        /*
-         * If "re-display cart at login" option is enabled in Prestashop configuration,
-         * there is no cart in previous cookie or there is, but empty,
-         * and we managed to get that cart ID, we will re-use it.
-         *
-         * We don't want to flush his cart, if he made it when logged out.
-         */
-        if (Configuration::get('PS_CART_FOLLOWING') &&
-            (empty($this->cookie->id_cart) || Cart::getNbProducts((int) $this->cookie->id_cart) == 0) &&
-            $idCart = (int) Cart::lastNoneOrderedCart($this->customer->id)
-        ) {
+        if (Configuration::get('PS_CART_FOLLOWING') && (empty($this->cookie->id_cart) || Cart::getNbProducts($this->cookie->id_cart) == 0) && $idCart = (int) Cart::lastNoneOrderedCart($this->customer->id)) {
             $this->cart = new Cart($idCart);
             $this->cart->secure_key = $customer->secure_key;
-            $this->cookie->id_guest = (int) $this->cart->id_guest;
-
-        /*
-        * Otherwise, normal cart recovery and update scenario.
-        */
         } else {
-            // Initialize new visit only if there is no visit identifier yet
-            if (!$this->cookie->id_guest) {
-                Guest::setNewGuest($this->cookie);
-            }
+            $idCarrier = (int) $this->cart->id_carrier;
+            $this->cart->secure_key = $customer->secure_key;
+            $this->cart->id_carrier = 0;
+            $this->cart->setDeliveryOption(null);
+            $this->cart->updateAddressId($this->cart->id_address_delivery, (int) Address::getFirstCustomerAddressId((int) ($customer->id)));
+            $this->cart->id_address_delivery = (int) Address::getFirstCustomerAddressId((int) ($customer->id));
+            $this->cart->id_address_invoice = (int) Address::getFirstCustomerAddressId((int) ($customer->id));
+        }
+        $this->cart->id_customer = (int) $customer->id;
 
-            // If there is some cart created in the context before logging in
-            if (Validate::isLoadedObject($this->cart)) {
-                // We need to update the cart so it matches the customer
-                $this->cart->secure_key = $customer->secure_key;
-                $this->cart->id_guest = (int) $this->cookie->id_guest;
-
-                // Update and revalidate the selected delivery option
-                $idCarrier = (int) $this->cart->id_carrier;
-                $this->cart->id_carrier = 0;
-                if (!empty($idCarrier)) {
-                    $deliveryOption = [$this->cart->id_address_delivery => $idCarrier . ','];
-                    $this->cart->setDeliveryOption($deliveryOption);
-                } else {
-                    $this->cart->setDeliveryOption(null);
-                }
-
-                // Set proper customer ID and assign addresses to the cart
-                $this->cart->id_customer = (int) $customer->id;
-                $this->cart->updateAddressId($this->cart->id_address_delivery, (int) Address::getFirstCustomerAddressId((int) ($customer->id)));
-                $this->cart->id_address_delivery = (int) Address::getFirstCustomerAddressId((int) ($customer->id));
-                $this->cart->id_address_invoice = (int) Address::getFirstCustomerAddressId((int) ($customer->id));
-            }
+        if (isset($idCarrier) && $idCarrier) {
+            $deliveryOption = [$this->cart->id_address_delivery => $idCarrier . ','];
+            $this->cart->setDeliveryOption($deliveryOption);
         }
 
-        // If previous logic resolved to some cart to be used, save it and put this information to cookie
-        if (Validate::isLoadedObject($this->cart)) {
-            $this->cart->save();
-            $this->cart->autosetProductAddress();
-            $this->cookie->id_cart = (int) $this->cart->id;
-        }
-
-        // Physically save and send this cookie to the client
+        $this->cart->save();
+        $this->cookie->id_cart = (int) $this->cart->id;
         $this->cookie->write();
+        $this->cart->autosetProductAddress();
 
-        // Register new logged in session in customer_session table
         $this->cookie->registerSession(new CustomerSession());
     }
 
@@ -475,7 +421,7 @@ class ContextCore
 
         // In case we have at least 1 translated message, we return the current translator.
         // If some translations are missing, clear cache
-        if (empty($locale) || count($translator->getCatalogue($locale)->all())) {
+        if ($locale === '' || null === $locale || count($translator->getCatalogue($locale)->all())) {
             return $translator;
         }
 
@@ -498,42 +444,38 @@ class ContextCore
         $withDB = !$this->language instanceof InstallLanguage;
         $theme = $this->shop !== null ? $this->shop->theme : null;
 
-        if ($this instanceof Context) {
-            try {
-                $containerFinder = new ContainerFinder($this);
-                $container = $containerFinder->getContainer();
-                $translatorLoader = $container->get('prestashop.translation.translator_language_loader');
-            } catch (ContainerNotFoundException|ServiceNotFoundException $exception) {
-                $translatorLoader = null;
-            }
-
-            if (null === $translatorLoader) {
-                // If a container is still not found, instantiate manually the translator loader
-                // This will happen in the Front as we have legacy controllers, the Sf container won't be available.
-                // As we get the translator in the controller's constructor and the container is built in the init method, we won't find it here
-                $translatorLoader = (new TranslatorLanguageLoader(new ModuleRepository(_PS_ROOT_DIR_, _PS_MODULE_DIR_)));
-            }
-
-            $translatorLoader
-                ->setIsAdminContext($adminContext)
-                ->loadLanguage($translator, $locale, $withDB, $theme)
-            ;
+        try {
+            $containerFinder = new ContainerFinder($this);
+            $container = $containerFinder->getContainer();
+            $translatorLoader = $container->get('prestashop.translation.translator_language_loader');
+        } catch (ContainerNotFoundException $exception) {
+            $translatorLoader = null;
+        } catch (ServiceNotFoundException $e) {
+            $translatorLoader = null;
         }
+
+        if (null === $translatorLoader) {
+            // If a container is still not found, instantiate manually the translator loader
+            // This will happen in the Front as we have legacy controllers, the Sf container won't be available.
+            // As we get the translator in the controller's constructor and the container is built in the init method, we won't find it here
+            $translatorLoader = (new TranslatorLanguageLoader(new ModuleRepository()));
+        }
+
+        $translatorLoader
+            ->setIsAdminContext($adminContext)
+            ->loadLanguage($translator, $locale, $withDB, $theme)
+        ;
 
         return $translator;
     }
 
     /**
-     * Returns directories that contain translation resources
-     *
      * @return array
      */
     protected function getTranslationResourcesDirectories()
     {
-        // Default common translation folder
-        $locations = [_PS_ROOT_DIR_ . '/translations'];
+        $locations = [_PS_ROOT_DIR_ . '/app/Resources/translations'];
 
-        // Translations for currently selected theme
         if (null !== $this->shop) {
             $activeThemeLocation = _PS_ROOT_DIR_ . '/themes/' . $this->shop->theme_name . '/translations';
             if (is_dir($activeThemeLocation)) {
@@ -545,8 +487,7 @@ class ContextCore
     }
 
     /**
-     * Returns the computing precision according to the current currency.
-     * If previously requested, it will be stored in priceComputingPrecision property.
+     * Returns the computing precision according to the current currency
      *
      * @return int
      */

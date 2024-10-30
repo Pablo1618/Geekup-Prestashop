@@ -19,37 +19,26 @@ use Symfony\Component\VarDumper\Dumper\CliDumper;
  */
 trait VarDumperTestTrait
 {
-    /**
-     * @internal
-     */
-    private $varDumperConfig = [
-        'casters' => [],
-        'flags' => null,
-    ];
-
-    protected function setUpVarDumper(array $casters, int $flags = null): void
+    public function assertDumpEquals($dump, $data, $filter = 0, $message = '')
     {
-        $this->varDumperConfig['casters'] = $casters;
-        $this->varDumperConfig['flags'] = $flags;
+        if (\is_string($filter)) {
+            @trigger_error(sprintf('The $message argument of the "%s()" method at the 3rd position is deprecated since Symfony 3.4 and will be moved at the 4th position in 4.0.', __METHOD__), \E_USER_DEPRECATED);
+            $message = $filter;
+            $filter = 0;
+        }
+
+        $this->assertSame(rtrim($dump), $this->getDump($data, null, $filter), $message);
     }
 
-    /**
-     * @after
-     */
-    protected function tearDownVarDumper(): void
+    public function assertDumpMatchesFormat($dump, $data, $filter = 0, $message = '')
     {
-        $this->varDumperConfig['casters'] = [];
-        $this->varDumperConfig['flags'] = null;
-    }
+        if (\is_string($filter)) {
+            @trigger_error(sprintf('The $message argument of the "%s()" method at the 3rd position is deprecated since Symfony 3.4 and will be moved at the 4th position in 4.0.', __METHOD__), \E_USER_DEPRECATED);
+            $message = $filter;
+            $filter = 0;
+        }
 
-    public function assertDumpEquals($expected, $data, $filter = 0, $message = '')
-    {
-        $this->assertSame($this->prepareExpectation($expected, $filter), $this->getDump($data, null, $filter), $message);
-    }
-
-    public function assertDumpMatchesFormat($expected, $data, $filter = 0, $message = '')
-    {
-        $this->assertStringMatchesFormat($this->prepareExpectation($expected, $filter), $this->getDump($data, null, $filter), $message);
+        $this->assertStringMatchesFormat(rtrim($dump), $this->getDump($data, null, $filter), $message);
     }
 
     /**
@@ -57,14 +46,10 @@ trait VarDumperTestTrait
      */
     protected function getDump($data, $key = null, $filter = 0)
     {
-        if (null === $flags = $this->varDumperConfig['flags']) {
-            $flags = getenv('DUMP_LIGHT_ARRAY') ? CliDumper::DUMP_LIGHT_ARRAY : 0;
-            $flags |= getenv('DUMP_STRING_LENGTH') ? CliDumper::DUMP_STRING_LENGTH : 0;
-            $flags |= getenv('DUMP_COMMA_SEPARATOR') ? CliDumper::DUMP_COMMA_SEPARATOR : 0;
-        }
+        $flags = getenv('DUMP_LIGHT_ARRAY') ? CliDumper::DUMP_LIGHT_ARRAY : 0;
+        $flags |= getenv('DUMP_STRING_LENGTH') ? CliDumper::DUMP_STRING_LENGTH : 0;
 
         $cloner = new VarCloner();
-        $cloner->addCasters($this->varDumperConfig['casters']);
         $cloner->setMaxItems(-1);
         $dumper = new CliDumper(null, null, $flags);
         $dumper->setColors(false);
@@ -74,14 +59,5 @@ trait VarDumperTestTrait
         }
 
         return rtrim($dumper->dump($data, true));
-    }
-
-    private function prepareExpectation($expected, int $filter): string
-    {
-        if (!\is_string($expected)) {
-            $expected = $this->getDump($expected, null, $filter);
-        }
-
-        return rtrim($expected);
     }
 }

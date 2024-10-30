@@ -15,8 +15,6 @@ namespace Doctrine\DBAL\Platforms;
  *   NVARCHAR(max) replace the old TEXT, NTEXT and IMAGE types. See
  *   {@link http://www.sql-server-helper.com/faq/sql-server-2005-varchar-max-p01.aspx}
  *   for more information.
- *
- * @deprecated Use SQL Server 2012 or newer
  */
 class SQLServer2005Platform extends SQLServerPlatform
 {
@@ -31,7 +29,7 @@ class SQLServer2005Platform extends SQLServerPlatform
     /**
      * {@inheritDoc}
      */
-    public function getClobTypeDeclarationSQL(array $column)
+    public function getClobTypeDeclarationSQL(array $field)
     {
         return 'VARCHAR(MAX)';
     }

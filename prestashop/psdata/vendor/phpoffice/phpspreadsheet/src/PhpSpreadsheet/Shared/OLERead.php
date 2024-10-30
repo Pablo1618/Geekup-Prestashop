@@ -92,23 +92,27 @@ class OLERead
 
     /**
      * Read the file.
+     *
+     * @param $pFilename string Filename
+     *
+     * @throws ReaderException
      */
-    public function read(string $filename): void
+    public function read($pFilename)
     {
-        File::assertFile($filename);
+        File::assertFile($pFilename);
 
         // Get the file identifier
         // Don't bother reading the whole file until we know it's a valid OLE file
-        $this->data = file_get_contents($filename, false, null, 0, 8);
+        $this->data = file_get_contents($pFilename, false, null, 0, 8);
 
         // Check OLE identifier
         $identifierOle = pack('CCCCCCCC', 0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1);
         if ($this->data != $identifierOle) {
-            throw new ReaderException('The filename ' . $filename . ' is not recognised as an OLE file');
+            throw new ReaderException('The filename ' . $pFilename . ' is not recognised as an OLE file');
         }
 
         // Get the file data
-        $this->data = file_get_contents($filename);
+        $this->data = file_get_contents($pFilename);
 
         // Total number of sectors used for the SAT
         $this->numBigBlockDepotBlocks = self::getInt4d($this->data, self::NUM_BIG_BLOCK_DEPOT_BLOCKS_POS);
@@ -178,7 +182,7 @@ class OLERead
 
         // read the directory stream
         $block = $this->rootStartBlock;
-        $this->entry = $this->readData($block);
+        $this->entry = $this->_readData($block);
 
         $this->readPropertySets();
     }
@@ -188,7 +192,7 @@ class OLERead
      *
      * @param int $stream
      *
-     * @return null|string
+     * @return string
      */
     public function getStream($stream)
     {
@@ -199,7 +203,7 @@ class OLERead
         $streamData = '';
 
         if ($this->props[$stream]['size'] < self::SMALL_BLOCK_THRESHOLD) {
-            $rootdata = $this->readData($this->props[$this->rootentry]['startBlock']);
+            $rootdata = $this->_readData($this->props[$this->rootentry]['startBlock']);
 
             $block = $this->props[$stream]['startBlock'];
 
@@ -235,12 +239,13 @@ class OLERead
     /**
      * Read a standard stream (by joining sectors using information from SAT).
      *
-     * @param int $block Sector ID where the stream starts
+     * @param int $bl Sector ID where the stream starts
      *
      * @return string Data for standard stream
      */
-    private function readData($block)
+    private function _readData($bl)
     {
+        $block = $bl;
         $data = '';
 
         while ($block != -2) {
@@ -255,7 +260,7 @@ class OLERead
     /**
      * Read entries in the directory stream.
      */
-    private function readPropertySets(): void
+    private function readPropertySets()
     {
         $offset = 0;
 

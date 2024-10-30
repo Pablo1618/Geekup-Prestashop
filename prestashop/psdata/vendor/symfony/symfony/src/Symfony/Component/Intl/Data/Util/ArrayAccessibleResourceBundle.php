@@ -39,38 +39,32 @@ class ArrayAccessibleResourceBundle implements \ArrayAccess, \IteratorAggregate,
         return $value instanceof \ResourceBundle ? new static($value) : $value;
     }
 
-    public function offsetExists($offset): bool
+    public function offsetExists($offset)
     {
         return null !== $this->bundleImpl->get($offset);
     }
 
-    /**
-     * @param mixed $offset
-     *
-     * @return mixed
-     */
-    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);
     }
 
-    public function offsetSet($offset, $value): void
+    public function offsetSet($offset, $value)
     {
         throw new BadMethodCallException('Resource bundles cannot be modified.');
     }
 
-    public function offsetUnset($offset): void
+    public function offsetUnset($offset)
     {
         throw new BadMethodCallException('Resource bundles cannot be modified.');
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator()
     {
         return $this->bundleImpl;
     }
 
-    public function count(): int
+    public function count()
     {
         return $this->bundleImpl->count();
     }

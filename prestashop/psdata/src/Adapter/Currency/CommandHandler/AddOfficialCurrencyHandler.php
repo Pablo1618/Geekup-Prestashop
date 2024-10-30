@@ -38,7 +38,6 @@ use PrestaShop\PrestaShop\Core\Domain\Language\Exception\LanguageNotFoundExcepti
 use PrestaShop\PrestaShop\Core\Language\LanguageInterface;
 use PrestaShop\PrestaShop\Core\Localization\CLDR\Locale;
 use PrestaShop\PrestaShop\Core\Localization\CLDR\LocaleRepository;
-use PrestaShop\PrestaShop\Core\Localization\Currency\PatternTransformer;
 use PrestaShop\PrestaShop\Core\Localization\Exception\LocalizationException;
 use PrestaShopException;
 
@@ -64,10 +63,9 @@ final class AddOfficialCurrencyHandler extends AbstractCurrencyHandler implement
         LocaleRepository $localeRepoCLDR,
         array $languages,
         CurrencyCommandValidator $validator,
-        CurrencyDataProviderInterface $currencyDataProvider,
-        PatternTransformer $patternTransformer
+        CurrencyDataProviderInterface $currencyDataProvider
     ) {
-        parent::__construct($localeRepoCLDR, $languages, $validator, $patternTransformer);
+        parent::__construct($localeRepoCLDR, $languages, $validator);
         $this->currencyDataProvider = $currencyDataProvider;
     }
 
@@ -131,6 +129,7 @@ final class AddOfficialCurrencyHandler extends AbstractCurrencyHandler implement
         $cldrLocale = $this->getCLDRLocale();
         $allCurrencies = $cldrLocale->getAllCurrencies();
 
+        $matchingRealCurrency = null;
         foreach ($allCurrencies as $currencyData) {
             if ($currencyData->getIsoCode() === $isoCode) {
                 return $currencyData->getNumericIsoCode();

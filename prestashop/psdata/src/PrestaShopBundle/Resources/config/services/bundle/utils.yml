@@ -1,13 +1,11 @@
 services:
-  _defaults:
-    public: true
+    _defaults:
+        public: true
 
-  prestashop.utils.zip_manager:
-    class: PrestaShopBundle\Utils\ZipManager
+    prestashop.utils.zip_manager:
+        class: PrestaShopBundle\Utils\ZipManager
 
-  PrestaShopBundle\Utils\FloatParser:
-    autowire: true
-
-  prestashop.utils.float_parser:
-    alias: PrestaShopBundle\Utils\FloatParser
-    deprecated: ~
+    prestashop.utils.float_parser:
+      class: PrestaShopBundle\Utils\FloatParser
+      arguments:
+        - '@prestashop.core.util.arabic_to_latin_digit_converter'

@@ -153,14 +153,10 @@ class CartRuleCalculator
                 $cartRowCheapest = null;
                 foreach ($this->cartRows as $cartRow) {
                     $product = $cartRow->getRowData();
-                    if (
-                        (
-                            ($cartRule->reduction_exclude_special && !$product['reduction_applies'])
-                            || !$cartRule->reduction_exclude_special
-                        ) && (
-                            $cartRowCheapest === null
-                            || $cartRowCheapest->getInitialUnitPrice()->getTaxIncluded() > $cartRow->getInitialUnitPrice()->getTaxIncluded()
-                        )
+                    if (((($cartRule->reduction_exclude_special && !$product['reduction_applies'])
+                            || !$cartRule->reduction_exclude_special)) && ($cartRowCheapest === null
+                            || $cartRowCheapest->getInitialUnitPrice()->getTaxIncluded() > $cartRow->getInitialUnitPrice()
+                                ->getTaxIncluded())
                     ) {
                         $cartRowCheapest = $cartRow;
                     }
@@ -224,7 +220,7 @@ class CartRuleCalculator
                 new \Currency($cart->id_currency)
             );
 
-            // Get total sum of concerned rows
+            // get total of concerned rows
             $totalTaxIncl = $totalTaxExcl = 0;
             foreach ($concernedRows as $concernedRow) {
                 $totalTaxIncl += $concernedRow->getFinalTotalPrice()->getTaxIncluded();
@@ -234,11 +230,16 @@ class CartRuleCalculator
             // The reduction cannot exceed the products total, except when we do not want it to be limited (for the partial use calculation)
             $discountConverted = min($discountConverted, $cartRule->reduction_tax ? $totalTaxIncl : $totalTaxExcl);
 
-            // apply weighted discount:
+            // apply weighted discount :
             // on each line we apply a part of the discount corresponding to discount*rowWeight/total
             foreach ($concernedRows as $concernedRow) {
-                // Get current line tax rate
-                $taxRate = $this->getTaxRateFromRow($concernedRow);
+                // get current line tax rate
+                $taxRate = 0;
+                if ($concernedRow->getFinalTotalPrice()->getTaxExcluded() != 0) {
+                    $taxRate = ($concernedRow->getFinalTotalPrice()->getTaxIncluded()
+                                - $concernedRow->getFinalTotalPrice()->getTaxExcluded())
+                               / $concernedRow->getFinalTotalPrice()->getTaxExcluded();
+                }
                 $weightFactor = 0;
                 if ($cartRule->reduction_tax) {
                     // if cart rule amount is set tax included : calculate weight tax included
@@ -258,38 +259,10 @@ class CartRuleCalculator
                     $discountAmountTaxIncl = $discountAmountTaxExcl * (1 + $taxRate);
                 }
                 $amount = new AmountImmutable($discountAmountTaxIncl, $discountAmountTaxExcl);
-
-                // Update the unit prices of the items, they will be needed for possible next rules to be calculated
                 $concernedRow->applyFlatDiscount($amount);
-
-                // Apply the discount amount
                 $cartRuleData->addDiscountApplied($amount);
             }
         }
-    }
-
-    /**
-     * @param CartRow $row
-     *
-     * @return float tax rate of the given row
-     */
-    protected function getTaxRateFromRow($row)
-    {
-        // If the product was free, we return zero
-        if (empty($row->getFinalTotalPrice()->getTaxExcluded())) {
-            return 0.0;
-        }
-
-        // Calculate the rate
-        $taxRate = ($row->getFinalTotalPrice()->getTaxIncluded() - $row->getFinalTotalPrice()->getTaxExcluded())
-                    / $row->getFinalTotalPrice()->getTaxExcluded();
-
-        // If we got some nonsense number below zero, we return zero
-        if (empty($taxRate) || $taxRate < 0) {
-            return 0.0;
-        }
-
-        return $taxRate;
     }
 
     /**

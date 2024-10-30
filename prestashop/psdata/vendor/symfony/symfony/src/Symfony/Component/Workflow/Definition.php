@@ -11,9 +11,8 @@
 
 namespace Symfony\Component\Workflow;
 
+use Symfony\Component\Workflow\Exception\InvalidArgumentException;
 use Symfony\Component\Workflow\Exception\LogicException;
-use Symfony\Component\Workflow\Metadata\InMemoryMetadataStore;
-use Symfony\Component\Workflow\Metadata\MetadataStoreInterface;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -24,15 +23,14 @@ final class Definition
 {
     private $places = [];
     private $transitions = [];
-    private $initialPlaces = [];
-    private $metadataStore;
+    private $initialPlace;
 
     /**
-     * @param string[]             $places
-     * @param Transition[]         $transitions
-     * @param string|string[]|null $initialPlaces
+     * @param string[]     $places
+     * @param Transition[] $transitions
+     * @param string|null  $initialPlace
      */
-    public function __construct(array $places, array $transitions, $initialPlaces = null, MetadataStoreInterface $metadataStore = null)
+    public function __construct(array $places, array $transitions, $initialPlace = null)
     {
         foreach ($places as $place) {
             $this->addPlace($place);
@@ -42,37 +40,21 @@ final class Definition
             $this->addTransition($transition);
         }
 
-        $this->setInitialPlaces($initialPlaces);
-
-        $this->metadataStore = $metadataStore ?? new InMemoryMetadataStore();
+        $this->setInitialPlace($initialPlace);
     }
 
     /**
-     * @deprecated since Symfony 4.3. Use getInitialPlaces() instead.
+     * @return string|null
      */
-    public function getInitialPlace(): ?string
+    public function getInitialPlace()
     {
-        @trigger_error(sprintf('Calling %s::getInitialPlace() is deprecated since Symfony 4.3. Call getInitialPlaces() instead.', __CLASS__), \E_USER_DEPRECATED);
-
-        if (!$this->initialPlaces) {
-            return null;
-        }
-
-        return reset($this->initialPlaces);
+        return $this->initialPlace;
     }
 
     /**
      * @return string[]
      */
-    public function getInitialPlaces(): array
-    {
-        return $this->initialPlaces;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getPlaces(): array
+    public function getPlaces()
     {
         return $this->places;
     }
@@ -80,37 +62,32 @@ final class Definition
     /**
      * @return Transition[]
      */
-    public function getTransitions(): array
+    public function getTransitions()
     {
         return $this->transitions;
     }
 
-    public function getMetadataStore(): MetadataStoreInterface
+    private function setInitialPlace($place)
     {
-        return $this->metadataStore;
-    }
-
-    private function setInitialPlaces($places = null)
-    {
-        if (!$places) {
+        if (null === $place) {
             return;
         }
 
-        $places = (array) $places;
-
-        foreach ($places as $place) {
-            if (!isset($this->places[$place])) {
-                throw new LogicException(sprintf('Place "%s" cannot be the initial place as it does not exist.', $place));
-            }
+        if (!isset($this->places[$place])) {
+            throw new LogicException(sprintf('Place "%s" cannot be the initial place as it does not exist.', $place));
         }
 
-        $this->initialPlaces = $places;
+        $this->initialPlace = $place;
     }
 
-    private function addPlace(string $place)
+    private function addPlace($place)
     {
+        if (!preg_match('{^[\w_-]+$}', $place)) {
+            throw new InvalidArgumentException(sprintf('The place "%s" contains invalid characters.', $place));
+        }
+
         if (!\count($this->places)) {
-            $this->initialPlaces = [$place];
+            $this->initialPlace = $place;
         }
 
         $this->places[$place] = $place;

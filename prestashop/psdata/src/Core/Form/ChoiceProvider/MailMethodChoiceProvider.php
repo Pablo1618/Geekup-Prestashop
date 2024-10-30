@@ -26,9 +26,10 @@
 
 namespace PrestaShop\PrestaShop\Core\Form\ChoiceProvider;
 
+use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Email\MailOption;
 use PrestaShop\PrestaShop\Core\Form\FormChoiceProviderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class MailMethodChoiceProvider provides choices for mail methods.
@@ -36,15 +37,24 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class MailMethodChoiceProvider implements FormChoiceProviderInterface
 {
     /**
+     * @var ConfigurationInterface
+     */
+    private $configuration;
+
+    /**
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * @param ConfigurationInterface $configuration
      * @param TranslatorInterface $translator
      */
-    public function __construct(TranslatorInterface $translator)
-    {
+    public function __construct(
+        ConfigurationInterface $configuration,
+        TranslatorInterface $translator
+    ) {
+        $this->configuration = $configuration;
         $this->translator = $translator;
     }
 
@@ -55,9 +65,11 @@ final class MailMethodChoiceProvider implements FormChoiceProviderInterface
     {
         $choices = [];
 
-        $choices[
-            $this->trans('Use /usr/sbin/sendmail (recommended; works in most cases)', [], 'Admin.Advparameters.Feature')
-        ] = MailOption::METHOD_NATIVE;
+        if (null === $this->configuration->get('_PS_HOST_MODE_')) {
+            $choices[
+                $this->trans('Use /usr/sbin/sendmail (recommended; works in most cases)', [], 'Admin.Advparameters.Feature')
+            ] = MailOption::METHOD_NATIVE;
+        }
 
         $choices[
             $this->trans('Set my own SMTP parameters (for advanced users ONLY)', [], 'Admin.Advparameters.Feature')

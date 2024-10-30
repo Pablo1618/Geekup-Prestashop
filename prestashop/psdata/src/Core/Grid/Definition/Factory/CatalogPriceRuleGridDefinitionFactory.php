@@ -36,8 +36,8 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DateTimeColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
@@ -99,7 +99,7 @@ final class CatalogPriceRuleGridDefinitionFactory extends AbstractGridDefinition
             ])
             )
             ->add((new DataColumn('shop'))
-            ->setName($this->trans('Store', [], 'Admin.Global'))
+            ->setName($this->trans('Shop', [], 'Admin.Global'))
             ->setOptions([
                 'field' => 'shop',
             ])
@@ -143,7 +143,7 @@ final class CatalogPriceRuleGridDefinitionFactory extends AbstractGridDefinition
             ->add((new DateTimeColumn('date_from'))
             ->setName($this->trans('Beginning', [], 'Admin.Catalog.Feature'))
             ->setOptions([
-                'format' => 'Y‑m‑d H:i', // note the use of non-breaking hyphens (U+2011)
+                'format' => 'Y-m-d H:i',
                 'field' => 'date_from',
             ])
             )
@@ -215,7 +215,7 @@ final class CatalogPriceRuleGridDefinitionFactory extends AbstractGridDefinition
             ->setTypeOptions([
                 'required' => false,
                 'attr' => [
-                    'placeholder' => $this->trans('Store', [], 'Admin.Global'),
+                    'placeholder' => $this->trans('Shop', [], 'Admin.Global'),
                 ],
             ])
             ->setAssociatedColumn('shop')

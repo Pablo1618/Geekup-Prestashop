@@ -27,7 +27,6 @@
 namespace PrestaShopBundle\Controller\Admin\Configure\ShopParameters;
 
 use Exception;
-use PrestaShop\PrestaShop\Adapter\Tools;
 use PrestaShop\PrestaShop\Core\Domain\Meta\Exception\MetaConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Meta\Exception\MetaNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\ShowcaseCard\Query\GetShowcaseCardIsClosed;
@@ -36,8 +35,6 @@ use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler;
 use PrestaShop\PrestaShop\Core\Search\Filters\MetaFilters;
-use PrestaShop\PrestaShop\Core\Util\HelperCard\DocumentationLinkProviderInterface;
-use PrestaShop\PrestaShop\Core\Util\Url\UrlFileCheckerInterface;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\DemoRestricted;
@@ -67,14 +64,14 @@ class MetaController extends FrameworkBundleAdminController
         $setUpUrlsForm = $this->getSetUpUrlsFormHandler()->getForm();
         $shopUrlsForm = $this->getShopUrlsFormHandler()->getForm();
         $seoOptionsForm = $this->getSeoOptionsFormHandler()->getForm();
-        $isRewriteSettingEnabled = $this->getConfiguration()->getBoolean('PS_REWRITING_SETTINGS');
+        $isRewriteSettingEnabled = $this->get('prestashop.adapter.legacy.configuration')->getBoolean('PS_REWRITING_SETTINGS');
 
         $urlSchemaForm = null;
         if ($isRewriteSettingEnabled) {
             $urlSchemaForm = $this->getUrlSchemaFormHandler()->getForm();
         }
 
-        return $this->doRenderForm($request, $filters, $setUpUrlsForm, $shopUrlsForm, $seoOptionsForm, $urlSchemaForm);
+        return $this->renderForm($request, $filters, $setUpUrlsForm, $shopUrlsForm, $seoOptionsForm, $urlSchemaForm);
     }
 
     /**
@@ -125,7 +122,7 @@ class MetaController extends FrameworkBundleAdminController
             $result = $this->getMetaFormHandler()->handle($metaForm);
 
             if (null !== $result->getIdentifiableObjectId()) {
-                $this->addFlash('success', $this->trans('Successful creation', 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans('Successful creation.', 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_metas_index');
             }
@@ -136,7 +133,7 @@ class MetaController extends FrameworkBundleAdminController
         return $this->render('@PrestaShop/Admin/Configure/ShopParameters/TrafficSeo/Meta/create.html.twig', [
             'meta_form' => $metaForm->createView(),
             'multistoreInfoTip' => $this->trans(
-                'Note that this feature is only available in the "all stores" context. It will be added to all your stores.',
+                'Note that this feature is available in all shops context only. It will be added to all your stores.',
                 'Admin.Notifications.Info'
             ),
             'multistoreIsUsed' => $this->get('prestashop.adapter.multistore_feature')->isUsed(),
@@ -163,7 +160,7 @@ class MetaController extends FrameworkBundleAdminController
             $result = $this->getMetaFormHandler()->handleFor($metaId, $metaForm);
 
             if ($result->isSubmitted() && $result->isValid()) {
-                $this->addFlash('success', $this->trans('Successful update', 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_metas_index');
             }
@@ -199,7 +196,7 @@ class MetaController extends FrameworkBundleAdminController
         } else {
             $this->addFlash(
                 'success',
-                $this->trans('Successful deletion', 'Admin.Notifications.Success')
+                $this->trans('Successful deletion.', 'Admin.Notifications.Success')
             );
         }
 
@@ -258,14 +255,14 @@ class MetaController extends FrameworkBundleAdminController
 
         $shopUrlsForm = $this->getShopUrlsFormHandler()->getForm();
         $seoOptionsForm = $this->getSeoOptionsFormHandler()->getForm();
-        $isRewriteSettingEnabled = $this->getConfiguration()->getBoolean('PS_REWRITING_SETTINGS');
+        $isRewriteSettingEnabled = $this->get('prestashop.adapter.legacy.configuration')->getBoolean('PS_REWRITING_SETTINGS');
 
         $urlSchemaForm = null;
         if ($isRewriteSettingEnabled) {
             $urlSchemaForm = $this->getUrlSchemaFormHandler()->getForm();
         }
 
-        return $this->doRenderForm($request, $filters, $formProcessResult, $shopUrlsForm, $seoOptionsForm, $urlSchemaForm);
+        return $this->renderForm($request, $filters, $formProcessResult, $shopUrlsForm, $seoOptionsForm, $urlSchemaForm);
     }
 
     /**
@@ -291,14 +288,14 @@ class MetaController extends FrameworkBundleAdminController
 
         $setUpUrlsForm = $this->getSetUpUrlsFormHandler()->getForm();
         $seoOptionsForm = $this->getSeoOptionsFormHandler()->getForm();
-        $isRewriteSettingEnabled = $this->getConfiguration()->getBoolean('PS_REWRITING_SETTINGS');
+        $isRewriteSettingEnabled = $this->get('prestashop.adapter.legacy.configuration')->getBoolean('PS_REWRITING_SETTINGS');
 
         $urlSchemaForm = null;
         if ($isRewriteSettingEnabled) {
             $urlSchemaForm = $this->getUrlSchemaFormHandler()->getForm();
         }
 
-        return $this->doRenderForm($request, $filters, $setUpUrlsForm, $formProcessResult, $seoOptionsForm, $urlSchemaForm);
+        return $this->renderForm($request, $filters, $setUpUrlsForm, $formProcessResult, $seoOptionsForm, $urlSchemaForm);
     }
 
     /**
@@ -326,7 +323,7 @@ class MetaController extends FrameworkBundleAdminController
         $shopUrlsForm = $this->getShopUrlsFormHandler()->getForm();
         $seoOptionsForm = $this->getSeoOptionsFormHandler()->getForm();
 
-        return $this->doRenderForm($request, $filters, $setUpUrlsForm, $shopUrlsForm, $seoOptionsForm, $formProcessResult);
+        return $this->renderForm($request, $filters, $setUpUrlsForm, $shopUrlsForm, $seoOptionsForm, $formProcessResult);
     }
 
     /**
@@ -352,22 +349,20 @@ class MetaController extends FrameworkBundleAdminController
 
         $setUpUrlsForm = $this->getSetUpUrlsFormHandler()->getForm();
         $shopUrlsForm = $this->getShopUrlsFormHandler()->getForm();
-        $isRewriteSettingEnabled = $this->getConfiguration()->getBoolean('PS_REWRITING_SETTINGS');
+        $isRewriteSettingEnabled = $this->get('prestashop.adapter.legacy.configuration')->getBoolean('PS_REWRITING_SETTINGS');
 
         $urlSchemaForm = null;
         if ($isRewriteSettingEnabled) {
             $urlSchemaForm = $this->getUrlSchemaFormHandler()->getForm();
         }
 
-        return $this->doRenderForm($request, $filters, $setUpUrlsForm, $shopUrlsForm, $formProcessResult, $urlSchemaForm);
+        return $this->renderForm($request, $filters, $setUpUrlsForm, $shopUrlsForm, $formProcessResult, $urlSchemaForm);
     }
 
     /**
      * Generates robots.txt file for Front Office.
      *
-     * @AdminSecurity(
-     *     "is_granted('create', request.get('_legacy_controller')) && is_granted('update', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))"
-     * )
+     * @AdminSecurity("is_granted(['create', 'update', 'delete'], request.get('_legacy_controller'))")
      * @DemoRestricted(redirectRoute="admin_metas_index")
      *
      * @return RedirectResponse
@@ -376,7 +371,7 @@ class MetaController extends FrameworkBundleAdminController
     {
         $robotsTextFileGenerator = $this->get('prestashop.adapter.file.robots_text_file_generator');
 
-        $rootDir = $this->getConfiguration()->get('_PS_ROOT_DIR_');
+        $rootDir = $this->get('prestashop.adapter.legacy.configuration')->get('_PS_ROOT_DIR_');
 
         if (!$robotsTextFileGenerator->generateFile()) {
             $this->addFlash(
@@ -395,15 +390,13 @@ class MetaController extends FrameworkBundleAdminController
 
         $this->addFlash(
             'success',
-            $this->trans('Successful update', 'Admin.Notifications.Success')
+            $this->trans('Successful update.', 'Admin.Notifications.Success')
         );
 
         return $this->redirectToRoute('admin_metas_index');
     }
 
     /**
-     * @deprecated since 8.1.0 and will be removed in next major version.
-     *
      * @param Request $request
      * @param MetaFilters $filters
      * @param FormInterface $setUpUrlsForm
@@ -414,42 +407,6 @@ class MetaController extends FrameworkBundleAdminController
      * @return Response
      */
     protected function renderForm(
-        Request $request,
-        MetaFilters $filters,
-        FormInterface $setUpUrlsForm,
-        FormInterface $shopUrlsForm,
-        FormInterface $seoOptionsForm,
-        ?FormInterface $urlSchemaForm = null
-    ): Response {
-        @trigger_error(
-            sprintf(
-                '%s is deprecated since version 8.1.0 and will be removed in the next major version. Use doRenderForm() instead.',
-                __METHOD__
-            ),
-            E_USER_DEPRECATED
-        );
-
-        return $this->doRenderForm(
-            $request,
-            $filters,
-            $setUpUrlsForm,
-            $shopUrlsForm,
-            $seoOptionsForm,
-            $urlSchemaForm
-        );
-    }
-
-    /**
-     * @param Request $request
-     * @param MetaFilters $filters
-     * @param FormInterface $setUpUrlsForm
-     * @param FormInterface $shopUrlsForm
-     * @param FormInterface $seoOptionsForm
-     * @param FormInterface|null $urlSchemaForm
-     *
-     * @return Response
-     */
-    private function doRenderForm(
         Request $request,
         MetaFilters $filters,
         FormInterface $setUpUrlsForm,
@@ -470,14 +427,15 @@ class MetaController extends FrameworkBundleAdminController
         if ($isGridDisplayed) {
             $grid = $seoUrlsGridFactory->getGrid($filters);
 
-            $presentedGrid = $this->presentGrid($grid);
+            $gridPresenter = $this->get('prestashop.core.grid.presenter.grid_presenter');
+            $presentedGrid = $gridPresenter->present($grid);
         }
 
-        $tools = $this->get(Tools::class);
-        $urlFileChecker = $this->get(UrlFileCheckerInterface::class);
+        $tools = $this->get('prestashop.adapter.tools');
+        $urlFileChecker = $this->get('prestashop.core.util.url.url_file_checker');
         $hostingInformation = $this->get('prestashop.adapter.hosting_information');
         $defaultRoutesProvider = $this->get('prestashop.adapter.data_provider.default_route');
-        $helperBlockLinkProvider = $this->get(DocumentationLinkProviderInterface::class);
+        $helperBlockLinkProvider = $this->get('prestashop.core.util.helper_card.documentation_link_provider');
         $metaDataProvider = $this->get('prestashop.adapter.meta.data_provider');
 
         $showcaseCardIsClosed = $this->getQueryBus()->handle(
@@ -509,6 +467,7 @@ class MetaController extends FrameworkBundleAdminController
                 'isHtaccessFileValid' => $urlFileChecker->isHtaccessFileWritable(),
                 'isRobotsTextFileValid' => $urlFileChecker->isRobotsFileWritable(),
                 'isShopFeatureActive' => $isShopFeatureActive,
+                'isHostMode' => $hostingInformation->isHostMode(),
                 'doesMainShopUrlExist' => $doesMainShopUrlExist,
                 'enableSidebar' => true,
                 'help_link' => $this->generateSidebarLink($request->attributes->get('_legacy_controller')),
@@ -677,7 +636,7 @@ class MetaController extends FrameworkBundleAdminController
     {
         $exceptionDictionary = [
             MetaNotFoundException::class => $this->trans(
-                'The object cannot be loaded (or found).',
+                'The object cannot be loaded (or found)',
                 'Admin.Notifications.Error'
             ),
         ];

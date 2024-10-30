@@ -43,6 +43,11 @@ abstract class AbstractGridAction implements GridActionInterface
     /**
      * @var string
      */
+    private $type;
+
+    /**
+     * @var string
+     */
     private $icon;
 
     /**

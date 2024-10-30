@@ -32,7 +32,6 @@ use PrestaShop\PrestaShop\Adapter\Product\Repository\TagRepository;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\CannotUpdateProductException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\LocalizedTags;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use Product;
 
@@ -47,20 +46,12 @@ class ProductTagUpdater
     private $tagRepository;
 
     /**
-     * @var ProductIndexationUpdater
-     */
-    private $productIndexationUpdater;
-
-    /**
      * @param TagRepository $tagRepository
-     * @param ProductIndexationUpdater $productIndexationUpdater
      */
     public function __construct(
-        TagRepository $tagRepository,
-        ProductIndexationUpdater $productIndexationUpdater
+        TagRepository $tagRepository
     ) {
         $this->tagRepository = $tagRepository;
-        $this->productIndexationUpdater = $productIndexationUpdater;
     }
 
     /**
@@ -76,78 +67,24 @@ class ProductTagUpdater
     {
         $productId = new ProductId((int) $product->id);
 
-        // We check if the values have changed, it represents an additional query to check but it's better than performing
-        // an update of search indexes for nothing.
-        if (!$this->hasModification($productId, $localizedTagsList)) {
-            return;
-        }
-
         // delete all tags for product if array is empty
         if (empty($localizedTagsList)) {
             $this->tagRepository->deleteAllTags($productId);
-        } else {
-            foreach ($localizedTagsList as $localizedTags) {
-                // delete all this product tags for this lang
-                $this->tagRepository->deleteTagsByLanguage($productId, $localizedTags->getLanguageId());
 
-                // empty tags means to delete all previous tags, which is already done above.
-                if ($localizedTags->isEmpty()) {
-                    continue;
-                }
-
-                // assign new tags to product
-                $this->tagRepository->addTagsByLanguage($productId, $localizedTags);
-            }
-        }
-
-        // Since tags have been modified we need to update the indexation values (only for active products)
-        if ($product->active) {
-            $this->productIndexationUpdater->updateIndexation($product, ShopConstraint::allShops());
-        }
-    }
-
-    /**
-     * @param ProductId $productId
-     * @param LocalizedTags[] $localizedTagsList
-     *
-     * @return bool
-     */
-    private function hasModification(ProductId $productId, array $localizedTagsList): bool
-    {
-        $localizedProductTags = $this->tagRepository->getLocalizedProductTags($productId);
-        $currentTagLanguages = array_keys($localizedProductTags);
-        $updateTagLanguages = array_map(static function (LocalizedTags $localizedTags): int {
-            return $localizedTags->getLanguageId()->getValue();
-        }, $localizedTagsList);
-
-        if (array_diff($currentTagLanguages, $updateTagLanguages)) {
-            return true;
+            return;
         }
 
         foreach ($localizedTagsList as $localizedTags) {
-            if (empty($localizedProductTags[$localizedTags->getLanguageId()->getValue()]) && !empty($localizedTags->getTags())) {
-                return true;
+            // delete all this product tags for this lang
+            $this->tagRepository->deleteTagsByLanguage($productId, $localizedTags->getLanguageId());
+
+            // empty tags means to delete all previous tags, which is already done above.
+            if ($localizedTags->isEmpty()) {
+                continue;
             }
 
-            $currentTags = $this->stringifyTags($localizedProductTags[$localizedTags->getLanguageId()->getValue()] ?? []);
-            $updateTags = $this->stringifyTags($localizedTags->getTags());
-            if ($currentTags !== $updateTags) {
-                return true;
-            }
+            // assign new tags to product
+            $this->tagRepository->addTagsByLanguage($productId, $localizedTags);
         }
-
-        return false;
-    }
-
-    /**
-     * @param string[] $tags
-     *
-     * @return string
-     */
-    private function stringifyTags(array $tags): string
-    {
-        asort($tags);
-
-        return implode(';', $tags);
     }
 }

@@ -29,13 +29,13 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Adapter\Product\Customization\CommandHandler;
 
 use CustomizationField;
-use PrestaShop\PrestaShop\Adapter\Product\Customization\Repository\CustomizationFieldRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Customization\Update\ProductCustomizationFieldUpdater;
+use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\Command\SetProductCustomizationFieldsCommand;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\CommandHandler\SetProductCustomizationFieldsHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\CustomizationField as CustomizationFieldDTO;
+use PrestaShop\PrestaShop\Core\Domain\Product\Customization\ValueObject\CustomizationFieldId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 
 /**
  * Handles @see SetProductCustomizationFieldsCommand using legacy object model
@@ -43,9 +43,9 @@ use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 class SetProductCustomizationFieldsHandler implements SetProductCustomizationFieldsHandlerInterface
 {
     /**
-     * @var CustomizationFieldRepository
+     * @var ProductRepository
      */
-    private $customizationFieldRepository;
+    private $productRepository;
 
     /**
      * @var ProductCustomizationFieldUpdater
@@ -53,14 +53,14 @@ class SetProductCustomizationFieldsHandler implements SetProductCustomizationFie
     private $productCustomizationFieldUpdater;
 
     /**
-     * @param CustomizationFieldRepository $customizationFieldRepository,
+     * @param ProductRepository $productRepository
      * @param ProductCustomizationFieldUpdater $productCustomizationFieldUpdater
      */
     public function __construct(
-        CustomizationFieldRepository $customizationFieldRepository,
+        ProductRepository $productRepository,
         ProductCustomizationFieldUpdater $productCustomizationFieldUpdater
     ) {
-        $this->customizationFieldRepository = $customizationFieldRepository;
+        $this->productRepository = $productRepository;
         $this->productCustomizationFieldUpdater = $productCustomizationFieldUpdater;
     }
 
@@ -71,34 +71,31 @@ class SetProductCustomizationFieldsHandler implements SetProductCustomizationFie
      */
     public function handle(SetProductCustomizationFieldsCommand $command): array
     {
-        $shopId = $command->getShopConstraint()->getShopId();
         $productId = $command->getProductId();
-
+        $product = $this->productRepository->get($productId);
         $customizationFields = [];
-        foreach ($command->getCustomizationFields() as $providedCustomizationField) {
-            $customizationFields[] = $this->buildEntityFromDTO($productId, $providedCustomizationField, $shopId);
-        }
-        $this->productCustomizationFieldUpdater->setProductCustomizationFields($productId, $customizationFields, $command->getShopConstraint());
 
-        return $this->customizationFieldRepository->getCustomizationFieldIds($productId);
+        foreach ($command->getCustomizationFields() as $providedCustomizationField) {
+            $customizationFields[] = $this->buildEntityFromDTO($productId, $providedCustomizationField);
+        }
+
+        $this->productCustomizationFieldUpdater->setProductCustomizationFields($productId, $customizationFields);
+
+        return array_map(function (int $customizationFieldId): CustomizationFieldId {
+            return new CustomizationFieldId($customizationFieldId);
+        }, $product->getNonDeletedCustomizationFieldIds());
     }
 
     /**
      * @param ProductId $productId
      * @param CustomizationFieldDTO $customizationFieldDTO
-     * @param ShopId $shopId
      *
      * @return CustomizationField
      */
-    private function buildEntityFromDTO(ProductId $productId, CustomizationFieldDTO $customizationFieldDTO, ShopId $shopId): CustomizationField
+    private function buildEntityFromDTO(ProductId $productId, CustomizationFieldDTO $customizationFieldDTO): CustomizationField
     {
-        // Fetch existing customization field or create a new one
-        if ($customizationFieldDTO->getCustomizationFieldId()) {
-            $customizationField = new CustomizationField($customizationFieldDTO->getCustomizationFieldId(), null, $shopId->getValue());
-        } else {
-            $customizationField = new CustomizationField();
-        }
-
+        $customizationField = new CustomizationField();
+        $customizationField->id = $customizationFieldDTO->getCustomizationFieldId();
         $customizationField->id_product = $productId->getValue();
         $customizationField->type = $customizationFieldDTO->getType();
         $customizationField->required = $customizationFieldDTO->isRequired();

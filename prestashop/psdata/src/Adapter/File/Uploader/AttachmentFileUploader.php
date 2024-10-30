@@ -40,23 +40,21 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
  * Uploads attachment file and if needed deletes old attachment file
+ *
+ * @internal
  */
-class AttachmentFileUploader implements AttachmentFileUploaderInterface
+final class AttachmentFileUploader implements AttachmentFileUploaderInterface
 {
     /**
      * @var ConfigurationInterface
      */
-    protected $configuration;
+    private $configuration;
 
     /**
      * @var UploadSizeConfigurationInterface
      */
-    protected $uploadSizeConfiguration;
+    private $uploadSizeConfiguration;
 
-    /**
-     * @param ConfigurationInterface $configuration
-     * @param UploadSizeConfigurationInterface $uploadSizeConfiguration
-     */
     public function __construct(
         ConfigurationInterface $configuration,
         UploadSizeConfigurationInterface $uploadSizeConfiguration
@@ -68,8 +66,6 @@ class AttachmentFileUploader implements AttachmentFileUploaderInterface
     /**
      * {@inheritdoc}
      *
-     * @param bool $throwExceptionOnFailure
-     *
      * @throws AttachmentConstraintException
      * @throws AttachmentNotFoundException
      * @throws AttachmentUploadFailedException
@@ -79,7 +75,7 @@ class AttachmentFileUploader implements AttachmentFileUploaderInterface
         string $uniqueFileName,
         int $fileSize,
         int $id = null,
-        bool $throwExceptionOnFailure = true
+        $throwExceptionOnFailure = true
     ): void {
         $this->checkFileAllowedForUpload($fileSize);
         $this->uploadFile($filePath, $uniqueFileName, $fileSize);
@@ -89,13 +85,12 @@ class AttachmentFileUploader implements AttachmentFileUploaderInterface
     }
 
     /**
-     * @param int $attachmentId
      * @param bool $throwExceptionOnFailure
      *
      * @throws AttachmentNotFoundException
      * @throws CannotUnlinkAttachmentException
      */
-    protected function deleteOldFile(int $attachmentId, bool $throwExceptionOnFailure): void
+    private function deleteOldFile(int $attachmentId, $throwExceptionOnFailure): void
     {
         try {
             $attachment = new Attachment($attachmentId);
@@ -114,14 +109,10 @@ class AttachmentFileUploader implements AttachmentFileUploaderInterface
     }
 
     /**
-     * @param string $filePath
-     * @param string $uniqid
-     * @param int $fileSize
-     *
      * @throws AttachmentConstraintException
      * @throws AttachmentUploadFailedException
      */
-    protected function uploadFile(string $filePath, string $uniqid, int $fileSize): void
+    private function uploadFile(string $filePath, string $uniqid, int $fileSize): void
     {
         if ($fileSize > ($this->configuration->get('PS_ATTACHMENT_MAXIMUM_SIZE') * 1024 * 1024)) {
             throw new AttachmentConstraintException(
@@ -142,11 +133,9 @@ class AttachmentFileUploader implements AttachmentFileUploaderInterface
     }
 
     /**
-     * @param int $fileSize
-     *
      * @throws AttachmentConstraintException
      */
-    protected function checkFileAllowedForUpload(int $fileSize): void
+    private function checkFileAllowedForUpload(int $fileSize): void
     {
         $maxFileSize = $this->uploadSizeConfiguration->getMaxUploadSizeInBytes();
 

@@ -15,8 +15,6 @@ namespace Symfony\Component\Intl\ResourceBundle;
  * Gives access to language-related ICU data.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
- *
- * @deprecated since Symfony 4.3, to be removed in 5.0.
  */
 interface LanguageBundleInterface extends ResourceBundleInterface
 {

@@ -70,7 +70,8 @@ class CheckoutSessionCore
     public function getCustomerAddressesCount()
     {
         return count($this->getCustomer()->getSimpleAddresses(
-            $this->context->language->id
+            $this->context->language->id,
+            true // no cache
         ));
     }
 
@@ -160,7 +161,7 @@ class CheckoutSessionCore
 
     public function setRecyclable($option)
     {
-        $this->context->cart->recyclable = (bool) $option;
+        $this->context->cart->recyclable = (int) $option;
 
         return $this->context->cart->update();
     }
@@ -172,7 +173,7 @@ class CheckoutSessionCore
 
     public function setGift($gift, $gift_message)
     {
-        $this->context->cart->gift = (bool) $gift;
+        $this->context->cart->gift = (int) $gift;
         $this->context->cart->gift_message = $gift_message;
 
         return $this->context->cart->update();

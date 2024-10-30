@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\FrameworkBundle\Command;
 
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,14 +24,25 @@ use Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer;
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
-final class CachePoolClearCommand extends Command
+final class CachePoolClearCommand extends ContainerAwareCommand
 {
     protected static $defaultName = 'cache:pool:clear';
 
     private $poolClearer;
 
-    public function __construct(Psr6CacheClearer $poolClearer)
+    /**
+     * @param Psr6CacheClearer $poolClearer
+     */
+    public function __construct($poolClearer = null)
     {
+        if (!$poolClearer instanceof Psr6CacheClearer) {
+            @trigger_error(sprintf('%s() expects an instance of "%s" as first argument since Symfony 3.4. Not passing it is deprecated and will throw a TypeError in 4.0.', __METHOD__, Psr6CacheClearer::class), \E_USER_DEPRECATED);
+
+            parent::__construct($poolClearer);
+
+            return;
+        }
+
         parent::__construct();
 
         $this->poolClearer = $poolClearer;
@@ -47,7 +57,7 @@ final class CachePoolClearCommand extends Command
             ->setDefinition([
                 new InputArgument('pools', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'A list of cache pools or cache pool clearers'),
             ])
-            ->setDescription('Clear cache pools')
+            ->setDescription('Clears cache pools')
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command clears the given cache pools or cache pool clearers.
 
@@ -60,8 +70,14 @@ EOF
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // BC to be removed in 4.0
+        if (null === $this->poolClearer) {
+            $this->poolClearer = $this->getContainer()->get('cache.global_clearer');
+            $cacheDir = $this->getContainer()->getParameter('kernel.cache_dir');
+        }
+
         $io = new SymfonyStyle($input, $output);
         $kernel = $this->getApplication()->getKernel();
         $pools = [];
@@ -85,7 +101,7 @@ EOF
 
         foreach ($clearers as $id => $clearer) {
             $io->comment(sprintf('Calling cache clearer: <info>%s</info>', $id));
-            $clearer->clear($kernel->getContainer()->getParameter('kernel.cache_dir'));
+            $clearer->clear(isset($cacheDir) ? $cacheDir : $kernel->getContainer()->getParameter('kernel.cache_dir'));
         }
 
         foreach ($pools as $id => $pool) {
@@ -99,7 +115,5 @@ EOF
         }
 
         $io->success('Cache was successfully cleared.');
-
-        return 0;
     }
 }

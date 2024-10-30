@@ -28,11 +28,8 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Configure\AdvancedParameters\FeatureFlag;
 
-use Doctrine\ORM\EntityManagerInterface;
-use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
-use PrestaShopBundle\Entity\FeatureFlag;
-use PrestaShopBundle\Routing\Converter\CacheCleanerInterface;
 
 /**
  * Passes data between the application layer in charge of the feature flags form
@@ -40,101 +37,33 @@ use PrestaShopBundle\Routing\Converter\CacheCleanerInterface;
  */
 class FeatureFlagsFormDataProvider implements FormDataProviderInterface
 {
-    /** @var EntityManagerInterface */
-    protected $doctrineEntityManager;
-
-    /** @var string */
-    protected $stability;
-
     /**
-     * @var CacheCleanerInterface
+     * @var DataConfigurationInterface
      */
-    private $cacheCleaner;
+    private $featureFlagDataConfigurator;
 
     /**
-     * @param EntityManagerInterface $doctrineEntityManager
-     * @param string $stability
-     * @param CacheCleanerInterface $cacheCleaner
+     * @param DataConfigurationInterface $featureFlagDataConfigurator
      */
     public function __construct(
-        EntityManagerInterface $doctrineEntityManager,
-        string $stability,
-        CacheCleanerInterface $cacheCleaner
+        DataConfigurationInterface $featureFlagDataConfigurator
     ) {
-        $this->doctrineEntityManager = $doctrineEntityManager;
-        $this->stability = $stability;
-        $this->cacheCleaner = $cacheCleaner;
+        $this->featureFlagDataConfigurator = $featureFlagDataConfigurator;
     }
 
-    public function getData()
+    /**
+     * {@inheritdoc}
+     */
+    public function getData(): array
     {
-        $featureFlags = $this->doctrineEntityManager->getRepository(FeatureFlag::class)->findBy(['stability' => $this->stability]);
-
-        $featureFlagsData = [];
-        foreach ($featureFlags as $featureFlag) {
-            $featureFlagsData[$featureFlag->getName()] = [
-                'enabled' => $featureFlag->isEnabled(),
-                'name' => $featureFlag->getName(),
-                'label' => $featureFlag->getLabelWording(),
-                'label_domain' => $featureFlag->getLabelDomain(),
-                'description' => $featureFlag->getDescriptionWording(),
-                'description_domain' => $featureFlag->getDescriptionDomain(),
-                // You can handle specific rules here to indicate if the feature flag should be editable or not, currently
-                // no more specific rule but it can evolve in the future
-                'disabled' => false,
-            ];
-        }
-
-        return ['feature_flags' => $featureFlagsData];
+        return $this->featureFlagDataConfigurator->getConfiguration();
     }
 
-    public function setData(array $flagsData)
+    /**
+     * {@inheritdoc}
+     */
+    public function setData(array $data): array
     {
-        $featureFlags = $flagsData['feature_flags'];
-        if (!$this->validateFlagsData($featureFlags)) {
-            throw new InvalidArgumentException('Invalid feature flag configuration submitted');
-        }
-
-        foreach ($featureFlags as $flagName => $flagData) {
-            $featureFlag = $this->getOneFeatureFlagByName($flagName);
-
-            if (null === $featureFlag) {
-                throw new InvalidArgumentException(sprintf('Invalid feature flag configuration submitted, flag %s does not exist', $flagName));
-            }
-
-            $flagState = $flagData['enabled'] ?? false;
-            if ($flagState) {
-                $featureFlag->enable();
-            } else {
-                $featureFlag->disable();
-            }
-        }
-
-        $this->doctrineEntityManager->flush();
-        // Clear cache of legacy routes since they can depend on an associated feature flag
-        // when the attribute _legacy_feature_flag is used
-        $this->cacheCleaner->clearCache();
-
-        return [];
-    }
-
-    protected function validateFlagsData(array $flagsData): bool
-    {
-        foreach ($flagsData as $flagName => $flagData) {
-            if (!is_string($flagName)) {
-                return false;
-            }
-
-            if ($flagData['enabled'] !== null && !is_bool($flagData['enabled'])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    protected function getOneFeatureFlagByName(string $featureFlagName): ?FeatureFlag
-    {
-        return $this->doctrineEntityManager->getRepository(FeatureFlag::class)->findOneBy(['name' => $featureFlagName]);
+        return $this->featureFlagDataConfigurator->updateConfiguration($data);
     }
 }

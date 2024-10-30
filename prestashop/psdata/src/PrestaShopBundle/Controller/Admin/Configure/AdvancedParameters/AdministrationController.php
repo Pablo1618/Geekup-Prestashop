@@ -66,6 +66,7 @@ class AdministrationController extends FrameworkBundleAdminController
         return $this->render('@PrestaShop/Admin/Configure/AdvancedParameters/administration.html.twig', [
             'layoutHeaderToolbarBtn' => [],
             'layoutTitle' => $this->trans('Administration', 'Admin.Navigation.Menu'),
+            'requireAddonsSearch' => true,
             'requireBulkActions' => false,
             'showContentHeader' => true,
             'enableSidebar' => true,
@@ -81,10 +82,7 @@ class AdministrationController extends FrameworkBundleAdminController
     /**
      * Process the Administration general configuration form.
      *
-     * @AdminSecurity(
-     *     "is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))",
-     *     message="You do not have permission to update this.",
-     *     redirectRoute="admin_administration")
+     * @AdminSecurity("is_granted(['update', 'create', 'delete'], request.get('_legacy_controller'))", message="You do not have permission to update this.", redirectRoute="admin_administration")
      * @DemoRestricted(redirectRoute="admin_administration")
      *
      * @param Request $request
@@ -103,10 +101,7 @@ class AdministrationController extends FrameworkBundleAdminController
     /**
      * Process the Administration upload quota configuration form.
      *
-     * @AdminSecurity(
-     *     "is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))",
-     *     message="You do not have permission to update this.",
-     *     redirectRoute="admin_administration")
+     * @AdminSecurity("is_granted(['update', 'create', 'delete'], request.get('_legacy_controller'))", message="You do not have permission to update this.", redirectRoute="admin_administration")
      * @DemoRestricted(redirectRoute="admin_administration")
      *
      * @param Request $request
@@ -125,11 +120,7 @@ class AdministrationController extends FrameworkBundleAdminController
     /**
      * Process the Administration notifications configuration form.
      *
-     * @AdminSecurity(
-     *     "is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))",
-     *     message="You do not have permission to update this.",
-     *     redirectRoute="admin_administration"
-     * )
+     * @AdminSecurity("is_granted(['update', 'create', 'delete'], request.get('_legacy_controller'))", message="You do not have permission to update this.", redirectRoute="admin_administration")
      * @DemoRestricted(redirectRoute="admin_administration")
      *
      * @param Request $request
@@ -207,9 +198,7 @@ class AdministrationController extends FrameworkBundleAdminController
     }
 
     /**
-     * @param InvalidConfigurationDataErrorCollection $errors
-     *
-     * @return array<int, string>
+     * @var InvalidConfigurationDataErrorCollection
      */
     private function getErrorMessages(InvalidConfigurationDataErrorCollection $errors): array
     {
@@ -249,7 +238,7 @@ class AdministrationController extends FrameworkBundleAdminController
                 );
             case FormDataProvider::ERROR_COOKIE_SAMESITE_NONE:
                 return $this->trans(
-                    'The SameSite=None attribute is only available in secure mode.',
+                    'The SameSite=None is only available in secure mode.',
                     'Admin.Advparameters.Notification'
                 );
         }

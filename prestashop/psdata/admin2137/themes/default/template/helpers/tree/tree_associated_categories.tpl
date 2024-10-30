@@ -102,15 +102,8 @@
 				);
 				{literal}
 				$.get(
-					'index.php',
-          {
-            ajax: 1,
-            controller: 'AdminProducts',
-            token: currentToken,
-            action: 'getCategoryTree',
-            fullTree: 1,
-            selected: selected
-          },
+					'ajax-tab.php',
+					{controller:'AdminProducts',token:currentToken,action:'getCategoryTree', fullTree:1, selected:selected},
 					function(content) {
 				{/literal}
 						$('#{$id|escape:'html':'UTF-8'}').html(content);

@@ -63,16 +63,15 @@
   </div>
 </template>
 
-<script lang="ts">
-  import {defineComponent, PropType} from 'vue';
-  import {EventEmitter} from '@components/event-emitter';
-  import PSTreeItem from './ps-tree-item.vue';
+<script>
+  import {EventBus} from '@app/utils/event-bus';
+  import PSTreeItem from './ps-tree-item';
 
-  export default defineComponent({
+  export default {
     name: 'PSTree',
     props: {
       model: {
-        type: Array as PropType<Array<Record<string, any>>>,
+        type: Array,
         default: () => ([]),
       },
       className: {
@@ -94,21 +93,21 @@
       },
     },
     methods: {
-      onCheck(obj: any): void {
+      onCheck(obj) {
         this.$emit('checked', obj);
       },
-      expand(): void {
-        EventEmitter.emit('expand');
+      expand() {
+        EventBus.$emit('expand');
       },
-      reduce(): void {
-        EventEmitter.emit('reduce');
+      reduce() {
+        EventBus.$emit('reduce');
       },
-      setCurrentElement(id: string | number): void {
-        EventEmitter.emit('setCurrentElement', id);
+      setCurrentElement(id) {
+        EventBus.$emit('setCurrentElement', id);
       },
     },
     components: {
       PSTreeItem,
     },
-  });
+  };
 </script>

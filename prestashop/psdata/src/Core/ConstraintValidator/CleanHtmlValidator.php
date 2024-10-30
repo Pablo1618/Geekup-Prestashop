@@ -76,6 +76,12 @@ final class CleanHtmlValidator extends ConstraintValidator
         // RLO characters detection
         $rloCharacters = "\xE2\x80\xAE";
 
+        // Check if the RLO character is in the string
+        if (strpos($value, $rloCharacters) !== false) {
+            // RLO character found, potential RLO attack
+            return false;
+        }
+
         if ($containsScriptTags || $containsJavascriptEvents || $iframe || preg_match($eventAttributeRegex, $value) || strpos($value, $rloCharacters) !== false) {
             $this->context->buildViolation($constraint->message)
                 ->setTranslationDomain('Admin.Notifications.Error')

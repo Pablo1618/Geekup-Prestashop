@@ -29,8 +29,8 @@
   <section id="main">
     <div class="cart-grid row">
 
-      <!-- Left Block: cart product informations & shipping -->
-      <div class="cart-grid-body col-lg-8">
+      <!-- Left Block: cart product informations & shpping -->
+      <div class="cart-grid-body col-xs-12 col-lg-8">
 
         <!-- cart products detailed -->
         <div class="card cart-container">
@@ -56,7 +56,7 @@
       </div>
 
       <!-- Right Block: cart subtotal & cart total -->
-      <div class="cart-grid-right col-lg-4">
+      <div class="cart-grid-right col-xs-12 col-lg-4">
 
         {block name='cart_summary'}
           <div class="card cart-summary">
@@ -83,8 +83,5 @@
       </div>
 
     </div>
-    
-    {hook h='displayCrossSellingShoppingCart'}
-    
   </section>
 {/block}

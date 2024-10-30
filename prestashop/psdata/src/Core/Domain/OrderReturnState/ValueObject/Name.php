@@ -35,7 +35,7 @@ use PrestaShop\PrestaShop\Core\Domain\OrderReturnState\Exception\OrderReturnStat
 class Name
 {
     /**
-     * @var int Maximum allowed length for name
+     * @var string Maximum allowed length for name
      */
     public const MAX_LENGTH = 255;
 
@@ -86,8 +86,9 @@ class Name
     {
         $name = html_entity_decode($name, ENT_COMPAT, 'UTF-8');
 
-        if (self::MAX_LENGTH < mb_strlen($name, 'UTF-8')) {
-            throw new OrderReturnStateConstraintException(sprintf('Order return state name is too long. Max allowed length is %s', self::MAX_LENGTH), OrderReturnStateConstraintException::INVALID_NAME);
+        $length = function_exists('mb_strlen') ? mb_strlen($name, 'UTF-8') : strlen($name);
+        if (self::MAX_LENGTH < $length) {
+            throw new OrderReturnStateConstraintException(sprintf('Order return  state name is too long. Max allowed length is %s', self::MAX_LENGTH), OrderReturnStateConstraintException::INVALID_NAME);
         }
     }
 }

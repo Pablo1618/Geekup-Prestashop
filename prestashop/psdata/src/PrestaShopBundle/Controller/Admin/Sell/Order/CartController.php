@@ -37,7 +37,6 @@ use PrestaShop\PrestaShop\Core\Domain\Cart\Command\UpdateCartCarrierCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\UpdateCartCurrencyCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\UpdateCartDeliverySettingsCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\UpdateCartLanguageCommand;
-use PrestaShop\PrestaShop\Core\Domain\Cart\Command\UpdateProductPriceInCartCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\UpdateProductQuantityInCartCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Exception\CartConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Exception\CartNotFoundException;
@@ -55,6 +54,9 @@ use PrestaShop\PrestaShop\Core\Domain\Product\Customization\Exception\Customizat
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\PackOutOfStockException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductCustomizationNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductOutOfStockException;
+use PrestaShop\PrestaShop\Core\Domain\SpecificPrice\Command\AddSpecificPriceCommand;
+use PrestaShop\PrestaShop\Core\Domain\SpecificPrice\Command\DeleteSpecificPriceByCartProductCommand;
+use PrestaShop\PrestaShop\Core\Domain\ValueObject\Reduction;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -81,7 +83,6 @@ class CartController extends FrameworkBundleAdminController
             return $this->redirect($this->getAdminLink('AdminCarts', [], true));
         }
 
-        // Prepare KPI row
         $kpiRowFactory = $this->get('prestashop.core.kpi_row.factory.cart');
         $kpiRowFactory->setOptions([
             'cart_id' => $cartId,
@@ -268,7 +269,7 @@ class CartController extends FrameworkBundleAdminController
      */
     public function updateDeliverySettingsAction(Request $request, int $cartId)
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->get('prestashop.adapter.legacy.configuration');
         $recycledPackagingEnabled = (bool) $configuration->get('PS_RECYCLABLE_PACK');
         $giftSettingsEnabled = (bool) $configuration->get('PS_GIFT_WRAPPING');
 
@@ -276,8 +277,8 @@ class CartController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new UpdateCartDeliverySettingsCommand(
                 $cartId,
                 $request->request->getBoolean('freeShipping'),
-                ($giftSettingsEnabled ? $request->request->getBoolean('isAGift', false) : null),
-                ($recycledPackagingEnabled ? $request->request->getBoolean('useRecycledPackaging', false) : null),
+                ($giftSettingsEnabled ? $request->request->getBoolean('isAGift', null) : null),
+                ($recycledPackagingEnabled ? $request->request->getBoolean('useRecycledPackaging', null) : null),
                 $request->request->get('giftMessage', null)
             ));
 
@@ -397,13 +398,27 @@ class CartController extends FrameworkBundleAdminController
         $commandBus = $this->getCommandBus();
 
         try {
-            $addSpecificPriceCommand = new UpdateProductPriceInCartCommand(
-                $cartId,
-                $productId,
-                $request->query->getInt('productAttributeId'),
-                (float) $request->request->get('newPrice')
-            );
+            $deleteSpecificPriceCommand = new DeleteSpecificPriceByCartProductCommand($cartId, $productId);
 
+            // @todo: this shouldn't be used use UpdateProductPriceInCartCommand
+            $addSpecificPriceCommand = new AddSpecificPriceCommand(
+                $productId,
+                Reduction::TYPE_AMOUNT,
+                0,
+                true,
+                (float) $request->request->get('newPrice'),
+                1
+            );
+            $addSpecificPriceCommand->setCartId($cartId);
+            $addSpecificPriceCommand->setCustomerId($request->request->getInt('customerId'));
+
+            if ($attributeId = $request->query->getInt('productAttributeId')) {
+                $deleteSpecificPriceCommand->setProductAttributeId($attributeId);
+                $addSpecificPriceCommand->setProductAttributeId($attributeId);
+            }
+
+            // delete previous specific prices
+            $commandBus->handle($deleteSpecificPriceCommand);
             // add new specific price
             $commandBus->handle($addSpecificPriceCommand);
 
@@ -538,7 +553,7 @@ class CartController extends FrameworkBundleAdminController
         $minimalQuantity = $e instanceof MinimalQuantityException ? $e->getMinimalQuantity() : 0;
 
         return [
-            CartNotFoundException::class => $this->trans('The object cannot be loaded (or found).', 'Admin.Notifications.Error'),
+            CartNotFoundException::class => $this->trans('The object cannot be loaded (or found)', 'Admin.Notifications.Error'),
             CartRuleValidityException::class => $e->getMessage(),
             CartConstraintException::class => [
                 CartConstraintException::INVALID_QUANTITY => $this->trans(

@@ -45,15 +45,22 @@ final class ExcelToCsvFileConverter implements FileConverterInterface
     /**
      * @var string
      */
+    private $csvDirectory;
+
+    /**
+     * @var string
+     */
     private $excelDirectory;
 
     /**
      * @param Filesystem $filesystem
+     * @param string $csvDirectory path to CSV files directory
      * @param string $excelDirectory path to excel files directory
      */
-    public function __construct(Filesystem $filesystem, $excelDirectory)
+    public function __construct(Filesystem $filesystem, $csvDirectory, $excelDirectory)
     {
         $this->filesystem = $filesystem;
+        $this->csvDirectory = $csvDirectory;
         $this->excelDirectory = $excelDirectory;
     }
 

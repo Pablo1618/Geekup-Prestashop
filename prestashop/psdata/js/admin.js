@@ -362,9 +362,24 @@ function gencode(size)
   getE('code').value = '';
   /* There are no O/0 in the codes in order to avoid confusion */
   var chars = "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ";
-  var randomNumbers = crypto.getRandomValues(new Uint32Array(size));
   for (var i = 1; i <= size; ++i) {
-    getE('code').value += chars.charAt(Math.floor(randomNumbers[i]/2**32 * chars.length));
+    getE('code').value += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  getE('cart-rules-highlight').style.display = '';
+}
+
+var tpl_viewing_window = null;
+function viewTemplates(id_select, lang, ext)
+{
+  var loc = $(id_select).val();
+  if (loc != 0)
+  {
+    if (tpl_viewing_window != null && !tpl_viewing_window.closed)
+      tpl_viewing_window.close();
+    var url_preview = $("option[value="+loc+"]", id_select).data('preview');
+    tpl_viewing_window = window.open(url_preview + lang + loc + ext, 'tpl_viewing', 'toolbar=0,location=0,directories=0,statfr=no,menubar=0,scrollbars=yes,resizable=yes,width=520,height=400,top=50,left=300');
+    tpl_viewing_window.focus();
   }
 }
 
@@ -519,13 +534,7 @@ function showRedirectProductOptions(show)
 
 function redirectSelectChange()
 {
-  redirectTypeValue = $('#redirect_type :selected').val();
-  if (redirectTypeValue == '404' ||
-      redirectTypeValue == '410' ||
-      redirectTypeValue == 'default' ||
-      redirectTypeValue == '200-displayed' ||
-      redirectTypeValue == '404-displayed' ||
-      redirectTypeValue == '410-displayed')
+  if ($('#redirect_type :selected').val() == '404')
     showRedirectProductSelectOptions(false);
   else
     showRedirectProductSelectOptions(true);
@@ -765,6 +774,8 @@ $(document).ready(function()
 
   bindTabModuleListAction();
 
+  bindAddonsButtons();
+
   //Check filters value on submit filter
   $("[name='submitFilter']").click(function(event) {
     var list_id = $(this).data('list-id');
@@ -826,6 +837,40 @@ $(document).ready(function()
     });
   }); // end bind
 
+  $(document).on('click', '.untrustedaddon', function(e){
+    e.preventDefault();
+    var moduleName = $(this).data('module-name');
+    var moduleDisplayName = $(this).data('module-display-name');
+    var moduleImage = $(this).data('module-image');
+    var authorName = $(this).data('author-name');
+    var moduleLink = $(this).data('link');
+    var authorUri = $(this).data('author-uri');
+    var isValidUri = /(https?):\/\/([a-z0-9\.]*)?(prestashop.com).*/gi;
+    var addonsSearchLink = 'https://addons.prestashop.com/en/search?search_query='+encodeURIComponent(moduleDisplayName)+'&utm_source=back-office&utm_medium=addons-certified&utm_campaign=back-office-'+iso_user.toUpperCase();
+
+    $('.modal #untrusted-module-logo').attr('src', moduleImage);
+    $('.modal .module-display-name-placeholder').text(moduleDisplayName);
+    $('.modal .author-name-placeholder').text(authorName);
+
+    if (isValidUri.test(authorUri))
+      $('.modal .author-name-placeholder').wrap('<a href="'+authorUri+'" onclick="window.open(this.href);return false;"></a>');
+
+    $('.modal #proceed-install-anyway').attr('href', moduleLink);
+    $('.modal .catalog-link').attr('href', addonsSearchLink);
+    $('.modal .catalog-link').attr('onclick', 'window.open(this.href);return false;');
+  });
+
+  $(document).on('click', '#untrusted-show-risk', function(e){
+    e.preventDefault();
+    $('.untrusted-content-action').hide();
+    $('.untrusted-content-more-info').show();
+  });
+  $(document).on('click', '#untrusted-show-action', function(e){
+    e.preventDefault();
+    $('.untrusted-content-more-info').hide();
+    $('.untrusted-content-action').show();
+  });
+
   // if count errors
   $('#hideError').on('click', function(e)
   {
@@ -874,6 +919,26 @@ $(document).ready(function()
     }
   });
 
+  if (typeof host_mode !== 'undefined' && host_mode)
+  {
+        // http://status.prestashop.com/
+        var status_map = {
+            operational: status_operational,
+            degraded_performance: status_degraded_performance,
+            partial_outage: status_partial_outage,
+            major_outage: status_major_outage,
+        };
+
+        var components_map = {'ca1': 0, 'fr1': 1};
+
+        var sp = new StatusPage.page({page: 'rmfc0cm3rk9y'});
+        sp.components({
+            success: function (data) {
+                $('.status-page-description').text(status_map[data.components[components_map[host_cluster]].status]);
+                $('.status-page-dot').addClass(data.components[components_map[host_cluster]].status);
+            }
+        });
+    }
     if ($('.kpi-container').length) {
         refresh_kpis();
     }
@@ -1227,6 +1292,80 @@ function controllerQuickView()
   });
 }
 
+function bindAddonsButtons()
+{
+  // Method to log on PrestaShop Addons WebServices
+  $('#addons_login_button').click(function()
+  {
+    var username_addons = $("#username_addons").val();
+    var password_addons = $("#password_addons").val();
+    try
+    {
+      resAjax = $.ajax({
+        type:"POST",
+        url : admin_modules_link,
+        async: true,
+        data : {
+          ajax : "1",
+          controller : "AdminModules",
+          action : "logOnAddonsWebservices",
+          username_addons : username_addons,
+          password_addons : password_addons
+        },
+        beforeSend: function(xhr){
+          $('#addons_loading').html('<img src="../img/loader.gif" alt="" border="0" />');
+        },
+        success : function(data){
+          if (data == 'OK')
+          {
+            $('#addons_loading').html('');
+            $('#addons_login_div').fadeOut();
+            window.location.href = currentIndex + '&token=' + token + '&conf=32';
+          }
+          else
+            $('#addons_loading').html('<br><div class="alert alert-danger">'+errorLogin+'</div>');
+        }
+      });
+    }
+    catch(e){}
+    return false;
+  });
+
+  // Method to log out PrestaShop Addons WebServices
+  $('#addons_logout_button').click(function()
+  {
+    try
+    {
+      resAjax = $.ajax({
+        type:"POST",
+        url : admin_modules_link,
+        async: true,
+        data : {
+          ajax : "1",
+          controller : "AdminModules",
+          action : "logOutAddonsWebservices"
+        },
+        beforeSend: function(xhr){
+          $('#addons_loading').html('<img src="../img/loader.gif" alt="" border="0" />');
+        },
+        success: function(data) {
+          if (data == 'OK')
+          {
+            $('#addons_loading').html('');
+            $('#addons_login_div').fadeOut();
+            window.location.reload();
+          }
+          else
+            $('#addons_loading').html(errorLogin);
+        }
+      });
+    }
+    catch(e){}
+    return false;
+  });
+
+}
+
 function ajaxStates(id_state_selected)
 {
   $.ajax({
@@ -1248,6 +1387,21 @@ function ajaxStates(id_state_selected)
       }
     }
   });
+
+  if (module_dir && vat_number)
+  {
+    $.ajax({
+      type: "GET",
+      url: window.location.origin + module_dir + "vatnumber/ajax.php?id_country=" + $('#id_country').val(),
+      success: function(isApplicable)
+      {
+        if(isApplicable == 1)
+          $('#vat_area').show();
+        else
+          $('#vat_area').hide();
+      }
+    });
+  }
 }
 
 function dniRequired() {

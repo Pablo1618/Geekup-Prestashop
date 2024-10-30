@@ -103,7 +103,7 @@ class OrderDetailLazyArray extends AbstractLazyArray
      */
     public function getOrderDate()
     {
-        return Tools::displayDate($this->order->date_add, false);
+        return Tools::displayDate($this->order->date_add, null, false);
     }
 
     /**
@@ -113,7 +113,7 @@ class OrderDetailLazyArray extends AbstractLazyArray
      */
     public function getDetailsUrl()
     {
-        return $this->context->link->getPageLink('order-detail', null, null, 'id_order=' . $this->order->id);
+        return $this->context->link->getPageLink('order-detail', true, null, 'id_order=' . $this->order->id);
     }
 
     /**
@@ -224,12 +224,12 @@ class OrderDetailLazyArray extends AbstractLazyArray
             if (isset($shipping['carrier_name']) && $shipping['carrier_name']) {
                 $orderShipping[$shippingId] = $shipping;
                 $orderShipping[$shippingId]['shipping_date'] =
-                    Tools::displayDate($shipping['date_add'], false);
+                    Tools::displayDate($shipping['date_add'], null, false);
                 $orderShipping[$shippingId]['shipping_weight'] =
                     ($shipping['weight'] > 0) ? sprintf('%.3f', $shipping['weight']) . ' ' .
                         Configuration::get('PS_WEIGHT_UNIT') : '-';
                 $shippingCost =
-                    ($order->getTaxCalculationMethod()) ? $shipping['shipping_cost_tax_excl']
+                    (!$order->getTaxCalculationMethod()) ? $shipping['shipping_cost_tax_excl']
                         : $shipping['shipping_cost_tax_incl'];
                 $orderShipping[$shippingId]['shipping_cost'] =
                     ($shippingCost > 0) ? $this->locale->formatPrice($shippingCost, (Currency::getIsoCodeById((int) $order->id_currency)))

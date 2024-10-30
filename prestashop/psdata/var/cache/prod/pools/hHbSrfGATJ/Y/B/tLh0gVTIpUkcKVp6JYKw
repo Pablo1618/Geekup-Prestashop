@@ -1,3 +1,0 @@
-<?php //PrestaShopBundle%255CEntity%255CRepository%255CApiAccessRepository
-
-return [PHP_INT_MAX, []];

@@ -25,7 +25,7 @@ class ResettableServicePass implements CompilerPassInterface
 {
     private $tagName;
 
-    public function __construct(string $tagName = 'kernel.reset')
+    public function __construct($tagName = 'kernel.reset')
     {
         $this->tagName = $tagName;
     }
@@ -43,21 +43,16 @@ class ResettableServicePass implements CompilerPassInterface
 
         foreach ($container->findTaggedServiceIds($this->tagName, true) as $id => $tags) {
             $services[$id] = new Reference($id, ContainerInterface::IGNORE_ON_UNINITIALIZED_REFERENCE);
+            $attributes = $tags[0];
 
-            foreach ($tags as $attributes) {
-                if (!isset($attributes['method'])) {
-                    throw new RuntimeException(sprintf('Tag "%s" requires the "method" attribute to be set.', $this->tagName));
-                }
-
-                if (!isset($methods[$id])) {
-                    $methods[$id] = [];
-                }
-
-                $methods[$id][] = $attributes['method'];
+            if (!isset($attributes['method'])) {
+                throw new RuntimeException(sprintf('Tag "%s" requires the "method" attribute to be set.', $this->tagName));
             }
+
+            $methods[$id] = $attributes['method'];
         }
 
-        if (!$services) {
+        if (empty($services)) {
             $container->removeAlias('services_resetter');
             $container->removeDefinition('services_resetter');
 

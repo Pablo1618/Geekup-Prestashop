@@ -2,19 +2,15 @@
 
 namespace Doctrine\DBAL\Sharding;
 
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\DBALException;
 
 /**
  * Sharding related Exceptions
- *
- * @deprecated
- *
- * @psalm-immutable
  */
-class ShardingException extends Exception
+class ShardingException extends DBALException
 {
     /**
-     * @return ShardingException
+     * @return \Doctrine\DBAL\Sharding\ShardingException
      */
     public static function notImplemented()
     {
@@ -22,7 +18,7 @@ class ShardingException extends Exception
     }
 
     /**
-     * @return ShardingException
+     * @return \Doctrine\DBAL\Sharding\ShardingException
      */
     public static function missingDefaultFederationName()
     {
@@ -30,7 +26,7 @@ class ShardingException extends Exception
     }
 
     /**
-     * @return ShardingException
+     * @return \Doctrine\DBAL\Sharding\ShardingException
      */
     public static function missingDefaultDistributionKey()
     {
@@ -38,7 +34,7 @@ class ShardingException extends Exception
     }
 
     /**
-     * @return ShardingException
+     * @return \Doctrine\DBAL\Sharding\ShardingException
      */
     public static function activeTransaction()
     {
@@ -46,7 +42,7 @@ class ShardingException extends Exception
     }
 
     /**
-     * @return ShardingException
+     * @return \Doctrine\DBAL\Sharding\ShardingException
      */
     public static function noShardDistributionValue()
     {
@@ -54,7 +50,7 @@ class ShardingException extends Exception
     }
 
     /**
-     * @return ShardingException
+     * @return \Doctrine\DBAL\Sharding\ShardingException
      */
     public static function missingDistributionType()
     {

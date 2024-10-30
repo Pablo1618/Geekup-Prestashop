@@ -441,7 +441,7 @@
             "nuovo siclo israeliano"
         ],
         "INR": [
-            "INR",
+            "₹",
             "rupia indiana"
         ],
         "IQD": [
@@ -583,11 +583,7 @@
         ],
         "MKD": [
             "MKD",
-            "dinaro macedone"
-        ],
-        "MKN": [
-            "MKN",
-            "dinaro macedone (1992–1993)"
+            "denar macedone"
         ],
         "MLF": [
             "MLF",
@@ -714,7 +710,7 @@
             "kina papuana"
         ],
         "PHP": [
-            "₱",
+            "PHP",
             "peso filippino"
         ],
         "PKR": [
@@ -962,7 +958,7 @@
             "bolívar venezuelano"
         ],
         "VND": [
-            "VND",
+            "₫",
             "dong vietnamita"
         ],
         "VUV": [
@@ -990,7 +986,7 @@
             "franco UIC francese"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "franco CFA BCEAO"
         ],
         "XPF": [
@@ -1035,7 +1031,7 @@
         ],
         "ZMW": [
             "ZMW",
-            "kwacha zambiano"
+            "kwacha dello Zambia"
         ],
         "ZRN": [
             "ZRN",

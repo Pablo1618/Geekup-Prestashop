@@ -22,6 +22,8 @@ class Font
 
     /**
      * Constructor.
+     *
+     * @param \PhpOffice\PhpSpreadsheet\Style\Font $font
      */
     public function __construct(\PhpOffice\PhpSpreadsheet\Style\Font $font)
     {
@@ -34,7 +36,7 @@ class Font
      *
      * @param int $colorIndex
      */
-    public function setColorIndex($colorIndex): void
+    public function setColorIndex($colorIndex)
     {
         $this->colorIndex = $colorIndex;
     }
@@ -119,7 +121,7 @@ class Font
     /**
      * Map of BIFF2-BIFF8 codes for underline styles.
      *
-     * @var int[]
+     * @var array of int
      */
     private static $mapUnderline = [
         \PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_NONE => 0x00,

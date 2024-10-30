@@ -55,7 +55,7 @@ class AdminShopGroupControllerCore extends AdminController
                 'class' => 'fixed-width-xs',
             ],
             'name' => [
-                'title' => $this->trans('Store group', [], 'Admin.Advparameters.Feature'),
+                'title' => $this->trans('Shop group', [], 'Admin.Advparameters.Feature'),
                 'width' => 'auto',
                 'filter_key' => 'a!name',
             ],
@@ -66,7 +66,7 @@ class AdminShopGroupControllerCore extends AdminController
                 'title' => $this->trans('Multistore options', [], 'Admin.Advparameters.Feature'),
                 'fields' => [
                     'PS_SHOP_DEFAULT' => [
-                        'title' => $this->trans('Default store', [], 'Admin.Advparameters.Feature'),
+                        'title' => $this->trans('Default shop', [], 'Admin.Advparameters.Feature'),
                         'cast' => 'intval',
                         'type' => 'select',
                         'identifier' => 'id_shop',
@@ -112,13 +112,13 @@ class AdminShopGroupControllerCore extends AdminController
         $shops_tree->setNodeFolderTemplate('shop_tree_node_folder.tpl')->setNodeItemTemplate('shop_tree_node_item.tpl')
             ->setHeaderTemplate('shop_tree_header.tpl')->setActions([
                 new TreeToolbarLink(
-                    'Collapse all',
+                    'Collapse All',
                     '#',
                     '$(\'#' . $shops_tree->getId() . '\').tree(\'collapseAll\'); return false;',
                     'icon-collapse-alt'
                 ),
                 new TreeToolbarLink(
-                    'Expand all',
+                    'Expand All',
                     '#',
                     '$(\'#' . $shops_tree->getId() . '\').tree(\'expandAll\'); return false;',
                     'icon-expand-alt'
@@ -148,11 +148,11 @@ class AdminShopGroupControllerCore extends AdminController
 
         if ($this->display != 'add' && $this->display != 'edit') {
             $this->page_header_toolbar_btn['new'] = [
-                'desc' => $this->trans('Add a new group of stores', [], 'Admin.Advparameters.Feature'),
+                'desc' => $this->trans('Add a new shop group', [], 'Admin.Advparameters.Feature'),
                 'href' => self::$currentIndex . '&add' . $this->table . '&token=' . $this->token,
             ];
             $this->page_header_toolbar_btn['new_2'] = [
-                'desc' => $this->trans('Add a new store', [], 'Admin.Advparameters.Feature'),
+                'desc' => $this->trans('Add a new shop', [], 'Admin.Advparameters.Feature'),
                 'href' => $this->context->link->getAdminLink('AdminShop') . '&addshop',
                 'imgclass' => 'new_2',
                 'icon' => 'process-icon-new',
@@ -166,29 +166,24 @@ class AdminShopGroupControllerCore extends AdminController
 
         if ($this->display != 'add' && $this->display != 'edit') {
             $this->toolbar_btn['new'] = [
-                'desc' => $this->trans('Add a new group of stores', [], 'Admin.Advparameters.Feature'),
+                'desc' => $this->trans('Add a new shop group', [], 'Admin.Advparameters.Feature'),
                 'href' => self::$currentIndex . '&add' . $this->table . '&token=' . $this->token,
             ];
         }
     }
 
-    /**
-     * @return string|void
-     *
-     * @throws SmartyException
-     */
     public function renderForm()
     {
         $this->fields_form = [
             'legend' => [
-                'title' => $this->trans('Store group', [], 'Admin.Advparameters.Feature'),
+                'title' => $this->trans('Shop group', [], 'Admin.Advparameters.Feature'),
                 'icon' => 'icon-shopping-cart',
             ],
             'description' => $this->trans('Warning: Enabling the "share customers" and "share orders" options is not recommended. Once activated and orders are created, you will not be able to disable these options. If you need these options, we recommend using several categories rather than several shops.', [], 'Admin.Advparameters.Help'),
             'input' => [
                 [
                     'type' => 'text',
-                    'label' => $this->trans('Name of the store group', [], 'Admin.Advparameters.Feature'),
+                    'label' => $this->trans('Shop group name', [], 'Admin.Advparameters.Feature'),
                     'name' => 'name',
                     'required' => true,
                 ],
@@ -300,7 +295,7 @@ class AdminShopGroupControllerCore extends AdminController
             $disabled = false;
         }
 
-        $default_shop = new Shop((int) Configuration::get('PS_SHOP_DEFAULT'));
+        $default_shop = new Shop(Configuration::get('PS_SHOP_DEFAULT'));
         $this->tpl_form_vars = [
             'disabled' => $disabled,
             'checked' => (Tools::getValue('addshop_group') !== false) ? true : false,
@@ -349,44 +344,24 @@ class AdminShopGroupControllerCore extends AdminController
         return parent::postProcess();
     }
 
-    public function beforeUpdateOptions()
-    {
-        if (!(new Shop((int) Tools::getValue('PS_SHOP_DEFAULT')))->getBaseURL()) {
-            $this->errors[] = $this->trans('You must configure this store\'s URL before setting it as default.', [], 'Admin.Advparameters.Notification');
-        }
-    }
-
-    /**
-     * @param ShopGroup $new_shop_group
-     *
-     * @return bool|void
-     */
     protected function afterAdd($new_shop_group)
     {
         //Reset available quantitites
         StockAvailable::resetProductFromStockAvailableByShopGroup($new_shop_group);
     }
 
-    /**
-     * @param ShopGroup $new_shop_group
-     *
-     * @return bool|void
-     */
     protected function afterUpdate($new_shop_group)
     {
         //Reset available quantitites
         StockAvailable::resetProductFromStockAvailableByShopGroup($new_shop_group);
     }
 
-    /**
-     * @return string|void
-     */
     public function renderOptions()
     {
         if ($this->fields_options && is_array($this->fields_options)) {
             $this->display = 'options';
             $this->show_toolbar = false;
-            $helper = new HelperOptions();
+            $helper = new HelperOptions($this);
             $this->setHelperDisplay($helper);
             $helper->id = $this->id;
             $helper->tpl_vars = $this->tpl_option_vars;

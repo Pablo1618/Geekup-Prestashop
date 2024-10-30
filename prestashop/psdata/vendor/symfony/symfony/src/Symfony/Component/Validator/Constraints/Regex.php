@@ -12,7 +12,6 @@
 namespace Symfony\Component\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Exception\InvalidArgumentException;
 
 /**
  * @Annotation
@@ -22,7 +21,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
  */
 class Regex extends Constraint
 {
-    public const REGEX_FAILED_ERROR = 'de1e3db3-5ed4-4941-aae4-59f3667cc3a3';
+    const REGEX_FAILED_ERROR = 'de1e3db3-5ed4-4941-aae4-59f3667cc3a3';
 
     protected static $errorNames = [
         self::REGEX_FAILED_ERROR => 'REGEX_FAILED_ERROR',
@@ -32,16 +31,6 @@ class Regex extends Constraint
     public $pattern;
     public $htmlPattern;
     public $match = true;
-    public $normalizer;
-
-    public function __construct($options = null)
-    {
-        parent::__construct($options);
-
-        if (null !== $this->normalizer && !\is_callable($this->normalizer)) {
-            throw new InvalidArgumentException(sprintf('The "normalizer" option must be a valid callable ("%s" given).', \is_object($this->normalizer) ? \get_class($this->normalizer) : \gettype($this->normalizer)));
-        }
-    }
 
     /**
      * {@inheritdoc}
@@ -63,6 +52,9 @@ class Regex extends Constraint
      * Converts the htmlPattern to a suitable format for HTML5 pattern.
      * Example: /^[a-z]+$/ would be converted to [a-z]+
      * However, if options are specified, it cannot be converted.
+     *
+     * Pattern is also ignored if match=false since the pattern should
+     * then be reversed before application.
      *
      * @see http://dev.w3.org/html5/spec/single-page.html#the-pattern-attribute
      *
@@ -95,7 +87,7 @@ class Regex extends Constraint
 
         // If the pattern contains an or statement, wrap the pattern in
         // .*(pattern).* and quit. Otherwise we'd need to parse the pattern
-        if (str_contains($pattern, '|')) {
+        if (false !== strpos($pattern, '|')) {
             return '.*('.$pattern.').*';
         }
 

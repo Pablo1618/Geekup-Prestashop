@@ -27,8 +27,7 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
     private $manager;
     private $strategy;
     private $voters = [];
-    private $decisionLog = []; // All decision logs
-    private $currentLog = [];  // Logs being filled in
+    private $decisionLog = [];
 
     public function __construct(AccessDecisionManagerInterface $manager)
     {
@@ -47,45 +46,41 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param bool $allowMultipleAttributes Whether to allow passing multiple values to the $attributes array
      */
-    public function decide(TokenInterface $token, array $attributes, $object = null/* , bool $allowMultipleAttributes = false */): bool
+    public function decide(TokenInterface $token, array $attributes, $object = null)
     {
-        $currentDecisionLog = [
+        $result = $this->manager->decide($token, $attributes, $object);
+
+        $this->decisionLog[] = [
             'attributes' => $attributes,
             'object' => $object,
-            'voterDetails' => [],
+            'result' => $result,
         ];
-
-        $this->currentLog[] = &$currentDecisionLog;
-
-        $result = $this->manager->decide($token, $attributes, $object, 3 < \func_num_args() && func_get_arg(3));
-
-        $currentDecisionLog['result'] = $result;
-
-        $this->decisionLog[] = array_pop($this->currentLog); // Using a stack since decide can be called by voters
 
         return $result;
     }
 
     /**
-     * Adds voter vote and class to the voter details.
+     * {@inheritdoc}
      *
-     * @param array $attributes attributes used for the vote
-     * @param int   $vote       vote of the voter
+     * @deprecated since version 3.3, to be removed in 4.0. Pass voters to the decorated AccessDecisionManager instead.
      */
-    public function addVoterVote(VoterInterface $voter, array $attributes, int $vote)
+    public function setVoters(array $voters)
     {
-        $currentLogIndex = \count($this->currentLog) - 1;
-        $this->currentLog[$currentLogIndex]['voterDetails'][] = [
-            'voter' => $voter,
-            'attributes' => $attributes,
-            'vote' => $vote,
-        ];
+        @trigger_error(sprintf('The %s() method is deprecated since Symfony 3.3 and will be removed in 4.0. Pass voters to the decorated AccessDecisionManager instead.', __METHOD__), \E_USER_DEPRECATED);
+
+        if (!method_exists($this->manager, 'setVoters')) {
+            return;
+        }
+
+        $this->voters = $voters;
+        $this->manager->setVoters($voters);
     }
 
-    public function getStrategy(): string
+    /**
+     * @return string
+     */
+    public function getStrategy()
     {
         // The $strategy property is misleading because it stores the name of its
         // method (e.g. 'decideAffirmative') instead of the original strategy name
@@ -96,17 +91,18 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
     /**
      * @return iterable|VoterInterface[]
      */
-    public function getVoters(): iterable
+    public function getVoters()
     {
         return $this->voters;
     }
 
-    public function getDecisionLog(): array
+    /**
+     * @return array
+     */
+    public function getDecisionLog()
     {
         return $this->decisionLog;
     }
 }
 
-if (!class_exists(DebugAccessDecisionManager::class, false)) {
-    class_alias(TraceableAccessDecisionManager::class, DebugAccessDecisionManager::class);
-}
+class_alias(TraceableAccessDecisionManager::class, DebugAccessDecisionManager::class);

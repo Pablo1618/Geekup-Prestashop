@@ -27,7 +27,7 @@
 namespace PrestaShopBundle\DataCollector;
 
 use ModuleCore;
-use PrestaShop\PrestaShop\Core\Module\Legacy\ModuleInterface;
+use PrestaShop\PrestaShop\Core\Module\ModuleInterface;
 
 /**
  * Collect all hooks information dispatched during a request.
@@ -35,7 +35,6 @@ use PrestaShop\PrestaShop\Core\Module\Legacy\ModuleInterface;
 final class HookRegistry
 {
     public const HOOK_NOT_CALLED = 'notCalled';
-    public const HOOK_NOT_REGISTERED = 'notRegistered';
     public const HOOK_CALLED = 'called';
 
     /**
@@ -44,7 +43,7 @@ final class HookRegistry
     private $currentHook = null;
 
     /**
-     * @var array<string, array<string, array{args: array, name:string, location: string, modules: array}>> the list of hooks data
+     * @var array the list of hooks data
      */
     private $hooks;
 
@@ -53,7 +52,6 @@ final class HookRegistry
         $this->hooks = [
             self::HOOK_CALLED => [],
             self::HOOK_NOT_CALLED => [],
-            self::HOOK_NOT_REGISTERED => [],
         ];
     }
 
@@ -61,7 +59,7 @@ final class HookRegistry
      * @param string $hookName
      * @param array $hookArguments
      * @param string $file filepath where the "Hook::exec" call have been done
-     * @param int $line position in file where the "Hook::exec" call have been done
+     * @param string $line position in file where the "Hook::exec" call have been done
      */
     public function selectHook($hookName, $hookArguments, $file, $line)
     {
@@ -80,14 +78,6 @@ final class HookRegistry
     public function hookWasCalled()
     {
         $this->currentHook['status'] = self::HOOK_CALLED;
-    }
-
-    /**
-     * Notify the registry that the selected hook have been called.
-     */
-    public function hookWasNotRegistered()
-    {
-        $this->currentHook['status'] = self::HOOK_NOT_REGISTERED;
     }
 
     /**
@@ -132,7 +122,7 @@ final class HookRegistry
      */
     public function getCalledHooks()
     {
-        return $this->hooks[self::HOOK_CALLED];
+        return $this->hooks['called'];
     }
 
     /**
@@ -140,15 +130,7 @@ final class HookRegistry
      */
     public function getNotCalledHooks()
     {
-        return $this->hooks[self::HOOK_NOT_CALLED];
-    }
-
-    /**
-     * @return array the list of unregistered hooks
-     */
-    public function getNotRegisteredHooks()
-    {
-        return $this->hooks[self::HOOK_NOT_REGISTERED];
+        return $this->hooks['notCalled'];
     }
 
     /**
@@ -156,7 +138,7 @@ final class HookRegistry
      */
     public function getHooks()
     {
-        return $this->hooks[self::HOOK_CALLED] + $this->hooks[self::HOOK_NOT_CALLED] + $this->hooks[self::HOOK_NOT_REGISTERED];
+        return $this->hooks['called'] + $this->hooks['notCalled'];
     }
 
     /**

@@ -51,20 +51,11 @@
             sprintf=['%email%' => $customer_email|stripslashes]}
         </div>
 
-        <div class="container-fluid field-password-policy">
+        <div class="container-fluid">
           <div class="row form-group">
             <label class="form-control-label col-md-3 offset-md-2">{l s='New password' d='Shop.Forms.Labels'}</label>
-            <div class="col-md-4 js-input-column">
-            <input
-              class="form-control"
-              type="password"
-              data-validate="isPasswd"
-              name="passwd"
-              value=""
-              {if isset($configuration.password_policy.minimum_length)}data-minlength="{$configuration.password_policy.minimum_length}"{/if}
-              {if isset($configuration.password_policy.maximum_length)}data-maxlength="{$configuration.password_policy.maximum_length}"{/if}
-              {if isset($configuration.password_policy.minimum_score)}data-minscore="{$configuration.password_policy.minimum_score}"{/if}
-            >
+            <div class="col-md-4">
+              <input class="form-control" type="password" data-validate="isPasswd" name="passwd" value="">
             </div>
           </div>
 

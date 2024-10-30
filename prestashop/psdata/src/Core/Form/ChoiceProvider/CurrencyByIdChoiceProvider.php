@@ -27,13 +27,12 @@
 namespace PrestaShop\PrestaShop\Core\Form\ChoiceProvider;
 
 use PrestaShop\PrestaShop\Adapter\Currency\CurrencyDataProvider;
-use PrestaShop\PrestaShop\Core\Form\FormChoiceAttributeProviderInterface;
 use PrestaShop\PrestaShop\Core\Form\FormChoiceProviderInterface;
 
 /**
  * Class CurrencyByIdChoiceProvider provides currency choices with ID values.
  */
-final class CurrencyByIdChoiceProvider implements FormChoiceProviderInterface, FormChoiceAttributeProviderInterface
+final class CurrencyByIdChoiceProvider implements FormChoiceProviderInterface
 {
     /**
      * @var CurrencyDataProvider
@@ -55,32 +54,13 @@ final class CurrencyByIdChoiceProvider implements FormChoiceProviderInterface, F
      */
     public function getChoices()
     {
-        $currencies = $this->getCurrencies();
+        $currencies = $this->currencyDataProvider->getCurrencies(false, true, true);
         $choices = [];
 
         foreach ($currencies as $currency) {
-            $currencyLabel = sprintf('%s (%s)', $currency['name'], $currency['iso_code']);
-            $choices[$currencyLabel] = $currency['id_currency'];
+            $choices[sprintf('%s (%s)', $currency['name'], $currency['iso_code'])] = $currency['id_currency'];
         }
 
         return $choices;
-    }
-
-    public function getChoicesAttributes()
-    {
-        $currencies = $this->getCurrencies();
-        $choicesAttributes = [];
-
-        foreach ($currencies as $currency) {
-            $currencyLabel = sprintf('%s (%s)', $currency['name'], $currency['iso_code']);
-            $choicesAttributes[$currencyLabel]['symbol'] = $currency['symbol'];
-        }
-
-        return $choicesAttributes;
-    }
-
-    private function getCurrencies(): array
-    {
-        return $this->currencyDataProvider->getCurrencies(false, true, true);
     }
 }

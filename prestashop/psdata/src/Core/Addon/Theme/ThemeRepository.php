@@ -51,7 +51,7 @@ class ThemeRepository implements AddonRepositoryInterface
      */
     private $shop;
     /**
-     * @var array|null
+     * @var array
      */
     public $themes;
 
@@ -65,7 +65,7 @@ class ThemeRepository implements AddonRepositoryInterface
     /**
      * @param string $name
      *
-     * @return Theme
+     * @return \PrestaShop\PrestaShop\Core\Addon\AddonInterface|Theme
      *
      * @throws PrestaShopException
      */
@@ -126,7 +126,7 @@ class ThemeRepository implements AddonRepositoryInterface
     {
         $filter->setType(AddonListFilterType::THEME);
 
-        if (empty($filter->status)) {
+        if (!isset($filter->status)) {
             $filter->setStatus(AddonListFilterStatus::ALL);
         }
 

@@ -12,22 +12,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ClearQueryCacheDoctrineCommand extends QueryCommand
 {
-    protected function configure(): void
+    /**
+     * {@inheritDoc}
+     */
+    protected function configure()
     {
         parent::configure();
 
         $this
             ->setName('doctrine:cache:clear-query')
-            ->setDescription('Clears all query cache for an entity manager');
-
-        if ($this->getDefinition()->hasOption('em')) {
-            return;
-        }
-
-        $this->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command');
+            ->setDescription('Clears all query cache for an entity manager')
+            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use for this command');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    /**
+     * {@inheritDoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         DoctrineCommandHelper::setApplicationEntityManager($this->getApplication(), $input->getOption('em'));
 

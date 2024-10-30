@@ -29,7 +29,7 @@
  */
 class CMSCore extends ObjectModel
 {
-    /** @var int|null */
+    /** @var string Name */
     public $id;
     public $id_cms;
     public $head_seo_title;
@@ -63,7 +63,7 @@ class CMSCore extends ObjectModel
             'meta_title' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'required' => true, 'size' => 255],
             'head_seo_title' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => 255],
             'link_rewrite' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isLinkRewrite', 'required' => true, 'size' => 128],
-            'content' => ['type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isCleanHtml', 'size' => 1073741823],
+            'content' => ['type' => self::TYPE_HTML, 'lang' => true, 'validate' => 'isCleanHtml', 'size' => 3999999999999],
         ],
     ];
 
@@ -129,7 +129,7 @@ class CMSCore extends ObjectModel
      * Get links.
      *
      * @param int $idLang Language ID
-     * @param array|null $selection
+     * @param null $selection
      * @param bool $active
      * @param Link|null $link
      *
@@ -163,7 +163,7 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int|null $idLang
+     * @param null $idLang
      * @param bool $idBlock
      * @param bool $active
      *
@@ -187,8 +187,8 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int|null $way
-     * @param int|null $position
+     * @param $way
+     * @param $position
      *
      * @return bool
      */
@@ -232,7 +232,7 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int $idCategory
+     * @param $idCategory
      *
      * @return bool
      */
@@ -258,13 +258,14 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int $idCategory
+     * @param $idCategory
      *
      * @return false|string|null
      */
     public static function getLastPosition($idCategory)
     {
-        $sql = 'SELECT MAX(position) + 1
+        $sql = '
+		SELECT MAX(position) + 1
 		FROM `' . _DB_PREFIX_ . 'cms`
 		WHERE `id_cms_category` = ' . (int) $idCategory;
 
@@ -272,10 +273,10 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int|null $idLang
-     * @param int|null $idCmsCategory
+     * @param null $idLang
+     * @param null $idCmsCategory
      * @param bool $active
-     * @param int|null $idShop
+     * @param null $idShop
      *
      * @return array|false|mysqli_result|PDOStatement|resource|null
      */
@@ -311,7 +312,7 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int $idCms
+     * @param $idCms
      *
      * @return array|false|mysqli_result|PDOStatement|resource|null
      */

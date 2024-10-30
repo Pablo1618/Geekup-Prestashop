@@ -37,37 +37,32 @@ final class Intl
      * The number of resource bundles to buffer. Loading the same resource
      * bundle for n locales takes up n spots in the buffer.
      */
-    public const BUFFER_SIZE = 10;
+    const BUFFER_SIZE = 10;
 
     /**
      * The directory name of the currency data.
      */
-    public const CURRENCY_DIR = 'currencies';
+    const CURRENCY_DIR = 'currencies';
 
     /**
      * The directory name of the language data.
      */
-    public const LANGUAGE_DIR = 'languages';
+    const LANGUAGE_DIR = 'languages';
 
     /**
      * The directory name of the script data.
      */
-    public const SCRIPT_DIR = 'scripts';
+    const SCRIPT_DIR = 'scripts';
 
     /**
      * The directory name of the locale data.
      */
-    public const LOCALE_DIR = 'locales';
+    const LOCALE_DIR = 'locales';
 
     /**
      * The directory name of the region data.
      */
-    public const REGION_DIR = 'regions';
-
-    /**
-     * The directory name of the zone data.
-     */
-    public const TIMEZONE_DIR = 'timezones';
+    const REGION_DIR = 'regions';
 
     /**
      * @var ResourceBundle\CurrencyBundleInterface
@@ -109,27 +104,23 @@ final class Intl
      *
      * @return bool Returns true if the intl extension is installed, false otherwise
      */
-    public static function isExtensionLoaded(): bool
+    public static function isExtensionLoaded()
     {
-        return class_exists(\ResourceBundle::class);
+        return class_exists('\ResourceBundle');
     }
 
     /**
      * Returns the bundle containing currency information.
      *
      * @return CurrencyBundleInterface The currency resource bundle
-     *
-     * @deprecated since Symfony 4.3, to be removed in 5.0. Use {@see Currencies} instead.
      */
-    public static function getCurrencyBundle(): CurrencyBundleInterface
+    public static function getCurrencyBundle()
     {
-        @trigger_error(sprintf('The method "%s()" is deprecated since Symfony 4.3, use "%s" instead.', __METHOD__, Currencies::class), \E_USER_DEPRECATED);
-
         if (null === self::$currencyBundle) {
             self::$currencyBundle = new CurrencyBundle(
                 self::getDataDirectory().'/'.self::CURRENCY_DIR,
                 self::getEntryReader(),
-                self::$localeBundle ?? self::$localeBundle = new LocaleBundle(self::getDataDirectory().'/'.self::LOCALE_DIR, self::getEntryReader())
+                self::getLocaleBundle()
             );
         }
 
@@ -140,18 +131,14 @@ final class Intl
      * Returns the bundle containing language information.
      *
      * @return LanguageBundleInterface The language resource bundle
-     *
-     * @deprecated since Symfony 4.3, to be removed in 5.0. Use {@see Languages} or {@see Scripts} instead.
      */
-    public static function getLanguageBundle(): LanguageBundleInterface
+    public static function getLanguageBundle()
     {
-        @trigger_error(sprintf('The method "%s()" is deprecated since Symfony 4.3, use "%s" or "%s" instead.', __METHOD__, Languages::class, Scripts::class), \E_USER_DEPRECATED);
-
         if (null === self::$languageBundle) {
             self::$languageBundle = new LanguageBundle(
                 self::getDataDirectory().'/'.self::LANGUAGE_DIR,
                 self::getEntryReader(),
-                self::$localeBundle ?? self::$localeBundle = new LocaleBundle(self::getDataDirectory().'/'.self::LOCALE_DIR, self::getEntryReader()),
+                self::getLocaleBundle(),
                 new ScriptDataProvider(
                     self::getDataDirectory().'/'.self::SCRIPT_DIR,
                     self::getEntryReader()
@@ -166,13 +153,9 @@ final class Intl
      * Returns the bundle containing locale information.
      *
      * @return LocaleBundleInterface The locale resource bundle
-     *
-     * @deprecated since Symfony 4.3, to be removed in 5.0. Use {@see Locales} instead.
      */
-    public static function getLocaleBundle(): LocaleBundleInterface
+    public static function getLocaleBundle()
     {
-        @trigger_error(sprintf('The method "%s()" is deprecated since Symfony 4.3, use "%s" instead.', __METHOD__, Locales::class), \E_USER_DEPRECATED);
-
         if (null === self::$localeBundle) {
             self::$localeBundle = new LocaleBundle(
                 self::getDataDirectory().'/'.self::LOCALE_DIR,
@@ -187,18 +170,14 @@ final class Intl
      * Returns the bundle containing region information.
      *
      * @return RegionBundleInterface The region resource bundle
-     *
-     * @deprecated since Symfony 4.3, to be removed in 5.0. Use {@see Countries} instead.
      */
-    public static function getRegionBundle(): RegionBundleInterface
+    public static function getRegionBundle()
     {
-        @trigger_error(sprintf('The method "%s()" is deprecated since Symfony 4.3, use "%s" instead.', __METHOD__, Countries::class), \E_USER_DEPRECATED);
-
         if (null === self::$regionBundle) {
             self::$regionBundle = new RegionBundle(
                 self::getDataDirectory().'/'.self::REGION_DIR,
                 self::getEntryReader(),
-                self::$localeBundle ?? self::$localeBundle = new LocaleBundle(self::getDataDirectory().'/'.self::LOCALE_DIR, self::getEntryReader())
+                self::getLocaleBundle()
             );
         }
 
@@ -210,7 +189,7 @@ final class Intl
      *
      * @return string|null The ICU version or NULL if it could not be determined
      */
-    public static function getIcuVersion(): ?string
+    public static function getIcuVersion()
     {
         if (false === self::$icuVersion) {
             if (!self::isExtensionLoaded()) {
@@ -240,7 +219,7 @@ final class Intl
      *
      * @return string The version of the installed ICU data
      */
-    public static function getIcuDataVersion(): string
+    public static function getIcuDataVersion()
     {
         if (false === self::$icuDataVersion) {
             self::$icuDataVersion = trim(file_get_contents(self::getDataDirectory().'/version.txt'));
@@ -254,9 +233,9 @@ final class Intl
      *
      * @return string The ICU version of the stub classes
      */
-    public static function getIcuStubVersion(): string
+    public static function getIcuStubVersion()
     {
-        return '71.1';
+        return '67.1';
     }
 
     /**
@@ -264,15 +243,17 @@ final class Intl
      *
      * @return string The absolute path to the data directory
      */
-    public static function getDataDirectory(): string
+    public static function getDataDirectory()
     {
         return __DIR__.'/Resources/data';
     }
 
     /**
      * Returns the cached bundle entry reader.
+     *
+     * @return BundleEntryReaderInterface The bundle entry reader
      */
-    private static function getEntryReader(): BundleEntryReaderInterface
+    private static function getEntryReader()
     {
         if (null === self::$entryReader) {
             self::$entryReader = new BundleEntryReader(new BufferedBundleReader(

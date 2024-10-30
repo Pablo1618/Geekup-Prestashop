@@ -9,43 +9,39 @@
  * file that was distributed with this source code.
  */
 
-if ('cli' !== \PHP_SAPI) {
-    throw new Exception('This script must be run from the command line.');
-}
-
 define('LINE_WIDTH', 75);
 
 define('LINE', str_repeat('-', LINE_WIDTH)."\n");
 
-function bailout(string $message)
+function bailout($message)
 {
     echo wordwrap($message, LINE_WIDTH)." Aborting.\n";
 
     exit(1);
 }
 
-function strip_minor_versions(string $version)
+function strip_minor_versions($version)
 {
     preg_match('/^(?P<version>[0-9]\.[0-9]|[0-9]{2,})/', $version, $matches);
 
     return $matches['version'];
 }
 
-function centered(string $text)
+function centered($text)
 {
     $padding = (int) ((LINE_WIDTH - strlen($text)) / 2);
 
     return str_repeat(' ', $padding).$text;
 }
 
-function cd(string $dir)
+function cd($dir)
 {
     if (false === chdir($dir)) {
         bailout("Could not switch to directory $dir.");
     }
 }
 
-function run(string $command)
+function run($command)
 {
     exec($command, $output, $status);
 
@@ -57,7 +53,7 @@ function run(string $command)
     }
 }
 
-function get_icu_version_from_genrb(string $genrb)
+function get_icu_version_from_genrb($genrb)
 {
     exec($genrb.' --version - 2>&1', $output, $status);
 
@@ -74,7 +70,7 @@ function get_icu_version_from_genrb(string $genrb)
 
 error_reporting(\E_ALL);
 
-set_error_handler(function (int $type, string $msg, string $file, int $line) {
+set_error_handler(function ($type, $msg, $file, $line) {
     throw new \ErrorException($msg, 0, $type, $file, $line);
 });
 

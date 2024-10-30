@@ -35,6 +35,19 @@ namespace PrestaShop\PrestaShop\Core\Image\Parser;
 final class ImageTagSourceParser implements ImageTagSourceParserInterface
 {
     /**
+     * @var string
+     */
+    private $shopRootUri;
+
+    /**
+     * @param string $shopRootUri
+     */
+    public function __construct($shopRootUri)
+    {
+        $this->shopRootUri = $shopRootUri;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function parse(string $imageTag): ?string

@@ -12,7 +12,6 @@
 namespace Symfony\Component\Form\Extension\Validator\Type;
 
 use Symfony\Component\Form\AbstractTypeExtension;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -39,8 +38,8 @@ class RepeatedTypeValidatorExtension extends AbstractTypeExtension
     /**
      * {@inheritdoc}
      */
-    public static function getExtendedTypes(): iterable
+    public function getExtendedType()
     {
-        return [RepeatedType::class];
+        return 'Symfony\Component\Form\Extension\Core\Type\RepeatedType';
     }
 }

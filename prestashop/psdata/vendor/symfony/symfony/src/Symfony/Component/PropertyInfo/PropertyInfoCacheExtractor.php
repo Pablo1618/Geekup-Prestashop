@@ -18,9 +18,9 @@ use Psr\Cache\CacheItemPoolInterface;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  *
- * @final
+ * @final since version 3.3
  */
-class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, PropertyInitializableExtractorInterface
+class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface
 {
     private $propertyInfoExtractor;
     private $cacheItemPool;
@@ -35,7 +35,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
     /**
      * {@inheritdoc}
      */
-    public function isReadable($class, $property, array $context = []): ?bool
+    public function isReadable($class, $property, array $context = [])
     {
         return $this->extract('isReadable', [$class, $property, $context]);
     }
@@ -43,7 +43,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
     /**
      * {@inheritdoc}
      */
-    public function isWritable($class, $property, array $context = []): ?bool
+    public function isWritable($class, $property, array $context = [])
     {
         return $this->extract('isWritable', [$class, $property, $context]);
     }
@@ -51,7 +51,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
     /**
      * {@inheritdoc}
      */
-    public function getShortDescription($class, $property, array $context = []): ?string
+    public function getShortDescription($class, $property, array $context = [])
     {
         return $this->extract('getShortDescription', [$class, $property, $context]);
     }
@@ -59,7 +59,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
     /**
      * {@inheritdoc}
      */
-    public function getLongDescription($class, $property, array $context = []): ?string
+    public function getLongDescription($class, $property, array $context = [])
     {
         return $this->extract('getLongDescription', [$class, $property, $context]);
     }
@@ -67,7 +67,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
     /**
      * {@inheritdoc}
      */
-    public function getProperties($class, array $context = []): ?array
+    public function getProperties($class, array $context = [])
     {
         return $this->extract('getProperties', [$class, $context]);
     }
@@ -75,31 +75,25 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
     /**
      * {@inheritdoc}
      */
-    public function getTypes($class, $property, array $context = []): ?array
+    public function getTypes($class, $property, array $context = [])
     {
         return $this->extract('getTypes', [$class, $property, $context]);
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function isInitializable(string $class, string $property, array $context = []): ?bool
-    {
-        return $this->extract('isInitializable', [$class, $property, $context]);
-    }
-
-    /**
      * Retrieves the cached data if applicable or delegates to the decorated extractor.
+     *
+     * @param string $method
      *
      * @return mixed
      */
-    private function extract(string $method, array $arguments)
+    private function extract($method, array $arguments)
     {
         try {
             $serializedArguments = serialize($arguments);
         } catch (\Exception $exception) {
             // If arguments are not serializable, skip the cache
-            return $this->propertyInfoExtractor->{$method}(...$arguments);
+            return \call_user_func_array([$this->propertyInfoExtractor, $method], $arguments);
         }
 
         // Calling rawurlencode escapes special characters not allowed in PSR-6's keys
@@ -115,7 +109,7 @@ class PropertyInfoCacheExtractor implements PropertyInfoExtractorInterface, Prop
             return $this->arrayCache[$key] = $item->get();
         }
 
-        $value = $this->propertyInfoExtractor->{$method}(...$arguments);
+        $value = \call_user_func_array([$this->propertyInfoExtractor, $method], $arguments);
         $item->set($value);
         $this->cacheItemPool->save($item);
 

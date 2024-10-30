@@ -40,10 +40,6 @@ class DataSeries
     const STYLE_MARKER = 'marker';
     const STYLE_FILLED = 'filled';
 
-    const EMPTY_AS_GAP = 'gap';
-    const EMPTY_AS_ZERO = 'zero';
-    const EMPTY_AS_SPAN = 'span';
-
     /**
      * Series Plot Type.
      *
@@ -75,21 +71,21 @@ class DataSeries
     /**
      * Order of plots in Series.
      *
-     * @var int[]
+     * @var array of integer
      */
     private $plotOrder = [];
 
     /**
      * Plot Label.
      *
-     * @var DataSeriesValues[]
+     * @var array of DataSeriesValues
      */
     private $plotLabel = [];
 
     /**
      * Plot Category.
      *
-     * @var DataSeriesValues[]
+     * @var array of DataSeriesValues
      */
     private $plotCategory = [];
 
@@ -103,7 +99,7 @@ class DataSeries
     /**
      * Plot Values.
      *
-     * @var DataSeriesValues[]
+     * @var array of DataSeriesValues
      */
     private $plotValues = [];
 
@@ -231,7 +227,7 @@ class DataSeries
     /**
      * Get Plot Labels.
      *
-     * @return DataSeriesValues[]
+     * @return array of DataSeriesValues
      */
     public function getPlotLabels()
     {
@@ -243,7 +239,7 @@ class DataSeries
      *
      * @param mixed $index
      *
-     * @return DataSeriesValues|false
+     * @return DataSeriesValues
      */
     public function getPlotLabelByIndex($index)
     {
@@ -260,7 +256,7 @@ class DataSeries
     /**
      * Get Plot Categories.
      *
-     * @return DataSeriesValues[]
+     * @return array of DataSeriesValues
      */
     public function getPlotCategories()
     {
@@ -272,7 +268,7 @@ class DataSeries
      *
      * @param mixed $index
      *
-     * @return DataSeriesValues|false
+     * @return DataSeriesValues
      */
     public function getPlotCategoryByIndex($index)
     {
@@ -313,7 +309,7 @@ class DataSeries
     /**
      * Get Plot Values.
      *
-     * @return DataSeriesValues[]
+     * @return array of DataSeriesValues
      */
     public function getPlotValues()
     {
@@ -325,7 +321,7 @@ class DataSeries
      *
      * @param mixed $index
      *
-     * @return DataSeriesValues|false
+     * @return DataSeriesValues
      */
     public function getPlotValuesByIndex($index)
     {
@@ -373,7 +369,7 @@ class DataSeries
         return $this;
     }
 
-    public function refresh(Worksheet $worksheet): void
+    public function refresh(Worksheet $worksheet)
     {
         foreach ($this->plotValues as $plotValues) {
             if ($plotValues !== null) {

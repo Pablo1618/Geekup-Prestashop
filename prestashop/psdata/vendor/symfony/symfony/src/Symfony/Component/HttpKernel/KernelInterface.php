@@ -18,13 +18,11 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 /**
  * The Kernel is the heart of the Symfony system.
  *
- * It manages an environment made of application kernel and bundles.
+ * It manages an environment made of bundles.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @method string getProjectDir() Gets the project dir (path of the project's composer file) - not defining it is deprecated since Symfony 4.2
  */
-interface KernelInterface extends HttpKernelInterface
+interface KernelInterface extends HttpKernelInterface, \Serializable
 {
     /**
      * Returns an array of bundles to register.
@@ -58,18 +56,22 @@ interface KernelInterface extends HttpKernelInterface
     public function getBundles();
 
     /**
-     * Returns a bundle.
+     * Returns a bundle and optionally its descendants by its name.
      *
-     * @param string $name Bundle name
+     * The second argument is deprecated as of 3.4 and will be removed in 4.0. This method
+     * will always return an instance of BundleInterface in 4.0.
      *
-     * @return BundleInterface A BundleInterface instance
+     * @param string $name  Bundle name
+     * @param bool   $first Whether to return the first bundle only or together with its descendants
+     *
+     * @return BundleInterface|BundleInterface[] A BundleInterface instance or an array of BundleInterface instances if $first is false
      *
      * @throws \InvalidArgumentException when the bundle is not enabled
      */
-    public function getBundle($name);
+    public function getBundle($name, $first = true);
 
     /**
-     * Returns the file path for a given bundle resource.
+     * Returns the file path for a given resource.
      *
      * A Resource can be a file or a directory.
      *
@@ -80,21 +82,28 @@ interface KernelInterface extends HttpKernelInterface
      * where BundleName is the name of the bundle
      * and the remaining part is the relative path in the bundle.
      *
-     * @param string $name A resource name to locate
+     * If $dir is passed, and the first segment of the path is "Resources",
+     * this method will look for a file named:
      *
-     * @return string|array The absolute path of the resource or an array if $first is false (array return value is deprecated)
+     *     $dir/<BundleName>/path/without/Resources
+     *
+     * before looking in the bundle resource folder.
+     *
+     * @param string $name  A resource name to locate
+     * @param string $dir   A directory where to look for the resource first
+     * @param bool   $first Whether to return the first path or paths for all matching bundles
+     *
+     * @return string|array The absolute path of the resource or an array if $first is false
      *
      * @throws \InvalidArgumentException if the file cannot be found or the name is not valid
      * @throws \RuntimeException         if the name contains invalid/unsafe characters
      */
-    public function locateResource($name/* , $dir = null, $first = true */);
+    public function locateResource($name, $dir = null, $first = true);
 
     /**
      * Gets the name of the kernel.
      *
      * @return string The kernel name
-     *
-     * @deprecated since Symfony 4.2
      */
     public function getName();
 
@@ -116,15 +125,13 @@ interface KernelInterface extends HttpKernelInterface
      * Gets the application root dir (path of the project's Kernel class).
      *
      * @return string The Kernel root dir
-     *
-     * @deprecated since Symfony 4.2
      */
     public function getRootDir();
 
     /**
      * Gets the current container.
      *
-     * @return ContainerInterface
+     * @return ContainerInterface|null A ContainerInterface instance or null when the Kernel is shutdown
      */
     public function getContainer();
 

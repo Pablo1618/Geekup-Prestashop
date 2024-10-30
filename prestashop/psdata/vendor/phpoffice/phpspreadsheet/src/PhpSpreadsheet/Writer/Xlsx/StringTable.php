@@ -8,18 +8,19 @@ use PhpOffice\PhpSpreadsheet\RichText\Run;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use PhpOffice\PhpSpreadsheet\Shared\XMLWriter;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 
 class StringTable extends WriterPart
 {
     /**
      * Create worksheet stringtable.
      *
-     * @param Worksheet $worksheet Worksheet
-     * @param string[] $existingTable Existing table to eventually merge with
+     * @param Worksheet $pSheet Worksheet
+     * @param string[] $pExistingTable Existing table to eventually merge with
      *
      * @return string[] String table for worksheet
      */
-    public function createStringTable(Worksheet $worksheet, $existingTable = null)
+    public function createStringTable(Worksheet $pSheet, $pExistingTable = null)
     {
         // Create string lookup table
         $aStringTable = [];
@@ -27,31 +28,27 @@ class StringTable extends WriterPart
         $aFlippedStringTable = null; // For faster lookup
 
         // Is an existing table given?
-        if (($existingTable !== null) && is_array($existingTable)) {
-            $aStringTable = $existingTable;
+        if (($pExistingTable !== null) && is_array($pExistingTable)) {
+            $aStringTable = $pExistingTable;
         }
 
         // Fill index array
         $aFlippedStringTable = $this->flipStringTable($aStringTable);
 
         // Loop through cells
-        foreach ($worksheet->getCoordinates() as $coordinate) {
-            $cell = $worksheet->getCell($coordinate);
+        foreach ($pSheet->getCoordinates() as $coordinate) {
+            $cell = $pSheet->getCell($coordinate);
             $cellValue = $cell->getValue();
-            if (
-                !is_object($cellValue) &&
+            if (!is_object($cellValue) &&
                 ($cellValue !== null) &&
                 $cellValue !== '' &&
-                ($cell->getDataType() == DataType::TYPE_STRING || $cell->getDataType() == DataType::TYPE_STRING2 || $cell->getDataType() == DataType::TYPE_NULL) &&
-                !isset($aFlippedStringTable[$cellValue])
-            ) {
+                !isset($aFlippedStringTable[$cellValue]) &&
+                ($cell->getDataType() == DataType::TYPE_STRING || $cell->getDataType() == DataType::TYPE_STRING2 || $cell->getDataType() == DataType::TYPE_NULL)) {
                 $aStringTable[] = $cellValue;
                 $aFlippedStringTable[$cellValue] = true;
-            } elseif (
-                $cellValue instanceof RichText &&
+            } elseif ($cellValue instanceof RichText &&
                 ($cellValue !== null) &&
-                !isset($aFlippedStringTable[$cellValue->getHashCode()])
-            ) {
+                !isset($aFlippedStringTable[$cellValue->getHashCode()])) {
                 $aStringTable[] = $cellValue;
                 $aFlippedStringTable[$cellValue->getHashCode()] = true;
             }
@@ -64,6 +61,8 @@ class StringTable extends WriterPart
      * Write string table to XML format.
      *
      * @param string[] $pStringTable
+     *
+     * @throws WriterException
      *
      * @return string XML Output
      */
@@ -116,7 +115,7 @@ class StringTable extends WriterPart
      * @param RichText $pRichText Rich text
      * @param string $prefix Optional Namespace prefix
      */
-    public function writeRichText(XMLWriter $objWriter, RichText $pRichText, $prefix = null): void
+    public function writeRichText(XMLWriter $objWriter, RichText $pRichText, $prefix = null)
     {
         if ($prefix !== null) {
             $prefix .= ':';
@@ -199,7 +198,7 @@ class StringTable extends WriterPart
      * @param RichText|string $pRichText text string or Rich text
      * @param string $prefix Optional Namespace prefix
      */
-    public function writeRichTextForCharts(XMLWriter $objWriter, $pRichText = null, $prefix = null): void
+    public function writeRichTextForCharts(XMLWriter $objWriter, $pRichText = null, $prefix = null)
     {
         if (!$pRichText instanceof RichText) {
             $textRun = $pRichText;

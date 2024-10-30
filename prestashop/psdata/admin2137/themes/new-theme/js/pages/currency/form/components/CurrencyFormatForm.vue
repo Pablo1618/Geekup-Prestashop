@@ -27,7 +27,6 @@
     <div class="col-4">
       <h4>{{ $t('step.symbol') }}</h4>
       <input
-        data-role="custom-symbol"
         type="text"
         v-model="customSymbol"
       >
@@ -57,9 +56,8 @@
 
 <script>
   import {NumberFormatter} from '@app/cldr';
-  import {defineComponent} from 'vue';
 
-  export default defineComponent({
+  export default {
     name: 'CurrencyFormatForm',
     data: () => ({
       value: {
@@ -84,7 +82,7 @@
         },
         set(symbol) {
           this.value.symbol = symbol;
-          this.$emit('formatChange', this.value);
+          this.$emit('input', this.value);
         },
       },
       customTransformation: {
@@ -93,7 +91,7 @@
         },
         set(transformation) {
           this.value.transformation = transformation;
-          this.$emit('formatChange', this.value);
+          this.$emit('input', this.value);
         },
       },
     },
@@ -117,9 +115,7 @@
       // Detect which transformation matches the language pattern
       /* eslint-disable-next-line no-restricted-syntax,guard-for-in */
       for (const transformation in this.language.transformations) {
-        const transformationPatterns = this.language.transformations[
-          transformation
-        ].split(';');
+        const transformationPatterns = this.language.transformations[transformation].split(';');
 
         if (transformationPatterns[0] === currencyPattern) {
           this.customTransformation = transformation;
@@ -127,5 +123,5 @@
         }
       }
     },
-  });
+  };
 </script>

@@ -2,40 +2,29 @@
 
 namespace Doctrine\Bundle\DoctrineBundle\Controller;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\ForwardCompatibility\Result;
 use Doctrine\DBAL\Platforms\OraclePlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
-use LogicException;
+use Exception;
 use PDO;
-use PDOStatement;
-use Symfony\Bridge\Doctrine\DataCollector\DoctrineDataCollector;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\VarDumper\Cloner\Data;
-use Throwable;
-use Twig\Environment;
 
-use function assert;
-use function stripos;
-
-/** @internal */
-class ProfilerController
+class ProfilerController implements ContainerAwareInterface
 {
-    /** @var Environment */
-    private $twig;
-    /** @var Registry */
-    private $registry;
-    /** @var Profiler */
-    private $profiler;
+    /** @var ContainerInterface */
+    private $container;
 
-    public function __construct(Environment $twig, Registry $registry, Profiler $profiler)
+    /**
+     * {@inheritDoc}
+     */
+    public function setContainer(ContainerInterface $container = null)
     {
-        $this->twig     = $twig;
-        $this->registry = $registry;
-        $this->profiler = $profiler;
+        $this->container = $container;
     }
 
     /**
@@ -49,14 +38,12 @@ class ProfilerController
      */
     public function explainAction($token, $connectionName, $query)
     {
-        $this->profiler->disable();
+        /** @var Profiler $profiler */
+        $profiler = $this->container->get('profiler');
+        $profiler->disable();
 
-        $profile   = $this->profiler->loadProfile($token);
-        $collector = $profile->getCollector('db');
-
-        assert($collector instanceof DoctrineDataCollector);
-
-        $queries = $collector->getQueries();
+        $profile = $profiler->loadProfile($token);
+        $queries = $profile->getCollector('db')->getQueries();
 
         if (! isset($queries[$connectionName][$query])) {
             return new Response('This query does not exist.');
@@ -67,8 +54,8 @@ class ProfilerController
             return new Response('This query cannot be explained.');
         }
 
-        $connection = $this->registry->getConnection($connectionName);
-        assert($connection instanceof Connection);
+        /** @var Connection $connection */
+        $connection = $this->container->get('doctrine')->getConnection($connectionName);
         try {
             $platform = $connection->getDatabasePlatform();
             if ($platform instanceof SqlitePlatform) {
@@ -80,22 +67,17 @@ class ProfilerController
             } else {
                 $results = $this->explainOtherPlatform($connection, $query);
             }
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             return new Response('This query cannot be explained.');
         }
 
-        return new Response($this->twig->render('@Doctrine/Collector/explain.html.twig', [
+        return new Response($this->container->get('twig')->render('@Doctrine/Collector/explain.html.twig', [
             'data' => $results,
             'query' => $query,
         ]));
     }
 
-    /**
-     * @param mixed[] $query
-     *
-     * @return mixed[]
-     */
-    private function explainSQLitePlatform(Connection $connection, array $query): array
+    private function explainSQLitePlatform(Connection $connection, $query)
     {
         $params = $query['params'];
 
@@ -107,12 +89,7 @@ class ProfilerController
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * @param mixed[] $query
-     *
-     * @return mixed[]
-     */
-    private function explainSQLServerPlatform(Connection $connection, array $query): array
+    private function explainSQLServerPlatform(Connection $connection, $query)
     {
         if (stripos($query['sql'], 'SELECT') === 0) {
             $sql = 'SET STATISTICS PROFILE ON; ' . $query['sql'] . '; SET STATISTICS PROFILE OFF;';
@@ -127,27 +104,12 @@ class ProfilerController
         }
 
         $stmt = $connection->executeQuery($sql, $params, $query['types']);
-
-        // DBAL 2.13 "forward compatibility" BC break handling
-        if ($stmt instanceof Result) {
-            $stmt = $stmt->getIterator();
-        }
-
-        if (! $stmt instanceof PDOStatement) {
-            throw new LogicException('We need nextRowSet() functionality feature, which is not available with current DBAL driver');
-        }
-
         $stmt->nextRowset();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * @param mixed[] $query
-     *
-     * @return mixed[]
-     */
-    private function explainOtherPlatform(Connection $connection, array $query): array
+    private function explainOtherPlatform(Connection $connection, $query)
     {
         $params = $query['params'];
 
@@ -161,10 +123,8 @@ class ProfilerController
 
     /**
      * @param mixed[] $query
-     *
-     * @return mixed[]
      */
-    private function explainOraclePlatform(Connection $connection, array $query): array
+    private function explainOraclePlatform(Connection $connection, array $query)
     {
         $connection->executeQuery('EXPLAIN PLAN FOR ' . $query['sql']);
 

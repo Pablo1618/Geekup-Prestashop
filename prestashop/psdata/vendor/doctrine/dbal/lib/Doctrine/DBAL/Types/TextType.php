@@ -3,7 +3,6 @@
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-
 use function is_resource;
 use function stream_get_contents;
 
@@ -15,9 +14,9 @@ class TextType extends Type
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return $platform->getClobTypeDeclarationSQL($column);
+        return $platform->getClobTypeDeclarationSQL($fieldDeclaration);
     }
 
     /**
@@ -33,6 +32,6 @@ class TextType extends Type
      */
     public function getName()
     {
-        return Types::TEXT;
+        return Type::TEXT;
     }
 }

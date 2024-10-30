@@ -1,97 +1,68 @@
 <?php
 
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Cache\Region;
 
-use Closure;
-use Doctrine\Common\Cache\Cache as LegacyCache;
-use Doctrine\Common\Cache\CacheProvider;
-use Doctrine\Common\Cache\Psr6\CacheAdapter;
-use Doctrine\Common\Cache\Psr6\DoctrineProvider;
-use Doctrine\Deprecations\Deprecation;
+use Doctrine\Common\Cache\Cache as CacheAdapter;
+use Doctrine\Common\Cache\ClearableCache;
 use Doctrine\ORM\Cache\CacheEntry;
 use Doctrine\ORM\Cache\CacheKey;
 use Doctrine\ORM\Cache\CollectionCacheEntry;
 use Doctrine\ORM\Cache\Lock;
 use Doctrine\ORM\Cache\Region;
-use Psr\Cache\CacheItemInterface;
-use Psr\Cache\CacheItemPoolInterface;
-use Traversable;
-use TypeError;
-
-use function array_map;
-use function get_debug_type;
-use function iterator_to_array;
-use function sprintf;
-use function strtr;
 
 /**
  * The simplest cache region compatible with all doctrine-cache drivers.
+ *
+ * @since   2.5
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
  */
 class DefaultRegion implements Region
 {
-    /**
-     * @internal since 2.11, this constant will be private in 3.0.
-     */
-    public const REGION_KEY_SEPARATOR = '_';
-    private const REGION_PREFIX       = 'DC2_REGION_';
+    const REGION_KEY_SEPARATOR = '_';
 
     /**
-     * @deprecated since 2.11, this property will be removed in 3.0.
-     *
-     * @var LegacyCache
+     * @var CacheAdapter
      */
     protected $cache;
 
     /**
-     * @internal since 2.11, this property will be private in 3.0.
-     *
      * @var string
      */
     protected $name;
 
     /**
-     * @internal since 2.11, this property will be private in 3.0.
-     *
-     * @var int
+     * @var integer
      */
     protected $lifetime = 0;
 
-    /** @var CacheItemPoolInterface */
-    private $cacheItemPool;
-
     /**
-     * @param CacheItemPoolInterface $cacheItemPool
+     * @param string       $name
+     * @param CacheAdapter $cache
+     * @param integer      $lifetime
      */
-    public function __construct(string $name, $cacheItemPool, int $lifetime = 0)
+    public function __construct($name, CacheAdapter $cache, $lifetime = 0)
     {
-        if ($cacheItemPool instanceof LegacyCache) {
-            Deprecation::trigger(
-                'doctrine/orm',
-                'https://github.com/doctrine/orm/pull/9322',
-                'Passing an instance of %s to %s is deprecated, pass a %s instead.',
-                get_debug_type($cacheItemPool),
-                __METHOD__,
-                CacheItemPoolInterface::class
-            );
-
-            $this->cache         = $cacheItemPool;
-            $this->cacheItemPool = CacheAdapter::wrap($cacheItemPool);
-        } elseif (! $cacheItemPool instanceof CacheItemPoolInterface) {
-            throw new TypeError(sprintf(
-                '%s: Parameter #2 is expected to be an instance of %s, got %s.',
-                __METHOD__,
-                CacheItemPoolInterface::class,
-                get_debug_type($cacheItemPool)
-            ));
-        } else {
-            $this->cache         = DoctrineProvider::wrap($cacheItemPool);
-            $this->cacheItemPool = $cacheItemPool;
-        }
-
-        $this->name     = $name;
-        $this->lifetime = $lifetime;
+        $this->cache    = $cache;
+        $this->name     = (string) $name;
+        $this->lifetime = (integer) $lifetime;
     }
 
     /**
@@ -103,9 +74,7 @@ class DefaultRegion implements Region
     }
 
     /**
-     * @deprecated
-     *
-     * @return CacheProvider
+     * @return \Doctrine\Common\Cache\CacheProvider
      */
     public function getCache()
     {
@@ -117,7 +86,7 @@ class DefaultRegion implements Region
      */
     public function contains(CacheKey $key)
     {
-        return $this->cacheItemPool->hasItem($this->getCacheEntryKey($key));
+        return $this->cache->contains($this->getCacheEntryKey($key));
     }
 
     /**
@@ -125,8 +94,7 @@ class DefaultRegion implements Region
      */
     public function get(CacheKey $key)
     {
-        $item  = $this->cacheItemPool->getItem($this->getCacheEntryKey($key));
-        $entry = $item->isHit() ? $item->get() : null;
+        $entry = $this->cache->fetch($this->getCacheEntryKey($key));
 
         if (! $entry instanceof CacheEntry) {
             return null;
@@ -140,78 +108,59 @@ class DefaultRegion implements Region
      */
     public function getMultiple(CollectionCacheEntry $collection)
     {
-        $keys = array_map(
-            Closure::fromCallable([$this, 'getCacheEntryKey']),
-            $collection->identifiers
-        );
-        /** @var iterable<string, CacheItemInterface> $items */
-        $items = $this->cacheItemPool->getItems($keys);
-        if ($items instanceof Traversable) {
-            $items = iterator_to_array($items);
-        }
-
         $result = [];
-        foreach ($keys as $arrayKey => $cacheKey) {
-            if (! isset($items[$cacheKey]) || ! $items[$cacheKey]->isHit()) {
+
+        foreach ($collection->identifiers as $key) {
+            $entryKey   = $this->getCacheEntryKey($key);
+            $entryValue = $this->cache->fetch($entryKey);
+
+            if (! $entryValue instanceof CacheEntry) {
                 return null;
             }
 
-            $entry = $items[$cacheKey]->get();
-            if (! $entry instanceof CacheEntry) {
-                return null;
-            }
-
-            $result[$arrayKey] = $entry;
+            $result[] = $entryValue;
         }
 
         return $result;
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return bool
-     */
-    public function put(CacheKey $key, CacheEntry $entry, ?Lock $lock = null)
-    {
-        $item = $this->cacheItemPool
-            ->getItem($this->getCacheEntryKey($key))
-            ->set($entry);
-
-        if ($this->lifetime > 0) {
-            $item->expiresAfter($this->lifetime);
-        }
-
-        return $this->cacheItemPool->save($item);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return bool
-     */
-    public function evict(CacheKey $key)
-    {
-        return $this->cacheItemPool->deleteItem($this->getCacheEntryKey($key));
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return bool
-     */
-    public function evictAll()
-    {
-        return $this->cacheItemPool->clear(self::REGION_PREFIX . $this->name);
-    }
-
-    /**
-     * @internal since 2.11, this method will be private in 3.0.
-     *
+     * @param CacheKey $key
      * @return string
      */
     protected function getCacheEntryKey(CacheKey $key)
     {
-        return self::REGION_PREFIX . $this->name . self::REGION_KEY_SEPARATOR . strtr($key->hash, '{}()/\@:', '________');
+        return $this->name . self::REGION_KEY_SEPARATOR . $key->hash;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function put(CacheKey $key, CacheEntry $entry, Lock $lock = null)
+    {
+        return $this->cache->save($this->getCacheEntryKey($key), $entry, $this->lifetime);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function evict(CacheKey $key)
+    {
+        return $this->cache->delete($this->getCacheEntryKey($key));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function evictAll()
+    {
+        if (! $this->cache instanceof ClearableCache) {
+            throw new \BadMethodCallException(sprintf(
+                'Clearing all cache entries is not supported by the supplied cache adapter of type %s',
+                get_class($this->cache)
+            ));
+        }
+
+        return $this->cache->deleteAll();
     }
 }

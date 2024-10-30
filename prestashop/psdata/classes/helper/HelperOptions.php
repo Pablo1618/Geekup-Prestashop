@@ -31,9 +31,6 @@ class HelperOptionsCore extends Helper
 {
     public $required = false;
 
-    /** @var int */
-    public $id;
-
     public function __construct()
     {
         $this->base_folder = 'helpers/options/';
@@ -52,7 +49,9 @@ class HelperOptionsCore extends Helper
     {
         $this->tpl = $this->createTemplate($this->base_tpl);
         $tab = Tab::getTab($this->context->language->id, $this->id);
-        $languages = Language::getLanguages(false);
+        if (!isset($languages)) {
+            $languages = Language::getLanguages(false);
+        }
 
         $has_color_field = false;
         $use_multishop = false;
@@ -101,13 +100,6 @@ class HelperOptionsCore extends Helper
                 $field['is_invisible'] = $is_invisible;
 
                 $field['required'] = isset($field['required']) ? $field['required'] : $this->required;
-
-                if ($field['type'] === 'checkbox' && isset($field['value_multiple'])) {
-                    $multipleValues = is_array($field['value']) ? $field['value'] : explode(',', $field['value']);
-                    foreach ($multipleValues as $currentValue) {
-                        $field['value_multiple'][$currentValue] = true;
-                    }
-                }
 
                 if ($field['type'] == 'color') {
                     $has_color_field = true;
@@ -219,7 +211,7 @@ class HelperOptionsCore extends Helper
                                 }
                             }
                         </script>';
-                    $field['link_remove_ip'] = '<button type="button" class="btn btn-default" onclick="addRemoteAddr();"><i class="icon-plus"></i> ' . Context::getContext()->getTranslator()->trans('Add my IP', [], 'Admin.Actions') . '</button>';
+                    $field['link_remove_ip'] = '<button type="button" class="btn btn-default" onclick="addRemoteAddr();"><i class="icon-plus"></i> ' . $this->l('Add my IP', 'Helper') . '</button>';
                 }
 
                 // Multishop default value
@@ -252,12 +244,11 @@ class HelperOptionsCore extends Helper
             'tabs' => (isset($tabs)) ? $tabs : null,
             'option_list' => $option_list,
             'current_id_lang' => $this->context->language->id,
-            'languages' => $languages,
+            'languages' => isset($languages) ? $languages : null,
             'currency_left_sign' => $this->context->currency->getSign('left'),
             'currency_right_sign' => $this->context->currency->getSign('right'),
             'use_multishop' => $use_multishop,
             'has_color_field' => $has_color_field,
-            'controller_name' => $this->controller_name,
         ]);
 
         return parent::generate();
@@ -296,10 +287,8 @@ class HelperOptionsCore extends Helper
     public function displayOptionTypePrice($key, $field, $value)
     {
         echo $this->context->currency->getSign('left');
-        if (method_exists($this, 'displayOptionTypeText')) {
-            $this->displayOptionTypeText($key, $field, $value);
-        }
-        echo $this->context->currency->getSign('right') . ' ' . Context::getContext()->getTranslator()->trans('(tax excl.)', [], 'Admin.Global');
+        $this->displayOptionTypeText($key, $field, $value);
+        echo $this->context->currency->getSign('right') . ' ' . $this->l('(tax excl.)', 'Helper');
     }
 
     /**
@@ -313,11 +302,6 @@ class HelperOptionsCore extends Helper
     public function getOptionValue($key, $field)
     {
         $value = Tools::getValue($key, Configuration::get($key));
-
-        if (!empty($field['skip_clean_html'])) {
-            return $value;
-        }
-
         if (!Validate::isCleanHtml($value)) {
             $value = Configuration::get($key);
         }

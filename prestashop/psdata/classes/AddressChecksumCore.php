@@ -29,7 +29,7 @@
  */
 class AddressChecksumCore implements ChecksumInterface
 {
-    public const SEPARATOR = '_';
+    const SEPARATOR = '_';
 
     /**
      * Generate a checksum.
@@ -45,13 +45,7 @@ class AddressChecksumCore implements ChecksumInterface
         }
 
         $uniqId = '';
-
-        try {
-            $fields = $address->getFields();
-        } catch (Exception $e) {
-            return sha1('Invalid address');
-        }
-
+        $fields = $address->getFields();
         foreach ($fields as $name => $value) {
             $uniqId .= $value . self::SEPARATOR;
         }

@@ -29,7 +29,7 @@
  */
 class FeatureCore extends ObjectModel
 {
-    /** @var string|array<int, string> Name */
+    /** @var array<string> Name */
     public $name;
 
     /** @var int */
@@ -150,12 +150,12 @@ class FeatureCore extends ObjectModel
     {
         $this->clearCache();
 
-        $result = true;
+        $result = 1;
         $fields = $this->getFieldsLang();
         foreach ($fields as $field) {
             foreach (array_keys($field) as $key) {
                 if (!Validate::isTableOrIdentifier($key)) {
-                    die(Tools::displayError('Invalid column name in feature_lang table.'));
+                    die(Tools::displayError());
                 }
             }
 
@@ -163,18 +163,15 @@ class FeatureCore extends ObjectModel
 					WHERE `' . $this->def['primary'] . '` = ' . (int) $this->id . '
 						AND `id_lang` = ' . (int) $field['id_lang'];
             $mode = Db::getInstance()->getRow($sql);
-            $result = $result &&
-                (!$mode
-                    ? Db::getInstance()->insert($this->def['table'] . '_lang', $field)
-                    : Db::getInstance()->update(
-                        $this->def['table'] . '_lang',
-                        $field,
-                        '`' . $this->def['primary'] . '` = ' . (int) $this->id . ' AND `id_lang` = ' . (int) $field['id_lang']
-                    )
+            $result &= (!$mode) ? Db::getInstance()->insert($this->def['table'] . '_lang', $field) :
+                Db::getInstance()->update(
+                    $this->def['table'] . '_lang',
+                    $field,
+                    '`' . $this->def['primary'] . '` = ' . (int) $this->id . ' AND `id_lang` = ' . (int) $field['id_lang']
                 );
         }
         if ($result) {
-            $result = parent::update($nullValues);
+            $result &= parent::update($nullValues);
             if ($result) {
                 Hook::exec('actionFeatureSave', ['id_feature' => $this->id]);
             }
@@ -235,7 +232,7 @@ class FeatureCore extends ObjectModel
      */
     public static function nbFeatures($idLang)
     {
-        return (int) Db::getInstance()->getValue('
+        return Db::getInstance()->getValue('
 		SELECT COUNT(*) as nb
 		FROM `' . _DB_PREFIX_ . 'feature` ag
 		LEFT JOIN `' . _DB_PREFIX_ . 'feature_lang` agl
@@ -247,7 +244,7 @@ class FeatureCore extends ObjectModel
      * Create a feature from import.
      *
      * @param string $name Feature name
-     * @param bool|int $position Feature position
+     * @param bool $position Feature position
      *
      * @return int Feature ID
      */
@@ -272,8 +269,7 @@ class FeatureCore extends ObjectModel
 
             return $feature->id;
         } elseif (isset($rq['id_feature']) && $rq['id_feature']) {
-            if (is_numeric($position)) {
-                $feature = new Feature((int) $rq['id_feature']);
+            if (is_numeric($position) && $feature = new Feature((int) $rq['id_feature'])) {
                 $feature->position = (int) $position;
                 if (Validate::isLoadedObject($feature)) {
                     $feature->update();
@@ -282,8 +278,6 @@ class FeatureCore extends ObjectModel
 
             return (int) $rq['id_feature'];
         }
-
-        return 0;
     }
 
     /**
@@ -302,8 +296,7 @@ class FeatureCore extends ObjectModel
      * Move a feature.
      *
      * @param bool $way Up (1)  or Down (0)
-     * @param int|null $position
-     * @param int|null $idFeature
+     * @param int $position
      *
      * @return bool Update result
      */

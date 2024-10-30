@@ -29,7 +29,7 @@ class TypeGuess extends Guess
      * @param int    $confidence The confidence that the guessed class name
      *                           is correct
      */
-    public function __construct(string $type, array $options, int $confidence)
+    public function __construct($type, array $options, $confidence)
     {
         parent::__construct($confidence);
 

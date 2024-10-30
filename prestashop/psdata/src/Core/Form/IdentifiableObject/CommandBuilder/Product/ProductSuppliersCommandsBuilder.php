@@ -30,57 +30,46 @@ namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\CommandBuilder\Prod
 
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Command\RemoveAllAssociatedProductSuppliersCommand;
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Command\SetProductDefaultSupplierCommand;
-use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Command\SetSuppliersCommand;
-use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Command\UpdateProductSuppliersCommand;
+use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Command\SetProductSuppliersCommand;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 
 final class ProductSuppliersCommandsBuilder implements ProductCommandsBuilderInterface
 {
     /**
      * {@inheritDoc}
      */
-    public function buildCommands(ProductId $productId, array $formData, ShopConstraint $singleShopConstraint): array
+    public function buildCommands(ProductId $productId, array $formData): array
     {
-        if (!isset($formData['options']['suppliers']['supplier_ids']) &&
-            !isset($formData['options']['suppliers']['default_supplier_id']) &&
-            !isset($formData['options']['product_suppliers'])) {
+        if (!isset($formData['options']['suppliers']['product_suppliers']) && !isset($formData['options']['suppliers']['default_supplier_id'])) {
             return [];
         }
 
-        $associatedSuppliers = $formData['options']['suppliers']['supplier_ids'] ?? [];
-        if (empty($associatedSuppliers)) {
+        $productSuppliersData = $formData['options']['suppliers']['product_suppliers'];
+        if (empty($productSuppliersData)) {
             return [new RemoveAllAssociatedProductSuppliersCommand($productId->getValue())];
         }
 
-        $commands[] = new SetSuppliersCommand(
-            $productId->getValue(),
-            $associatedSuppliers
-        );
+        $productSuppliers = [];
+        foreach ($productSuppliersData as $productSupplierDatum) {
+            $supplierId = (int) $productSupplierDatum['supplier_id'];
 
-        $defaultSupplierId = $formData['options']['suppliers']['default_supplier_id'] ?? null;
-        if (!empty($defaultSupplierId)) {
-            $commands[] = new SetProductDefaultSupplierCommand(
-                $productId->getValue(),
-                (int) $defaultSupplierId
+            $productSuppliers[] = $this->formatProductSupplier(
+                $supplierId,
+                $productSupplierDatum
             );
         }
 
-        $productSuppliersUpdates = $formData['options']['product_suppliers'] ?? [];
-        if (!empty($productSuppliersUpdates)) {
-            $productSuppliers = [];
-            foreach ($productSuppliersUpdates as $productSupplierUpdate) {
-                $supplierId = (int) $productSupplierUpdate['supplier_id'];
-
-                $productSuppliers[] = $this->formatProductSupplier(
-                    $supplierId,
-                    $productSupplierUpdate
-                );
-            }
-
-            $commands[] = new UpdateProductSuppliersCommand(
+        $commands = [
+            new SetProductSuppliersCommand(
                 $productId->getValue(),
                 $productSuppliers
+            ),
+        ];
+
+        if (!empty($formData['options']['suppliers']['default_supplier_id'])) {
+            $commands[] = new SetProductDefaultSupplierCommand(
+                $productId->getValue(),
+                (int) $formData['options']['suppliers']['default_supplier_id']
             );
         }
 

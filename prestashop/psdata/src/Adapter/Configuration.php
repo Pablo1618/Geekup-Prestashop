@@ -36,7 +36,6 @@ use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShopBundle\Exception\NotImplementedException;
 use Shop;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Traversable;
 
 /**
  * Adapter of Configuration ObjectModel.
@@ -265,7 +264,7 @@ class Configuration extends ParameterBag implements ShopConfigurationInterface
         );
 
         if (!$success) {
-            throw new \Exception('Could not delete configuration');
+            throw new \Exception('Could not update configuration');
         }
 
         return $this;
@@ -290,7 +289,7 @@ class Configuration extends ParameterBag implements ShopConfigurationInterface
     /**
      * {@inheritdoc}
      */
-    public function getIterator(): Traversable
+    public function getIterator()
     {
         return new \ArrayIterator($this->all());
     }
@@ -298,7 +297,7 @@ class Configuration extends ParameterBag implements ShopConfigurationInterface
     /**
      * {@inheritdoc}
      */
-    public function count(): int
+    public function count()
     {
         return count($this->all());
     }
@@ -396,21 +395,13 @@ class Configuration extends ParameterBag implements ShopConfigurationInterface
     /**
      * @param string $key
      * @param ShopConstraint $shopConstraint
-     *
-     * @throws ShopException
      */
     public function deleteFromContext(string $key, ShopConstraint $shopConstraint): void
     {
-        if ($shopConstraint->forAllShops()) {
-            throw new ShopException(
-                sprintf('This method can not be used for all shops, if you want to completely delete a configuration use %s::remove() instead', static::class)
-            );
-        }
-
         $shopId = $shopConstraint->getShopId();
         $shopGroupId = $shopConstraint->getShopGroupId();
 
-        ConfigurationLegacy::deleteFromGivenContext(
+        ConfigurationLegacy::deleteFromContext(
             $key,
             !empty($shopGroupId) ? $shopGroupId->getValue() : null,
             !empty($shopId) ? $shopId->getValue() : null

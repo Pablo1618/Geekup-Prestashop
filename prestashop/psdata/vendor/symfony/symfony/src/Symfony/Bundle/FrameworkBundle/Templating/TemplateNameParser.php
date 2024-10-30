@@ -11,8 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating;
 
-@trigger_error('The '.TemplateNameParser::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig instead.', \E_USER_DEPRECATED);
-
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Templating\TemplateNameParser as BaseTemplateNameParser;
 use Symfony\Component\Templating\TemplateReferenceInterface;
@@ -23,8 +21,6 @@ use Symfony\Component\Templating\TemplateReferenceInterface;
  * instances.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class TemplateNameParser extends BaseTemplateNameParser
 {
@@ -50,11 +46,11 @@ class TemplateNameParser extends BaseTemplateNameParser
         // normalize name
         $name = preg_replace('#/{2,}#', '/', str_replace('\\', '/', $name));
 
-        if (str_contains($name, '..')) {
+        if (false !== strpos($name, '..')) {
             throw new \RuntimeException(sprintf('Template name "%s" contains invalid characters.', $name));
         }
 
-        if (!preg_match('/^(?:([^:]*):([^:]*):)?(.+)\.([^\.]+)\.([^\.]+)$/', $name, $matches) || str_starts_with($name, '@')) {
+        if ($this->isAbsolutePath($name) || !preg_match('/^(?:([^:]*):([^:]*):)?(.+)\.([^\.]+)\.([^\.]+)$/', $name, $matches) || 0 === strpos($name, '@')) {
             return parent::parse($name);
         }
 
@@ -69,5 +65,16 @@ class TemplateNameParser extends BaseTemplateNameParser
         }
 
         return $this->cache[$name] = $template;
+    }
+
+    private function isAbsolutePath($file)
+    {
+        $isAbsolute = (bool) preg_match('#^(?:/|[a-zA-Z]:)#', $file);
+
+        if ($isAbsolute) {
+            @trigger_error('Absolute template path support is deprecated since Symfony 3.1 and will be removed in 4.0.', \E_USER_DEPRECATED);
+        }
+
+        return $isAbsolute;
     }
 }

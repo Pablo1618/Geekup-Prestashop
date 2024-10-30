@@ -105,7 +105,7 @@ class PrestaShopExceptionCore extends Exception
      *
      * @param string $file
      * @param int $line
-     * @param int|null $id
+     * @param string $id
      */
     protected function displayFileDebug($file, $line, $id = null)
     {
@@ -183,7 +183,7 @@ class PrestaShopExceptionCore extends Exception
      * Display arguments list of traced function.
      *
      * @param array $args List of arguments
-     * @param int $id ID of argument
+     * @param string $id ID of argument
      */
     protected function displayArgsDebug($args, $id)
     {
@@ -204,6 +204,16 @@ class PrestaShopExceptionCore extends Exception
         $logger = new FileLogger();
         $logger->setFilename(_PS_ROOT_DIR_ . '/var/logs/' . date('Ymd') . '_exception.log');
         $logger->logError($this->getExtendedMessage(false));
+    }
+
+    /**
+     * @deprecated 1.5.5
+     */
+    protected function getExentedMessage($html = true)
+    {
+        Tools::displayAsDeprecated('Use getExtendedMessage instead');
+
+        return $this->getExtendedMessage($html);
     }
 
     /**

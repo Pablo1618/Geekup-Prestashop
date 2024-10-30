@@ -40,12 +40,11 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Category\CategoryPositionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DraggableColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\HtmlColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\IdentifierColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\LinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
@@ -62,6 +61,16 @@ final class CategoryGridDefinitionFactory extends AbstractFilterableGridDefiniti
     public const GRID_ID = 'category';
 
     /**
+     * @var string
+     */
+    private $resetActionUrl;
+
+    /**
+     * @var string
+     */
+    private $redirectActionUrl;
+
+    /**
      * @var AccessibilityCheckerInterface
      */
     private $categoryForViewAccessibilityChecker;
@@ -73,15 +82,21 @@ final class CategoryGridDefinitionFactory extends AbstractFilterableGridDefiniti
 
     /**
      * @param HookDispatcherInterface $hookDispatcher
+     * @param string $resetActionUrl
+     * @param string $redirectActionUrl
      * @param MultistoreContextCheckerInterface $multistoreContextChecker
      * @param AccessibilityCheckerInterface $categoryForViewAccessibilityChecker
      */
     public function __construct(
         HookDispatcherInterface $hookDispatcher,
+        $resetActionUrl,
+        $redirectActionUrl,
         MultistoreContextCheckerInterface $multistoreContextChecker,
         AccessibilityCheckerInterface $categoryForViewAccessibilityChecker
     ) {
         parent::__construct($hookDispatcher);
+        $this->resetActionUrl = $resetActionUrl;
+        $this->redirectActionUrl = $redirectActionUrl;
         $this->categoryForViewAccessibilityChecker = $categoryForViewAccessibilityChecker;
         $this->multistoreContextChecker = $multistoreContextChecker;
     }
@@ -129,20 +144,11 @@ final class CategoryGridDefinitionFactory extends AbstractFilterableGridDefiniti
                     ])
             )
             ->add(
-                (new HtmlColumn('description'))
+                (new DataColumn('description'))
                     ->setName($this->trans('Description', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'description',
                         'sortable' => false,
-                    ])
-            )
-            ->add(
-                (new DataColumn('products_count'))
-                    ->setName($this->trans('Products', [], 'Admin.Global'))
-                    ->setOptions([
-                        'field' => 'products_count',
-                        'sortable' => false,
-                        'alignment' => 'center',
                     ])
             )
             ->add(
@@ -166,7 +172,7 @@ final class CategoryGridDefinitionFactory extends AbstractFilterableGridDefiniti
         if ($this->multistoreContextChecker->isSingleShopContext()) {
             $columns
                 ->addAfter(
-                    'products_count',
+                    'description',
                     (new CategoryPositionColumn('position'))
                         ->setName($this->trans('Position', [], 'Admin.Global'))
                         ->setOptions([

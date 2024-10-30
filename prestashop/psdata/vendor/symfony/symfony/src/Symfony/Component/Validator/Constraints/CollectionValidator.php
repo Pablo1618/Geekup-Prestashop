@@ -14,7 +14,6 @@ namespace Symfony\Component\Validator\Constraints;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -35,7 +34,7 @@ class CollectionValidator extends ConstraintValidator
         }
 
         if (!\is_array($value) && !($value instanceof \Traversable && $value instanceof \ArrayAccess)) {
-            throw new UnexpectedValueException($value, 'array|(Traversable&ArrayAccess)');
+            throw new UnexpectedTypeException($value, 'array or Traversable and ArrayAccess');
         }
 
         // We need to keep the initialized context when CollectionValidator

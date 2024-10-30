@@ -28,24 +28,16 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Product\Stock\Update;
 
-use PrestaShop\PrestaShop\Adapter\HookManager;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
-use PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\MovementReasonRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository;
-use PrestaShop\PrestaShop\Core\Domain\Configuration\ShopConfigurationInterface;
-use PrestaShop\PrestaShop\Core\Domain\OrderState\ValueObject\OrderStateId;
-use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
-use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\NoCombinationId;
+use PrestaShop\PrestaShop\Adapter\Product\Update\ProductStockProperties;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\CannotUpdateProductException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Stock\Exception\ProductStockException;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\ValueObject\StockId;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\ValueObject\StockModification;
+use PrestaShop\PrestaShop\Core\Domain\Product\Stock\Exception\StockAvailableNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\InvalidShopConstraintException;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShop\PrestaShop\Core\Stock\StockManager;
+use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime;
 use Product;
 use StockAvailable;
 
@@ -70,125 +62,45 @@ class ProductStockUpdater
     private $stockAvailableRepository;
 
     /**
-     * @var MovementReasonRepository
+     * @var bool
      */
-    private $movementReasonRepository;
+    private $advancedStockEnabled;
 
     /**
-     * @var ShopConfigurationInterface
+     * @param StockManager $stockManager
+     * @param ProductRepository $productRepository
+     * @param StockAvailableRepository $stockAvailableRepository
+     * @param bool $advancedStockEnabled
      */
-    private $configuration;
-
-    /**
-     * @var HookManager
-     */
-    private $hookManager;
-
     public function __construct(
         StockManager $stockManager,
         ProductRepository $productRepository,
         StockAvailableRepository $stockAvailableRepository,
-        MovementReasonRepository $movementReasonRepository,
-        ShopConfigurationInterface $configuration,
-        HookManager $hookManager
+        bool $advancedStockEnabled
     ) {
         $this->stockManager = $stockManager;
         $this->productRepository = $productRepository;
         $this->stockAvailableRepository = $stockAvailableRepository;
-        $this->movementReasonRepository = $movementReasonRepository;
-        $this->configuration = $configuration;
-        $this->hookManager = $hookManager;
+        $this->advancedStockEnabled = $advancedStockEnabled;
     }
 
     /**
      * @param ProductId $productId
      * @param ProductStockProperties $properties
      */
-    public function update(ProductId $productId, ProductStockProperties $properties, ShopConstraint $shopConstraint): void
+    public function update(ProductId $productId, ProductStockProperties $properties)
     {
-        $product = $this->productRepository->getByShopConstraint($productId, $shopConstraint);
-        // Use the shop matching the Product instance (either the specified ShopId from constraint or the Product default shop)
-        $stockAvailable = $this->stockAvailableRepository->getForProduct($productId, new ShopId($product->getShopId()));
+        $product = $this->productRepository->get($productId);
+        $this->productRepository->partialUpdate(
+            $product,
+            $this->fillUpdatableProperties($product, $properties),
+            CannotUpdateProductException::FAILED_UPDATE_STOCK
+        );
 
-        $productUpdates = $this->fillUpdatableProperties($product, $stockAvailable, $properties);
-        if (!empty($productUpdates)) {
-            $this->productRepository->partialUpdate(
-                $product,
-                $productUpdates,
-                $shopConstraint,
-                CannotUpdateProductException::FAILED_UPDATE_STOCK
-            );
-        }
+        $this->updateStockAvailable($product, $properties);
 
-        $this->updateStockByShopConstraint($stockAvailable, $properties, $shopConstraint);
-
-        if ($this->isAdvancedStockEnabled($shopConstraint) && $product->depends_on_stock) {
+        if ($this->advancedStockEnabled && $product->depends_on_stock) {
             StockAvailable::synchronize($product->id);
-        }
-    }
-
-    /**
-     * Resets product stock to zero, both Product and associated StockAvailable are reset, and a stock movement linked to
-     * the employee from context is generated.
-     *
-     * @param ProductId $productId
-     * @param ShopConstraint $shopConstraint
-     *
-     * @throws CoreException
-     * @throws ProductStockException
-     */
-    public function resetStock(ProductId $productId, ShopConstraint $shopConstraint): void
-    {
-        if ($shopConstraint->getShopGroupId()) {
-            throw new InvalidShopConstraintException('Product has no features related with shop group use single shop and all shops constraints');
-        }
-
-        if ($shopConstraint->forAllShops()) {
-            $shops = $this->productRepository->getAssociatedShopIds($productId);
-        } else {
-            $shops = [$shopConstraint->getShopId()];
-        }
-
-        foreach ($shops as $shopId) {
-            $stockAvailable = $this->stockAvailableRepository->getForProduct($productId, $shopId);
-            if ((int) $stockAvailable->quantity === 0) {
-                continue;
-            }
-
-            $previousQuantity = (int) $stockAvailable->quantity;
-            $stockModification = StockModification::buildFixedQuantity(0);
-
-            // Update product
-            $shopConstraint = ShopConstraint::shop($shopId->getValue());
-            $product = $this->productRepository->getByShopConstraint($productId, $shopConstraint);
-            $product->quantity = 0;
-            $this->productRepository->partialUpdate(
-                $product,
-                ['quantity'],
-                $shopConstraint,
-                CannotUpdateProductException::FAILED_UPDATE_STOCK
-            );
-
-            // Update stock
-            $stockAvailable->quantity = 0;
-
-            $fallbackShopId = $this->stockAvailableRepository->getFallbackShopId($stockAvailable);
-            $this->stockAvailableRepository->update($stockAvailable, $fallbackShopId);
-
-            // Generate stock movement related to the employee
-            $this->saveMovement($stockAvailable, $stockModification, $previousQuantity, $shopId->getValue());
-
-            // Update reserved and physical quantity for this stock
-            $shopConstraint = ShopConstraint::shop($fallbackShopId->getValue());
-            $this->stockAvailableRepository->updatePhysicalProductQuantity(
-                new StockId((int) $stockAvailable->id),
-                new OrderStateId((int) $this->configuration->get('PS_OS_ERROR', null, $shopConstraint)),
-                new OrderStateId((int) $this->configuration->get('PS_OS_CANCELED', null, $shopConstraint))
-            );
-
-            if ($this->isAdvancedStockEnabled($shopConstraint)) {
-                StockAvailable::synchronize($productId->getValue(), $shopId->getValue());
-            }
         }
     }
 
@@ -200,53 +112,65 @@ class ProductStockUpdater
      */
     private function fillUpdatableProperties(
         Product $product,
-        StockAvailable $stockAvailable,
         ProductStockProperties $properties
     ): array {
         $updatableProperties = [];
 
+        $localizedLaterLabels = $properties->getLocalizedAvailableLaterLabels();
+        if (null !== $localizedLaterLabels) {
+            $product->available_later = $localizedLaterLabels;
+            $updatableProperties['available_later'] = array_keys($localizedLaterLabels);
+        }
+
+        $localizedNowLabels = $properties->getLocalizedAvailableNowLabels();
+        if (null !== $localizedNowLabels) {
+            $product->available_now = $localizedNowLabels;
+            $updatableProperties['available_now'] = array_keys($localizedNowLabels);
+        }
         if (null !== $properties->getLocation()) {
             $product->location = $properties->getLocation();
             $updatableProperties[] = 'location';
+        }
+        if (null !== $properties->isLowStockAlertEnabled()) {
+            $product->low_stock_alert = $properties->isLowStockAlertEnabled();
+            $updatableProperties[] = 'low_stock_alert';
+        }
+        if (null !== $properties->getLowStockThreshold()) {
+            $product->low_stock_threshold = $properties->getLowStockThreshold();
+            $updatableProperties[] = 'low_stock_threshold';
+        }
+        if (null !== $properties->getMinimalQuantity()) {
+            $product->minimal_quantity = $properties->getMinimalQuantity();
+            $updatableProperties[] = 'minimal_quantity';
         }
         if (null !== $properties->getOutOfStockType()) {
             $product->out_of_stock = $properties->getOutOfStockType()->getValue();
             $updatableProperties[] = 'out_of_stock';
         }
-        if (null !== $properties->getStockModification()) {
-            $product->quantity = $properties->getStockModification()->getDeltaQuantity() !== null ?
-                $stockAvailable->quantity + $properties->getStockModification()->getDeltaQuantity() :
-                $properties->getStockModification()->getFixedQuantity()
-            ;
+        if (null !== $properties->getPackStockType()) {
+            $product->pack_stock_type = $properties->getPackStockType()->getValue();
+            $updatableProperties[] = 'pack_stock_type';
+        }
+        if (null !== $properties->getQuantity()) {
+            $product->quantity = $properties->getQuantity();
             $updatableProperties[] = 'quantity';
+        }
+        if (null !== $properties->getAvailableDate()) {
+            $product->available_date = $properties->getAvailableDate()->format(DateTime::DEFAULT_DATE_FORMAT);
+            $updatableProperties[] = 'available_date';
         }
 
         return $updatableProperties;
     }
 
-    private function updateStockByShopConstraint(StockAvailable $stockAvailable, ProductStockProperties $properties, ShopConstraint $shopConstraint): void
+    /**
+     * @param Product $product
+     * @param ProductStockProperties $properties
+     */
+    private function updateStockAvailable(Product $product, ProductStockProperties $properties)
     {
-        if ($shopConstraint->forAllShops()) {
-            // Since each stock has a distinct ID we can't use the ObjectModel multi shop feature based on id_shop_list,
-            // so we manually loop to update each associated stocks
-            $stockIds = $this->stockAvailableRepository->getAllShopsStockIds(
-                new ProductId((int) $stockAvailable->id_product),
-                (int) $stockAvailable->id_product_attribute === NoCombinationId::NO_COMBINATION_ID ? new NoCombinationId() : new CombinationId((int) $stockAvailable->id_product_attribute)
-            );
-
-            foreach ($stockIds as $stockId) {
-                $shopStockAvailable = $this->stockAvailableRepository->get($stockId);
-                $this->updateStockAvailable($shopStockAvailable, $properties);
-            }
-        } else {
-            $this->updateStockAvailable($stockAvailable, $properties);
-        }
-    }
-
-    private function updateStockAvailable(StockAvailable $stockAvailable, ProductStockProperties $properties)
-    {
+        $stockAvailable = $this->getStockAvailable($product);
         $stockUpdateRequired = false;
-        $previousQuantity = (int) $stockAvailable->quantity;
 
         if (null !== $properties->getOutOfStockType()) {
             $stockAvailable->out_of_stock = $properties->getOutOfStockType()->getValue();
@@ -257,75 +181,45 @@ class ProductStockUpdater
             $stockUpdateRequired = true;
         }
 
-        if ($properties->getStockModification()) {
-            $stockAvailable->quantity = $properties->getStockModification()->getDeltaQuantity() !== null ?
-                $stockAvailable->quantity + $properties->getStockModification()->getDeltaQuantity() :
-                $properties->getStockModification()->getFixedQuantity()
-            ;
+        if (null !== $properties->getQuantity()) {
+            $this->updateQuantity($stockAvailable, $properties->getQuantity());
             $stockUpdateRequired = true;
         }
 
-        if (!$stockUpdateRequired) {
-            return;
-        }
-
-        $fallbackShopId = $this->stockAvailableRepository->getFallbackShopId($stockAvailable);
-        $this->stockAvailableRepository->update($stockAvailable, $fallbackShopId);
-
-        if ($properties->getStockModification()) {
-            //Save movement only after stock has been updated
-            $this->saveMovement($stockAvailable, $properties->getStockModification(), $previousQuantity, $fallbackShopId->getValue());
-
-            // Update reserved and physical quantity for this stock
-            $shopConstraint = ShopConstraint::shop($fallbackShopId->getValue());
-            $this->stockAvailableRepository->updatePhysicalProductQuantity(
-                new StockId((int) $stockAvailable->id),
-                new OrderStateId((int) $this->configuration->get('PS_OS_ERROR', null, $shopConstraint)),
-                new OrderStateId((int) $this->configuration->get('PS_OS_CANCELED', null, $shopConstraint))
-            );
+        if ($stockUpdateRequired) {
+            $this->stockAvailableRepository->update($stockAvailable);
         }
     }
 
     /**
      * @param StockAvailable $stockAvailable
-     * @param StockModification $stockModification
-     * @param int $previousQuantity
-     * @param int $affectedShopId
+     * @param int $newQuantity
      */
-    private function saveMovement(StockAvailable $stockAvailable, StockModification $stockModification, int $previousQuantity, int $affectedShopId): void
+    private function updateQuantity(StockAvailable $stockAvailable, int $newQuantity): void
     {
-        if ($stockModification->getDeltaQuantity()) {
-            $deltaQuantity = $stockModification->getDeltaQuantity();
-        } else {
-            $deltaQuantity = $stockModification->getFixedQuantity() - $previousQuantity;
+        $deltaQuantity = $newQuantity - (int) $stockAvailable->quantity;
+        $stockAvailable->quantity = $newQuantity;
+
+        if (0 !== $deltaQuantity) {
+            $this->stockManager->saveMovement($stockAvailable->id_product, $stockAvailable->id_product_attribute, $deltaQuantity);
         }
-
-        $movementReasonId = $this->movementReasonRepository->getEmployeeEditionReasonId($deltaQuantity > 0);
-
-        $this->stockManager->saveMovement(
-            $stockAvailable->id_product,
-            $stockAvailable->id_product_attribute,
-            $deltaQuantity,
-            [
-                'id_stock_mvt_reason' => $movementReasonId->getValue(),
-                'id_shop' => (int) $affectedShopId,
-            ]
-        );
-
-        $this->hookManager->exec(
-            'actionUpdateQuantity',
-            [
-                'id_product' => $stockAvailable->id_product,
-                'id_product_attribute' => $stockAvailable->id_product_attribute,
-                'quantity' => $stockAvailable->quantity,
-                'delta_quantity' => $deltaQuantity,
-                'id_shop' => (int) $affectedShopId,
-            ]
-        );
     }
 
-    private function isAdvancedStockEnabled(ShopConstraint $shopConstraint): bool
+    /**
+     * @param Product $product
+     *
+     * @return StockAvailable
+     *
+     * @throws CoreException
+     * @throws ProductStockException
+     */
+    private function getStockAvailable(Product $product): StockAvailable
     {
-        return (bool) $this->configuration->get('PS_ADVANCED_STOCK_MANAGEMENT', null, $shopConstraint);
+        $productId = new ProductId($product->id);
+        try {
+            return $this->stockAvailableRepository->getForProduct($productId);
+        } catch (StockAvailableNotFoundException $e) {
+            return $this->stockAvailableRepository->create($productId);
+        }
     }
 }

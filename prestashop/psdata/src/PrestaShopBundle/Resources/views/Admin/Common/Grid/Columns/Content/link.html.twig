@@ -23,11 +23,7 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *#}
 
-{% if column.options.color_template_field is not empty and record[column.options.color_template_field] is defined %}
-  {% set color = record[column.options.color_template_field] %}
-{% else %}
-  {% set color = column.options.color_template %}
-{% endif %}
+{% set color = column.options.color_template%}
 {% set class = "text-" ~ color %}
 
 {% if column.options.button_template %}
@@ -39,30 +35,15 @@
   {% endif %}
 {% endif %}
 
-{% set class = (class ~ ' ' ~ column.options.attr.class|default(''))|trim %}
-
 {% block link %}
-<a
+<a 
   class="{{ class }} text-nowrap"
-  href="{{ path(column.options.route, { (column.options.route_param_name) : record[column.options.route_param_field], _fragment : column.options.route_fragment }) }}"
+  href="{{ path(column.options.route, { (column.options.route_param_name) : record[column.options.route_param_field]}) }}"
   {% if column.options.target is defined %}
     target="{{ column.options.target }}"
   {% endif %}
-  {# Add all attributes which are not class #}
-  {%- for attrname, attrvalue in column.options.attr -%}
-    {% if attrname != 'class' %}
-      {{- " " -}}
-      {% if attrvalue is formview %}
-        {{- attrname }}="{{ form_row(attrvalue)|e('html_attr') }}"
-      {% elseif attrvalue is form %}
-      {{- attrname }}="{{ form_row(attrvalue.createView())|e('html_attr') }}"
-      {% else %}
-        {{- attrname }}="{{ attrvalue }}"
-      {% endif %}
-    {% endif %}
-  {%- endfor -%}
 >
-  {% if column.options.icon is defined and column.options.icon is not empty %}
+  {% if column.options.icon is defined %}
     <i class="material-icons">{{ column.options.icon }}</i>
   {% endif %}
   {{ record[column.options.field] }}

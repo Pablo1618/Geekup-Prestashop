@@ -57,7 +57,6 @@ final class BulkActionCollection extends AbstractCollection implements BulkActio
                 'id' => $bulkAction->getId(),
                 'name' => $bulkAction->getName(),
                 'type' => $bulkAction->getType(),
-                'icon' => $bulkAction->getIcon(),
                 'options' => $bulkAction->getOptions(),
             ];
         }

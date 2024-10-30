@@ -1,5 +1,7 @@
+{{ include('@Twig/exception.css.twig') }}
+
 .container {
-    max-width: none;
+    max-width: auto;
     margin: 0;
     padding: 0;
 }
@@ -8,8 +10,8 @@
 }
 
 .exception-summary {
-    background: var(--base-0);
-    border: var(--border);
+    background: #FFF;
+    border: 1px solid #E0E0E0;
     box-shadow: 0 0 1px rgba(128, 128, 128, .2);
     margin: 1em 0;
     padding: 10px;
@@ -19,7 +21,7 @@
 }
 
 .exception-message {
-    color: var(--color-error);
+    color: #B0413E;
 }
 
 .exception-metadata,
@@ -28,5 +30,5 @@
 }
 
 .exception-message-wrapper .container {
-    min-height: unset;
+    min-height: auto;
 }

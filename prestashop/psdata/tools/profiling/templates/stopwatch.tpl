@@ -32,7 +32,6 @@
   <table class="table table-condensed table-bordered sortable">
     <thead>
       <tr>
-        <th>#</th>
         <th>Query</th>
         <th>Time (ms)</th>
         <th>Rows</th>
@@ -46,10 +45,9 @@
         {$callstack = implode('<br>', $data['stack'])}
         {$callstack_md5 = md5($callstack)}
         <tr>
-          <td>{$data['id']}</td>
-          <td class="pre" style="max-width: 60vw"><pre>{preg_replace("/(^[\s]*)/m", "", htmlspecialchars($data['query'], ENT_NOQUOTES, 'utf-8', false))}</pre></td>
+          <td class="pre"><pre>{preg_replace("/(^[\s]*)/m", "", htmlspecialchars($data['query'], ENT_NOQUOTES, 'utf-8', false))}</pre></td>
           <td data-value="{$data['time']}">
-            {load_time data=($data['time'])}
+            {load_time data=($data['time'] * 1000)}
           </td>
 
           <td>{$data['rows']}</td>
@@ -65,11 +63,7 @@
           </td>
           <td data-value="{$data['location']}">
             <a href="javascript:void(0);" onclick="$('#callstack_{$callstack_md5}').toggle();">{$data['location']}</a>
-            <div id="callstack_{$callstack_md5}" style="display:none">
-              {foreach $data['stack'] as $stack}
-                {$stack}<br/>
-              {/foreach}
-            </div>
+            <div id="callstack_{$callstack_md5}" style="display:none">{implode('<br>', $data['stack'])}</div>
           </td>
         </tr>
       {/foreach}

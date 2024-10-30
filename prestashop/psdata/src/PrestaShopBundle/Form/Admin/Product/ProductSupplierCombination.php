@@ -33,23 +33,24 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This form class is responsible to generate the basic product suppliers form.
  */
 class ProductSupplierCombination extends CommonAbstractType
 {
+    private $translator;
     private $contextLegacy;
     private $currencyAdapter;
 
     /**
      * Constructor.
      *
+     * @param object $translator
      * @param object $contextLegacy
      * @param object $currencyAdapter
      */
-    public function __construct($contextLegacy, $currencyAdapter)
+    public function __construct($translator, $contextLegacy, $currencyAdapter)
     {
+        $this->translator = $translator;
         $this->contextLegacy = $contextLegacy->getContext();
         $this->currencyAdapter = $currencyAdapter;
     }

@@ -1,71 +1,91 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Query\Expr;
-
-use function strtoupper;
 
 /**
  * Expression class for DQL join.
  *
  * @link    www.doctrine-project.org
+ * @since   2.0
+ * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
+ * @author  Jonathan Wage <jonwage@gmail.com>
+ * @author  Roman Borschel <roman@code-factory.org>
  */
 class Join
 {
-    public const INNER_JOIN = 'INNER';
-    public const LEFT_JOIN  = 'LEFT';
+    const INNER_JOIN    = 'INNER';
+    const LEFT_JOIN     = 'LEFT';
 
-    public const ON   = 'ON';
-    public const WITH = 'WITH';
+    const ON            = 'ON';
+    const WITH          = 'WITH';
 
     /**
      * @var string
-     * @psalm-var self::INNER_JOIN|self::LEFT_JOIN
      */
     protected $joinType;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $join;
 
-    /** @var string|null */
+    /**
+     * @var string
+     */
     protected $alias;
 
     /**
-     * @var string|null
-     * @psalm-var self::ON|self::WITH|null
+     * @var string
      */
     protected $conditionType;
 
-    /** @var string|Comparison|Composite|null */
+    /**
+     * @var string
+     */
     protected $condition;
 
-    /** @var string|null */
+    /**
+     * @var string
+     */
     protected $indexBy;
 
     /**
-     * @param string                           $joinType      The condition type constant. Either INNER_JOIN or LEFT_JOIN.
-     * @param string                           $join          The relationship to join.
-     * @param string|null                      $alias         The alias of the join.
-     * @param string|null                      $conditionType The condition type constant. Either ON or WITH.
-     * @param string|Comparison|Composite|null $condition     The condition for the join.
-     * @param string|null                      $indexBy       The index for the join.
-     * @psalm-param self::INNER_JOIN|self::LEFT_JOIN $joinType
-     * @psalm-param self::ON|self::WITH|null $conditionType
+     * @param string      $joinType      The condition type constant. Either INNER_JOIN or LEFT_JOIN.
+     * @param string      $join          The relationship to join.
+     * @param string|null $alias         The alias of the join.
+     * @param string|null $conditionType The condition type constant. Either ON or WITH.
+     * @param string|null $condition     The condition for the join.
+     * @param string|null $indexBy       The index for the join.
      */
     public function __construct($joinType, $join, $alias = null, $conditionType = null, $condition = null, $indexBy = null)
     {
-        $this->joinType      = $joinType;
-        $this->join          = $join;
-        $this->alias         = $alias;
-        $this->conditionType = $conditionType;
-        $this->condition     = $condition;
-        $this->indexBy       = $indexBy;
+        $this->joinType       = $joinType;
+        $this->join           = $join;
+        $this->alias          = $alias;
+        $this->conditionType  = $conditionType;
+        $this->condition      = $condition;
+        $this->indexBy        = $indexBy;
     }
 
     /**
-     * @return string
-     * @psalm-return self::INNER_JOIN|self::LEFT_JOIN
+     * @return string 
      */
     public function getJoinType()
     {
@@ -81,7 +101,7 @@ class Join
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getAlias()
     {
@@ -89,8 +109,7 @@ class Join
     }
 
     /**
-     * @return string|null
-     * @psalm-return self::ON|self::WITH|null
+     * @return string
      */
     public function getConditionType()
     {
@@ -98,7 +117,7 @@ class Join
     }
 
     /**
-     * @return string|Comparison|Composite|null
+     * @return string
      */
     public function getCondition()
     {
@@ -106,7 +125,7 @@ class Join
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getIndexBy()
     {

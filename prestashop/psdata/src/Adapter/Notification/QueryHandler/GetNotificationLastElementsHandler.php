@@ -84,9 +84,7 @@ final class GetNotificationLastElementsHandler implements GetNotificationLastEle
                         $notification['iso_code'],
                         $notification['company'],
                         $notification['status'],
-                        $notification['date_add'],
-                        $notification['customer_thread_view_url'],
-                        $notification['order_view_url']
+                        $notification['date_add']
                     );
                 }
             }

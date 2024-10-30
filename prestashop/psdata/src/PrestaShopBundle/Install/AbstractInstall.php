@@ -26,9 +26,6 @@
 
 namespace PrestaShopBundle\Install;
 
-use NullLogger;
-use PrestaShopLoggerInterface;
-
 abstract class AbstractInstall
 {
     /**
@@ -45,11 +42,6 @@ abstract class AbstractInstall
      * @var array List of errors
      */
     protected $errors = [];
-
-    /**
-     * @var PrestaShopLoggerInterface
-     */
-    protected $logger;
 
     public function __construct()
     {
@@ -75,25 +67,5 @@ abstract class AbstractInstall
         $this->translator = $translator;
 
         return $this;
-    }
-
-    /**
-     * @return PrestaShopLoggerInterface;
-     */
-    public function getLogger(): PrestaShopLoggerInterface
-    {
-        if (null === $this->logger) {
-            $this->logger = new NullLogger();
-        }
-
-        return $this->logger;
-    }
-
-    /**
-     * @param PrestaShopLoggerInterface $logger
-     */
-    public function setLogger(PrestaShopLoggerInterface $logger): void
-    {
-        $this->logger = $logger;
     }
 }

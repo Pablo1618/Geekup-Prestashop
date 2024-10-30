@@ -26,7 +26,10 @@ class Chart extends WriterPart
     /**
      * Write charts to XML format.
      *
+     * @param \PhpOffice\PhpSpreadsheet\Chart\Chart $pChart
      * @param mixed $calculateCellValues
+     *
+     * @throws WriterException
      *
      * @return string XML Output
      */
@@ -75,7 +78,7 @@ class Chart extends WriterPart
         $objWriter->writeAttribute('val', 0);
         $objWriter->endElement();
 
-        $this->writePlotArea($objWriter, $pChart->getPlotArea(), $pChart->getXAxisLabel(), $pChart->getYAxisLabel(), $pChart->getChartAxisX(), $pChart->getChartAxisY(), $pChart->getMajorGridlines(), $pChart->getMinorGridlines());
+        $this->writePlotArea($objWriter, $pChart->getWorksheet(), $pChart->getPlotArea(), $pChart->getXAxisLabel(), $pChart->getYAxisLabel(), $pChart->getChartAxisX(), $pChart->getChartAxisY(), $pChart->getMajorGridlines(), $pChart->getMinorGridlines());
 
         $this->writeLegend($objWriter, $pChart->getLegend());
 
@@ -106,8 +109,10 @@ class Chart extends WriterPart
      *
      * @param XMLWriter $objWriter XML Writer
      * @param Title $title
+     *
+     * @throws WriterException
      */
-    private function writeTitle(XMLWriter $objWriter, ?Title $title = null): void
+    private function writeTitle(XMLWriter $objWriter, Title $title = null)
     {
         if ($title === null) {
             return;
@@ -129,7 +134,7 @@ class Chart extends WriterPart
         if ((is_array($caption)) && (count($caption) > 0)) {
             $caption = $caption[0];
         }
-        $this->getParentWriter()->getWriterPartstringtable()->writeRichTextForCharts($objWriter, $caption, 'a');
+        $this->getParentWriter()->getWriterPart('stringtable')->writeRichTextForCharts($objWriter, $caption, 'a');
 
         $objWriter->endElement();
         $objWriter->endElement();
@@ -149,8 +154,10 @@ class Chart extends WriterPart
      *
      * @param XMLWriter $objWriter XML Writer
      * @param Legend $legend
+     *
+     * @throws WriterException
      */
-    private function writeLegend(XMLWriter $objWriter, ?Legend $legend = null): void
+    private function writeLegend(XMLWriter $objWriter, Legend $legend = null)
     {
         if ($legend === null) {
             return;
@@ -197,12 +204,18 @@ class Chart extends WriterPart
      * Write Chart Plot Area.
      *
      * @param XMLWriter $objWriter XML Writer
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $pSheet
+     * @param PlotArea $plotArea
      * @param Title $xAxisLabel
      * @param Title $yAxisLabel
      * @param Axis $xAxis
      * @param Axis $yAxis
+     * @param null|GridLines $majorGridlines
+     * @param null|GridLines $minorGridlines
+     *
+     * @throws WriterException
      */
-    private function writePlotArea(XMLWriter $objWriter, PlotArea $plotArea, ?Title $xAxisLabel = null, ?Title $yAxisLabel = null, ?Axis $xAxis = null, ?Axis $yAxis = null, ?GridLines $majorGridlines = null, ?GridLines $minorGridlines = null): void
+    private function writePlotArea(XMLWriter $objWriter, \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $pSheet, PlotArea $plotArea, Title $xAxisLabel = null, Title $yAxisLabel = null, Axis $xAxis = null, Axis $yAxis = null, GridLines $majorGridlines = null, GridLines $minorGridlines = null)
     {
         if ($plotArea === null) {
             return;
@@ -219,12 +232,10 @@ class Chart extends WriterPart
         $chartTypes = self::getChartType($plotArea);
         $catIsMultiLevelSeries = $valIsMultiLevelSeries = false;
         $plotGroupingType = '';
-        $chartType = null;
         foreach ($chartTypes as $chartType) {
             $objWriter->startElement('c:' . $chartType);
 
             $groupCount = $plotArea->getPlotGroupCount();
-            $plotGroup = null;
             for ($i = 0; $i < $groupCount; ++$i) {
                 $plotGroup = $plotArea->getPlotGroupByIndex($i);
                 $groupType = $plotGroup->getPlotType();
@@ -246,7 +257,7 @@ class Chart extends WriterPart
 
             $this->writeDataLabels($objWriter, $layout);
 
-            if ($chartType === DataSeries::TYPE_LINECHART && $plotGroup) {
+            if ($chartType === DataSeries::TYPE_LINECHART) {
                 //    Line only, Line3D can't be smoothed
                 $objWriter->startElement('c:smooth');
                 $objWriter->writeAttribute('val', (int) $plotGroup->getSmoothLine());
@@ -318,10 +329,10 @@ class Chart extends WriterPart
             if ($chartType === DataSeries::TYPE_BUBBLECHART) {
                 $this->writeValueAxis($objWriter, $xAxisLabel, $chartType, $id1, $id2, $catIsMultiLevelSeries, $xAxis, $majorGridlines, $minorGridlines);
             } else {
-                $this->writeCategoryAxis($objWriter, $xAxisLabel, $id1, $id2, $catIsMultiLevelSeries, $xAxis);
+                $this->writeCategoryAxis($objWriter, $xAxisLabel, $id1, $id2, $catIsMultiLevelSeries, $yAxis);
             }
 
-            $this->writeValueAxis($objWriter, $yAxisLabel, $chartType, $id1, $id2, $valIsMultiLevelSeries, $yAxis, $majorGridlines, $minorGridlines);
+            $this->writeValueAxis($objWriter, $yAxisLabel, $chartType, $id1, $id2, $valIsMultiLevelSeries, $xAxis, $majorGridlines, $minorGridlines);
         }
 
         $objWriter->endElement();
@@ -333,7 +344,7 @@ class Chart extends WriterPart
      * @param XMLWriter $objWriter XML Writer
      * @param \PhpOffice\PhpSpreadsheet\Chart\Layout $chartLayout Chart layout
      */
-    private function writeDataLabels(XMLWriter $objWriter, ?Layout $chartLayout = null): void
+    private function writeDataLabels(XMLWriter $objWriter, Layout $chartLayout = null)
     {
         $objWriter->startElement('c:dLbls');
 
@@ -383,8 +394,11 @@ class Chart extends WriterPart
      * @param string $id1
      * @param string $id2
      * @param bool $isMultiLevelSeries
+     * @param Axis $yAxis
+     *
+     * @throws WriterException
      */
-    private function writeCategoryAxis($objWriter, $xAxisLabel, $id1, $id2, $isMultiLevelSeries, Axis $yAxis): void
+    private function writeCategoryAxis($objWriter, $xAxisLabel, $id1, $id2, $isMultiLevelSeries, Axis $yAxis)
     {
         $objWriter->startElement('c:catAx');
 
@@ -501,8 +515,13 @@ class Chart extends WriterPart
      * @param string $id1
      * @param string $id2
      * @param bool $isMultiLevelSeries
+     * @param Axis $xAxis
+     * @param GridLines $majorGridlines
+     * @param GridLines $minorGridlines
+     *
+     * @throws WriterException
      */
-    private function writeValueAxis($objWriter, $yAxisLabel, $groupType, $id1, $id2, $isMultiLevelSeries, Axis $xAxis, GridLines $majorGridlines, GridLines $minorGridlines): void
+    private function writeValueAxis($objWriter, $yAxisLabel, $groupType, $id1, $id2, $isMultiLevelSeries, Axis $xAxis, GridLines $majorGridlines, GridLines $minorGridlines)
     {
         $objWriter->startElement('c:valAx');
 
@@ -980,6 +999,8 @@ class Chart extends WriterPart
      *
      * @param PlotArea $plotArea
      *
+     * @throws WriterException
+     *
      * @return array|string
      */
     private static function getChartType($plotArea)
@@ -1040,11 +1061,13 @@ class Chart extends WriterPart
      * @param DataSeries $plotGroup
      * @param string $groupType Type of plot for dataseries
      * @param XMLWriter $objWriter XML Writer
-     * @param bool $catIsMultiLevelSeries Is category a multi-series category
-     * @param bool $valIsMultiLevelSeries Is value set a multi-series set
-     * @param string $plotGroupingType Type of grouping for multi-series values
+     * @param bool &$catIsMultiLevelSeries Is category a multi-series category
+     * @param bool &$valIsMultiLevelSeries Is value set a multi-series set
+     * @param string &$plotGroupingType Type of grouping for multi-series values
+     *
+     * @throws WriterException
      */
-    private function writePlotGroup($plotGroup, $groupType, $objWriter, &$catIsMultiLevelSeries, &$valIsMultiLevelSeries, &$plotGroupingType): void
+    private function writePlotGroup($plotGroup, $groupType, $objWriter, &$catIsMultiLevelSeries, &$valIsMultiLevelSeries, &$plotGroupingType)
     {
         if ($plotGroup === null) {
             return;
@@ -1081,7 +1104,6 @@ class Chart extends WriterPart
             }
         }
 
-        $plotSeriesIdx = 0;
         foreach ($plotSeriesOrder as $plotSeriesIdx => $plotSeriesRef) {
             $objWriter->startElement('c:ser');
 
@@ -1229,7 +1251,7 @@ class Chart extends WriterPart
      * @param DataSeriesValues $plotSeriesLabel
      * @param XMLWriter $objWriter XML Writer
      */
-    private function writePlotSeriesLabel($plotSeriesLabel, $objWriter): void
+    private function writePlotSeriesLabel($plotSeriesLabel, $objWriter)
     {
         if ($plotSeriesLabel === null) {
             return;
@@ -1264,7 +1286,7 @@ class Chart extends WriterPart
      * @param string $groupType Type of plot for dataseries
      * @param string $dataType Datatype of series values
      */
-    private function writePlotSeriesValues($plotSeriesValues, XMLWriter $objWriter, $groupType, $dataType = 'str'): void
+    private function writePlotSeriesValues($plotSeriesValues, XMLWriter $objWriter, $groupType, $dataType = 'str')
     {
         if ($plotSeriesValues === null) {
             return;
@@ -1354,7 +1376,7 @@ class Chart extends WriterPart
      * @param DataSeriesValues $plotSeriesValues
      * @param XMLWriter $objWriter XML Writer
      */
-    private function writeBubbles($plotSeriesValues, $objWriter): void
+    private function writeBubbles($plotSeriesValues, $objWriter)
     {
         if ($plotSeriesValues === null) {
             return;
@@ -1399,7 +1421,7 @@ class Chart extends WriterPart
      * @param XMLWriter $objWriter XML Writer
      * @param Layout $layout
      */
-    private function writeLayout(XMLWriter $objWriter, ?Layout $layout = null): void
+    private function writeLayout(XMLWriter $objWriter, Layout $layout = null)
     {
         $objWriter->startElement('c:layout');
 
@@ -1466,7 +1488,7 @@ class Chart extends WriterPart
      *
      * @param XMLWriter $objWriter XML Writer
      */
-    private function writeAlternateContent($objWriter): void
+    private function writeAlternateContent($objWriter)
     {
         $objWriter->startElement('mc:AlternateContent');
         $objWriter->writeAttribute('xmlns:mc', 'http://schemas.openxmlformats.org/markup-compatibility/2006');
@@ -1494,7 +1516,7 @@ class Chart extends WriterPart
      *
      * @param XMLWriter $objWriter XML Writer
      */
-    private function writePrintSettings($objWriter): void
+    private function writePrintSettings($objWriter)
     {
         $objWriter->startElement('c:printSettings');
 

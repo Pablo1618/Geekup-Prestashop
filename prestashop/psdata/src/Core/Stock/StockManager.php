@@ -35,6 +35,7 @@ use Employee;
 use Mail;
 use Pack;
 use PrestaShop\PrestaShop\Adapter\LegacyContext as ContextAdapter;
+use PrestaShop\PrestaShop\Adapter\Product\ProductDataProvider;
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShopBundle\Entity\StockMvt;
@@ -190,7 +191,6 @@ class StockManager
                 'id_product_attribute' => $id_product_attribute,
                 'quantity' => $stockAvailable->quantity,
                 'delta_quantity' => $delta_quantity,
-                'id_shop' => $id_shop,
             ]
         );
 
@@ -304,9 +304,6 @@ class StockManager
         }
         $templateVars = [
             '{qty}' => $newQuantity,
-            '{product_id}' => $product->id,
-            '{product_attribute_id}' => $id_product_attribute,
-            '{product_reference}' => $product->reference,
             '{last_qty}' => $lowStockThreshold,
             '{product}' => $productName,
         ];
@@ -381,11 +378,11 @@ class StockManager
      */
     private function prepareMovement($productId, $productAttributeId, $deltaQuantity, $params = [])
     {
-        $product = new Product($productId);
+        $product = (new ProductDataProvider())->getProductInstance($productId);
 
         if ($product->id) {
             $stockManager = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Adapter\\StockManager');
-            $stockAvailable = $stockManager->getStockAvailableByProduct($product, $productAttributeId, $params['id_shop'] ?? null);
+            $stockAvailable = $stockManager->getStockAvailableByProduct($product, $productAttributeId);
 
             if ($stockAvailable->id) {
                 $stockMvt = new StockMvt();

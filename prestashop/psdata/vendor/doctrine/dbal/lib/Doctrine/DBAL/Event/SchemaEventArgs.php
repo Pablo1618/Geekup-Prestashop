@@ -13,7 +13,7 @@ class SchemaEventArgs extends EventArgs
     private $preventDefault = false;
 
     /**
-     * @return SchemaEventArgs
+     * @return \Doctrine\DBAL\Event\SchemaEventArgs
      */
     public function preventDefault()
     {

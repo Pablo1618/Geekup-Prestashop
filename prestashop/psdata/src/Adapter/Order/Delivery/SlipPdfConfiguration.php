@@ -37,6 +37,16 @@ use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 final class SlipPdfConfiguration implements DataConfigurationInterface
 {
     /**
+     * @var Configuration
+     */
+    private $configuration;
+
+    public function __construct(Configuration $configuration)
+    {
+        $this->configuration = $configuration;
+    }
+
+    /**
      * Returns configuration used to manage Slip pdf in back office.
      *
      * @return array

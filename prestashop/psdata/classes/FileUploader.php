@@ -23,10 +23,6 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-
-/**
- * @deprecated deprecated since version 8.1, will be dropped in 9.0
- */
 class FileUploaderCore
 {
     protected $allowedExtensions = [];
@@ -37,8 +33,6 @@ class FileUploaderCore
 
     public function __construct(array $allowedExtensions = [], $sizeLimit = 10485760)
     {
-        @trigger_error('This class is deprecated since 8.1 and will be dropped in 9.0.', E_USER_DEPRECATED);
-
         $allowedExtensions = array_map('strtolower', $allowedExtensions);
 
         $this->allowedExtensions = $allowedExtensions;
@@ -55,7 +49,7 @@ class FileUploaderCore
 
     protected function toBytes($str)
     {
-        $val = (int) trim($str);
+        $val = trim($str);
         $last = strtolower($str[strlen($str) - 1]);
         switch ($last) {
             case 'g':

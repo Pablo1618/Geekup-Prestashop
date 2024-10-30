@@ -30,8 +30,7 @@ namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler;
 
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
-use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\CommandBuilder\Product\Combination\CombinationCommandsBuilderInterface;
+use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\CommandBuilder\Product\Combination\CombinationCommandsBuilder;
 
 /**
  * Handles data posted from combination form
@@ -44,34 +43,20 @@ class CombinationFormDataHandler implements FormDataHandlerInterface
     private $bus;
 
     /**
-     * @var CombinationCommandsBuilderInterface
+     * @var CombinationCommandsBuilder
      */
     private $commandsBuilder;
 
     /**
-     * @var int
-     */
-    private $contextShopId;
-
-    /**
-     * @var int
-     */
-    private $defaultShopId;
-
-    /**
      * @param CommandBusInterface $bus
-     * @param CombinationCommandsBuilderInterface $commandsBuilder
+     * @param CombinationCommandsBuilder $commandsBuilder
      */
     public function __construct(
         CommandBusInterface $bus,
-        CombinationCommandsBuilderInterface $commandsBuilder,
-        int $contextShopId,
-        int $defaultShopId
+        CombinationCommandsBuilder $commandsBuilder
     ) {
         $this->bus = $bus;
         $this->commandsBuilder = $commandsBuilder;
-        $this->contextShopId = $contextShopId;
-        $this->defaultShopId = $defaultShopId;
     }
 
     /**
@@ -88,9 +73,7 @@ class CombinationFormDataHandler implements FormDataHandlerInterface
      */
     public function update($id, array $data)
     {
-        $singleShopConstraint = $this->contextShopId ? ShopConstraint::shop($this->contextShopId) : ShopConstraint::shop($this->defaultShopId);
-
-        $commands = $this->commandsBuilder->buildCommands(new CombinationId($id), $data, $singleShopConstraint);
+        $commands = $this->commandsBuilder->buildCommands(new CombinationId($id), $data);
 
         foreach ($commands as $command) {
             $this->bus->handle($command);

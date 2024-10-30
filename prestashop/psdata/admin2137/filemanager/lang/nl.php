@@ -1,7 +1,5 @@
 <?php
-/*
-* Important - this file MUST implement all strings defined in base en.php file
-*/
+
 define('lang_Select', 'Selecteren');
 define('lang_Erase', 'Verwijderen');
 define('lang_Open', 'Openen');

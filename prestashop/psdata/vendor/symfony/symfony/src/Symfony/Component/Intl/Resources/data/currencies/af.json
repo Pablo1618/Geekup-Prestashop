@@ -182,7 +182,7 @@
         ],
         "EUR": [
             "€",
-            "Euro"
+            "euro"
         ],
         "FJD": [
             "FJD",
@@ -653,7 +653,7 @@
             "Oos-Karibiese dollar"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "Wes-Afrikaanse CFA-frank"
         ],
         "XPF": [

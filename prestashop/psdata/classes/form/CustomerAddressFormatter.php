@@ -24,7 +24,7 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CustomerAddressFormatterCore implements FormFormatterInterface
 {
@@ -147,7 +147,6 @@ class CustomerAddressFormatterCore implements FormFormatterInterface
         }
 
         //To add the extra fields in address form
-        // An array [module_name => module_output] will be returned
         $additionalAddressFormFields = Hook::exec('additionalCustomerAddressFields', ['fields' => &$format], null, true);
         if (is_array($additionalAddressFormFields)) {
             foreach ($additionalAddressFormFields as $moduleName => $additionnalFormFields) {

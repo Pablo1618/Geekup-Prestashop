@@ -131,7 +131,7 @@
 									{if $field['type'] == 'select'}
 										<div class="col-lg-9">
 											{if $field['list']}
-												<select class="form-control fixed-width-xxl {if isset($field['class'])}{$field['class']}{/if}" name="{$key}"{if isset($field['js'])} onchange="{$field['js']}"{/if} id="{$key}" {if isset($field['size'])} size="{$field['size']}"{/if} {if !empty($field['multiple'])} multiple="multiple"{/if}>
+												<select class="form-control fixed-width-xxl {if isset($field['class'])}{$field['class']}{/if}" name="{$key}"{if isset($field['js'])} onchange="{$field['js']}"{/if} id="{$key}" {if isset($field['size'])} size="{$field['size']}"{/if}>
 													{foreach $field['list'] AS $k => $option}
 														<option value="{$option[$field['identifier']]}"{if $field['value'] == $option[$field['identifier']]} selected="selected"{/if}>{$option['name']}</option>
 													{/foreach}
@@ -175,12 +175,8 @@
 												<p class="checkbox">
 													{strip}
 													<label class="col-lg-3" for="{$key}{$k}_on">
-                            {if empty($field['multiple'])}
-														  <input type="checkbox" name="{$key}" id="{$key}{$k}_on" value="{$k|intval}"{if $k == $field['value']} checked="checked"{/if}{if isset($field['js'][$k])} {$field['js'][$k]}{/if}/>
-														{else}
-                              <input type="checkbox" name="{$key}[]" id="{$key}{$k}_on" value="{$k}"{if $field['value_multiple'][$k]} checked="checked"{/if} {if isset($field['disabled'][$k]) && $field['disabled'][$k]} disabled="disabled"{/if} {if isset($field['js'][$k])} {$field['js'][$k]}{/if}/>
-                            {/if}
-                            {$v}
+														<input type="checkbox" name="{$key}" id="{$key}{$k}_on" value="{$k|intval}"{if $k == $field['value']} checked="checked"{/if}{if isset($field['js'][$k])} {$field['js'][$k]}{/if}/>
+													 	{$v}
 													</label>
 													{/strip}
 												</p>
@@ -188,7 +184,7 @@
 										</div>
 									{elseif $field['type'] == 'text'}
 										<div class="col-lg-9">{if isset($field['suffix'])}<div class="input-group{if isset($field.class)} {$field.class}{/if}">{/if}
-											<input class="form-control {if isset($field['class'])}{$field['class']}{/if}" type="{$field['type']}"{if isset($field['id'])} id="{$field['id']}"{/if} size="{if isset($field['size'])}{$field['size']|intval}{else}5{/if}" name="{$key}" value="{if isset($field['no_escape']) && $field['no_escape']}{$field['value']}{else}{$field['value']|escape:'html':'UTF-8'}{/if}" {if isset($field['autocomplete']) && !$field['autocomplete']}autocomplete="off"{/if} {if isset($field['required']) && $field['required']} required="required"{/if}  {if !empty($field['disabled'])} disabled="disabled"{/if} />
+											<input class="form-control {if isset($field['class'])}{$field['class']}{/if}" type="{$field['type']}"{if isset($field['id'])} id="{$field['id']}"{/if} size="{if isset($field['size'])}{$field['size']|intval}{else}5{/if}" name="{$key}" value="{if isset($field['no_escape']) && $field['no_escape']}{$field['value']}{else}{$field['value']|escape:'html':'UTF-8'}{/if}" {if isset($field['autocomplete']) && !$field['autocomplete']}autocomplete="off"{/if}/>
 											{if isset($field['suffix'])}
 											<span class="input-group-addon">
 												{$field['suffix']|strval}
@@ -198,7 +194,7 @@
 										</div>
 									{elseif $field['type'] == 'password'}
 										<div class="col-lg-9">{if isset($field['suffix'])}<div class="input-group{if isset($field.class)} {$field.class}{/if}">{/if}
-                      <input{if !empty($field['class'])} class="{$field['class']}"{/if} type="{$field['type']}"{if isset($field['id'])} id="{$field['id']}"{/if} size="{if isset($field['size'])}{$field['size']|intval}{else}5{/if}" name="{$key}" value=""{if isset($field['autocomplete']) && !$field['autocomplete']} autocomplete="off"{/if} />
+											<input type="{$field['type']}"{if isset($field['id'])} id="{$field['id']}"{/if} size="{if isset($field['size'])}{$field['size']|intval}{else}5{/if}" name="{$key}" value=""{if isset($field['autocomplete']) && !$field['autocomplete']} autocomplete="off"{/if} />
 											{if isset($field['suffix'])}
 											<span class="input-group-addon">
 												{$field['suffix']|strval}
@@ -208,14 +204,14 @@
 										</div>
 									{elseif $field['type'] == 'textarea'}
 										<div class="col-lg-9">
-											<textarea class="{if isset($field['autoload_rte']) && $field['autoload_rte']}rte autoload_rte{else}textarea-autosize{/if}" name="{$key}"{if isset($field['cols'])} cols="{$field['cols']}"{/if}{if isset($field['rows'])} rows="{$field['rows']}"{/if}>{$field['value']|escape:'html':'UTF-8'}</textarea>
+											<textarea class="{if isset($field['autoload_rte']) && $field['autoload_rte']}rte autoload_rte{else}textarea-autosize{/if}" name={$key}{if isset({$field['cols']})} cols="{$field['cols']}"{/if}{if isset({$field['rows']})} rows="{$field['rows']}"{/if}">{$field['value']|escape:'html':'UTF-8'}</textarea>
 										</div>
 									{elseif $field['type'] == 'file'}
 										<div class="col-lg-9">{$field['file']}</div>
 									{elseif $field['type'] == 'color'}
 										<div class="col-lg-2">
 											<div class="input-group">
-												<input type="color" size="{if isset($field['size'])}{$field['size']|intval}{else}5{/if}" data-hex="true" class="{if isset($field['class'])}{$field['class']}{else}color mColorPickerInput{/if}" name="{if isset($field['name'])}{$field['name']}{else}{$key}{/if}" value="{$field['value']|escape:'html':'UTF-8'}" />
+												<input type="color" size="{$field['size']}" data-hex="true" {if isset($input.class)}class="{$field['class']}" {else}class="color mColorPickerInput"{/if} name="{$field['name']}" class="{if isset($field['class'])}{$field['class']}{/if}" value="{$field['value']|escape:'html':'UTF-8'}" />
 											</div>
 							            </div>
 									{elseif $field['type'] == 'price'}
@@ -332,7 +328,7 @@
 								{if $field['is_invisible']}
 								<div class="col-lg-9 col-lg-offset-3">
 									<p class="alert alert-warning row-margin-top">
-										{l s='You can\'t change the value of this configuration field in this store\'s context.'}
+										{l s='You can\'t change the value of this configuration field in the context of this shop.'}
 									</p>
 								</div>
 								{/if}

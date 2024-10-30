@@ -36,10 +36,7 @@ class TabLangCore extends DataLangCore
     protected $fieldsToUpdate = ['name'];
 
     /**
-     * @param string $field
-     * @param string|array $value
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getFieldValue($field, $value)
     {

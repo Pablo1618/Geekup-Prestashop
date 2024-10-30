@@ -40,11 +40,11 @@ class CurrencyCollection implements IteratorAggregate, Countable
     /**
      * Gets the current CurrencyCollection as an Iterator that includes all currencies.
      *
-     * @return Traversable<Currency>
+     * @return iterable<Currency>|Traversable
      */
-    public function getIterator(): Traversable
+    public function getIterator()
     {
-        /** @var Traversable<Currency> $iterator (needed for auto-completion) */
+        /** @var Currency[] $iterator (needed for auto-completion) */
         $iterator = new ArrayIterator($this->currencies);
 
         return $iterator;
@@ -56,7 +56,7 @@ class CurrencyCollection implements IteratorAggregate, Countable
      * @return int
      *             The number of currencies
      */
-    public function count(): int
+    public function count()
     {
         return count($this->currencies);
     }
@@ -99,7 +99,9 @@ class CurrencyCollection implements IteratorAggregate, Countable
      */
     public function get($isoCode)
     {
-        return $this->currencies[$isoCode] ?? null;
+        return isset($this->currencies[$isoCode])
+            ? $this->currencies[$isoCode]
+            : null;
     }
 
     /**

@@ -26,6 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Customer\QueryHandler;
 
+use Carrier;
 use Cart;
 use CartRule;
 use Category;
@@ -55,6 +56,7 @@ use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\OrderInformation;
 use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\OrdersInformation;
 use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\PersonalInformation;
 use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\ProductsInformation;
+use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\ReferrerInformation;
 use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\SentEmailInformation;
 use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\Subscriptions;
 use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\ViewableCustomer;
@@ -62,8 +64,9 @@ use PrestaShop\PrestaShop\Core\Domain\Customer\QueryResult\ViewedProductInformat
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\CustomerId;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
 use Product;
+use Referrer;
 use Shop;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Tools;
 use Validate;
 
@@ -142,6 +145,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
             $this->getLastEmailsSentToCustomer($customer),
             $this->getLastCustomerConnections($customer),
             $this->getCustomerGroups($customer),
+            $this->getCustomerReferrers($customer),
             $this->getCustomerAddresses($customer)
         );
     }
@@ -181,10 +185,10 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
             $birthday = $this->translator->trans('Unknown', [], 'Admin.Orderscustomers.Feature');
         }
 
-        $registrationDate = Tools::displayDate($customer->date_add, true);
-        $lastUpdateDate = Tools::displayDate($customer->date_upd, true);
+        $registrationDate = Tools::displayDate($customer->date_add, null, true);
+        $lastUpdateDate = Tools::displayDate($customer->date_upd, null, true);
         $lastVisitDate = $customerStats['last_visit'] ?
-            Tools::displayDate($customerStats['last_visit'], true) :
+            Tools::displayDate($customerStats['last_visit'], null, true) :
             $this->translator->trans('Never', [], 'Admin.Global');
 
         $customerShop = new Shop($customer->id_shop);
@@ -218,7 +222,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
      *
      * @return int|null customer rank or null if customer is not ranked
      */
-    private function getCustomerRankBySales($customerId): ?int
+    private function getCustomerRankBySales($customerId)
     {
         $sql = 'SELECT SUM(total_paid_real) FROM ' . _DB_PREFIX_ . 'orders WHERE id_customer = ' . (int) $customerId . ' AND valid = 1';
 
@@ -244,7 +248,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
      *
      * @return OrdersInformation
      */
-    private function getCustomerOrders(Customer $customer): OrdersInformation
+    private function getCustomerOrders(Customer $customer)
     {
         $validOrders = [];
         $invalidOrders = [];
@@ -298,24 +302,28 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
      */
     private function getCustomerCarts(Customer $customer)
     {
-        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
-        SELECT c.id_cart, c.date_add, ca.name as carrier_name, c.id_currency, cu.iso_code as currency_iso_code
-        FROM ' . _DB_PREFIX_ . 'cart c
-        LEFT JOIN ' . _DB_PREFIX_ . 'carrier ca ON ca.id_carrier = c.id_carrier
-        LEFT JOIN ' . _DB_PREFIX_ . 'currency cu ON cu.id_currency = c.id_currency
-        WHERE c.`id_customer` = ' . (int) $customer->id . '
-        ORDER BY c.`date_add` DESC');
-
+        $carts = Cart::getCustomerCarts($customer->id);
         $customerCarts = [];
-        foreach ($result as $row) {
-            $cart = new Cart((int) $row['id_cart']);
+
+        foreach ($carts as $cart) {
+            $cart = new Cart((int) $cart['id_cart']);
+            Context::getContext()->cart = $cart;
+
+            $currency = new Currency($cart->id_currency);
+            Context::getContext()->currency = $currency;
+
+            $carrier = new Carrier($cart->id_carrier);
+            $summary = $cart->getSummaryDetails();
+
             $customerCarts[] = new CartInformation(
-                sprintf('%06d', $row['id_cart']),
-                Tools::displayDate($row['date_add'], true),
-                $this->locale->formatPrice($cart->getOrderTotal(true), $row['currency_iso_code']),
-                $row['carrier_name']
+                sprintf('%06d', $cart->id),
+                Tools::displayDate($cart->date_add, null, true),
+                $this->locale->formatPrice($summary['total_price'], $currency->iso_code),
+                $carrier->name
             );
         }
+
+        Context::getContext()->currency = Currency::getDefaultCurrency();
 
         return $customerCarts;
     }
@@ -334,7 +342,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
         foreach ($products as $product) {
             $boughtProducts[] = new BoughtProductInformation(
                 (int) $product['id_order'],
-                Tools::displayDate($product['date_add'], false),
+                Tools::displayDate($product['date_add'], null, false),
                 $product['product_name'],
                 $product['product_quantity']
             );
@@ -415,7 +423,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
                 (int) $message['id_customer_thread'],
                 substr(strip_tags(html_entity_decode($message['message'], ENT_NOQUOTES, 'UTF-8')), 0, 75),
                 $status,
-                Tools::displayDate($message['date_add'], true)
+                Tools::displayDate($message['date_add'], null, true)
             );
         }
 
@@ -429,8 +437,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
      */
     private function getCustomerDiscounts(Customer $customer)
     {
-        $discounts = CartRule::getAllCustomerCartRules($customer->id);
-
+        $discounts = CartRule::getCustomerCartRules($this->contextLangId, $customer->id, false, false);
         $customerDiscounts = [];
 
         foreach ($discounts as $discount) {
@@ -460,7 +467,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
 
         foreach ($emails as $email) {
             $customerEmails[] = new SentEmailInformation(
-                Tools::displayDate($email['date_add'], true),
+                Tools::displayDate($email['date_add'], null, true),
                 $email['language'],
                 $email['subject'],
                 $email['template']
@@ -527,6 +534,27 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
     /**
      * @param Customer $customer
      *
+     * @return ReferrerInformation[]
+     */
+    private function getCustomerReferrers(Customer $customer)
+    {
+        $referrers = Referrer::getReferrers($customer->id);
+        $customerReferrers = [];
+
+        foreach ($referrers as $referrer) {
+            $customerReferrers[] = new ReferrerInformation(
+                Tools::displayDate($referrer['date_add'], null, true),
+                $referrer['name'],
+                $referrer['shop_name']
+            );
+        }
+
+        return $customerReferrers;
+    }
+
+    /**
+     * @param Customer $customer
+     *
      * @return AddressInformation[]
      */
     private function getCustomerAddresses(Customer $customer)
@@ -567,7 +595,7 @@ final class GetCustomerForViewingHandler implements GetCustomerForViewingHandler
     private function assertCustomerWasFound(CustomerId $customerId, Customer $customer)
     {
         if (!$customer->id) {
-            throw new CustomerNotFoundException(sprintf('Customer with id "%d" was not found.', $customerId->getValue()));
+            throw new CustomerNotFoundException($customerId, sprintf('Customer with id "%s" was not found.', $customerId->getValue()));
         }
     }
 }

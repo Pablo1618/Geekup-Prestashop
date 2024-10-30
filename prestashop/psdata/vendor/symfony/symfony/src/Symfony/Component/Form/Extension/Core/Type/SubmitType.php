@@ -15,7 +15,6 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\SubmitButtonTypeInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * A submit button.
@@ -27,19 +26,6 @@ class SubmitType extends AbstractType implements SubmitButtonTypeInterface
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['clicked'] = $form->isClicked();
-
-        if (!$options['validate']) {
-            $view->vars['attr']['formnovalidate'] = true;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefault('validate', true);
-        $resolver->setAllowedTypes('validate', 'bool');
     }
 
     /**

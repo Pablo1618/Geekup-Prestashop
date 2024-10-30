@@ -33,12 +33,12 @@
         "Grek": "grški",
         "Gujr": "gudžaratski",
         "Guru": "gurmuki",
-        "Hanb": "han + bopomofo",
+        "Hanb": "Han + Bopomofo",
         "Hang": "hangul",
         "Hani": "kanji",
         "Hano": "hanunski",
-        "Hans": "poenostavljena pisava",
-        "Hant": "tradicionalna pisava",
+        "Hans": "poenostavljena pisava han",
+        "Hant": "tradicionalna pisava han",
         "Hebr": "hebrejski",
         "Hira": "hiragana",
         "Hmng": "pahavhmonska zlogovna pisava",
@@ -46,7 +46,7 @@
         "Hung": "staroogrski",
         "Inds": "induški",
         "Ital": "staroitalski",
-        "Jamo": "jamo",
+        "Jamo": "Jamo",
         "Java": "javanski",
         "Jpan": "japonski",
         "Kali": "karenski",
@@ -120,6 +120,7 @@
         "Zsye": "čustvenček",
         "Zsym": "simboli",
         "Zxxx": "nenapisano",
-        "Zyyy": "splošno"
+        "Zyyy": "splošno",
+        "Zzzz": "neznan ali neveljaven zapis"
     }
 }

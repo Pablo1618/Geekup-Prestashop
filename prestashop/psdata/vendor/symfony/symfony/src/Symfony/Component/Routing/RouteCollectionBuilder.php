@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Routing;
 
-use Symfony\Component\Config\Exception\LoaderLoadException;
+use Symfony\Component\Config\Exception\FileLoaderLoadException;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\ResourceInterface;
 
@@ -54,11 +54,11 @@ class RouteCollectionBuilder
      *
      * @return self
      *
-     * @throws LoaderLoadException
+     * @throws FileLoaderLoadException
      */
     public function import($resource, $prefix = '/', $type = null)
     {
-        /** @var RouteCollection[] $collections */
+        /** @var RouteCollection[] $collection */
         $collections = $this->load($resource, $type);
 
         // create a builder from the RouteCollection
@@ -115,7 +115,8 @@ class RouteCollectionBuilder
     /**
      * Add a RouteCollectionBuilder.
      *
-     * @param string $prefix
+     * @param string                 $prefix
+     * @param RouteCollectionBuilder $builder
      */
     public function mount($prefix, self $builder)
     {
@@ -251,7 +252,7 @@ class RouteCollectionBuilder
      *
      * @return $this
      */
-    private function addResource(ResourceInterface $resource): self
+    private function addResource(ResourceInterface $resource)
     {
         $this->resources[] = $resource;
 
@@ -307,9 +308,7 @@ class RouteCollectionBuilder
             } else {
                 /* @var self $route */
                 $subCollection = $route->build();
-                if (null !== $this->prefix) {
-                    $subCollection->addPrefix($this->prefix);
-                }
+                $subCollection->addPrefix($this->prefix);
 
                 $routeCollection->addCollection($subCollection);
             }
@@ -324,8 +323,10 @@ class RouteCollectionBuilder
 
     /**
      * Generates a route name based on details of this route.
+     *
+     * @return string
      */
-    private function generateRouteName(Route $route): string
+    private function generateRouteName(Route $route)
     {
         $methods = implode('_', $route->getMethods()).'_';
 
@@ -347,9 +348,9 @@ class RouteCollectionBuilder
      *
      * @return RouteCollection[]
      *
-     * @throws LoaderLoadException If no loader is found
+     * @throws FileLoaderLoadException If no loader is found
      */
-    private function load($resource, string $type = null): array
+    private function load($resource, $type = null)
     {
         if (null === $this->loader) {
             throw new \BadMethodCallException('Cannot import other routing resources: you must pass a LoaderInterface when constructing RouteCollectionBuilder.');
@@ -362,11 +363,11 @@ class RouteCollectionBuilder
         }
 
         if (null === $resolver = $this->loader->getResolver()) {
-            throw new LoaderLoadException($resource, null, 0, null, $type);
+            throw new FileLoaderLoadException($resource, null, null, null, $type);
         }
 
         if (false === $loader = $resolver->resolve($resource, $type)) {
-            throw new LoaderLoadException($resource, null, 0, null, $type);
+            throw new FileLoaderLoadException($resource, null, null, null, $type);
         }
 
         $collections = $loader->load($resource, $type);

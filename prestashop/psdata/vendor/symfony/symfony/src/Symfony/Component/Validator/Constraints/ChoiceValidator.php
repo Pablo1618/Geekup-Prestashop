@@ -15,7 +15,6 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 /**
  * ChoiceValidator validates that the value is one of the expected values.
@@ -44,7 +43,7 @@ class ChoiceValidator extends ConstraintValidator
         }
 
         if ($constraint->multiple && !\is_array($value)) {
-            throw new UnexpectedValueException($value, 'array');
+            throw new UnexpectedTypeException($value, 'array');
         }
 
         if ($constraint->callback) {
@@ -54,21 +53,20 @@ class ChoiceValidator extends ConstraintValidator
             ) {
                 throw new ConstraintDefinitionException('The Choice constraint expects a valid callback.');
             }
-            $choices = $choices();
+            $choices = \call_user_func($choices);
         } else {
             $choices = $constraint->choices;
         }
 
         if (true !== $constraint->strict) {
-            throw new \RuntimeException('The "strict" option of the Choice constraint should not be used.');
+            @trigger_error('Not setting the strict option of the Choice constraint to true is deprecated since Symfony 3.4 and will throw an exception in 4.0.', \E_USER_DEPRECATED);
         }
 
         if ($constraint->multiple) {
             foreach ($value as $_value) {
-                if (!\in_array($_value, $choices, true)) {
+                if (!\in_array($_value, $choices, $constraint->strict)) {
                     $this->context->buildViolation($constraint->multipleMessage)
                         ->setParameter('{{ value }}', $this->formatValue($_value))
-                        ->setParameter('{{ choices }}', $this->formatValues($choices))
                         ->setCode(Choice::NO_SUCH_CHOICE_ERROR)
                         ->setInvalidValue($_value)
                         ->addViolation();
@@ -98,10 +96,9 @@ class ChoiceValidator extends ConstraintValidator
 
                 return;
             }
-        } elseif (!\in_array($value, $choices, true)) {
+        } elseif (!\in_array($value, $choices, $constraint->strict)) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $this->formatValue($value))
-                ->setParameter('{{ choices }}', $this->formatValues($choices))
                 ->setCode(Choice::NO_SUCH_CHOICE_ERROR)
                 ->addViolation();
         }

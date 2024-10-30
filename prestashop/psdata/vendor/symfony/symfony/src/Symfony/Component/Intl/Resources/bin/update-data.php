@@ -18,14 +18,9 @@ use Symfony\Component\Intl\Data\Generator\LanguageDataGenerator;
 use Symfony\Component\Intl\Data\Generator\LocaleDataGenerator;
 use Symfony\Component\Intl\Data\Generator\RegionDataGenerator;
 use Symfony\Component\Intl\Data\Generator\ScriptDataGenerator;
-use Symfony\Component\Intl\Data\Generator\TimezoneDataGenerator;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Intl\Locale;
 use Symfony\Component\Intl\Util\GitRepository;
-
-if ('cli' !== \PHP_SAPI) {
-    throw new Exception('This script must be run from the command line.');
-}
 
 require_once __DIR__.'/common.php';
 require_once __DIR__.'/autoload.php';
@@ -202,11 +197,6 @@ $generator->generateData($config);
 echo "Generating locale data...\n";
 
 $generator = new LocaleDataGenerator($compiler, Intl::LOCALE_DIR);
-$generator->generateData($config);
-
-echo "Generating timezone data...\n";
-
-$generator = new TimezoneDataGenerator($compiler, Intl::TIMEZONE_DIR);
 $generator->generateData($config);
 
 echo "Resource bundle compilation complete.\n";

@@ -11,9 +11,8 @@
 
 namespace Symfony\Component\Validator\Context;
 
-use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Creates new {@link ExecutionContext} instances.
@@ -35,12 +34,8 @@ class ExecutionContextFactory implements ExecutionContextFactoryInterface
      *                                               use for translating
      *                                               violation messages
      */
-    public function __construct($translator, string $translationDomain = null)
+    public function __construct(TranslatorInterface $translator, $translationDomain = null)
     {
-        if (!$translator instanceof LegacyTranslatorInterface && !$translator instanceof TranslatorInterface) {
-            throw new \TypeError(sprintf('Argument 1 passed to "%s()" must be an instance of "%s", "%s" given.', __METHOD__, TranslatorInterface::class, \is_object($translator) ? \get_class($translator) : \gettype($translator)));
-        }
-
         $this->translator = $translator;
         $this->translationDomain = $translationDomain;
     }

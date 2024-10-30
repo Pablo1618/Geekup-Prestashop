@@ -38,9 +38,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AvailabilityType extends TranslatorAwareType
 {
@@ -50,25 +49,17 @@ class AvailabilityType extends TranslatorAwareType
     private $outOfStockTypeChoiceProvider;
 
     /**
-     * @var RouterInterface
-     */
-    private $router;
-
-    /**
      * @param TranslatorInterface $translator
      * @param array $locales
      * @param FormChoiceProviderInterface $outOfStockTypeChoiceProvider
-     * @param RouterInterface $router
      */
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
-        FormChoiceProviderInterface $outOfStockTypeChoiceProvider,
-        RouterInterface $router
+        FormChoiceProviderInterface $outOfStockTypeChoiceProvider
     ) {
         parent::__construct($translator, $locales);
         $this->outOfStockTypeChoiceProvider = $outOfStockTypeChoiceProvider;
-        $this->router = $router;
     }
 
     /**
@@ -79,20 +70,14 @@ class AvailabilityType extends TranslatorAwareType
         $builder
             ->add('out_of_stock_type', ChoiceType::class, [
                 'choices' => $this->outOfStockTypeChoiceProvider->getChoices(),
-                'label' => false,
+                'label' => $this->trans('Behavior when out of stock', 'Admin.Catalog.Feature'),
                 'expanded' => true,
                 'column_breaker' => true,
-                'modify_all_shops' => true,
-                'external_link' => [
-                    'text' => $this->trans('[1]Edit default behavior[/1]', 'Admin.Catalog.Feature'),
-                    'href' => $this->router->generate('admin_product_preferences') . '#configuration_fieldset_stock',
-                ],
             ])
             ->add('available_now_label', TranslatableType::class, [
                 'type' => TextType::class,
                 'label' => $this->trans('Label when in stock', 'Admin.Catalog.Feature'),
                 'required' => false,
-                'modify_all_shops' => true,
                 'options' => [
                     'constraints' => [
                         new TypedRegex(TypedRegex::TYPE_GENERIC_NAME),
@@ -110,11 +95,10 @@ class AvailabilityType extends TranslatorAwareType
             ->add('available_later_label', TranslatableType::class, [
                 'type' => TextType::class,
                 'label' => $this->trans(
-                    'Label when out of stock (and backorders allowed)',
+                    'Label when out of stock (and back order allowed)',
                     'Admin.Catalog.Feature'
                 ),
                 'required' => false,
-                'modify_all_shops' => true,
                 'options' => [
                     'constraints' => [
                         new TypedRegex(TypedRegex::TYPE_GENERIC_NAME),
@@ -135,7 +119,6 @@ class AvailabilityType extends TranslatorAwareType
                 'attr' => [
                     'placeholder' => 'YYYY-MM-DD',
                 ],
-                'modify_all_shops' => true,
             ])
         ;
     }
@@ -147,8 +130,8 @@ class AvailabilityType extends TranslatorAwareType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'label' => $this->trans('When out of stock', 'Admin.Catalog.Feature'),
-            'label_tag_name' => 'h3',
+            'label' => $this->trans('Availability preferences', 'Admin.Catalog.Feature'),
+            'label_tag_name' => 'h2',
             'required' => false,
             'columns_number' => 3,
         ]);

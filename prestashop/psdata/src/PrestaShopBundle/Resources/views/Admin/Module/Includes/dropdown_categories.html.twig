@@ -46,7 +46,6 @@
       </a>
 
       {% for subMenu in menu.subMenu %}
-        {% if subMenu.modules is not empty %}
           <a 
             class="dropdown-item module-category-menu"
             {% if subMenu.tab %}data-category-tab="{{subMenu.tab}}"{% endif %}
@@ -55,7 +54,6 @@
           >
             {{subMenu.name|trans({}, 'Admin.Modules.Feature')}}<span class="float-right">{{subMenu.modules|length }}</span>
           </a>
-        {% endif %}
       {% endfor %}
     </div>
   {% endfor %}

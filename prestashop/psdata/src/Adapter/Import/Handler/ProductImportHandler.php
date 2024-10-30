@@ -54,7 +54,7 @@ use SpecificPrice;
 use StockAvailable;
 use StockManagerFactory;
 use Supplier;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Tag;
 use TaxManagerFactory;
 use TaxRulesGroup;
@@ -423,10 +423,9 @@ final class ProductImportHandler extends AbstractImportHandler
 
         if (is_array($category_data)) {
             foreach ($category_data as $tmp) {
-                if ($product->category && !is_array($product->category)) {
-                    continue;
+                if (!isset($product->category) || !$product->category || is_array($product->category)) {
+                    $product->category[] = $tmp;
                 }
-                $product->category[] = $tmp;
             }
         }
     }
@@ -452,12 +451,7 @@ final class ProductImportHandler extends AbstractImportHandler
 
         // link product to shops
         $product->id_shop_list = [];
-
-        $multipleValueSeparator = $importConfig->getMultipleValueSeparator();
-        if (empty($multipleValueSeparator)) {
-            return;
-        }
-        $productShops = explode($multipleValueSeparator, $product->shop);
+        $productShops = explode($importConfig->getMultipleValueSeparator(), $product->shop);
 
         if (is_array($productShops)) {
             foreach ($productShops as $shop) {
@@ -648,7 +642,7 @@ final class ProductImportHandler extends AbstractImportHandler
      */
     private function loadCategory(Product $product, $validateOnly)
     {
-        if (is_array($product->category) && count($product->category)) {
+        if (isset($product->category) && is_array($product->category) && count($product->category)) {
             $unfriendlyError = $this->configuration->getBoolean('UNFRIENDLY_ERROR');
             $defaultLanguageId = $this->configuration->getInt('PS_LANG_DEFAULT');
             $homeCategoryId = $this->configuration->getInt('PS_HOME_CATEGORY');
@@ -656,7 +650,7 @@ final class ProductImportHandler extends AbstractImportHandler
 
             foreach ($product->category as $value) {
                 if (is_numeric($value)) {
-                    if (Category::categoryExists((int) $value)) {
+                    if (Category::categoryExists($value)) {
                         $product->id_category[] = (int) $value;
                     } else {
                         $category = new Category();
@@ -843,7 +837,7 @@ final class ProductImportHandler extends AbstractImportHandler
 
             if ($productExistsByReference) {
                 $sqlPart .= 'p.`reference` = "' . pSQL($product->reference) . '"';
-            } else {
+            } elseif ($productExistsById) {
                 $sqlPart .= 'p.`id_product` = ' . (int) $product->id;
             }
 
@@ -917,7 +911,7 @@ final class ProductImportHandler extends AbstractImportHandler
      */
     private function saveProductSupplier(Product $product)
     {
-        if ($product->id && property_exists($product, 'supplier_reference')) {
+        if ($product->id && isset($product->id_supplier) && property_exists($product, 'supplier_reference')) {
             $productSupplierId = (int) ProductSupplier::getIdByProductAndSupplier(
                 (int) $product->id,
                 0,
@@ -1011,10 +1005,10 @@ final class ProductImportHandler extends AbstractImportHandler
         if (isset($product->id) && $product->id) {
             $tags = Tag::getProductTags($product->id);
             if (is_array($tags) && count($tags)) {
-                if (is_string($product->tags) && !empty($multipleValueSeparator)) {
+                if (!empty($product->tags)) {
                     $product->tags = explode($multipleValueSeparator, $product->tags);
                 }
-                if (is_array($product->tags)) {
+                if (is_array($product->tags) && count($product->tags)) {
                     foreach ($product->tags as $key => $tag) {
                         if (!empty($tag)) {
                             $product->tags[$key] = trim($tag);
@@ -1034,9 +1028,9 @@ final class ProductImportHandler extends AbstractImportHandler
                 $isTagAdded = Tag::addTags($key, $product->id, $tags, $multipleValueSeparator);
                 if (!$isTagAdded) {
                     $this->addEntityWarning(
-                        $this->translator->trans('Tags list is invalid', [], 'Admin.Advparameters.Notification'),
                         $this->tools->sanitize($productName),
-                        $product->id
+                        $product->id,
+                        $this->translator->trans('Tags list is invalid', [], 'Admin.Advparameters.Notification')
                     );
                     break;
                 }
@@ -1054,15 +1048,15 @@ final class ProductImportHandler extends AbstractImportHandler
 
                 if (!$isTagAdded) {
                     $this->addEntityWarning(
+                        $this->tools->sanitize($productName),
+                        (int) $product->id,
                         $this->translator->trans(
                             'Invalid tag(s) (%s)',
                             [
                                 $str,
                             ],
                             'Admin.Notifications.Error'
-                        ),
-                        $this->tools->sanitize($productName),
-                        (int) $product->id
+                        )
                     );
                     break;
                 }
@@ -1184,7 +1178,7 @@ final class ProductImportHandler extends AbstractImportHandler
         $features = get_object_vars($product);
         $multipleValueSeparator = $importConfig->getMultipleValueSeparator();
 
-        if (empty($features['features']) || empty($multipleValueSeparator)) {
+        if (empty($features['features'])) {
             return;
         }
 
@@ -1231,8 +1225,7 @@ final class ProductImportHandler extends AbstractImportHandler
         $asmEnabled = $this->configuration->getBoolean('PS_ADVANCED_STOCK_MANAGEMENT');
 
         // set advanced stock managment
-        if (!$validateOnly) {
-            /* @phpstan-ignore-next-line Data of the property `advanced_stock_management` comes from database */
+        if (!$validateOnly && isset($product->advanced_stock_management)) {
             if ($product->advanced_stock_management != 1 && $product->advanced_stock_management != 0) {
                 $this->warning(
                     $this->translator->trans(
@@ -1254,7 +1247,7 @@ final class ProductImportHandler extends AbstractImportHandler
             }
             // automaticly disable depends on stock, if a_s_m set to disabled
             if (StockAvailable::dependsOnStock($product->id) == 1 && $product->advanced_stock_management == 0) {
-                StockAvailable::setProductDependsOnStock($product->id, false);
+                StockAvailable::setProductDependsOnStock($product->id, 0);
             }
         }
 
@@ -1304,7 +1297,6 @@ final class ProductImportHandler extends AbstractImportHandler
 
         // stock available
         if (isset($product->depends_on_stock)) {
-            /* @phpstan-ignore-next-line Data of the property `depends_on_stock` comes from database */
             if ($product->depends_on_stock != 0 && $product->depends_on_stock != 1) {
                 $this->warning(
                     $this->translator->trans(
@@ -1313,7 +1305,6 @@ final class ProductImportHandler extends AbstractImportHandler
                         'Admin.Advparameters.Notification'
                     )
                 );
-            /* @phpstan-ignore-next-line Data of properties `advanced_stock_management` & `depends_on_stock` comes from database */
             } elseif ((!$product->advanced_stock_management || $product->advanced_stock_management == 0) && $product->depends_on_stock == 1) {
                 $this->warning(
                     $this->translator->trans(
@@ -1327,11 +1318,11 @@ final class ProductImportHandler extends AbstractImportHandler
             }
 
             // This code allows us to set qty and disable depends on stock
-            if (!$validateOnly) {
+            if (!$validateOnly && isset($product->quantity)) {
                 // if depends on stock and quantity, add quantity to stock
                 if ($product->depends_on_stock == 1) {
                     $stockManager = StockManagerFactory::getManager();
-                    $price = str_replace(',', '.', (string) $product->wholesale_price);
+                    $price = str_replace(',', '.', $product->wholesale_price);
                     if ($price == 0) {
                         $price = 0.000001;
                     }

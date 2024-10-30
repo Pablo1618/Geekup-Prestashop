@@ -34,9 +34,7 @@ use PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepositor
 use PrestaShop\PrestaShop\Core\Domain\Product\Image\Query\GetProductImage;
 use PrestaShop\PrestaShop\Core\Domain\Product\Image\QueryHandler\GetProductImageHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Product\Image\QueryResult\ProductImage;
-use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\ShopAssociationNotFound;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Image\ValueObject\ImageId;
 
 /**
  * Handles @see GetProductImage query
@@ -70,33 +68,27 @@ class GetProductImageHandler implements GetProductImageHandlerInterface
      */
     public function handle(GetProductImage $query): ProductImage
     {
-        $imageId = $query->getImageId();
+        $image = $this->productImageRepository->get($query->getImageId());
 
-        // Sometimes we need to show the image for shop even when it is not associated, but then the "cover" field is hidden,
-        // so in that case remaining info can be loaded from any other shop (only cover differs between shops)
-        try {
-            $image = $this->productImageRepository->getByShopConstraint($imageId, $query->getShopConstraint());
-            $isCover = (bool) $image->cover;
-        } catch (ShopAssociationNotFound $e) {
-            // If image is not associated with certain shop, then fall back to any other shop image (by using all shops constraint).
-            $image = $this->productImageRepository->getByShopConstraint($imageId, ShopConstraint::allShops());
-            // hardcode cover to false, because image cannot be a cover if it is not associated to this shop.
-            $isCover = false;
-        }
+        return $this->formatImage($image);
+    }
+
+    /**
+     * @param Image $image
+     *
+     * @return ProductImage
+     */
+    private function formatImage(Image $image): ProductImage
+    {
+        $imageId = new ImageId((int) $image->id);
 
         return new ProductImage(
             (int) $image->id,
-            $isCover,
+            (bool) $image->cover,
             (int) $image->position,
             $image->legend,
             $this->productImageUrlFactory->getPath($imageId),
-            $this->productImageUrlFactory->getPathByType($imageId, ProductImagePathFactory::IMAGE_TYPE_SMALL_DEFAULT),
-            array_map(
-                static function (ShopId $shopId): int {
-                    return $shopId->getValue();
-                },
-                $this->productImageRepository->getAssociatedShopIds($imageId)
-            )
+            $this->productImageUrlFactory->getPathByType($imageId, ProductImagePathFactory::IMAGE_TYPE_SMALL_DEFAULT)
         );
     }
 }

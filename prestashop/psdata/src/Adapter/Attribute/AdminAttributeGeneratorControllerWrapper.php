@@ -26,25 +26,24 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Attribute;
 
+use AdminAttributeGeneratorController;
 use Combination;
 use Context;
-use PrestaShopBundle\Translation\TranslatorComponent;
 use Product;
 use SpecificPriceRule;
 use Stock;
 use StockAvailable;
+use Symfony\Component\Translation\TranslatorInterface;
 use Tools;
 use Validate;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * Admin controller wrapper for new Architecture, about Category admin controller.
  */
 class AdminAttributeGeneratorControllerWrapper
 {
     /**
-     * @var TranslatorComponent
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -65,7 +64,7 @@ class AdminAttributeGeneratorControllerWrapper
         SpecificPriceRule::disableAnyApplication();
 
         //add combination if not already exists
-        $combinations = array_values($this->createCombinations(array_values($options)));
+        $combinations = array_values(AdminAttributeGeneratorController::createCombinations(array_values($options)));
         $combinationsValues = array_values(array_map(function () use ($product) {
             return [
                 'id_product' => $product->id,
@@ -77,25 +76,6 @@ class AdminAttributeGeneratorControllerWrapper
         Product::updateDefaultAttribute($product->id);
         SpecificPriceRule::enableAnyApplication();
         SpecificPriceRule::applyAllRules([(int) $product->id]);
-    }
-
-    public function createCombinations(array $list): array
-    {
-        if (count($list) <= 1) {
-            return count($list) ? array_map(function ($v) {
-                return [$v];
-            }, $list[0]) : $list;
-        }
-        $res = [];
-        $first = array_pop($list);
-        foreach ($first as $attribute) {
-            $tab = $this->createCombinations($list);
-            foreach ($tab as $to_add) {
-                $res[] = is_array($to_add) ? array_merge($to_add, [$attribute]) : [$to_add, $attribute];
-            }
-        }
-
-        return $res;
     }
 
     /**

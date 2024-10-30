@@ -26,15 +26,14 @@
 
 namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\OrderPreferences;
 
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
+use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShopBundle\Form\Admin\Type\MoneyWithSuffixType;
-use PrestaShopBundle\Form\Admin\Type\MultistoreConfigurationType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class generates "General" form
@@ -54,15 +53,9 @@ class GeneralType extends TranslatorAwareType
      */
     private $tosCmsChoices;
 
-    /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
-
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
-        ConfigurationInterface $configuration,
         $defaultCurrencyIsoCode,
         array $tosCmsChoices
     ) {
@@ -70,13 +63,13 @@ class GeneralType extends TranslatorAwareType
 
         $this->defaultCurrencyIsoCode = $defaultCurrencyIsoCode;
         $this->tosCmsChoices = $tosCmsChoices;
-        $this->configuration = $configuration;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $configuration = $this->configuration;
-        $isMultishippingEnabled = (bool) $configuration->get('PS_ALLOW_MULTISHIPPING');
+        /** @var Configuration $configuration */
+        $configuration = $this->getConfiguration();
+        $isMultishippingEnabled = $configuration->getBoolean('PS_ALLOW_MULTISHIPPING');
         $currencyIsoCode = $this->defaultCurrencyIsoCode;
 
         $builder
@@ -84,19 +77,16 @@ class GeneralType extends TranslatorAwareType
                 'required' => false,
                 'label' => $this->trans('Enable final summary', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('Display an overview of the addresses, shipping method and cart just before the order button (required in some European countries).', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_FINAL_SUMMARY_ENABLED',
             ])
             ->add('enable_guest_checkout', SwitchType::class, [
                 'required' => false,
                 'label' => $this->trans('Enable guest checkout', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('Allow guest visitors to place an order without registering.', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_GUEST_CHECKOUT_ENABLED',
             ])
             ->add('disable_reordering_option', SwitchType::class, [
                 'required' => false,
                 'label' => $this->trans('Disable reordering option', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('Disable the option to allow customers to reorder in one click from the order history page (required in some European countries).', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_DISALLOW_HISTORY_REORDERING',
             ])
             ->add('purchase_minimum_value', MoneyWithSuffixType::class, [
                 'required' => false,
@@ -104,13 +94,11 @@ class GeneralType extends TranslatorAwareType
                 'help' => $this->trans('Set to 0 to disable this feature.', 'Admin.Shopparameters.Help'),
                 'currency' => $currencyIsoCode,
                 'suffix' => $this->trans('(tax excl.)', 'Admin.Global'),
-                'multistore_configuration_key' => 'PS_PURCHASE_MINIMUM',
             ])
             ->add('recalculate_shipping_cost', SwitchType::class, [
                 'required' => false,
                 'label' => $this->trans('Recalculate shipping costs after editing the order', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('Automatically updates the shipping costs when you edit an order.', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_ORDER_RECALCULATE_SHIPPING',
             ]);
 
         if ($isMultishippingEnabled) {
@@ -118,7 +106,6 @@ class GeneralType extends TranslatorAwareType
                 'required' => false,
                 'label' => $this->trans('Allow multishipping', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('Allow the customer to ship orders to multiple addresses. This option will convert the customer\'s cart into one or more orders.', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_ALLOW_MULTISHIPPING',
             ]);
         }
 
@@ -127,13 +114,11 @@ class GeneralType extends TranslatorAwareType
                 'required' => false,
                 'label' => $this->trans('Delayed shipping', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('It allows you to delay shipping if your customers request it.', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_SHIP_WHEN_AVAILABLE',
             ])
             ->add('enable_tos', SwitchType::class, [
                 'required' => false,
                 'label' => $this->trans('Terms of service', 'Admin.Shopparameters.Feature'),
                 'help' => $this->trans('Require customers to accept or decline terms of service before processing an order.', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_CONDITIONS',
             ])
             ->add('tos_cms_id', ChoiceType::class, [
                 'required' => false,
@@ -141,17 +126,6 @@ class GeneralType extends TranslatorAwareType
                 'help' => $this->trans('Choose the page which contains your store\'s terms and conditions of use.', 'Admin.Shopparameters.Help'),
                 'placeholder' => $this->trans('None', 'Admin.Global'),
                 'choices' => $this->tosCmsChoices,
-                'multistore_configuration_key' => 'PS_CONDITIONS_CMS_ID',
-                'attr' => [
-                    'data-toggle' => 'select2',
-                    'data-minimumResultsForSearch' => '7',
-                ],
-            ])
-            ->add('enable_backorder_status', SwitchType::class, [
-                'required' => false,
-                'label' => $this->trans('Set backorder status', 'Admin.Shopparameters.Feature'),
-                'help' => $this->trans('The order status will be set to "On backorder" for new orders containing products that are out of stock.', 'Admin.Shopparameters.Help'),
-                'multistore_configuration_key' => 'PS_ENABLE_BACKORDER_STATUS',
             ]);
     }
 
@@ -171,15 +145,5 @@ class GeneralType extends TranslatorAwareType
     public function getBlockPrefix()
     {
         return 'order_preferences_general_block';
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see MultistoreConfigurationTypeExtension
-     */
-    public function getParent(): string
-    {
-        return MultistoreConfigurationType::class;
     }
 }

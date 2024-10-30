@@ -4,12 +4,8 @@ services:
 
   prestashop.core.image.parser.image_tag_source_parser:
     class: 'PrestaShop\PrestaShop\Core\Image\Parser\ImageTagSourceParser'
+    arguments:
+      - '@=service("prestashop.adapter.legacy.context").getRootUrl()'
 
   prestashop.core.image.file_deleter:
     class: 'PrestaShop\PrestaShop\Core\Image\Deleter\ImageFileDeleter'
-
-  PrestaShop\PrestaShop\Core\Image\AvifExtensionChecker: ~
-
-  PrestaShop\PrestaShop\Core\Image\ImageFormatConfiguration:
-    arguments:
-      - '@prestashop.adapter.legacy.configuration'

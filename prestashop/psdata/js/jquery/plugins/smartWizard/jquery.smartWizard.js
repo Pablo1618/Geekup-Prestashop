@@ -184,6 +184,7 @@ function SmartWizard(target, options) {
                 }
             }
         }
+        $this.elmStepContainer.height(_step($this, selStep).outerHeight());
         var prevCurStepIdx = $this.curStepIdx;
         $this.curStepIdx =  stepIdx;
         if ($this.options.transitionEffect == 'slide'){
@@ -374,6 +375,20 @@ function SmartWizard(target, options) {
         }else{
             $(this.steps.eq(stepnum-1), this.target).removeClass("errorStep");
         }
+    }
+
+    SmartWizard.prototype.fixHeight = function(){
+        var height = 0;
+
+        var selStep = this.steps.eq(this.curStepIdx);
+        var stepContainer = _step(this, selStep);
+        stepContainer.children().each(function() {
+            height += $(this).outerHeight();
+        });
+
+        // These values (5 and 20) are experimentally chosen.
+        stepContainer.height(height + 5);
+        this.elmStepContainer.height(height + 20);
     }
 
     _init(this);

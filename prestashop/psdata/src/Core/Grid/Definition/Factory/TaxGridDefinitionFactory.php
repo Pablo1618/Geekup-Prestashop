@@ -35,8 +35,8 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
@@ -48,10 +48,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
  */
 final class TaxGridDefinitionFactory extends AbstractGridDefinitionFactory
 {
+    public const GRID_ID = 'tax';
+
     use BulkDeleteActionTrait;
     use DeleteActionTrait;
-
-    public const GRID_ID = 'tax';
 
     /**
      * {@inheritdoc}
@@ -175,9 +175,12 @@ final class TaxGridDefinitionFactory extends AbstractGridDefinitionFactory
                     ])
                     ->setAssociatedColumn('rate')
             )
-            ->add(
-                (new Filter('active', YesAndNoChoiceType::class))
-                    ->setAssociatedColumn('active')
+            ->add((new Filter('active', YesAndNoChoiceType::class))
+            ->setTypeOptions([
+                'required' => false,
+                'choice_translation_domain' => false,
+            ])
+            ->setAssociatedColumn('active')
             )
             ->add(
                 (new Filter('actions', SearchAndResetType::class))

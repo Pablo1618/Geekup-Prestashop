@@ -35,7 +35,7 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SubmitGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
@@ -52,7 +52,15 @@ final class EmailLogsDefinitionFactory extends AbstractGridDefinitionFactory
     use BulkDeleteActionTrait;
     use DeleteActionTrait;
 
-    public const GRID_ID = 'email_logs';
+    /**
+     * @var string the URL to reset Grid filters
+     */
+    private $resetActionUrl;
+
+    /**
+     * @var string the URL for redirection
+     */
+    private $redirectionUrl;
 
     /**
      * @var ConfigurableFormChoiceProviderInterface
@@ -61,13 +69,19 @@ final class EmailLogsDefinitionFactory extends AbstractGridDefinitionFactory
 
     /**
      * @param HookDispatcherInterface $hookDispatcher
+     * @param string $resetActionUrl
+     * @param string $redirectionUrl
      * @param ConfigurableFormChoiceProviderInterface $languageChoiceProvider
      */
     public function __construct(
         HookDispatcherInterface $hookDispatcher,
+        $resetActionUrl,
+        $redirectionUrl,
         ConfigurableFormChoiceProviderInterface $languageChoiceProvider
     ) {
         parent::__construct($hookDispatcher);
+        $this->resetActionUrl = $resetActionUrl;
+        $this->redirectionUrl = $redirectionUrl;
         $this->languageChoiceProvider = $languageChoiceProvider;
     }
 
@@ -76,7 +90,7 @@ final class EmailLogsDefinitionFactory extends AbstractGridDefinitionFactory
      */
     protected function getId()
     {
-        return self::GRID_ID;
+        return 'email_logs';
     }
 
     /**
@@ -210,11 +224,10 @@ final class EmailLogsDefinitionFactory extends AbstractGridDefinitionFactory
             ->add(
                 (new Filter('actions', SearchAndResetType::class))
                     ->setTypeOptions([
-                        'reset_route' => 'admin_common_reset_search_by_filter_id',
-                        'reset_route_params' => [
-                            'filterId' => self::GRID_ID,
+                        'attr' => [
+                            'data-url' => $this->resetActionUrl,
+                            'data-redirect' => $this->redirectionUrl,
                         ],
-                        'redirect_route' => 'admin_emails_index',
                     ])
                     ->setAssociatedColumn('actions')
             );

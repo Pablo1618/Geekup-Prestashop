@@ -34,6 +34,7 @@ use Order;
 use OrderDetail;
 use OrderInvoice;
 use PrestaShop\PrestaShop\Adapter\ContextStateManager;
+use PrestaShop\PrestaShop\Adapter\Order\OrderAmountUpdater;
 use PrestaShop\PrestaShop\Adapter\Order\OrderProductQuantityUpdater;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderException;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderNotFoundException;
@@ -52,6 +53,11 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
      * @var ContextStateManager
      */
     private $contextStateManager;
+
+    /**
+     * @var OrderAmountUpdater
+     */
+    private $orderAmountUpdater;
     /**
      * @var OrderProductQuantityUpdater
      */
@@ -59,13 +65,16 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
 
     /**
      * @param ContextStateManager $contextStateManager
+     * @param OrderAmountUpdater $orderAmountUpdater
      * @param OrderProductQuantityUpdater $orderProductQuantityUpdater
      */
     public function __construct(
         ContextStateManager $contextStateManager,
+        OrderAmountUpdater $orderAmountUpdater,
         OrderProductQuantityUpdater $orderProductQuantityUpdater
     ) {
         $this->contextStateManager = $contextStateManager;
+        $this->orderAmountUpdater = $orderAmountUpdater;
         $this->orderProductQuantityUpdater = $orderProductQuantityUpdater;
     }
 

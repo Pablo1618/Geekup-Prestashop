@@ -47,6 +47,26 @@ class TranslationsTreeBuilder
      * @var Router
      */
     private $router;
+
+    /**
+     * @var string|null
+     */
+    private $theme;
+
+    /**
+     * @var array|null
+     */
+    private $search;
+
+    /**
+     * @var string|null
+     */
+    private $module;
+
+    /**
+     * @var string
+     */
+    private $locale;
     /**
      * @var TranslationCatalogueBuilder
      */

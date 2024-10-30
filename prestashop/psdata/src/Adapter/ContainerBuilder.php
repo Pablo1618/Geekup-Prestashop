@@ -26,6 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Adapter;
 
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
 use LegacyCompilerPass;
@@ -37,9 +38,6 @@ use PrestaShop\PrestaShop\Adapter\Container\LegacyContainerBuilder;
 use PrestaShop\PrestaShop\Core\EnvironmentInterface;
 use PrestaShopBundle\DependencyInjection\Compiler\LoadServicesFromModulesPass;
 use PrestaShopBundle\Exception\ServiceContainerException;
-use PrestaShopBundle\PrestaShopBundle;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
@@ -125,7 +123,7 @@ class ContainerBuilder
     {
         $this->containerName = $containerName;
         $this->containerClassName = ucfirst($this->containerName) . 'Container';
-        $this->dumpFile = $this->environment->getCacheDir() . DIRECTORY_SEPARATOR . $this->containerClassName . '.php';
+        $this->dumpFile = $this->environment->getCacheDir() . $this->containerClassName . '.php';
         $this->containerConfigCache = new ConfigCache($this->dumpFile, $this->environment->isDebug());
 
         //These methods load required files like autoload or annotation metadata so we need to load
@@ -135,13 +133,13 @@ class ContainerBuilder
         $container = $this->loadDumpedContainer();
         if (null === $container) {
             $container = $this->compileContainer();
-        } else {
-            $this->loadModulesAutoloader($container);
         }
 
         // synthetic definitions can't be compiled
         $container->set('shop', $container->get('context')->shop);
         $container->set('employee', $container->get('context')->employee);
+
+        $this->loadModulesAutoloader($container);
 
         return $container;
     }
@@ -171,7 +169,7 @@ class ContainerBuilder
         //If the container builder is modified the container logically should be rebuilt
         $container->addResource(new FileResource(__FILE__));
 
-        $container->addCompilerPass(new LoadServicesFromModulesPass($this->containerName), PassConfig::TYPE_BEFORE_OPTIMIZATION, PrestaShopBundle::LOAD_MODULE_SERVICES_PASS_PRIORITY);
+        $container->addCompilerPass(new LoadServicesFromModulesPass($this->containerName), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
         $container->addCompilerPass(new LegacyCompilerPass());
 
         //Build extensions
@@ -185,7 +183,6 @@ class ContainerBuilder
         }
 
         $this->loadServicesFromConfig($container);
-        $this->loadModulesAutoloader($container);
         $container->compile();
 
         //Dump the container file
@@ -210,8 +207,7 @@ class ContainerBuilder
     private function loadDoctrineAnnotationMetadata()
     {
         //IMPORTANT: we need to provide a cache because doctrine tries to init a connection on redis, memcached, ... on its own
-        $cacheProvider = new DoctrineProvider(new ArrayAdapter());
-        Setup::createAnnotationMetadataConfiguration([], $this->environment->isDebug(), null, $cacheProvider);
+        Setup::createAnnotationMetadataConfiguration([], $this->environment->isDebug(), null, new ArrayCache());
     }
 
     /**
@@ -248,7 +244,6 @@ class ContainerBuilder
         }
 
         $activeModules = $container->getParameter('kernel.active_modules');
-        /** @var array<string> $activeModules */
         foreach ($activeModules as $module) {
             $autoloader = _PS_MODULE_DIR_ . $module . '/vendor/autoload.php';
 

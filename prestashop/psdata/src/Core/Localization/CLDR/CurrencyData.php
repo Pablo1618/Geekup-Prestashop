@@ -66,7 +66,7 @@ class CurrencyData
      *     'other'   => 'dollars',
      * ]
      *
-     * @var string[]|null
+     * @var string[]
      */
     protected $displayNames;
 
@@ -79,7 +79,7 @@ class CurrencyData
      *     'narrow' => '$',
      * ]
      *
-     * @var string[]|null
+     * @var string[]
      */
     protected $symbols;
 
@@ -189,7 +189,7 @@ class CurrencyData
     }
 
     /**
-     * @return string[]|null
+     * @return string[]
      */
     public function getDisplayNames()
     {
@@ -209,7 +209,7 @@ class CurrencyData
     }
 
     /**
-     * @return string[]|null
+     * @return string[]
      */
     public function getSymbols()
     {

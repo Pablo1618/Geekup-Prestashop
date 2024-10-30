@@ -34,13 +34,11 @@ use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductSupplierRepository;
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Query\GetProductSupplierOptions;
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\QueryHandler\GetProductSupplierOptionsHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\QueryResult\ProductSupplierOptions;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductType;
-use PrestaShop\PrestaShop\Core\Domain\Supplier\ValueObject\SupplierId;
 
 /**
  * Handles @see GetProductSupplierOptions query
  */
-class GetProductSupplierOptionsHandler extends AbstractProductSupplierHandler implements GetProductSupplierOptionsHandlerInterface
+final class GetProductSupplierOptionsHandler extends AbstractProductSupplierHandler implements GetProductSupplierOptionsHandlerInterface
 {
     /**
      * @var ProductRepository
@@ -66,21 +64,11 @@ class GetProductSupplierOptionsHandler extends AbstractProductSupplierHandler im
      */
     public function handle(GetProductSupplierOptions $query): ProductSupplierOptions
     {
-        $defaultSupplier = $this->productSupplierRepository->getDefaultSupplierId($query->getProductId());
-        $supplierIds = $this->productSupplierRepository->getAssociatedSupplierIds($query->getProductId());
-        $productType = $this->productRepository->getProductType($query->getProductId());
-        $productSuppliers = [];
-        if ($productType->getValue() !== ProductType::TYPE_COMBINATIONS) {
-            $productSuppliers = $this->getProductSuppliersInfo($query->getProductId());
-        }
-        $supplierIntIds = array_map(function (SupplierId $supplierId) {
-            return $supplierId->getValue();
-        }, $supplierIds);
+        $product = $this->productRepository->get($query->getProductId());
 
         return new ProductSupplierOptions(
-            null !== $defaultSupplier ? $defaultSupplier->getValue() : 0,
-            $supplierIntIds,
-            $productSuppliers
+            (int) $product->id_supplier,
+            $this->getProductSuppliersInfo($query->getProductId())
         );
     }
 }

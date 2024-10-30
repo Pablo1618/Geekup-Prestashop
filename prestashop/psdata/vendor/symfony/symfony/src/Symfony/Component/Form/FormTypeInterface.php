@@ -24,9 +24,10 @@ interface FormTypeInterface
      * This method is called for each type in the hierarchy starting from the
      * top most type. Type extensions can further modify the form.
      *
-     * @param array<string, mixed> $options
-     *
      * @see FormTypeExtensionInterface::buildForm()
+     *
+     * @param FormBuilderInterface $builder The form builder
+     * @param array                $options The options
      */
     public function buildForm(FormBuilderInterface $builder, array $options);
 
@@ -40,9 +41,11 @@ interface FormTypeInterface
      * This means that you cannot access child views in this method. If you need
      * to do so, move your logic to {@link finishView()} instead.
      *
-     * @param array<string, mixed> $options
-     *
      * @see FormTypeExtensionInterface::buildView()
+     *
+     * @param FormView      $view    The view
+     * @param FormInterface $form    The form
+     * @param array         $options The options
      */
     public function buildView(FormView $view, FormInterface $form, array $options);
 
@@ -57,14 +60,18 @@ interface FormTypeInterface
      * such logic in this method that actually accesses child views. For everything
      * else you are recommended to implement {@link buildView()} instead.
      *
-     * @param array<string, mixed> $options
-     *
      * @see FormTypeExtensionInterface::finishView()
+     *
+     * @param FormView      $view    The view
+     * @param FormInterface $form    The form
+     * @param array         $options The options
      */
     public function finishView(FormView $view, FormInterface $form, array $options);
 
     /**
      * Configures the options for this type.
+     *
+     * @param OptionsResolver $resolver The resolver for the options
      */
     public function configureOptions(OptionsResolver $resolver);
 

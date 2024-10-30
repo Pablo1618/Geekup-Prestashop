@@ -1,6 +1,5 @@
 {
-    "Names": [],
-    "LocalizedNames": {
+    "Names": {
         "ar_001": "Modern Standard Arabic",
         "de_AT": "Austrian German",
         "de_CH": "Swiss High German",

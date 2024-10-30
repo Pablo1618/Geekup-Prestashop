@@ -56,13 +56,10 @@ class LabelOptionsExtension extends AbstractTypeExtension
                 'label_subtitle' => null,
                 // Allows to add a help box after a label
                 'label_help_box' => null,
-                // Allows to force a label in a tab content when using the NavigationTabType (by default the label value is only used for tab name)
-                'label_tab' => null,
             ])
             ->setAllowedTypes('label_tag_name', ['null', 'string'])
             ->setAllowedTypes('label_subtitle', ['null', 'string'])
             ->setAllowedTypes('label_help_box', ['null', 'string'])
-            ->setAllowedTypes('label_tab', ['null', 'string'])
         ;
     }
 
@@ -80,16 +77,13 @@ class LabelOptionsExtension extends AbstractTypeExtension
         if (!empty($options['label_help_box'])) {
             $view->vars['label_help_box'] = $options['label_help_box'];
         }
-        if (!empty($options['label_tab'])) {
-            $view->vars['label_tab'] = $options['label_tab'];
-        }
     }
 
     /**
      * {@inheritdoc}
      */
-    public static function getExtendedTypes(): iterable
+    public function getExtendedType()
     {
-        return [FormType::class];
+        return FormType::class;
     }
 }

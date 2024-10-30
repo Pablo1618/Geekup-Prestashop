@@ -38,7 +38,7 @@ use PrestaShop\PrestaShop\Core\Employee\ContextEmployeeProviderInterface;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
 use PrestaShop\PrestaShop\Core\MailTemplate\Layout\LayoutInterface;
 use Product;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Tools;
 
 /**
@@ -137,10 +137,10 @@ final class MailPreviewVariablesBuilder
         $templateVars['{lastname}'] = $employeeData['lastname'];
         $templateVars['{email}'] = $employeeData['email'];
         $templateVars['{shop_name}'] = $this->context->shop->name;
-        $templateVars['{shop_url}'] = $this->context->link->getPageLink('index');
-        $templateVars['{my_account_url}'] = $this->context->link->getPageLink('my-account');
-        $templateVars['{guest_tracking_url}'] = $this->context->link->getPageLink('guest-tracking');
-        $templateVars['{history_url}'] = $this->context->link->getPageLink('history');
+        $templateVars['{shop_url}'] = $this->context->link->getPageLink('index', true);
+        $templateVars['{my_account_url}'] = $this->context->link->getPageLink('my-account', true);
+        $templateVars['{guest_tracking_url}'] = $this->context->link->getPageLink('guest-tracking', true);
+        $templateVars['{history_url}'] = $this->context->link->getPageLink('history', true);
         $templateVars['{color}'] = $this->configuration->get('PS_MAIL_COLOR');
         $templateVars = array_merge($templateVars, $this->buildOrderVariables($mailLayout));
 
@@ -150,8 +150,8 @@ final class MailPreviewVariablesBuilder
     /**
      * @param string $id
      * @param array $parameters
-     * @param string|null $domain
-     * @param string|null $local
+     * @param null $domain
+     * @param null $local
      *
      * @return string
      */
@@ -227,11 +227,11 @@ final class MailPreviewVariablesBuilder
                 'firstname' => '<span style="font-weight:bold;">%s</span>',
                 'lastname' => '<span style="font-weight:bold;">%s</span>',
             ]),
-            '{date}' => Tools::displayDate($order->date_add, true),
+            '{date}' => Tools::displayDate($order->date_add, null, 1),
             '{order_name}' => $order->getUniqReference(),
             '{id_order}' => $order->id,
             '{payment}' => Tools::substr($order->payment, 0, 255),
-            '{total_products}' => $this->locale->formatPrice($order->total_products_wt, $this->context->currency->iso_code),
+            '{total_products}' => count($order->getProducts()),
             '{total_discounts}' => $this->locale->formatPrice($order->total_discounts, $this->context->currency->iso_code),
             '{total_wrapping}' => $this->locale->formatPrice($order->total_wrapping, $this->context->currency->iso_code),
             '{total_shipping}' => $this->locale->formatPrice($order->total_shipping, $this->context->currency->iso_code),
@@ -270,10 +270,7 @@ final class MailPreviewVariablesBuilder
                     }
 
                     if (isset($customization['datas'][Product::CUSTOMIZE_FILE])) {
-                        $customizationText .= count($customization['datas'][Product::CUSTOMIZE_FILE])
-                            . ' '
-                            . $this->trans('image(s)', [], 'Modules.Mailalerts.Admin')
-                            . '<br />';
+                        $customizationText .= count($customization['datas'][Product::CUSTOMIZE_FILE]) . ' ' . $this->trans('image(s)', [], 'Modules.Mailalerts.Admin') . '<br />';
                     }
 
                     $customizationText .= '---<br />';

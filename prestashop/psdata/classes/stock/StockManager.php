@@ -47,7 +47,7 @@ class StockManagerCore implements StockManagerInterface
      * @param int $id_product_attribute
      * @param Warehouse $warehouse
      * @param int $quantity
-     * @param int|null $id_stock_mvt_reason
+     * @param int $id_stock_mvt_reason
      * @param float $price_te
      * @param bool $is_usable
      * @param int|null $id_supply_order
@@ -170,6 +170,8 @@ class StockManagerCore implements StockManagerInterface
 
             default:
                 return false;
+
+                break;
         }
 
         if (!$stock_exists) {
@@ -211,7 +213,7 @@ class StockManagerCore implements StockManagerInterface
      * @param int $ignore_pack
      * @param Employee|null $employee
      *
-     * @return array|bool
+     * @return array
      *
      * @throws PrestaShopException
      */
@@ -609,20 +611,9 @@ class StockManagerCore implements StockManagerInterface
         }
 
         // skip if product is a pack without
-        $product = new Product((int) $id_product);
-        if (!Pack::isPack($id_product)
-            || (
-                Validate::isLoadedObject($product)
-                && $product->pack_stock_type == Pack::STOCK_TYPE_PACK_ONLY
-                || $product->pack_stock_type == Pack::STOCK_TYPE_PACK_BOTH
-                || (
-                    $product->pack_stock_type == Pack::STOCK_TYPE_DEFAULT
-                    && (Configuration::get('PS_PACK_STOCK_TYPE') == Pack::STOCK_TYPE_PACK_ONLY
-                        || Configuration::get('PS_PACK_STOCK_TYPE') == Pack::STOCK_TYPE_PACK_BOTH
-                    )
-                )
-            )
-        ) {
+        if (!Pack::isPack($id_product) || (Pack::isPack($id_product) && Validate::isLoadedObject($product = new Product((int) $id_product))
+            && $product->pack_stock_type == Pack::STOCK_TYPE_PACK_ONLY || $product->pack_stock_type == Pack::STOCK_TYPE_PACK_BOTH ||
+                    ($product->pack_stock_type == Pack::STOCK_TYPE_DEFAULT && (Configuration::get('PS_PACK_STOCK_TYPE') == Pack::STOCK_TYPE_PACK_ONLY || Configuration::get('PS_PACK_STOCK_TYPE') == Pack::STOCK_TYPE_PACK_BOTH)))) {
             // Gets client_orders_qty
             $query = new DbQuery();
             $query->select('od.product_quantity, od.product_quantity_refunded');
@@ -709,11 +700,11 @@ class StockManagerCore implements StockManagerInterface
         // Removes from warehouse_from
         $stocks = $this->removeProduct(
             $id_product,
-            $id_product_attribute,
-            $warehouse_from,
-            $quantity,
-            (int) Configuration::get('PS_STOCK_MVT_TRANSFER_FROM'),
-            $usable_from
+                                       $id_product_attribute,
+                                       $warehouse_from,
+                                       $quantity,
+                                       Configuration::get('PS_STOCK_MVT_TRANSFER_FROM'),
+                                       $usable_from
         );
         if (!count($stocks)) {
             return false;
@@ -734,12 +725,12 @@ class StockManagerCore implements StockManagerInterface
 
             if (!$this->addProduct(
                 $id_product,
-                $id_product_attribute,
-                $warehouse_to,
-                $stock['quantity'],
-                (int) Configuration::get('PS_STOCK_MVT_TRANSFER_TO'),
-                $price,
-                $usable_to
+                                   $id_product_attribute,
+                                   $warehouse_to,
+                                   $stock['quantity'],
+                                   Configuration::get('PS_STOCK_MVT_TRANSFER_TO'),
+                                   $price,
+                                   $usable_to
             )) {
                 return false;
             }
@@ -760,7 +751,7 @@ class StockManagerCore implements StockManagerInterface
             $id_product_attribute = 0;
         }
 
-        if ($coverage == 0) {
+        if ($coverage == 0 || !$coverage) {
             $coverage = 7;
         } // Week by default
 
@@ -784,7 +775,7 @@ class StockManagerCore implements StockManagerInterface
 				GROUP BY sm.`id_stock_mvt`
 			) as view';
 
-        $quantity_out = (int) Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
+        $quantity_out = Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
         if (!$quantity_out) {
             return -1;
         }
@@ -805,11 +796,11 @@ class StockManagerCore implements StockManagerInterface
      * For a given stock, calculates its new WA(Weighted Average) price based on the new quantities and price
      * Formula : (physicalStock * lastCump + quantityToAdd * unitPrice) / (physicalStock + quantityToAdd).
      *
-     * @param Stock $stock
+     * @param Stock|PrestaShopCollection $stock
      * @param int $quantity
      * @param float $price_te
      *
-     * @return float
+     * @return int WA
      */
     protected function calculateWA(Stock $stock, $quantity, $price_te)
     {
@@ -822,7 +813,7 @@ class StockManagerCore implements StockManagerInterface
      * @param int $id_product
      * @param int $id_product_attribute
      * @param int $id_warehouse Optional
-     * @param float|int|null $price_te Optional
+     * @param int $price_te Optional
      *
      * @return PrestaShopCollection Collection of Stock
      */
@@ -848,7 +839,7 @@ class StockManagerCore implements StockManagerInterface
      * @param int $id_product_attribute optional
      * @param array $delivery_option
      *
-     * @return bool|int quantity
+     * @return int quantity
      */
     public static function getStockByCarrier($id_product = 0, $id_product_attribute = 0, $delivery_option = null)
     {

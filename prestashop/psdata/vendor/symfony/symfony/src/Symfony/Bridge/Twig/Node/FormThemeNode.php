@@ -11,31 +11,35 @@
 
 namespace Symfony\Bridge\Twig\Node;
 
+use Symfony\Bridge\Twig\Form\TwigRenderer;
 use Symfony\Component\Form\FormRenderer;
 use Twig\Compiler;
+use Twig\Error\RuntimeError;
 use Twig\Node\Node;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class FormThemeNode extends Node
 {
-    public function __construct(Node $form, Node $resources, int $lineno, string $tag = null, bool $only = false)
+    public function __construct(Node $form, Node $resources, $lineno, $tag = null, $only = false)
     {
-        parent::__construct(['form' => $form, 'resources' => $resources], ['only' => $only], $lineno, $tag);
+        parent::__construct(['form' => $form, 'resources' => $resources], ['only' => (bool) $only], $lineno, $tag);
     }
 
-    /**
-     * @return void
-     */
     public function compile(Compiler $compiler)
     {
+        try {
+            $compiler->getEnvironment()->getRuntime(FormRenderer::class);
+            $renderer = FormRenderer::class;
+        } catch (RuntimeError $e) {
+            $renderer = TwigRenderer::class;
+        }
+
         $compiler
             ->addDebugInfo($this)
             ->write('$this->env->getRuntime(')
-            ->string(FormRenderer::class)
+            ->string($renderer)
             ->raw(')->setTheme(')
             ->subcompile($this->getNode('form'))
             ->raw(', ')

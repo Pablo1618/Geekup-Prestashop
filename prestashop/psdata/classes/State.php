@@ -80,7 +80,7 @@ class StateCore extends ObjectModel
      *
      * @param int $idState Country ID
      *
-     * @return bool|string State name
+     * @return string State name
      */
     public static function getNameById($idState)
     {
@@ -108,7 +108,7 @@ class StateCore extends ObjectModel
      *
      * @param string $state State ID
      *
-     * @return bool|int state id
+     * @return int state id
      */
     public static function getIdByName($state)
     {
@@ -134,18 +134,16 @@ class StateCore extends ObjectModel
      * Get a state id with its iso code.
      *
      * @param string $isoCode Iso code
-     * @param int|null $idCountry
      *
      * @return int state id
      */
     public static function getIdByIso($isoCode, $idCountry = null)
     {
-        return (int) Db::getInstance()->getValue(
-            'SELECT `id_state`
-            FROM `' . _DB_PREFIX_ . 'state`
-            WHERE `iso_code` = \'' . pSQL($isoCode) . '\'
-            ' . ($idCountry ? 'AND `id_country` = ' . (int) $idCountry : '')
-        );
+        return Db::getInstance()->getValue('
+		SELECT `id_state`
+		FROM `' . _DB_PREFIX_ . 'state`
+		WHERE `iso_code` = \'' . pSQL($isoCode) . '\'
+		' . ($idCountry ? 'AND `id_country` = ' . (int) $idCountry : ''));
     }
 
     /**
@@ -190,11 +188,14 @@ class StateCore extends ObjectModel
      */
     public function countUsed()
     {
-        return (int) Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
-            'SELECT COUNT(*)
+        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            '
+			SELECT COUNT(*)
 			FROM `' . _DB_PREFIX_ . 'address`
 			WHERE `' . $this->def['primary'] . '` = ' . (int) $this->id
         );
+
+        return $result;
     }
 
     /**
@@ -210,7 +211,7 @@ class StateCore extends ObjectModel
     public static function getStatesByIdCountry($idCountry, $active = false, $orderBy = null, $sort = 'ASC')
     {
         if (empty($idCountry)) {
-            die(Tools::displayError('Country ID is invalid.'));
+            die(Tools::displayError());
         }
 
         $available_sort = ['DESC', 'ASC', 'asc', 'desc'];
@@ -232,6 +233,18 @@ class StateCore extends ObjectModel
     }
 
     /**
+     * Has Counties.
+     *
+     * @param int $idState
+     *
+     * @return int
+     */
+    public static function hasCounties($idState)
+    {
+        return count(County::getCounties((int) $idState));
+    }
+
+    /**
      * Get Zone ID.
      *
      * @param int $idState State ID
@@ -241,7 +254,7 @@ class StateCore extends ObjectModel
     public static function getIdZone($idState)
     {
         if (!Validate::isUnsignedId($idState)) {
-            die(Tools::displayError('State ID is invalid.'));
+            die(Tools::displayError());
         }
 
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(

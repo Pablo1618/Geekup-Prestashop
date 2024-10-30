@@ -46,9 +46,9 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Defines form for supplier create/edit actions (Sell > Catalog > Brands & Suppliers > Supplier)
@@ -232,8 +232,6 @@ class SupplierType extends TranslatorAwareType
                 'attr' => [
                     'class' => 'js-supplier-country-select',
                     'data-states-url' => $this->router->generate('admin_country_states'),
-                    'data-toggle' => 'select2',
-                    'data-minimumResultsForSearch' => '7',
                 ],
             ])
             ->add('id_state', ChoiceType::class, [
@@ -244,10 +242,6 @@ class SupplierType extends TranslatorAwareType
                     new AddressStateRequired([
                         'id_country' => $countryId,
                     ]),
-                ],
-                'attr' => [
-                    'data-toggle' => 'select2',
-                    'data-minimumResultsForSearch' => '7',
                 ],
             ])
             ->add('dni', TextType::class, [
@@ -352,7 +346,7 @@ class SupplierType extends TranslatorAwareType
 
         if ($this->isMultistoreEnabled) {
             $builder->add('shop_association', ShopChoiceTreeType::class, [
-                'label' => $this->trans('Store association', 'Admin.Global'),
+                'label' => $this->trans('Shop association', 'Admin.Global'),
                 'required' => false,
                 'constraints' => [
                     new NotBlank([

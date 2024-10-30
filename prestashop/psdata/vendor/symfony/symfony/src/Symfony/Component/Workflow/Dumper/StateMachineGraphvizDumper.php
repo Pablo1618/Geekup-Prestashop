@@ -44,34 +44,17 @@ class StateMachineGraphvizDumper extends GraphvizDumper
     /**
      * @internal
      */
-    protected function findEdges(Definition $definition): array
+    protected function findEdges(Definition $definition)
     {
-        $workflowMetadata = $definition->getMetadataStore();
-
         $edges = [];
 
         foreach ($definition->getTransitions() as $transition) {
-            $attributes = [];
-
-            $transitionName = $workflowMetadata->getMetadata('label', $transition) ?? $transition->getName();
-
-            $labelColor = $workflowMetadata->getMetadata('color', $transition);
-            if (null !== $labelColor) {
-                $attributes['fontcolor'] = $labelColor;
-            }
-            $arrowColor = $workflowMetadata->getMetadata('arrow_color', $transition);
-            if (null !== $arrowColor) {
-                $attributes['color'] = $arrowColor;
-            }
-
             foreach ($transition->getFroms() as $from) {
                 foreach ($transition->getTos() as $to) {
-                    $edge = [
-                        'name' => $transitionName,
+                    $edges[$from][] = [
+                        'name' => $transition->getName(),
                         'to' => $to,
-                        'attributes' => $attributes,
                     ];
-                    $edges[$from][] = $edge;
                 }
             }
         }
@@ -82,20 +65,13 @@ class StateMachineGraphvizDumper extends GraphvizDumper
     /**
      * @internal
      */
-    protected function addEdges(array $edges): string
+    protected function addEdges(array $edges)
     {
         $code = '';
 
         foreach ($edges as $id => $edges) {
             foreach ($edges as $edge) {
-                $code .= sprintf(
-                    "  place_%s -> place_%s [label=\"%s\" style=\"%s\"%s];\n",
-                    $this->dotize($id),
-                    $this->dotize($edge['to']),
-                    $this->escape($edge['name']),
-                    'solid',
-                    $this->addAttributes($edge['attributes'])
-                );
+                $code .= sprintf("  place_%s -> place_%s [label=\"%s\" style=\"%s\"];\n", $this->dotize($id), $this->dotize($edge['to']), $edge['name'], 'solid');
             }
         }
 

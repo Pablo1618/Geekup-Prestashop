@@ -30,11 +30,9 @@ use PrestaShop\PrestaShop\Adapter\Category\CategoryDataProvider;
 use PrestaShopBundle\Form\Admin\Type\ChoiceCategoriesTreeType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This class render Product Categories Form in Product List Page.
  */
 class ProductCategories extends TranslatorAwareType

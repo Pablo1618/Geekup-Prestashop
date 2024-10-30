@@ -11,7 +11,6 @@
 
 namespace Symfony\Bridge\Monolog\Handler;
 
-use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Logger;
 use Symfony\Bridge\Monolog\Formatter\VarDumperFormatter;
@@ -25,14 +24,11 @@ class ServerLogHandler extends AbstractHandler
     private $context;
     private $socket;
 
-    /**
-     * @param string|int $level The minimum logging level at which this handler will be triggered
-     */
-    public function __construct(string $host, $level = Logger::DEBUG, bool $bubble = true, array $context = [])
+    public function __construct($host, $level = Logger::DEBUG, $bubble = true, $context = [])
     {
         parent::__construct($level, $bubble);
 
-        if (!str_contains($host, '://')) {
+        if (false === strpos($host, '://')) {
             $host = 'tcp://'.$host;
         }
 
@@ -42,8 +38,6 @@ class ServerLogHandler extends AbstractHandler
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function handle(array $record)
     {
@@ -83,8 +77,6 @@ class ServerLogHandler extends AbstractHandler
 
     /**
      * {@inheritdoc}
-     *
-     * @return FormatterInterface
      */
     protected function getDefaultFormatter()
     {
@@ -106,11 +98,11 @@ class ServerLogHandler extends AbstractHandler
         return $socket;
     }
 
-    private function formatRecord(array $record): string
+    private function formatRecord(array $record)
     {
         if ($this->processors) {
             foreach ($this->processors as $processor) {
-                $record = $processor($record);
+                $record = \call_user_func($processor, $record);
             }
         }
 

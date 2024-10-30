@@ -71,14 +71,7 @@ abstract class AbstractLegacyRouteProvider implements LegacyRouteProviderInterfa
     }
 
     /**
-     * Return the LegacyRoute object matching $controller and $action.
-     *
-     * @param string $controller
-     * @param string|null $action
-     *
-     * @return LegacyRoute
-     *
-     * @throws RouteNotFoundException
+     * {@inheritdoc}
      */
     public function getLegacyRouteByAction($controller, $action)
     {

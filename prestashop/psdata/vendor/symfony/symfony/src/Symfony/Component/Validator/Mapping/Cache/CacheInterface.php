@@ -13,14 +13,10 @@ namespace Symfony\Component\Validator\Mapping\Cache;
 
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
-@trigger_error(sprintf('The "%s" interface is deprecated since Symfony 4.4.', CacheInterface::class), \E_USER_DEPRECATED);
-
 /**
  * Persists ClassMetadata instances in a cache.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
- *
- * @deprecated since Symfony 4.4.
  */
 interface CacheInterface
 {

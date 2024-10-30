@@ -36,39 +36,21 @@ class EditableTaxRulesGroup
     /**
      * @var TaxRulesGroupId
      */
-    protected $taxRulesGroupId;
-
-    /**
-     * @var string
-     */
-    protected $name;
+    private $taxRulesGroupId;
 
     /**
      * @var bool
      */
-    protected $active;
-
-    /**
-     * @var int[]
-     */
-    protected $shopAssociationIds;
+    private $active;
 
     /**
      * @param TaxRulesGroupId $taxRulesGroupId
-     * @param string $name
      * @param bool $active
-     * @param array<int> $shopAssociationIds
      */
-    public function __construct(
-        TaxRulesGroupId $taxRulesGroupId,
-        string $name,
-        bool $active,
-        array $shopAssociationIds
-    ) {
+    public function __construct(TaxRulesGroupId $taxRulesGroupId, bool $active)
+    {
         $this->taxRulesGroupId = $taxRulesGroupId;
-        $this->name = $name;
         $this->active = $active;
-        $this->shopAssociationIds = $shopAssociationIds;
     }
 
     /**
@@ -80,26 +62,10 @@ class EditableTaxRulesGroup
     }
 
     /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
      * @return bool
      */
     public function isActive(): bool
     {
         return $this->active;
-    }
-
-    /**
-     * @return int[]
-     */
-    public function getShopAssociationIds(): array
-    {
-        return $this->shopAssociationIds;
     }
 }

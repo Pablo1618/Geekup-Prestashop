@@ -24,25 +24,13 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-declare(strict_types=1);
-
 namespace PrestaShop\PrestaShop\Core\Domain\SpecificPrice\Command;
 
 use PrestaShop\PrestaShop\Core\Domain\Cart\ValueObject\CartId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 
-@trigger_error(
-    sprintf(
-        '%s is deprecated since version 8.0.0 and will be removed in the next major version.',
-        DeleteSpecificPriceByCartProductCommand::class
-    ),
-    E_USER_DEPRECATED
-);
-
 /**
- * @deprecated since 8.0.0 and will be removed in the next major version.
- * @see UpdateProductPriceInCartCommand to change a product price in a cart
- * or @see DeleteProductSpecificPriceCommand if you wish to set special price rules on a product
+ * Deletes specific price by cart id
  */
 class DeleteSpecificPriceByCartProductCommand
 {
@@ -95,13 +83,9 @@ class DeleteSpecificPriceByCartProductCommand
 
     /**
      * @param int $productAttributeId
-     *
-     * @return DeleteSpecificPriceByCartProductCommand
      */
-    public function setProductAttributeId(int $productAttributeId): self
+    public function setProductAttributeId(int $productAttributeId): void
     {
         $this->productAttributeId = $productAttributeId;
-
-        return $this;
     }
 }

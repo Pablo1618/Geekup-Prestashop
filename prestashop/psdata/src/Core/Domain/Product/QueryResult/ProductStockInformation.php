@@ -36,6 +36,16 @@ use DateTimeInterface;
 class ProductStockInformation
 {
     /**
+     * @var bool
+     */
+    private $useAdvancedStockManagement;
+
+    /**
+     * @var bool
+     */
+    private $dependsOnStock;
+
+    /**
      * @var int
      */
     private $packStockType;
@@ -119,6 +129,22 @@ class ProductStockInformation
         $this->localizedAvailableNowLabels = $localizedAvailableNowLabels;
         $this->localizedAvailableLaterLabels = $localizedAvailableLaterLabels;
         $this->availableDate = $availableDate;
+    }
+
+    /**
+     * @return bool
+     */
+    public function useAdvancedStockManagement(): bool
+    {
+        return $this->useAdvancedStockManagement;
+    }
+
+    /**
+     * @return bool
+     */
+    public function dependsOnStock(): bool
+    {
+        return $this->dependsOnStock;
     }
 
     /**

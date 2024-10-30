@@ -10,27 +10,27 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 class TableDiff
 {
     /** @var string */
-    public $name;
+    public $name = null;
 
-    /** @var string|false */
+    /** @var string|bool */
     public $newName = false;
 
     /**
-     * All added columns
+     * All added fields.
      *
      * @var Column[]
      */
     public $addedColumns;
 
     /**
-     * All changed columns
+     * All changed fields.
      *
      * @var ColumnDiff[]
      */
     public $changedColumns = [];
 
     /**
-     * All removed columns
+     * All removed fields.
      *
      * @var Column[]
      */
@@ -92,7 +92,7 @@ class TableDiff
      */
     public $removedForeignKeys = [];
 
-    /** @var Table|null */
+    /** @var Table */
     public $fromTable;
 
     /**
@@ -139,14 +139,10 @@ class TableDiff
     }
 
     /**
-     * @return Identifier|false
+     * @return Identifier|string|bool
      */
     public function getNewName()
     {
-        if ($this->newName === false) {
-            return false;
-        }
-
-        return new Identifier($this->newName);
+        return $this->newName ? new Identifier($this->newName) : $this->newName;
     }
 }

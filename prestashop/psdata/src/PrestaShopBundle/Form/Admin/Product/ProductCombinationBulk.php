@@ -35,11 +35,9 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This form class is responsible to generate the form for bulk combination feature
  * Note this form is not validated from the server side.
  */

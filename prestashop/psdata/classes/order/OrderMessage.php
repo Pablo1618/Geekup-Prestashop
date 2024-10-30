@@ -25,10 +25,10 @@
  */
 class OrderMessageCore extends ObjectModel
 {
-    /** @var string|array<int, string> Name */
+    /** @var array<string> Name */
     public $name;
 
-    /** @var string|array<int, string> Message content */
+    /** @var array<string> Message content */
     public $message;
 
     /** @var string Object creation date */
@@ -46,7 +46,7 @@ class OrderMessageCore extends ObjectModel
 
             /* Lang fields */
             'name' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'required' => true, 'size' => 128],
-            'message' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isMessage', 'required' => true, 'size' => 4194303],
+            'message' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isMessage', 'required' => true, 'size' => 1200],
         ],
     ];
 

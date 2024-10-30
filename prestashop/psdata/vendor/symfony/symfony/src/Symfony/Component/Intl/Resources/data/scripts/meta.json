@@ -29,7 +29,6 @@
         "Chrs",
         "Cirt",
         "Copt",
-        "Cpmn",
         "Cprt",
         "Cyrl",
         "Cyrs",
@@ -76,7 +75,6 @@
         "Jurc",
         "Kali",
         "Kana",
-        "Kawi",
         "Khar",
         "Khmr",
         "Khoj",
@@ -116,7 +114,6 @@
         "Mtei",
         "Mult",
         "Mymr",
-        "Nagm",
         "Nand",
         "Narb",
         "Nbat",
@@ -130,7 +127,6 @@
         "Orya",
         "Osge",
         "Osma",
-        "Ougr",
         "Palm",
         "Pauc",
         "Perm",
@@ -181,12 +177,9 @@
         "Thai",
         "Tibt",
         "Tirh",
-        "Tnsa",
-        "Toto",
         "Ugar",
         "Vaii",
         "Visp",
-        "Vith",
         "Wara",
         "Wcho",
         "Wole",
@@ -200,6 +193,7 @@
         "Zsye",
         "Zsym",
         "Zxxx",
-        "Zyyy"
+        "Zyyy",
+        "Zzzz"
     ]
 }

@@ -35,15 +35,14 @@ use PrestaShopBundle\Form\Admin\Type\FormattedTextareaType;
 use PrestaShopBundle\Form\Admin\Type\Material\MaterialChoiceTreeType;
 use PrestaShopBundle\Form\Admin\Type\ShopChoiceTreeType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
-use PrestaShopBundle\Form\Admin\Type\TextWithRecommendedLengthType;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Defines Improve > Design > Pages cms page form
@@ -54,8 +53,6 @@ class CmsPageType extends TranslatorAwareType
     public const META_DESCRIPTION_MAX_CHARS = 512;
     public const META_KEYWORD_MAX_CHARS = 512;
     public const FRIENDLY_URL_MAX_CHARS = 128;
-    public const RECOMMENDED_TITLE_LENGTH = 70;
-    public const RECOMMENDED_DESCRIPTION_LENGTH = 160;
 
     /**
      * @var array
@@ -149,17 +146,12 @@ class CmsPageType extends TranslatorAwareType
             ])
             ->add('meta_title', TranslatableType::class, [
                 'label' => $this->trans('Meta title', 'Admin.Global'),
-                'type' => TextWithRecommendedLengthType::class,
                 'help' => sprintf('%s %s',
                     $this->trans('Used to override the title tag value. If left blank, the default title value is used.', 'Admin.Design.Help'),
                     $invalidCharsText
                 ),
                 'required' => false,
                 'options' => [
-                    'recommended_length' => self::RECOMMENDED_TITLE_LENGTH,
-                    'attr' => [
-                        'maxlength' => self::TITLE_MAX_CHARS,
-                    ],
                     'constraints' => [
                         new TypedRegex([
                             'type' => 'generic_name',
@@ -177,14 +169,9 @@ class CmsPageType extends TranslatorAwareType
             ])
             ->add('meta_description', TranslatableType::class, [
                 'label' => $this->trans('Meta description', 'Admin.Global'),
-                'type' => TextWithRecommendedLengthType::class,
                 'help' => $invalidCharsText,
                 'required' => false,
                 'options' => [
-                    'recommended_length' => self::RECOMMENDED_DESCRIPTION_LENGTH,
-                    'attr' => [
-                        'maxlength' => self::META_DESCRIPTION_MAX_CHARS,
-                    ],
                     'constraints' => [
                         new TypedRegex([
                             'type' => 'generic_name',
@@ -268,7 +255,6 @@ class CmsPageType extends TranslatorAwareType
                 'type' => FormattedTextareaType::class,
                 'required' => false,
                 'options' => [
-                    'limit' => FormattedTextareaType::LIMIT_LONGTEXT_UTF8,
                     'constraints' => [
                         new CleanHtml([
                             'message' => $this->trans(
@@ -290,7 +276,7 @@ class CmsPageType extends TranslatorAwareType
 
         if ($this->isMultiShopEnabled) {
             $builder->add('shop_association', ShopChoiceTreeType::class, [
-                'label' => $this->trans('Store association', 'Admin.Global'),
+                'label' => $this->trans('Shop association', 'Admin.Global'),
                 'required' => false,
                 'attr' => [
                     'class' => 'js-shop-assoc-tree',
@@ -301,7 +287,7 @@ class CmsPageType extends TranslatorAwareType
                             'The %s field is required.',
                             'Admin.Notifications.Error',
                             [
-                                sprintf('"%s"', $this->trans('Store association', 'Admin.Global')),
+                                sprintf('"%s"', $this->trans('Shop association', 'Admin.Global')),
                             ]
                         ),
                     ]),

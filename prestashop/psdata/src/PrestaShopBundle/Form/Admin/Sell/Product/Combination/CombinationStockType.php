@@ -28,31 +28,51 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Product\Combination;
 
-use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\TypedRegex;
-use PrestaShop\PrestaShop\Core\Domain\Combination\CombinationSettings;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductType;
 use PrestaShopBundle\Form\Admin\Sell\Product\Stock\QuantityType;
 use PrestaShopBundle\Form\Admin\Sell\Product\Stock\StockOptionsType;
 use PrestaShopBundle\Form\Admin\Type\DatePickerType;
-use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CombinationStockType extends TranslatorAwareType
 {
+    /**
+     * @var RouterInterface
+     */
+    private $router;
+
+    /**
+     * @var bool
+     */
+    private $stockManagementEnabled;
+
+    /**
+     * @param TranslatorInterface $translator
+     * @param array $locales
+     * @param RouterInterface $router
+     * @param bool $stockManagementEnabled
+     */
+    public function __construct(
+        TranslatorInterface $translator,
+        array $locales,
+        RouterInterface $router,
+        bool $stockManagementEnabled
+    ) {
+        parent::__construct($translator, $locales);
+        $this->router = $router;
+        $this->stockManagementEnabled = $stockManagementEnabled;
+    }
+
     /**
      * {@inheritDoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('quantities', QuantityType::class, [
-                'product_id' => $options['product_id'],
-                'product_type' => ProductType::TYPE_COMBINATIONS,
-            ])
+            ->add('quantities', QuantityType::class)
             ->add('options', StockOptionsType::class)
             ->add('available_date', DatePickerType::class, [
                 'label' => $this->trans('Availability date', 'Admin.Catalog.Feature'),
@@ -60,48 +80,6 @@ class CombinationStockType extends TranslatorAwareType
                 'attr' => [
                     'placeholder' => 'YYYY-MM-DD',
                 ],
-                'modify_all_shops' => true,
-            ])
-            ->add('available_now_label', TranslatableType::class, [
-                'type' => TextType::class,
-                'label' => $this->trans('Label when in stock', 'Admin.Catalog.Feature'),
-                'required' => false,
-                'options' => [
-                    'constraints' => [
-                        new TypedRegex(TypedRegex::TYPE_GENERIC_NAME),
-                        new Length([
-                            'max' => CombinationSettings::MAX_AVAILABLE_NOW_LABEL_LENGTH,
-                            'maxMessage' => $this->trans(
-                                'This field cannot be longer than %limit% characters.',
-                                'Admin.Notifications.Error',
-                                ['%limit%' => CombinationSettings::MAX_AVAILABLE_NOW_LABEL_LENGTH]
-                            ),
-                        ]),
-                    ],
-                ],
-                'modify_all_shops' => true,
-            ])
-            ->add('available_later_label', TranslatableType::class, [
-                'type' => TextType::class,
-                'label' => $this->trans(
-                    'Label when out of stock (and backorders allowed)',
-                    'Admin.Catalog.Feature'
-                ),
-                'required' => false,
-                'options' => [
-                    'constraints' => [
-                        new TypedRegex(TypedRegex::TYPE_GENERIC_NAME),
-                        new Length([
-                            'max' => CombinationSettings::MAX_AVAILABLE_LATER_LABEL_LENGTH,
-                            'maxMessage' => $this->trans(
-                                'This field cannot be longer than %limit% characters.',
-                                'Admin.Notifications.Error',
-                                ['%limit%' => CombinationSettings::MAX_AVAILABLE_LATER_LABEL_LENGTH]
-                            ),
-                        ]),
-                    ],
-                ],
-                'modify_all_shops' => true,
             ])
         ;
     }
@@ -112,14 +90,8 @@ class CombinationStockType extends TranslatorAwareType
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-        $resolver
-            ->setDefaults([
-                'label' => false,
-            ])
-            ->setRequired([
-                'product_id',
-            ])
-            ->setAllowedTypes('product_id', 'int')
-        ;
+        $resolver->setDefaults([
+            'label' => false,
+        ]);
     }
 }

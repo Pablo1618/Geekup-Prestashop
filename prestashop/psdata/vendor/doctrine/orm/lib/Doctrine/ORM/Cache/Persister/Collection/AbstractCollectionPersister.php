@@ -1,87 +1,119 @@
 <?php
 
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Cache\Persister\Collection;
 
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Util\ClassUtils;
-use Doctrine\Deprecations\Deprecation;
-use Doctrine\ORM\Cache\CollectionCacheKey;
-use Doctrine\ORM\Cache\CollectionHydrator;
 use Doctrine\ORM\Cache\EntityCacheKey;
-use Doctrine\ORM\Cache\Logging\CacheLogger;
+use Doctrine\ORM\Cache\CollectionCacheKey;
 use Doctrine\ORM\Cache\Persister\Entity\CachedEntityPersister;
-use Doctrine\ORM\Cache\Region;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataFactory;
-use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Persisters\Collection\CollectionPersister;
-use Doctrine\ORM\UnitOfWork;
+use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Cache\Region;
+use Doctrine\Common\Util\ClassUtils;
 
-use function array_values;
-use function assert;
-use function count;
-
+/**
+ * @author Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
+ * @since 2.5
+ */
 abstract class AbstractCollectionPersister implements CachedCollectionPersister
 {
-    /** @var UnitOfWork */
+     /**
+     * @var \Doctrine\ORM\UnitOfWork
+     */
     protected $uow;
 
-    /** @var ClassMetadataFactory */
+    /**
+     * @var \Doctrine\ORM\Mapping\ClassMetadataFactory
+     */
     protected $metadataFactory;
 
-    /** @var CollectionPersister */
+    /**
+     * @var \Doctrine\ORM\Persisters\Collection\CollectionPersister
+     */
     protected $persister;
 
-    /** @var ClassMetadata */
+    /**
+     * @var \Doctrine\ORM\Mapping\ClassMetadata
+     */
     protected $sourceEntity;
 
-    /** @var ClassMetadata */
+    /**
+     * @var \Doctrine\ORM\Mapping\ClassMetadata
+     */
     protected $targetEntity;
 
-    /** @var mixed[] */
+    /**
+     * @var array
+     */
     protected $association;
 
-    /** @var mixed[] */
+     /**
+     * @var array
+     */
     protected $queuedCache = [];
 
-    /** @var Region */
+    /**
+     * @var \Doctrine\ORM\Cache\Region
+     */
     protected $region;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $regionName;
 
-    /** @var CollectionHydrator */
+    /**
+     * @var \Doctrine\ORM\Cache\CollectionHydrator
+     */
     protected $hydrator;
 
-    /** @var CacheLogger|null */
+    /**
+     * @var \Doctrine\ORM\Cache\Logging\CacheLogger
+     */
     protected $cacheLogger;
 
     /**
-     * @param CollectionPersister    $persister   The collection persister that will be cached.
-     * @param Region                 $region      The collection region.
-     * @param EntityManagerInterface $em          The entity manager.
-     * @param mixed[]                $association The association mapping.
+     * @param \Doctrine\ORM\Persisters\Collection\CollectionPersister $persister   The collection persister that will be cached.
+     * @param \Doctrine\ORM\Cache\Region                              $region      The collection region.
+     * @param \Doctrine\ORM\EntityManagerInterface                    $em          The entity manager.
+     * @param array                                                   $association The association mapping.
      */
     public function __construct(CollectionPersister $persister, Region $region, EntityManagerInterface $em, array $association)
     {
-        $configuration = $em->getConfiguration();
-        $cacheConfig   = $configuration->getSecondLevelCacheConfiguration();
-        $cacheFactory  = $cacheConfig->getCacheFactory();
+        $configuration  = $em->getConfiguration();
+        $cacheConfig    = $configuration->getSecondLevelCacheConfiguration();
+        $cacheFactory   = $cacheConfig->getCacheFactory();
 
-        $this->region          = $region;
-        $this->persister       = $persister;
-        $this->association     = $association;
-        $this->regionName      = $region->getName();
-        $this->uow             = $em->getUnitOfWork();
-        $this->metadataFactory = $em->getMetadataFactory();
-        $this->cacheLogger     = $cacheConfig->getCacheLogger();
-        $this->hydrator        = $cacheFactory->buildCollectionHydrator($em, $association);
-        $this->sourceEntity    = $em->getClassMetadata($association['sourceEntity']);
-        $this->targetEntity    = $em->getClassMetadata($association['targetEntity']);
+        $this->region           = $region;
+        $this->persister        = $persister;
+        $this->association      = $association;
+        $this->regionName       = $region->getName();
+        $this->uow              = $em->getUnitOfWork();
+        $this->metadataFactory  = $em->getMetadataFactory();
+        $this->cacheLogger      = $cacheConfig->getCacheLogger();
+        $this->hydrator         = $cacheFactory->buildCollectionHydrator($em, $association);
+        $this->sourceEntity     = $em->getClassMetadata($association['sourceEntity']);
+        $this->targetEntity     = $em->getClassMetadata($association['targetEntity']);
     }
 
     /**
@@ -109,17 +141,22 @@ abstract class AbstractCollectionPersister implements CachedCollectionPersister
     }
 
     /**
-     * {@inheritdoc}
+     * @param \Doctrine\ORM\PersistentCollection     $collection
+     * @param \Doctrine\ORM\Cache\CollectionCacheKey $key
+     *
+     * @return object[]|null
      */
     public function loadCollectionCache(PersistentCollection $collection, CollectionCacheKey $key)
     {
-        $cache = $this->region->get($key);
-
-        if ($cache === null) {
+        if (($cache = $this->region->get($key)) === null) {
             return null;
         }
 
-        return $this->hydrator->loadCacheEntry($this->sourceEntity, $key, $cache, $collection);
+        if (($cache = $this->hydrator->loadCacheEntry($this->sourceEntity, $key, $cache, $collection)) === null) {
+            return null;
+        }
+
+        return $cache;
     }
 
     /**
@@ -127,16 +164,16 @@ abstract class AbstractCollectionPersister implements CachedCollectionPersister
      */
     public function storeCollectionCache(CollectionCacheKey $key, $elements)
     {
+        /* @var $targetPersister CachedEntityPersister */
         $associationMapping = $this->sourceEntity->associationMappings[$key->association];
         $targetPersister    = $this->uow->getEntityPersister($this->targetEntity->rootEntityName);
-        assert($targetPersister instanceof CachedEntityPersister);
-        $targetRegion   = $targetPersister->getCacheRegion();
-        $targetHydrator = $targetPersister->getEntityHydrator();
+        $targetRegion       = $targetPersister->getCacheRegion();
+        $targetHydrator     = $targetPersister->getEntityHydrator();
 
         // Only preserve ordering if association configured it
-        if (! (isset($associationMapping['indexBy']) && $associationMapping['indexBy'])) {
+        if ( ! (isset($associationMapping['indexBy']) && $associationMapping['indexBy'])) {
             // Elements may be an array or a Collection
-            $elements = array_values($elements instanceof Collection ? $elements->getValues() : $elements);
+            $elements = array_values(is_array($elements) ? $elements : $elements->getValues());
         }
 
         $entry = $this->hydrator->buildCacheEntry($this->targetEntity, $key, $elements);
@@ -146,15 +183,15 @@ abstract class AbstractCollectionPersister implements CachedCollectionPersister
                 continue;
             }
 
-            $class     = $this->targetEntity;
-            $className = ClassUtils::getClass($elements[$index]);
+            $class      = $this->targetEntity;
+            $className  = ClassUtils::getClass($elements[$index]);
 
             if ($className !== $this->targetEntity->name) {
                 $class = $this->metadataFactory->getMetadataFor($className);
             }
 
-            $entity      = $elements[$index];
-            $entityEntry = $targetHydrator->buildCacheEntry($class, $entityKey, $entity);
+            $entity       = $elements[$index];
+            $entityEntry  = $targetHydrator->buildCacheEntry($class, $entityKey, $entity);
 
             $targetRegion->put($entityKey, $entityEntry);
         }
@@ -225,18 +262,10 @@ abstract class AbstractCollectionPersister implements CachedCollectionPersister
     /**
      * Clears cache entries related to the current collection
      *
-     * @deprecated This method is not used anymore.
-     *
-     * @return void
+     * @param PersistentCollection $collection
      */
     protected function evictCollectionCache(PersistentCollection $collection)
     {
-        Deprecation::trigger(
-            'doctrine/orm',
-            'https://github.com/doctrine/orm/pull/9512',
-            'The method %s() is deprecated and will be removed without replacement.'
-        );
-
         $key = new CollectionCacheKey(
             $this->sourceEntity->rootEntityName,
             $this->association['fieldName'],
@@ -251,26 +280,15 @@ abstract class AbstractCollectionPersister implements CachedCollectionPersister
     }
 
     /**
-     * @deprecated This method is not used anymore.
-     *
      * @param string $targetEntity
      * @param object $element
-     * @psalm-param class-string $targetEntity
-     *
-     * @return void
      */
     protected function evictElementCache($targetEntity, $element)
     {
-        Deprecation::trigger(
-            'doctrine/orm',
-            'https://github.com/doctrine/orm/pull/9512',
-            'The method %s() is deprecated and will be removed without replacement.'
-        );
-
+        /* @var $targetPersister CachedEntityPersister */
         $targetPersister = $this->uow->getEntityPersister($targetEntity);
-        assert($targetPersister instanceof CachedEntityPersister);
-        $targetRegion = $targetPersister->getCacheRegion();
-        $key          = new EntityCacheKey($targetEntity, $this->uow->getEntityIdentifier($element));
+        $targetRegion    = $targetPersister->getCacheRegion();
+        $key             = new EntityCacheKey($targetEntity, $this->uow->getEntityIdentifier($element));
 
         $targetRegion->evict($key);
 

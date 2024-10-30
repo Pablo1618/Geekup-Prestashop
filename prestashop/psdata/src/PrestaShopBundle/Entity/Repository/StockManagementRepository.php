@@ -26,7 +26,6 @@
 
 namespace PrestaShopBundle\Entity\Repository;
 
-use Context;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\ORM\EntityManager;
@@ -79,6 +78,21 @@ abstract class StockManagementRepository
     /**
      * @var int
      */
+    protected $languageId;
+
+    /**
+     * @var int
+     */
+    protected $shopId;
+
+    /**
+     * @var \Context
+     */
+    protected $context;
+
+    /**
+     * @var int
+     */
     protected $foundRows = 0;
 
     /**
@@ -109,65 +123,26 @@ abstract class StockManagementRepository
         $this->contextAdapter = $contextAdapter;
         $this->imageManager = $imageManager;
         $this->tablePrefix = $tablePrefix;
-    }
 
-    /**
-     * Returns the current context
-     */
-    protected function getCurrentContext(): Context
-    {
-        return $this->contextAdapter->getContext();
-    }
+        $this->context = $contextAdapter->getContext();
 
-    /**
-     * Returns the employee set in current context
-     */
-    protected function getCurrentEmployee(): Employee
-    {
-        $employee = $this->getCurrentContext()->employee;
-
-        if (!$employee instanceof Employee) {
+        if (!$this->context->employee instanceof Employee) {
             throw new RuntimeException('Determining the active language requires a contextual employee instance.');
         }
 
-        return $employee;
-    }
+        $languageId = $this->context->employee->id_lang;
+        $this->languageId = (int) $languageId;
 
-    /**
-     * Returns the language ID of the employee in current context
-     */
-    protected function getCurrentLanguageId(): int
-    {
-        return (int) $this->getCurrentEmployee()->id_lang;
-    }
-
-    /**
-     * Returns the shop set in current context
-     *
-     * @throws NotImplementedException
-     */
-    protected function getCurrentShop(): Shop
-    {
-        $shop = $this->getCurrentContext()->shop;
-
-        if (!$shop instanceof Shop) {
+        if (!$this->context->shop instanceof Shop) {
             throw new RuntimeException('Determining the active shop requires a contextual shop instance.');
         }
-        if ($shop->getContextType() !== Shop::CONTEXT_SHOP) {
+
+        $shop = $this->context->shop;
+        if ($shop->getContextType() !== $shop::CONTEXT_SHOP) {
             throw new NotImplementedException('Shop context types other than "single shop" are not supported');
         }
 
-        return $shop;
-    }
-
-    /**
-     * Returns the contextual ID of the shop in current context
-     *
-     * @throws NotImplementedException
-     */
-    protected function getContextualShopId(): int
-    {
-        return $this->getCurrentShop()->getContextualShopId();
+        $this->shopId = $shop->getContextualShopId();
     }
 
     /**
@@ -239,7 +214,7 @@ abstract class StockManagementRepository
     /**
      * @param string $andWhereClause
      * @param string $having
-     * @param string|null $orderByClause
+     * @param null $orderByClause
      *
      * @return mixed
      */
@@ -335,9 +310,6 @@ abstract class StockManagementRepository
         return strtr($orderByClause, [
             '{product} DESC' => $productColumns,
             '{product}' => $productColumns,
-            '{product_id}' => 'product_id',
-            '{product_name}' => 'product_name',
-            '{combination_id}' => 'combination_id',
             '{reference}' => 'product_reference',
             '{supplier}' => 'supplier_name',
             '{available_quantity}' => 'product_available_quantity',
@@ -370,21 +342,18 @@ abstract class StockManagementRepository
         QueryParamsCollection $queryParams = null,
         ProductIdentity $productIdentity = null
     ) {
-        $shop = $this->getCurrentShop();
-        $shopId = $shop->getContextualShopId();
-        $shopGroup = $shop->getGroup();
-        $languageId = $this->getCurrentLanguageId();
-
-        $statement->bindValue('shop_id', $shopId, PDO::PARAM_INT);
-        $statement->bindValue('language_id', $languageId, PDO::PARAM_INT);
+        $statement->bindValue('shop_id', $this->shopId, PDO::PARAM_INT);
+        $statement->bindValue('language_id', $this->languageId, PDO::PARAM_INT);
         $statement->bindValue('state', Product::STATE_SAVED, PDO::PARAM_INT);
 
         // if quantities are shared between shops of the group
+        $shop = $this->context->shop;
+        $shopGroup = $shop->getGroup();
         if ($shopGroup->share_stock) {
             $stockShopId = 0;
             $stockGroupId = $shopGroup->id;
         } else {
-            $stockShopId = $shopId;
+            $stockShopId = $shop->getContextualShopId();
             $stockGroupId = 0;
         }
 
@@ -534,7 +503,7 @@ abstract class StockManagementRepository
                         WHERE fv.custom = 0 AND fp.id_product=:id_product';
             $statement = $this->connection->prepare($query);
             $statement->bindValue('id_product', (int) $row['product_id'], \PDO::PARAM_INT);
-            $statement->bindValue('shop_id', $this->getContextualShopId(), \PDO::PARAM_INT);
+            $statement->bindValue('shop_id', $this->shopId, \PDO::PARAM_INT);
             $statement->execute();
             $this->productFeatures[$row['product_id']] = $statement->fetchColumn(0);
             $statement->closeCursor();

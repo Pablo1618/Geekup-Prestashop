@@ -72,12 +72,11 @@
   </div>
 </template>
 
-<script lang="ts">
-  import PSButton from '@app/widgets/ps-button.vue';
-  import {EventEmitter} from '@components/event-emitter';
-  import {defineComponent} from 'vue';
+<script>
+  import PSButton from '@app/widgets/ps-button';
+  import {EventBus} from '@app/utils/event-bus';
 
-  export default defineComponent({
+  export default {
     props: {
       translations: {
         type: Object,
@@ -86,31 +85,32 @@
       },
     },
     mounted() {
-      EventEmitter.on('showModal', () => {
+      EventBus.$on('showModal', () => {
         this.showModal();
       });
-      EventEmitter.on('hideModal', () => {
+      EventBus.$on('hideModal', () => {
         this.hideModal();
       });
     },
     methods: {
-      showModal(): void {
+      showModal() {
         $(this.$el).modal('show');
       },
-      hideModal(): void {
+      hideModal() {
         $(this.$el).modal('hide');
       },
-      onSave(): void {
+      onSave() {
         this.$emit('save');
       },
-      onLeave(): void {
+      onLeave() {
         this.$emit('leave');
       },
     },
     components: {
       PSButton,
     },
-  });
+  };
+
 </script>
 
 <style lang="scss" scoped>

@@ -31,17 +31,12 @@ use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @deprecated since 8.1 and will be removed in next major.
- */
 class CombinationController extends FrameworkBundleAdminController
 {
     /**
      * Generate combination
      *
-     * @AdminSecurity(
-     *     "is_granted('create', 'ADMINPRODUCTS_') && is_granted('update', 'ADMINPRODUCTS_')"
-     * )
+     * @AdminSecurity("is_granted(['create', 'update'], 'ADMINPRODUCTS_')")
      *
      * @return Response
      */
@@ -75,7 +70,7 @@ class CombinationController extends FrameworkBundleAdminController
     /**
      * Get all Combinations for a product.
      *
-     * @AdminSecurity("is_granted('read', 'ADMINPRODUCTS_')")
+     * @AdminSecurity("is_granted(['read'], 'ADMINPRODUCTS_')")
      *
      * @param int $idProduct The product id
      *

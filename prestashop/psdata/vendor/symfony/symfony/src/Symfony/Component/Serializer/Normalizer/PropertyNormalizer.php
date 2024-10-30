@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\Serializer\Normalizer;
 
-use Symfony\Component\PropertyAccess\Exception\AccessException;
-
 /**
  * Converts between objects and arrays by mapping properties.
  *
@@ -32,12 +30,14 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
  */
 class PropertyNormalizer extends AbstractObjectNormalizer
 {
+    private $cache = [];
+
     /**
      * {@inheritdoc}
      */
     public function supportsNormalization($data, $format = null)
     {
-        return parent::supportsNormalization($data, $format) && $this->supports(\get_class($data));
+        return parent::supportsNormalization($data, $format) && (isset($this->cache[$type = \get_class($data)]) ? $this->cache[$type] : $this->cache[$type] = $this->supports($type));
     }
 
     /**
@@ -45,21 +45,17 @@ class PropertyNormalizer extends AbstractObjectNormalizer
      */
     public function supportsDenormalization($data, $type, $format = null)
     {
-        return parent::supportsDenormalization($data, $type, $format) && $this->supports($type);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasCacheableSupportsMethod(): bool
-    {
-        return __CLASS__ === static::class;
+        return parent::supportsDenormalization($data, $type, $format) && (isset($this->cache[$type]) ? $this->cache[$type] : $this->cache[$type] = $this->supports($type));
     }
 
     /**
      * Checks if the given class has any non-static property.
+     *
+     * @param string $class
+     *
+     * @return bool
      */
-    private function supports(string $class): bool
+    private function supports($class)
     {
         $class = new \ReflectionClass($class);
 
@@ -103,9 +99,20 @@ class PropertyNormalizer extends AbstractObjectNormalizer
     {
         $reflectionObject = new \ReflectionObject($object);
         $attributes = [];
+        $checkPropertyInitialization = \PHP_VERSION_ID >= 70400;
 
         do {
             foreach ($reflectionObject->getProperties() as $property) {
+                if ($checkPropertyInitialization) {
+                    if (!$property->isPublic()) {
+                        $property->setAccessible(true);
+                    }
+
+                    if (!$property->isInitialized($object)) {
+                        continue;
+                    }
+                }
+
                 if (!$this->isAllowedAttribute($reflectionObject->getName(), $property->name, $format, $context)) {
                     continue;
                 }
@@ -114,7 +121,7 @@ class PropertyNormalizer extends AbstractObjectNormalizer
             }
         } while ($reflectionObject = $reflectionObject->getParentClass());
 
-        return array_unique($attributes);
+        return $attributes;
     }
 
     /**
@@ -131,21 +138,6 @@ class PropertyNormalizer extends AbstractObjectNormalizer
         // Override visibility
         if (!$reflectionProperty->isPublic()) {
             $reflectionProperty->setAccessible(true);
-        }
-
-        if (\PHP_VERSION_ID >= 70400 && $reflectionProperty->hasType()) {
-            return $reflectionProperty->getValue($object);
-        }
-
-        if (!method_exists($object, '__get') && !isset($object->$attribute)) {
-            $propertyValues = (array) $object;
-
-            if (($reflectionProperty->isPublic() && !\array_key_exists($reflectionProperty->name, $propertyValues))
-                || ($reflectionProperty->isProtected() && !\array_key_exists("\0*\0{$reflectionProperty->name}", $propertyValues))
-                || ($reflectionProperty->isPrivate() && !\array_key_exists("\0{$reflectionProperty->class}\0{$reflectionProperty->name}", $propertyValues))
-            ) {
-                throw new AccessException(sprintf('The property "%s::$%s" is not initialized.', \get_class($object), $reflectionProperty->name));
-            }
         }
 
         return $reflectionProperty->getValue($object);
@@ -176,10 +168,13 @@ class PropertyNormalizer extends AbstractObjectNormalizer
 
     /**
      * @param string|object $classOrObject
+     * @param string        $attribute
+     *
+     * @return \ReflectionProperty
      *
      * @throws \ReflectionException
      */
-    private function getReflectionProperty($classOrObject, string $attribute): \ReflectionProperty
+    private function getReflectionProperty($classOrObject, $attribute)
     {
         $reflectionClass = new \ReflectionClass($classOrObject);
         while (true) {

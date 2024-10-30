@@ -1,12 +1,6 @@
 services:
-  _defaults:
-    autowire: true
-    public: false
+    _defaults:
+        public: true
 
-  PrestaShop\PrestaShop\Core\Domain\Country\ZipCodePatternResolverInterface: '@PrestaShop\PrestaShop\Core\Domain\Country\ZipCodePatternResolver'
-  PrestaShop\PrestaShop\Core\Domain\Country\ZipCodePatternResolver:
-
-  prestashop.core.domain.country.zip_code_format_resolver:
-    alias: 'PrestaShop\PrestaShop\Core\Domain\Country\ZipCodePatternResolver'
-    public: true
-    deprecated: ~
+    prestashop.core.domain.country.zip_code_format_resolver:
+        class: 'PrestaShop\PrestaShop\Core\Domain\Country\ZipCodePatternResolver'

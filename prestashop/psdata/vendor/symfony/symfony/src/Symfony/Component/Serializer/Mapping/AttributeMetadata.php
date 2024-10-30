@@ -42,15 +42,11 @@ class AttributeMetadata implements AttributeMetadataInterface
     public $maxDepth;
 
     /**
-     * @var string|null
+     * Constructs a metadata for the given attribute.
      *
-     * @internal This property is public in order to reduce the size of the
-     *           class' serialized representation. Do not access it. Use
-     *           {@link getSerializedName()} instead.
+     * @param string $name
      */
-    public $serializedName;
-
-    public function __construct(string $name)
+    public function __construct($name)
     {
         $this->name = $name;
     }
@@ -58,7 +54,7 @@ class AttributeMetadata implements AttributeMetadataInterface
     /**
      * {@inheritdoc}
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -76,7 +72,7 @@ class AttributeMetadata implements AttributeMetadataInterface
     /**
      * {@inheritdoc}
      */
-    public function getGroups(): array
+    public function getGroups()
     {
         return $this->groups;
     }
@@ -100,22 +96,6 @@ class AttributeMetadata implements AttributeMetadataInterface
     /**
      * {@inheritdoc}
      */
-    public function setSerializedName(string $serializedName = null)
-    {
-        $this->serializedName = $serializedName;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSerializedName(): ?string
-    {
-        return $this->serializedName;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function merge(AttributeMetadataInterface $attributeMetadata)
     {
         foreach ($attributeMetadata->getGroups() as $group) {
@@ -126,11 +106,6 @@ class AttributeMetadata implements AttributeMetadataInterface
         if (null === $this->maxDepth) {
             $this->maxDepth = $attributeMetadata->getMaxDepth();
         }
-
-        // Overwrite only if not defined
-        if (null === $this->serializedName) {
-            $this->serializedName = $attributeMetadata->getSerializedName();
-        }
     }
 
     /**
@@ -140,6 +115,6 @@ class AttributeMetadata implements AttributeMetadataInterface
      */
     public function __sleep()
     {
-        return ['name', 'groups', 'maxDepth', 'serializedName'];
+        return ['name', 'groups', 'maxDepth'];
     }
 }

@@ -3,7 +3,6 @@
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-
 use function is_resource;
 use function restore_error_handler;
 use function serialize;
@@ -19,9 +18,9 @@ class ObjectType extends Type
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return $platform->getClobTypeDeclarationSQL($column);
+        return $platform->getClobTypeDeclarationSQL($fieldDeclaration);
     }
 
     /**
@@ -43,7 +42,7 @@ class ObjectType extends Type
 
         $value = is_resource($value) ? stream_get_contents($value) : $value;
 
-        set_error_handler(function (int $code, string $message): bool {
+        set_error_handler(function (int $code, string $message) : void {
             throw ConversionException::conversionFailedUnserialization($this->getName(), $message);
         });
 
@@ -59,7 +58,7 @@ class ObjectType extends Type
      */
     public function getName()
     {
-        return Types::OBJECT;
+        return Type::OBJECT;
     }
 
     /**

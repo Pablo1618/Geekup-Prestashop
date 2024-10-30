@@ -18,8 +18,6 @@ use Symfony\Component\HttpFoundation\Response;
  * MemoryDataCollector.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class MemoryDataCollector extends DataCollector implements LateDataCollectorInterface
 {
@@ -30,10 +28,8 @@ class MemoryDataCollector extends DataCollector implements LateDataCollectorInte
 
     /**
      * {@inheritdoc}
-     *
-     * @param \Throwable|null $exception
      */
-    public function collect(Request $request, Response $response/* , \Throwable $exception = null */)
+    public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         $this->updateMemoryUsage();
     }
@@ -45,7 +41,7 @@ class MemoryDataCollector extends DataCollector implements LateDataCollectorInte
     {
         $this->data = [
             'memory' => 0,
-            'memory_limit' => $this->convertToBytes(\ini_get('memory_limit')),
+            'memory_limit' => $this->convertToBytes(ini_get('memory_limit')),
         ];
     }
 
@@ -93,10 +89,7 @@ class MemoryDataCollector extends DataCollector implements LateDataCollectorInte
         return 'memory';
     }
 
-    /**
-     * @return int|float
-     */
-    private function convertToBytes(string $memoryLimit)
+    private function convertToBytes($memoryLimit)
     {
         if ('-1' === $memoryLimit) {
             return -1;
@@ -104,9 +97,9 @@ class MemoryDataCollector extends DataCollector implements LateDataCollectorInte
 
         $memoryLimit = strtolower($memoryLimit);
         $max = strtolower(ltrim($memoryLimit, '+'));
-        if (str_starts_with($max, '0x')) {
+        if (0 === strpos($max, '0x')) {
             $max = \intval($max, 16);
-        } elseif (str_starts_with($max, '0')) {
+        } elseif (0 === strpos($max, '0')) {
             $max = \intval($max, 8);
         } else {
             $max = (int) $max;

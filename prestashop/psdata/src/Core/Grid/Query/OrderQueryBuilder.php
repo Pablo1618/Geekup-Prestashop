@@ -169,6 +169,8 @@ final class OrderQueryBuilder implements DoctrineQueryBuilderInterface
             'customer' => $this->getCustomerField(),
         ];
 
+        $havingLikeComparisonFilters = [];
+
         $dateComparisonFilters = [
             'date_add' => 'o.`date_add`',
         ];
@@ -187,6 +189,15 @@ final class OrderQueryBuilder implements DoctrineQueryBuilderInterface
                 $alias = $likeComparisonFilters[$filterName];
 
                 $qb->andWhere("$alias LIKE :$filterName");
+                $qb->setParameter($filterName, '%' . $filterValue . '%');
+
+                continue;
+            }
+
+            if (isset($havingLikeComparisonFilters[$filterName])) {
+                $alias = $havingLikeComparisonFilters[$filterName];
+
+                $qb->andHaving("$alias LIKE :$filterName");
                 $qb->setParameter($filterName, '%' . $filterValue . '%');
 
                 continue;

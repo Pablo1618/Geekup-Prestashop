@@ -28,15 +28,11 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Product\Image;
 
-use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * This form type integrates a Dropzone used to manage images, the twig templates is a simple div
@@ -48,58 +44,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ImageDropzoneType extends TranslatorAwareType
 {
     /**
-     * @var FeatureInterface
-     */
-    private $multistoreFeature;
-
-    public function __construct(
-        TranslatorInterface $translator,
-        array $locales,
-        FeatureInterface $multistoreFeature
-    ) {
-        parent::__construct($translator, $locales);
-        $this->multistoreFeature = $multistoreFeature;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        parent::buildForm($builder, $options);
-
-        if ($this->multistoreFeature->isUsed()) {
-            $builder->add('shop_images', ButtonType::class, [
-                'label' => $this->trans('Manage images', 'Admin.Catalog.Feature'),
-                'row_attr' => [
-                    'class' => 'manage-shop-images-button-container',
-                    'data-product-id' => $options['product_id'],
-                    'data-translations' => json_encode([
-                        'button.label' => $this->trans('Manage images', 'Admin.Catalog.Feature'),
-                        'modal.save' => $this->trans('Save and publish', 'Admin.Actions'),
-                        'modal.close' => $this->trans('Close', 'Admin.Actions'),
-                        'modal.cancel' => $this->trans('Cancel', 'Admin.Actions'),
-                        'cover.label' => $this->trans('Cover', 'Admin.Catalog.Feature'),
-                        'modal.noImages' => $this->trans('Product has no images.', 'Admin.Catalog.Feature'),
-                        'grid.imageHeader' => $this->trans('Image', 'Admin.Catalog.Feature'),
-                        'warning.deletedImages' => $this->trans('Images will be deleted.', 'Admin.Catalog.Feature'),
-                    ]),
-                ],
-                'attr' => [
-                    'class' => 'btn-outline-secondary manage-shop-images-button',
-                ],
-            ]);
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'is_multi_store_active' => $this->multistoreFeature->isActive(),
             'translations' => [
                 'window.selectAll' => $this->trans('Select all', 'Admin.Actions'),
                 'window.settingsUpdated' => $this->trans('Settings updated', 'Admin.Global'),
@@ -108,13 +58,11 @@ class ImageDropzoneType extends TranslatorAwareType
                 'window.replaceSelection' => $this->trans('Replace selection', 'Admin.Actions'),
                 'window.cantDisableCover' => $this->trans('Using another image as cover will automatically uncheck this box.', 'Admin.Catalog.Help'),
                 'window.selectedFiles' => $this->trans(
-                    '[1]{filesNb}[/1] selected file(s)',
+                    '[1]%filesNb%[/1] selected file(s)',
                     'Admin.Catalog.Feature',
                     ['[1]' => '<span>', '[/1]' => '</span>']
                 ),
-                'window.notAssociatedToShop' => $this->trans('Image is not associated to this store', 'Admin.Catalog.Feature'),
                 'window.useAsCover' => $this->trans('Use as cover image', 'Admin.Catalog.Feature'),
-                'window.applyToAllStores' => $this->trans('Apply changes to all associated stores', 'Admin.Global'),
                 'window.saveImage' => $this->trans('Save image settings', 'Admin.Actions'),
                 'window.delete' => $this->trans('Delete selection', 'Admin.Actions'),
                 'window.close' => $this->trans('Close window', 'Admin.Actions'),
@@ -128,7 +76,7 @@ class ImageDropzoneType extends TranslatorAwareType
                 'window.zoom' => $this->trans('Zoom on selection', 'Admin.Actions'),
                 'modal.close' => $this->trans('Cancel', 'Admin.Actions'),
                 'modal.accept' => $this->trans('Delete', 'Admin.Actions'),
-                'modal.title' => $this->trans('Are you sure you want to delete the selected image?|Are you sure you want to delete the {filesNb} selected images?', 'Admin.Catalog.Notification'),
+                'modal.title' => $this->trans('Are you sure you want to delete the selected image?|Are you sure you want to delete the %filesNb% selected images?', 'Admin.Catalog.Notification'),
                 'delete.success' => $this->trans('The selection has been successfully deleted.', 'Admin.Notifications.Success'),
                 'window.fileisTooLarge' => $this->trans(
                     'The file is too large. The maximum size allowed is [1] MB. The file you are trying to upload is [2] MB.',
@@ -138,10 +86,11 @@ class ImageDropzoneType extends TranslatorAwareType
                 'window.dropImages' => $this->trans('Drop images here', 'Admin.Catalog.Feature'),
                 'window.selectFiles' => $this->trans('or select files', 'Admin.Catalog.Feature'),
                 'window.recommendedSize' => $this->trans('Recommended size 800 x 800px for default theme.', 'Admin.Catalog.Feature'),
-                'window.recommendedFormats' => $this->trans('JPG, GIF, PNG or WebP format.', 'Admin.Catalog.Feature'),
+                'window.recommendedFormats' => $this->trans('JPG, GIF or PNG format.', 'Admin.Catalog.Feature'),
                 'window.cover' => $this->trans('Cover', 'Admin.Catalog.Feature'),
                 'window.caption' => $this->trans('Caption', 'Admin.Catalog.Feature'),
             ],
+            'product_id' => null,
             'update_form_type' => null,
             'attr' => [
                 'class' => 'product-image-dropzone',
@@ -150,18 +99,9 @@ class ImageDropzoneType extends TranslatorAwareType
             'label' => false,
         ]);
 
-        $resolver
-            ->setRequired([
-                'product_id',
-                'shop_id',
-                'is_multi_store_active',
-            ])
-            ->setAllowedTypes('product_id', 'int')
-            ->setAllowedTypes('shop_id', 'int')
-            ->setAllowedTypes('update_form_type', ['string', 'null'])
-            ->setAllowedTypes('translations', ['array'])
-            ->setAllowedTypes('is_multi_store_active', ['bool'])
-        ;
+        $resolver->setAllowedTypes('product_id', ['int', 'null']);
+        $resolver->setAllowedTypes('update_form_type', ['string', 'null']);
+        $resolver->setAllowedTypes('translations', ['array']);
     }
 
     /**
@@ -173,9 +113,6 @@ class ImageDropzoneType extends TranslatorAwareType
         $view->vars['locales'] = $this->locales;
         $view->vars['translations'] = $options['translations'];
         $view->vars['product_id'] = $options['product_id'];
-        $view->vars['shop_id'] = $options['shop_id'];
-        // twig acts strange when data attr is bool, so we cast it to int to be safe
-        $view->vars['is_multi_store_active'] = (int) $options['is_multi_store_active'];
         $view->vars['update_form_name'] = StringUtil::fqcnToBlockPrefix($options['update_form_type']) ?: '';
     }
 }

@@ -20,9 +20,9 @@ use Symfony\Component\Serializer\Exception\RuntimeException;
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  *
- * @final
+ * @final since version 3.3.
  */
-class ChainDecoder implements ContextAwareDecoderInterface
+class ChainDecoder implements DecoderInterface /*, ContextAwareDecoderInterface*/
 {
     protected $decoders = [];
     protected $decoderByFormat = [];
@@ -43,8 +43,10 @@ class ChainDecoder implements ContextAwareDecoderInterface
     /**
      * {@inheritdoc}
      */
-    public function supportsDecoding($format, array $context = []): bool
+    public function supportsDecoding($format/*, array $context = []*/)
     {
+        $context = \func_num_args() > 1 ? func_get_arg(1) : [];
+
         try {
             $this->getDecoder($format, $context);
         } catch (RuntimeException $e) {
@@ -57,9 +59,13 @@ class ChainDecoder implements ContextAwareDecoderInterface
     /**
      * Gets the decoder supporting the format.
      *
+     * @param string $format
+     *
+     * @return DecoderInterface
+     *
      * @throws RuntimeException if no decoder is found
      */
-    private function getDecoder(string $format, array $context): DecoderInterface
+    private function getDecoder($format, array $context)
     {
         if (isset($this->decoderByFormat[$format])
             && isset($this->decoders[$this->decoderByFormat[$format]])
@@ -67,13 +73,9 @@ class ChainDecoder implements ContextAwareDecoderInterface
             return $this->decoders[$this->decoderByFormat[$format]];
         }
 
-        $cache = true;
         foreach ($this->decoders as $i => $decoder) {
-            $cache = $cache && !$decoder instanceof ContextAwareDecoderInterface;
             if ($decoder->supportsDecoding($format, $context)) {
-                if ($cache) {
-                    $this->decoderByFormat[$format] = $i;
-                }
+                $this->decoderByFormat[$format] = $i;
 
                 return $decoder;
             }

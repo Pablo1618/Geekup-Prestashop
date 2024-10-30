@@ -39,6 +39,7 @@ use PrestaShop\PrestaShop\Core\Domain\Cart\CommandHandler\AddCartRuleToCartHandl
 use PrestaShop\PrestaShop\Core\Domain\Cart\Exception\CartException;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\Exception\CartRuleValidityException;
 use Shop;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @internal
@@ -46,15 +47,24 @@ use Shop;
 final class AddCartRuleToCartHandler extends AbstractCartHandler implements AddCartRuleToCartHandlerInterface
 {
     /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * @var ContextStateManager
      */
     private $contextStateManager;
 
     /**
+     * @param TranslatorInterface $translator
      * @param ContextStateManager $contextStateManager
      */
-    public function __construct(ContextStateManager $contextStateManager)
-    {
+    public function __construct(
+        TranslatorInterface $translator,
+        ContextStateManager $contextStateManager
+    ) {
+        $this->translator = $translator;
         $this->contextStateManager = $contextStateManager;
     }
 

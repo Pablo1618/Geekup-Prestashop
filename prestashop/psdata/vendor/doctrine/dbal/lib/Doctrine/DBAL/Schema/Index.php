@@ -4,7 +4,6 @@ namespace Doctrine\DBAL\Schema;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use InvalidArgumentException;
-
 use function array_filter;
 use function array_keys;
 use function array_map;
@@ -47,24 +46,18 @@ class Index extends AbstractAsset implements Constraint
     private $options = [];
 
     /**
-     * @param string   $name
+     * @param string   $indexName
      * @param string[] $columns
      * @param bool     $isUnique
      * @param bool     $isPrimary
      * @param string[] $flags
      * @param mixed[]  $options
      */
-    public function __construct(
-        $name,
-        array $columns,
-        $isUnique = false,
-        $isPrimary = false,
-        array $flags = [],
-        array $options = []
-    ) {
+    public function __construct($indexName, array $columns, $isUnique = false, $isPrimary = false, array $flags = [], array $options = [])
+    {
         $isUnique = $isUnique || $isPrimary;
 
-        $this->_setName($name);
+        $this->_setName($indexName);
         $this->_isUnique  = $isUnique;
         $this->_isPrimary = $isPrimary;
         $this->options    = $options;
@@ -72,7 +65,6 @@ class Index extends AbstractAsset implements Constraint
         foreach ($columns as $column) {
             $this->_addColumn($column);
         }
-
         foreach ($flags as $flag) {
             $this->addFlag($flag);
         }
@@ -162,17 +154,17 @@ class Index extends AbstractAsset implements Constraint
     }
 
     /**
-     * @param string $name
+     * @param string $columnName
      * @param int    $pos
      *
      * @return bool
      */
-    public function hasColumnAtPosition($name, $pos = 0)
+    public function hasColumnAtPosition($columnName, $pos = 0)
     {
-        $name         = $this->trimQuotes(strtolower($name));
+        $columnName   = $this->trimQuotes(strtolower($columnName));
         $indexColumns = array_map('strtolower', $this->getUnquotedColumns());
 
-        return array_search($name, $indexColumns) === $pos;
+        return array_search($columnName, $indexColumns) === $pos;
     }
 
     /**
@@ -189,10 +181,7 @@ class Index extends AbstractAsset implements Constraint
         $sameColumns     = true;
 
         for ($i = 0; $i < $numberOfColumns; $i++) {
-            if (
-                isset($columnNames[$i])
-                && $this->trimQuotes(strtolower($columns[$i])) === $this->trimQuotes(strtolower($columnNames[$i]))
-            ) {
+            if (isset($columnNames[$i]) && $this->trimQuotes(strtolower($columns[$i])) === $this->trimQuotes(strtolower($columnNames[$i]))) {
                 continue;
             }
 
@@ -254,15 +243,11 @@ class Index extends AbstractAsset implements Constraint
     {
         if ($other->isPrimary()) {
             return false;
-        }
-
-        if ($this->isSimpleIndex() && $other->isUnique()) {
+        } elseif ($this->isSimpleIndex() && $other->isUnique()) {
             return false;
         }
 
-        return $this->spansColumns($other->getColumns())
-            && ($this->isPrimary() || $this->isUnique())
-            && $this->samePartialIndex($other);
+        return $this->spansColumns($other->getColumns()) && ($this->isPrimary() || $this->isUnique()) && $this->samePartialIndex($other);
     }
 
     /**
@@ -350,11 +335,7 @@ class Index extends AbstractAsset implements Constraint
      */
     private function samePartialIndex(Index $other)
     {
-        if (
-            $this->hasOption('where')
-            && $other->hasOption('where')
-            && $this->getOption('where') === $other->getOption('where')
-        ) {
+        if ($this->hasOption('where') && $other->hasOption('where') && $this->getOption('where') === $other->getOption('where')) {
             return true;
         }
 
@@ -364,9 +345,9 @@ class Index extends AbstractAsset implements Constraint
     /**
      * Returns whether the index has the same column lengths as the other
      */
-    private function hasSameColumnLengths(self $other): bool
+    private function hasSameColumnLengths(self $other) : bool
     {
-        $filter = static function (?int $length): bool {
+        $filter = static function (?int $length) : bool {
             return $length !== null;
         };
 

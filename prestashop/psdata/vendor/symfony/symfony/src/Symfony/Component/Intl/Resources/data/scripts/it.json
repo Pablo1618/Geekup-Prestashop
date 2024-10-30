@@ -1,7 +1,6 @@
 {
     "Names": {
         "Afak": "afaka",
-        "Aghb": "albanese caucasico",
         "Arab": "arabo",
         "Aran": "nastaliq",
         "Armi": "aramaico imperiale",
@@ -43,7 +42,7 @@
         "Grek": "greco",
         "Gujr": "gujarati",
         "Guru": "gurmukhi",
-        "Hanb": "han, bopomofo",
+        "Hanb": "hanb",
         "Hang": "hangul",
         "Hani": "han",
         "Hano": "hanunoo",
@@ -162,6 +161,7 @@
         "Zsye": "emoji",
         "Zsym": "simboli",
         "Zxxx": "non scritto",
-        "Zyyy": "comune"
+        "Zyyy": "comune",
+        "Zzzz": "scrittura sconosciuta"
     }
 }

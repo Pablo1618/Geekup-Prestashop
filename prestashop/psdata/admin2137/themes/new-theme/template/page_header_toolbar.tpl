@@ -44,7 +44,6 @@
                   data-toggle="modal"{/if}{if isset($btn.help)}
                   data-toggle="pstooltip"
                   data-placement="bottom"{/if}
-                  {if isset($btn.data_attributes) && $btn.data_attributes}{foreach from=$btn.data_attributes item=attribute_value key=attribute_name}data-{$attribute_name}="{$attribute_value}"{/foreach}{/if}
                 >
                   {if !empty($btn.icon)}<i class="material-icons">{$btn.icon}</i>{/if}
                   {$btn.desc|escape}
@@ -134,7 +133,7 @@
         {foreach from=$toolbar_btn item=btn key=k}
           {if $k != 'back' && $k != 'modules-list'}
             <a
-              class="btn btn-floating-item {if isset($btn.floating_class) && $btn.floating_class}{$btn.floating_class|escape}{/if} {if isset($btn.target) && $btn.target} _blank{/if} pointer"{if isset($btn.href)}
+              class="btn btn-floating-item {if isset($btn.target) && $btn.target} _blank{/if} pointer"{if isset($btn.href)}
               id="page-header-desc-floating-{$table}-{if isset($btn.imgclass)}{$btn.imgclass|escape}{else}{$k}{/if}"
               href="{$btn.href|escape}"{/if}
               title="{if isset($btn.help)}{$btn.help}{else}{$btn.desc|escape}{/if}"{if isset($btn.js) && $btn.js}

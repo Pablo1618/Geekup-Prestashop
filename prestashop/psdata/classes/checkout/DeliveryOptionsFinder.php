@@ -25,7 +25,7 @@
  */
 use PrestaShop\PrestaShop\Adapter\Presenter\Object\ObjectPresenter;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class DeliveryOptionsFinderCore
 {
@@ -74,7 +74,7 @@ class DeliveryOptionsFinderCore
     {
         $delivery_option_list = $this->context->cart->getDeliveryOptionList();
         $include_taxes = !Product::getTaxCalculationMethod((int) $this->context->cart->id_customer) && (int) Configuration::get('PS_TAX');
-        $display_taxes_label = (Configuration::get('PS_TAX') && $this->context->country->display_tax_label && !Configuration::get('AEUC_LABEL_TAX_INC_EXC'));
+        $display_taxes_label = (Configuration::get('PS_TAX') && !Configuration::get('AEUC_LABEL_TAX_INC_EXC'));
 
         $carriers_available = [];
 
@@ -125,7 +125,6 @@ class DeliveryOptionsFinderCore
                             $carrier['extraContent'] = '';
                             if ($carrier['is_module']) {
                                 if ($moduleId = Module::getModuleIdByName($carrier['external_module_name'])) {
-                                    // Hook called only for the module concerned
                                     $carrier['extraContent'] = Hook::exec('displayCarrierExtraContent', ['carrier' => $carrier], $moduleId);
                                 }
                             }

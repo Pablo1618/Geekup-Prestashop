@@ -26,12 +26,11 @@
 
 namespace PrestaShopBundle\Form\Admin\Improve\Design\MailTheme;
 
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class GenerateMailsType is responsible for build the form to generate mail templates.
@@ -45,28 +44,20 @@ class GenerateMailsType extends TranslatorAwareType
     private $themes;
 
     /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
-
-    /**
      * @param TranslatorInterface $translator
      * @param array $locales
-     * @param ConfigurationInterface $configuration
      * @param array $mailThemes
      * @param array $themes
      */
     public function __construct(
         TranslatorInterface $translator,
         array $locales,
-        ConfigurationInterface $configuration,
         array $mailThemes,
         array $themes
     ) {
         parent::__construct($translator, $locales);
         $this->mailThemes = $mailThemes;
         $this->themes = $themes;
-        $this->configuration = $configuration;
     }
 
     /**
@@ -79,7 +70,7 @@ class GenerateMailsType extends TranslatorAwareType
         $builder
             ->add('mailTheme', ChoiceType::class, [
                 'choices' => $this->mailThemes,
-                'data' => $this->configuration->get('PS_MAIL_THEME'),
+                'data' => $this->getConfiguration()->get('PS_MAIL_THEME'),
             ])
             ->add('language', ChoiceType::class, [
                 'placeholder' => $this->trans('Language', 'Admin.Global'),

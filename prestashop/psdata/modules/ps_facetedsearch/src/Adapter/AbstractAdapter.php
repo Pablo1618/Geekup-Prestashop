@@ -48,6 +48,10 @@ abstract class AbstractAdapter implements InterfaceAdapter
 
     protected $orderDirection = 'DESC';
 
+    protected $limit = 20;
+
+    protected $offset = 0;
+
     /** @var InterfaceAdapter */
     protected $initialPopulation = null;
 
@@ -307,6 +311,17 @@ abstract class AbstractAdapter implements InterfaceAdapter
     public function setOrderDirection($direction)
     {
         $this->orderDirection = $direction === 'desc' ? 'desc' : 'asc';
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setLimit($limit, $offset = 0)
+    {
+        $this->limit = $limit ? (int) $limit : null;
+        $this->offset = (int) $offset;
 
         return $this;
     }

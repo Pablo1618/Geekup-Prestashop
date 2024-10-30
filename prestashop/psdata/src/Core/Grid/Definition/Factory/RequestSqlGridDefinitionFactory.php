@@ -34,7 +34,7 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
@@ -46,10 +46,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class RequestSqlGridDefinitionFactory extends AbstractGridDefinitionFactory
 {
+    public const GRID_ID = 'sql_request';
+
     use BulkDeleteActionTrait;
     use DeleteActionTrait;
-
-    public const GRID_ID = 'sql_request';
 
     /**
      * {@inheritdoc}
@@ -107,7 +107,6 @@ final class RequestSqlGridDefinitionFactory extends AbstractGridDefinitionFactor
                         'actions' => (new RowActionCollection())
                             ->add(
                                 (new LinkRowAction('export'))
-                                    ->setName($this->trans('Export', [], 'Admin.Actions'))
                                     ->setIcon('cloud_download')
                                     ->setOptions([
                                         'route' => 'admin_sql_requests_export',

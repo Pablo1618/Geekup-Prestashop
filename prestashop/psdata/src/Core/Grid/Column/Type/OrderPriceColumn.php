@@ -26,10 +26,36 @@
 
 namespace PrestaShop\PrestaShop\Core\Grid\Column\Type;
 
+use PrestaShop\PrestaShop\Core\Grid\Column\AbstractColumn;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
 /**
- * @deprecated since 8.1 and will be removed in next major.
- * Use \PrestaShop\PrestaShop\Core\Grid\Column\Type\Order\OrderPriceColumn instead.
+ * Displays order price
  */
-final class OrderPriceColumn extends \PrestaShop\PrestaShop\Core\Grid\Column\Type\Order\OrderPriceColumn
+final class OrderPriceColumn extends AbstractColumn
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getType()
+    {
+        return 'order_price';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        $resolver
+            ->setRequired([
+                'field',
+                'is_paid_field',
+            ])
+            ->setAllowedTypes('field', 'string')
+            ->setAllowedTypes('is_paid_field', 'string')
+        ;
+    }
 }

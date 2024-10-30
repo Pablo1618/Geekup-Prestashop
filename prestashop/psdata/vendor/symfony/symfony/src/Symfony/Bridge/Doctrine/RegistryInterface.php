@@ -11,17 +11,15 @@
 
 namespace Symfony\Bridge\Doctrine;
 
+use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\ORM\EntityManager;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * References Doctrine connections and entity managers.
  *
- * @deprecated since Symfony 4.4, use Doctrine\Persistence\ManagerRegistry instead
- *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-interface RegistryInterface extends ManagerRegistry
+interface RegistryInterface extends LegacyManagerRegistry
 {
     /**
      * Gets the default entity manager name.

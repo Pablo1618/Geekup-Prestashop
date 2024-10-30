@@ -38,8 +38,10 @@ class ContentSecurityPolicyHandler
      *  - The request - In case HTML content is fetched via AJAX and inserted in DOM, it must use the same nonce as origin
      *  - The response -  A call to getNonces() has already been done previously. Same nonce are returned
      *  - They are otherwise randomly generated
+     *
+     * @return array
      */
-    public function getNonces(Request $request, Response $response): array
+    public function getNonces(Request $request, Response $response)
     {
         if ($request->headers->has('X-SymfonyProfiler-Script-Nonce') && $request->headers->has('X-SymfonyProfiler-Style-Nonce')) {
             return [
@@ -81,7 +83,7 @@ class ContentSecurityPolicyHandler
      *
      * @return array Nonces used by the bundle in Content-Security-Policy header
      */
-    public function updateResponseHeaders(Request $request, Response $response): array
+    public function updateResponseHeaders(Request $request, Response $response)
     {
         if ($this->cspDisabled) {
             $this->removeCspHeaders($response);
@@ -111,8 +113,10 @@ class ContentSecurityPolicyHandler
 
     /**
      * Updates Content-Security-Policy headers in a response.
+     *
+     * @return array
      */
-    private function updateCspHeaders(Response $response, array $nonces = []): array
+    private function updateCspHeaders(Response $response, array $nonces = [])
     {
         $nonces = array_replace([
             'csp_script_nonce' => $this->generateNonce(),
@@ -140,12 +144,6 @@ class ContentSecurityPolicyHandler
                         continue;
                     }
 
-                    if (['\'none\''] === $fallback) {
-                        // Fallback came from "default-src: 'none'"
-                        // 'none' is invalid if it's not the only expression in the source list, so we leave it out
-                        $fallback = [];
-                    }
-
                     $headers[$header][$type] = $fallback;
                 }
                 $ruleIsSet = true;
@@ -169,16 +167,22 @@ class ContentSecurityPolicyHandler
 
     /**
      * Generates a valid Content-Security-Policy nonce.
+     *
+     * @return string
      */
-    private function generateNonce(): string
+    private function generateNonce()
     {
         return $this->nonceGenerator->generate();
     }
 
     /**
      * Converts a directive set array into Content-Security-Policy header.
+     *
+     * @param array $directives The directive set
+     *
+     * @return string The Content-Security-Policy header
      */
-    private function generateCspHeader(array $directives): string
+    private function generateCspHeader(array $directives)
     {
         return array_reduce(array_keys($directives), function ($res, $name) use ($directives) {
             return ('' !== $res ? $res.'; ' : '').sprintf('%s %s', $name, implode(' ', $directives[$name]));
@@ -187,8 +191,12 @@ class ContentSecurityPolicyHandler
 
     /**
      * Converts a Content-Security-Policy header value into a directive set array.
+     *
+     * @param string $header The header value
+     *
+     * @return array The directive set
      */
-    private function parseDirectives(string $header): array
+    private function parseDirectives($header)
     {
         $directives = [];
 
@@ -206,8 +214,13 @@ class ContentSecurityPolicyHandler
 
     /**
      * Detects if the 'unsafe-inline' is prevented for a directive within the directive set.
+     *
+     * @param array  $directivesSet The directive set
+     * @param string $type          The name of the directive to check
+     *
+     * @return bool
      */
-    private function authorizesInline(array $directivesSet, string $type): bool
+    private function authorizesInline(array $directivesSet, $type)
     {
         if (isset($directivesSet[$type])) {
             $directives = $directivesSet[$type];
@@ -218,10 +231,10 @@ class ContentSecurityPolicyHandler
         return \in_array('\'unsafe-inline\'', $directives, true) && !$this->hasHashOrNonce($directives);
     }
 
-    private function hasHashOrNonce(array $directives): bool
+    private function hasHashOrNonce(array $directives)
     {
         foreach ($directives as $directive) {
-            if (!str_ends_with($directive, '\'')) {
+            if ('\'' !== substr($directive, -1)) {
                 continue;
             }
             if ('\'nonce-' === substr($directive, 0, 7)) {
@@ -248,8 +261,10 @@ class ContentSecurityPolicyHandler
     /**
      * Retrieves the Content-Security-Policy headers (either X-Content-Security-Policy or Content-Security-Policy) from
      * a response.
+     *
+     * @return array An associative array of headers
      */
-    private function getCspHeaders(Response $response): array
+    private function getCspHeaders(Response $response)
     {
         $headers = [];
 

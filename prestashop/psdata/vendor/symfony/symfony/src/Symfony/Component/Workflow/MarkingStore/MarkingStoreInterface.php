@@ -36,8 +36,8 @@ interface MarkingStoreInterface
     /**
      * Sets a Marking to a subject.
      *
-     * @param object $subject A subject
-     * @param array  $context Some context
+     * @param object  $subject A subject
+     * @param Marking $marking A marking
      */
-    public function setMarking($subject, Marking $marking/* , array $context = [] */);
+    public function setMarking($subject, Marking $marking);
 }

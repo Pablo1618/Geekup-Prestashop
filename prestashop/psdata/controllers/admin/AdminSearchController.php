@@ -23,19 +23,10 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-
-use PrestaShop\PrestaShop\Core\Search\SearchPanel;
-use PrestaShop\PrestaShop\Core\Search\SearchPanelInterface;
-
 class AdminSearchControllerCore extends AdminController
 {
-    public const TOKEN_CHECK_START_POS = 34;
-    public const TOKEN_CHECK_LENGTH = 8;
-
-    /**
-     * @var string
-     */
-    public $query;
+    const TOKEN_CHECK_START_POS = 34;
+    const TOKEN_CHECK_LENGTH = 8;
 
     public function __construct()
     {
@@ -101,9 +92,8 @@ class AdminSearchControllerCore extends AdminController
             /* Product research */
             if (!$searchType || $searchType == 1) {
                 /* Handle product ID */
-                if ($searchType == 1 && Validate::isUnsignedInt((int) $this->query)) {
-                    $product = new Product((int) $this->query);
-                    if (Validate::isLoadedObject($product)) {
+                if ($searchType == 1 && (int) $this->query && Validate::isUnsignedInt((int) $this->query)) {
+                    if (($product = new Product($this->query)) && Validate::isLoadedObject($product)) {
                         Tools::redirectAdmin('index.php?tab=AdminProducts&id_product=' . (int) ($product->id) . '&token=' . Tools::getAdminTokenLite('AdminProducts'));
                     }
                 }
@@ -116,9 +106,8 @@ class AdminSearchControllerCore extends AdminController
             if (!$searchType || $searchType == 2 || $searchType == 6) {
                 if (!$searchType || $searchType == 2) {
                     /* Handle customer ID */
-                    if ($searchType && Validate::isUnsignedInt((int) $this->query)) {
-                        $customer = new Customer((int) $this->query);
-                        if (Validate::isLoadedObject($customer)) {
+                    if ($searchType && (int) $this->query && Validate::isUnsignedInt((int) $this->query)) {
+                        if (($customer = new Customer($this->query)) && Validate::isLoadedObject($customer)) {
                             Tools::redirectAdmin($this->context->link->getAdminLink(
                                 'AdminCustomers',
                                 true,
@@ -142,7 +131,7 @@ class AdminSearchControllerCore extends AdminController
 
             /* Order */
             if (!$searchType || $searchType == 3) {
-                if (Validate::isUnsignedInt(trim($this->query)) && Validate::isLoadedObject($order = new Order((int) $this->query))) {
+                if (Validate::isUnsignedInt(trim($this->query)) && (int) $this->query && ($order = new Order((int) $this->query)) && Validate::isLoadedObject($order)) {
                     if ($searchType == 3) {
                         Tools::redirectAdmin('index.php?tab=AdminOrders&id_order=' . (int) $order->id . '&vieworder' . '&token=' . Tools::getAdminTokenLite('AdminOrders'));
                     } else {
@@ -179,24 +168,15 @@ class AdminSearchControllerCore extends AdminController
 
             /* Invoices */
             if ($searchType == 4) {
-                if ($invoice = OrderInvoice::getInvoiceByNumber($this->query)) {
-                    Tools::redirectAdmin(
-                        $this->context->link->getAdminLink(
-                            'AdminPdf',
-                            true,
-                            [
-                                'route' => 'admin_orders_generate_invoice_pdf',
-                                'orderId' => (int) ($invoice->id_order),
-                            ]
-                        )
-                    );
+                if (Validate::isOrderInvoiceNumber($this->query) && ($invoice = OrderInvoice::getInvoiceByNumber($this->query))) {
+                    Tools::redirectAdmin($this->context->link->getAdminLink('AdminPdf') . '&submitAction=generateInvoicePDF&id_order=' . (int) ($invoice->id_order));
                 }
                 $this->errors[] = $this->trans('No invoice was found with this ID:', [], 'Admin.Orderscustomers.Notification') . ' ' . Tools::htmlentitiesUTF8($this->query);
             }
 
             /* Cart */
             if ($searchType == 5) {
-                if (Validate::isUnsignedInt((int) $this->query) && Validate::isLoadedObject($cart = new Cart((int) $this->query))) {
+                if ((int) $this->query && Validate::isUnsignedInt((int) $this->query) && ($cart = new Cart($this->query)) && Validate::isLoadedObject($cart)) {
                     Tools::redirectAdmin('index.php?tab=AdminCarts&id_cart=' . (int) ($cart->id) . '&viewcart' . '&token=' . Tools::getAdminToken('AdminCarts' . (int) (Tab::getIdFromClassName('AdminCarts')) . (int) $this->context->employee->id));
                 }
                 $this->errors[] = $this->trans('No cart was found with this ID:', [], 'Admin.Orderscustomers.Notification') . ' ' . Tools::htmlentitiesUTF8($this->query);
@@ -230,6 +210,8 @@ class AdminSearchControllerCore extends AdminController
 
     /**
      * Search a specific string in the products and categories.
+     *
+     * @param string $query String to find in the catalog
      */
     public function searchCatalog()
     {
@@ -240,6 +222,8 @@ class AdminSearchControllerCore extends AdminController
 
     /**
      * Search a specific name in the customers.
+     *
+     * @param string $query String to find in the catalog
      */
     public function searchCustomer()
     {
@@ -249,65 +233,75 @@ class AdminSearchControllerCore extends AdminController
     public function searchModule()
     {
         $this->_list['modules'] = [];
-        $all_modules = Module::getModulesOnDisk(true, Context::getContext()->employee->id);
+        $all_modules = Module::getModulesOnDisk(true, true, Context::getContext()->employee->id);
         foreach ($all_modules as $module) {
-            if (
-                (isset($module->name) && stripos($module->name, $this->query) !== false)
-                || (isset($module->displayName) && stripos($module->displayName, $this->query) !== false)
-                || (isset($module->description) && stripos($module->description, $this->query) !== false)
-            ) {
-                $module->linkto = Context::getContext()->link->getAdminLink('ADMINMODULESSF') . '&find=' . $module->name;
+            if (stripos($module->name, $this->query) !== false || stripos($module->displayName, $this->query) !== false || stripos($module->description, $this->query) !== false) {
+                $module->linkto = 'index.php?tab=AdminModules&tab_module=' . $module->tab . '&module_name=' . $module->name . '&anchor=' . ucfirst($module->name) . '&token=' . Tools::getAdminTokenLite('AdminModules');
                 $this->_list['modules'][] = $module;
+            }
+        }
+
+        if (!is_numeric(trim($this->query)) && !Validate::isEmail($this->query)) {
+            $iso_lang = Tools::strtolower(Context::getContext()->language->iso_code);
+            $iso_country = Tools::strtolower(Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT')));
+            if (($json_content = Tools::file_get_contents('https://api-addons.prestashop.com/' . _PS_VERSION_ . '/search/' . urlencode($this->query) . '/' . $iso_country . '/' . $iso_lang . '/')) != false) {
+                $results = json_decode($json_content, true);
+                if (isset($results['id'])) {
+                    $this->_list['addons'] = [$results];
+                } else {
+                    $this->_list['addons'] = $results;
+                }
             }
         }
     }
 
     /**
      * Search a feature in all store.
+     *
+     * @param string $query String to find in the catalog
      */
     public function searchFeatures()
     {
         $this->_list['features'] = [];
 
-        $sql = sprintf(
-            'SELECT class_name, name, route_name FROM %stab t INNER JOIN %stab_lang tl ON (t.id_tab = tl.id_tab AND tl.id_lang = %d) WHERE active = 1',
-            _DB_PREFIX_,
-            _DB_PREFIX_,
-            (int) $this->context->employee->id_lang
-        );
-        $result = Db::getInstance()->executeS($sql);
-        $mainControllers = Dispatcher::getControllers([
-            _PS_ADMIN_DIR_ . '/tabs/',
-            _PS_ADMIN_CONTROLLER_DIR_,
-            _PS_OVERRIDE_DIR_ . 'controllers/admin/',
-        ]);
+        global $_LANGADM;
+        if ($_LANGADM === null) {
+            return;
+        }
 
+        $tabs = [];
+        $key_match = [];
+        $result = Db::getInstance()->executeS(
+            '
+		SELECT class_name, name
+		FROM ' . _DB_PREFIX_ . 'tab t
+		INNER JOIN ' . _DB_PREFIX_ . 'tab_lang tl ON (t.id_tab = tl.id_tab AND tl.id_lang = ' . (int) $this->context->employee->id_lang . ')
+		WHERE active = 1' . (defined('_PS_HOST_MODE_') ? ' AND t.`hide_host_mode` = 0' : '')
+        );
         foreach ($result as $row) {
-            // Search pages with the query need
-            if (stripos($row['name'], $this->query) === false) {
-                continue;
+            if (Access::isGranted('ROLE_MOD_TAB_' . strtoupper($row['class_name']) . '_READ', $this->context->employee->id_profile)) {
+                $tabs[strtolower($row['class_name'])] = $row['name'];
+                $key_match[strtolower($row['class_name'])] = $row['class_name'];
             }
-            // Remove pages without access
-            if (!Access::isGranted('ROLE_MOD_TAB_' . strtoupper($row['class_name']) . '_READ', $this->context->employee->id_profile)) {
-                continue;
-            }
-            $tab = Tab::getInstanceFromClassName($row['class_name']);
-            if (!Validate::isLoadedObject($tab)) {
-                continue;
-            }
-            // Check if it's not a parent tab
-            if (!isset($mainControllers[strtolower($row['class_name'])])) {
-                $tabs = Tab::getTabs(Context::getContext()->language->id, $tab->id);
-                if (isset($tabs[0])) {
+        }
+
+        $this->_list['features'] = [];
+        foreach ($_LANGADM as $key => $value) {
+            if (stripos($value, $this->query) !== false) {
+                $value = stripslashes($value);
+                $key = strtolower(substr($key, 0, -32));
+                if (in_array($key, ['AdminTab', 'index'])) {
                     continue;
                 }
+                // if class name doesn't exists, just ignore it
+                if (!isset($tabs[$key])) {
+                    continue;
+                }
+                if (!isset($this->_list['features'][$tabs[$key]])) {
+                    $this->_list['features'][$tabs[$key]] = [];
+                }
+                $this->_list['features'][$tabs[$key]][] = ['link' => Context::getContext()->link->getAdminLink($key_match[$key]), 'value' => Tools::safeOutput($value)];
             }
-
-            $sfRouteParams = (!empty($row['route_name'])) ? ['route' => $row['route_name']] : [];
-            $params = ['bo_query' => $this->query];
-            $this->_list['features'][$row['name']][] = [
-                'link' => Context::getContext()->link->getAdminLink((string) $row['class_name'], true, $sfRouteParams, $params),
-            ];
         }
     }
 
@@ -379,11 +373,12 @@ class AdminSearchControllerCore extends AdminController
 
     public function renderView()
     {
-        $searchedExpression = Tools::safeOutput($this->query);
-        $this->tpl_view_vars['query'] = $searchedExpression;
+        $this->tpl_view_vars['query'] = Tools::safeOutput($this->query);
         $this->tpl_view_vars['show_toolbar'] = true;
 
-        if (!count($this->errors)) {
+        if (count($this->errors)) {
+            return parent::renderView();
+        } else {
             $nb_results = 0;
             foreach ($this->_list as $list) {
                 if ($list != false) {
@@ -463,6 +458,7 @@ class AdminSearchControllerCore extends AdminController
             }
 
             if ($this->isCountableAndNotEmpty($this->_list, 'orders')) {
+                $view = '';
                 $this->initOrderList();
 
                 $helper = new HelperList();
@@ -475,61 +471,20 @@ class AdminSearchControllerCore extends AdminController
                 $helper->currentIndex = $this->context->link->getAdminLink('AdminOrders', false);
                 $helper->token = Tools::getAdminTokenLite('AdminOrders');
 
-                $this->tpl_view_vars['orders'] = $helper->generateList($this->_list['orders'], $this->fields_list['orders']);
+                $view = $helper->generateList($this->_list['orders'], $this->fields_list['orders']);
+                $this->tpl_view_vars['orders'] = $view;
                 $this->tpl_view_vars['orderCount'] = count($this->_list['orders']);
             }
 
             if ($this->isCountableAndNotEmpty($this->_list, 'modules')) {
                 $this->tpl_view_vars['modules'] = $this->_list['modules'];
             }
-        }
-        $this->getSearchPanels($searchedExpression);
 
-        return parent::renderView();
-    }
-
-    protected function getSearchPanels(string $searchedExpression): void
-    {
-        // Build native search panels
-        $searchPanels = [];
-        $searchPanels[] = new SearchPanel(
-            $this->trans('Search docs.prestashop-project.org', [], 'Admin.Navigation.Search'),
-            $this->trans('Go to the documentation', [], 'Admin.Navigation.Search'),
-            'https://docs.prestashop-project.org/welcome/',
-            [
-                'q' => $searchedExpression,
-            ]
-        );
-
-        // Get additional search panels from hooks
-        // An array [module_name => module_output] will be returned
-        $alternativeSearchPanelsFromModules = Hook::exec(
-            'actionGetAlternativeSearchPanels',
-            [
-                'previous_search_panels' => $searchPanels,
-                'bo_query' => $searchedExpression,
-            ],
-            null,
-            true
-        );
-
-        foreach ($alternativeSearchPanelsFromModules as $alternativeSearchPanelsFromModule) {
-            foreach ($alternativeSearchPanelsFromModule as $alternativeSearchPanel) {
-                if ($alternativeSearchPanel instanceof SearchPanelInterface) {
-                    $searchPanels[] = $alternativeSearchPanel;
-                }
+            if ($this->isCountableAndNotEmpty($this->_list, 'addons')) {
+                $this->tpl_view_vars['addons'] = $this->_list['addons'];
             }
-        }
 
-        // Transform the search panels and inject them to the view
-        $this->tpl_view_vars['searchPanels'] = [];
-        foreach ($searchPanels as $searchPanel) {
-            $this->tpl_view_vars['searchPanels'][] = [
-                'title' => $searchPanel->getTitle(),
-                'button_label' => $searchPanel->getButtonLabel(),
-                'link' => $searchPanel->getLink(),
-                'is_external_link' => $searchPanel->isExternalLink(),
-            ];
+            return parent::renderView();
         }
     }
 
@@ -563,16 +518,9 @@ class AdminSearchControllerCore extends AdminController
         }
 
         // Considering the indexing task can be really long, we ask the PHP process to not stop before 2 hours.
-        ini_set('max_execution_time', '7200');
+        ini_set('max_execution_time', 7200);
         Search::indexation(Tools::getValue('full'));
-
-        /*
-         * If redirect parameter was specified in the URL and we have the URL the user came from,
-         * we will redirect him back. This is used in backoffice so the user lands back to the config form.
-         *
-         * In CRON or CLI (referer is missing), it will die here. Even if redirect is in the URL.
-         */
-        if (Tools::getValue('redirect') && !empty($_SERVER['HTTP_REFERER'])) {
+        if (Tools::getValue('redirect')) {
             Tools::redirectAdmin($_SERVER['HTTP_REFERER'] . '&conf=4');
         }
     }

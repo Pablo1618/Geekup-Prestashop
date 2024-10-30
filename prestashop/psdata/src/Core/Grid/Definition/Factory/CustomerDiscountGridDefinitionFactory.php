@@ -35,8 +35,8 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Row\Type\Customer\EditCustomerDiscoun
 use PrestaShop\PrestaShop\Core\Grid\Action\ViewOptionsCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\StatusColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 
 /**
  * Class CustomerDiscountGridDefinitionFactory defines customer's discounts grid structure.
@@ -72,7 +72,6 @@ final class CustomerDiscountGridDefinitionFactory extends AbstractGridDefinition
                     ->setName($this->trans('ID', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'id_cart_rule',
-                        'sortable' => false,
                     ])
             )
             ->add(
@@ -80,7 +79,6 @@ final class CustomerDiscountGridDefinitionFactory extends AbstractGridDefinition
                     ->setName($this->trans('Code', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'code',
-                        'sortable' => false,
                     ])
             )
             ->add(
@@ -88,7 +86,6 @@ final class CustomerDiscountGridDefinitionFactory extends AbstractGridDefinition
                     ->setName($this->trans('Name', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'name',
-                        'sortable' => false,
                     ])
             )
             ->add(
@@ -96,7 +93,6 @@ final class CustomerDiscountGridDefinitionFactory extends AbstractGridDefinition
                     ->setName($this->trans('Status', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'active',
-                        'sortable' => false,
                     ])
             )
             ->add(
@@ -104,7 +100,6 @@ final class CustomerDiscountGridDefinitionFactory extends AbstractGridDefinition
                     ->setName($this->trans('Qty available', [], 'Admin.Orderscustomers.Feature'))
                     ->setOptions([
                         'field' => 'quantity',
-                        'sortable' => false,
                     ])
             )
             ->add((new ActionColumn('actions'))

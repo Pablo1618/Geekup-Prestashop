@@ -1,38 +1,53 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Tools\Export;
 
-use Doctrine\Deprecations\Deprecation;
+use const E_USER_DEPRECATED;
+use function trigger_error;
 
 /**
  * Class used for converting your mapping information between the
  * supported formats: yaml, xml, and php/annotation.
  *
- * @deprecated 2.7 This class is being removed from the ORM and won't have any replacement
- *
  * @link    www.doctrine-project.org
+ * @since   2.0
+ * @author  Jonathan Wage <jonwage@gmail.com>
+ *
+ * @deprecated 2.7 This class is being removed from the ORM and won't have any replacement
  */
 class ClassMetadataExporter
 {
-    /** @var array<string,string> */
+    /**
+     * @var array
+     */
     private static $_exporterDrivers = [
         'xml' => Driver\XmlExporter::class,
         'yaml' => Driver\YamlExporter::class,
         'yml' => Driver\YamlExporter::class,
         'php' => Driver\PhpExporter::class,
-        'annotation' => Driver\AnnotationExporter::class,
+        'annotation' => Driver\AnnotationExporter::class
     ];
 
     public function __construct()
     {
-        Deprecation::trigger(
-            'doctrine/orm',
-            'https://github.com/doctrine/orm/issues/8458',
-            '%s is deprecated with no replacement',
-            self::class
-        );
+        @trigger_error(self::class . ' is deprecated and will be removed in Doctrine ORM 3.0', E_USER_DEPRECATED);
     }
 
     /**
@@ -60,7 +75,7 @@ class ClassMetadataExporter
      */
     public function getExporter($type, $dest = null)
     {
-        if (! isset(self::$_exporterDrivers[$type])) {
+        if ( ! isset(self::$_exporterDrivers[$type])) {
             throw ExportException::invalidExporterDriverType($type);
         }
 

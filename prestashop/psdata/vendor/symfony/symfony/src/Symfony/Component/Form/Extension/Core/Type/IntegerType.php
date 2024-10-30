@@ -25,7 +25,12 @@ class IntegerType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addViewTransformer(new IntegerToLocalizedStringTransformer($options['grouping'], $options['rounding_mode'], !$options['grouping'] ? 'en' : null));
+        $builder->addViewTransformer(
+            new IntegerToLocalizedStringTransformer(
+                $options['scale'],
+                $options['grouping'],
+                $options['rounding_mode']
+        ));
     }
 
     /**
@@ -44,6 +49,8 @@ class IntegerType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
+            // default scale is locale specific (usually around 3)
+            'scale' => null,
             'grouping' => false,
             // Integer cast rounds towards 0, so do the same when displaying fractions
             'rounding_mode' => IntegerToLocalizedStringTransformer::ROUND_DOWN,
@@ -60,9 +67,7 @@ class IntegerType extends AbstractType
             IntegerToLocalizedStringTransformer::ROUND_CEILING,
         ]);
 
-        $resolver->setDefined('scale');
         $resolver->setAllowedTypes('scale', ['null', 'int']);
-        $resolver->setDeprecated('scale');
     }
 
     /**

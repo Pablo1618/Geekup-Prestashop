@@ -4,7 +4,6 @@
     {% if collector.hasexception %}
         <style>
             {{ render(path('_profiler_exception_css', { token: token })) }}
-            {{ include('@WebProfiler/Collector/exception.css.twig') }}
         </style>
     {% endif %}
     {{ parent() }}

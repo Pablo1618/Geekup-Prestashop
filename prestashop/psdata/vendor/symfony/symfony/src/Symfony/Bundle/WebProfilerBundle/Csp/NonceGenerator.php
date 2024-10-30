@@ -20,7 +20,7 @@ namespace Symfony\Bundle\WebProfilerBundle\Csp;
  */
 class NonceGenerator
 {
-    public function generate(): string
+    public function generate()
     {
         return bin2hex(random_bytes(16));
     }

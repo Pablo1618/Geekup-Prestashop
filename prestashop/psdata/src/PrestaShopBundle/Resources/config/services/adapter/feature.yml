@@ -2,53 +2,55 @@ services:
   _defaults:
     public: true
 
-  PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\AddFeatureHandler:
+  prestashop.adapter.feature.command_handler.add_feature_handler:
+    class: PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\AddFeatureHandler
     tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\AddFeatureCommand
+      - { name: tactician.handler, command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\AddFeatureCommand }
 
-  PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\EditFeatureHandler:
+  prestashop.adapter.feature.command_handler.edit_feature_handler:
+    class: PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\EditFeatureHandler
     tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\EditFeatureCommand
+      - { name: tactician.handler, command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\EditFeatureCommand }
 
-  PrestaShop\PrestaShop\Adapter\Feature\QueryHandler\GetFeatureForEditingHandler:
+  prestashop.adapter.feature.query_handler.get_feature_for_editing:
+    class: PrestaShop\PrestaShop\Adapter\Feature\QueryHandler\GetFeatureForEditingHandler
     tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Feature\Query\GetFeatureForEditing
+      - { name: tactician.handler, command: PrestaShop\PrestaShop\Core\Domain\Feature\Query\GetFeatureForEditing }
 
-  PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\AddFeatureValueHandler:
-    arguments:
-      - '@PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureRepository'
-      - '@PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository'
-    tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\AddFeatureValueCommand
+  prestashop.adapter.feature.command_handler.add_feature_value_handler:
+      class: PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\AddFeatureValueHandler
+      arguments:
+          - '@prestashop.adapter.feature.repository.feature_repository'
+          - '@prestashop.adapter.feature.repository.feature_value_repository'
+      tags:
+          - { name: tactician.handler, command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\AddFeatureValueCommand }
 
-  PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\EditFeatureValueHandler:
-    arguments:
-      - '@PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository'
-    tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\EditFeatureValueCommand
+  prestashop.adapter.feature.command_handler.edit_feature_value_handler:
+      class: PrestaShop\PrestaShop\Adapter\Feature\CommandHandler\EditFeatureValueHandler
+      arguments:
+          - '@prestashop.adapter.feature.repository.feature_value_repository'
+      tags:
+          - { name: tactician.handler, command: PrestaShop\PrestaShop\Core\Domain\Feature\Command\EditFeatureValueCommand }
 
-  PrestaShop\PrestaShop\Adapter\Feature\QueryHandler\GetFeatureValueForEditingHandler:
-    arguments:
-      - '@PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository'
-    tags:
-      - name: tactician.handler
-        command: PrestaShop\PrestaShop\Core\Domain\Feature\Query\GetFeatureValueForEditing
+  prestashop.adapter.feature.query_handler.get_feature_value_for_editing:
+      class: PrestaShop\PrestaShop\Adapter\Feature\QueryHandler\GetFeatureValueForEditingHandler
+      arguments:
+          - '@prestashop.adapter.feature.repository.feature_value_repository'
+      tags:
+          - { name: tactician.handler, command: PrestaShop\PrestaShop\Core\Domain\Feature\Query\GetFeatureValueForEditing }
 
-  PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureRepository:
-    arguments:
-      - '@doctrine.dbal.default_connection'
-      - '%database_prefix%'
+  prestashop.adapter.feature.repository.feature_repository:
+      class: PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureRepository
+      arguments:
+          - '@doctrine.dbal.default_connection'
+          - '%database_prefix%'
 
-  PrestaShop\PrestaShop\Adapter\Feature\Validate\FeatureValueValidator: ~
+  prestashop.adapter.feature.validate.feature_value_validator:
+      class: PrestaShop\PrestaShop\Adapter\Feature\Validate\FeatureValueValidator
 
-  PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository:
-    public: true
-    arguments:
-      - '@doctrine.dbal.default_connection'
-      - '%database_prefix%'
-      - '@PrestaShop\PrestaShop\Adapter\Feature\Validate\FeatureValueValidator'
+  prestashop.adapter.feature.repository.feature_value_repository:
+      class: PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository
+      arguments:
+          - '@doctrine.dbal.default_connection'
+          - '%database_prefix%'
+          - '@prestashop.adapter.feature.validate.feature_value_validator'

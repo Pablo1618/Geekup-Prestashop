@@ -14,7 +14,7 @@ namespace Symfony\Component\WebLink;
 use Psr\Link\LinkInterface;
 
 /**
- * Serializes a list of Link instances to an HTTP Link header.
+ * Serializes a list of Link instances to a HTTP Link header.
  *
  * @see https://tools.ietf.org/html/rfc5988
  *
@@ -26,8 +26,10 @@ final class HttpHeaderSerializer
      * Builds the value of the "Link" HTTP header.
      *
      * @param LinkInterface[]|\Traversable $links
+     *
+     * @return string|null
      */
-    public function serialize(iterable $links): ?string
+    public function serialize($links)
     {
         $elements = [];
         foreach ($links as $link) {
@@ -39,14 +41,14 @@ final class HttpHeaderSerializer
             foreach ($link->getAttributes() as $key => $value) {
                 if (\is_array($value)) {
                     foreach ($value as $v) {
-                        $attributesParts[] = sprintf('%s="%s"', $key, preg_replace('/(?<!\\\\)"/', '\"', $v));
+                        $attributesParts[] = sprintf('%s="%s"', $key, $v);
                     }
 
                     continue;
                 }
 
                 if (!\is_bool($value)) {
-                    $attributesParts[] = sprintf('%s="%s"', $key, preg_replace('/(?<!\\\\)"/', '\"', $value));
+                    $attributesParts[] = sprintf('%s="%s"', $key, $value);
 
                     continue;
                 }

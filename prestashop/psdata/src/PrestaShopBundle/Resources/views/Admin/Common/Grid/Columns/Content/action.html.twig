@@ -30,12 +30,10 @@
     {% set regularActions = [] %}
 
     {% for action in actions %}
-      {% if action.isApplicable(record) %}
-        {% if action.options['use_inline_display'] == true %}
-            {% set inlineActions = inlineActions|merge([action]) %}
-          {% else %}
-            {% set regularActions = regularActions|merge([action]) %}
-        {% endif %}
+      {% if action.options['use_inline_display'] == true %}
+          {% set inlineActions = inlineActions|merge([action]) %}
+        {% else %}
+          {% set regularActions = regularActions|merge([action]) %}
       {% endif %}
     {% endfor %}
 
@@ -43,15 +41,18 @@
       {% if inlineActions is not empty %}
         <div class="btn-group d-flex justify-content-between text-right">
           {% for inlineAction in inlineActions -%}
-              {% set class = 'dropdown-item inline-dropdown-item ' ~ inlineAction.options.attr.class|default('') %}
+            {% if inlineAction.isApplicable(record) %}
+
+              {% set class = 'dropdown-item inline-dropdown-item' %}
 
               {{ include('@PrestaShop/Admin/Common/Grid/Actions/Row/'~inlineAction.type~'.html.twig', {
                 'grid': grid,
                 'column': column,
-                'attributes': {'class': class|trim, 'tooltip_name': true},
+                'attributes': {'class': class, 'tooltip_name': true},
                 'record': record,
                 'action': inlineAction
               }) }}
+            {% endif %}
           {% endfor %}
         </div>
       {% endif %}
@@ -66,13 +67,11 @@
               {% set skippedActions = skippedActions + 1 %}
             {% endif %}
 
-            {% if not isFirstRendered %}
-              {% set class = 'dropdown-item ' ~ action.options.attr.class|default('') %}
-
+            {% if action.isApplicable(record) and not isFirstRendered %}
               {{ include('@PrestaShop/Admin/Common/Grid/Actions/Row/'~action.type~'.html.twig', {
                 'grid': grid,
                 'column': column,
-                'attributes': {'class': class|trim, 'tooltip_name': true},
+                'attributes': {'class': 'dropdown-item', 'tooltip_name': true},
                 'record': record,
                 'action': action
               }) }}
@@ -91,7 +90,7 @@
             </a>
 
             <div class="dropdown-menu dropdown-menu-right">
-              {% for action in regularActions|slice(skippedActions) %}
+              {% for action in regularActions|slice(skippedActions) if action.isApplicable(record) %}
                 {{ include('@PrestaShop/Admin/Common/Grid/Actions/Row/'~action.type~'.html.twig', {
                   'grid': grid,
                   'column': column,

@@ -19,8 +19,6 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  * FirePHPHandler.
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
- *
- * @final since Symfony 4.3
  */
 class FirePHPHandler extends BaseFirePHPHandler
 {
@@ -74,8 +72,6 @@ class FirePHPHandler extends BaseFirePHPHandler
 
     /**
      * Override default behavior since we check the user agent in onKernelResponse.
-     *
-     * @return bool
      */
     protected function headersAccepted()
     {

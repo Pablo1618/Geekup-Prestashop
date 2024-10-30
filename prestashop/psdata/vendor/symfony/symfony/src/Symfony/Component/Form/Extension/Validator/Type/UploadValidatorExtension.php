@@ -12,11 +12,9 @@
 namespace Symfony\Component\Form\Extension\Validator\Type;
 
 use Symfony\Component\Form\AbstractTypeExtension;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @author Abdellatif Ait boudad <a.aitboudad@gmail.com>
@@ -28,13 +26,11 @@ class UploadValidatorExtension extends AbstractTypeExtension
     private $translationDomain;
 
     /**
-     * @param TranslatorInterface $translator
+     * @param TranslatorInterface $translator        The translator for translating error messages
+     * @param string|null         $translationDomain The translation domain for translating
      */
-    public function __construct($translator, string $translationDomain = null)
+    public function __construct(TranslatorInterface $translator, $translationDomain = null)
     {
-        if (!$translator instanceof LegacyTranslatorInterface && !$translator instanceof TranslatorInterface) {
-            throw new \TypeError(sprintf('Argument 1 passed to "%s()" must be an instance of "%s", "%s" given.', __METHOD__, TranslatorInterface::class, \is_object($translator) ? \get_class($translator) : \gettype($translator)));
-        }
         $this->translator = $translator;
         $this->translationDomain = $translationDomain;
     }
@@ -48,7 +44,7 @@ class UploadValidatorExtension extends AbstractTypeExtension
         $translationDomain = $this->translationDomain;
         $resolver->setNormalizer('upload_max_size_message', function (Options $options, $message) use ($translator, $translationDomain) {
             return function () use ($translator, $translationDomain, $message) {
-                return $translator->trans($message(), [], $translationDomain);
+                return $translator->trans(\call_user_func($message), [], $translationDomain);
             };
         });
     }
@@ -56,8 +52,8 @@ class UploadValidatorExtension extends AbstractTypeExtension
     /**
      * {@inheritdoc}
      */
-    public static function getExtendedTypes(): iterable
+    public function getExtendedType()
     {
-        return [FormType::class];
+        return 'Symfony\Component\Form\Extension\Core\Type\FormType';
     }
 }

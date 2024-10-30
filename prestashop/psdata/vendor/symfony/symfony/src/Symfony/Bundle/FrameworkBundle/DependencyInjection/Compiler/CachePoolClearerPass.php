@@ -11,15 +11,31 @@
 
 namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\Cache\DependencyInjection\CachePoolClearerPass as BaseCachePoolClearerPass;
-
-@trigger_error(sprintf('The "%s" class is deprecated since Symfony 4.2, use "%s" instead.', CachePoolClearerPass::class, BaseCachePoolClearerPass::class), \E_USER_DEPRECATED);
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @author Nicolas Grekas <p@tchwork.com>
- *
- * @deprecated since version 4.2, use Symfony\Component\Cache\DependencyInjection\CachePoolClearerPass instead.
  */
-class CachePoolClearerPass extends BaseCachePoolClearerPass
+final class CachePoolClearerPass implements CompilerPassInterface
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function process(ContainerBuilder $container)
+    {
+        $container->getParameterBag()->remove('cache.prefix.seed');
+
+        foreach ($container->findTaggedServiceIds('cache.pool.clearer') as $id => $attr) {
+            $clearer = $container->getDefinition($id);
+            $pools = [];
+            foreach ($clearer->getArgument(0) as $id => $ref) {
+                if ($container->hasDefinition($id)) {
+                    $pools[$id] = new Reference($id);
+                }
+            }
+            $clearer->replaceArgument(0, $pools);
+        }
+    }
 }

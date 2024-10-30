@@ -30,10 +30,10 @@ use Currency;
 use Exception;
 use Hook;
 use Module as LegacyModule;
+use PrestaShop\PrestaShop\Adapter\Module\Module;
 use PrestaShop\PrestaShop\Adapter\Presenter\PresenterInterface;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
-use PrestaShop\PrestaShop\Core\Module\ModuleCollection;
-use PrestaShop\PrestaShop\Core\Module\ModuleInterface;
+use PrestaShop\PrestaShop\Core\Addon\AddonsCollection;
 
 class ModulePresenter implements PresenterInterface
 {
@@ -52,20 +52,20 @@ class ModulePresenter implements PresenterInterface
     }
 
     /**
-     * @param ModuleInterface $module
+     * @param Module $module
      *
      * @return array
      */
     public function present($module)
     {
-        if (!($module instanceof ModuleInterface)) {
+        if (!($module instanceof Module)) {
             throw new Exception('ModulePresenter can only present instance of Module');
         }
 
         $attributes = $module->attributes->all();
+        $attributes['picos'] = $this->addPicos($attributes);
         $attributes['price'] = $this->getModulePrice($attributes['price']);
-        // Round to the nearest 0.5
-        $attributes['starsRate'] = str_replace('.', '', (string) (round(floatval($attributes['avgRate']) * 2) / 2));
+        $attributes['starsRate'] = str_replace('.', '', round($attributes['avgRate'] * 2) / 2); // Round to the nearest 0.5
 
         $moduleInstance = $module->getInstance();
 
@@ -103,18 +103,47 @@ class ModulePresenter implements PresenterInterface
     /**
      * Transform a collection of addons as a simple array of data.
      *
-     * @param ModuleCollection|array $modules
+     * @param AddonsCollection|array $modules
      *
      * @return array
      */
     public function presentCollection($modules)
     {
-        $presentedModules = [];
-
-        foreach ($modules as $name => $module) {
-            $presentedModules[$name] = $this->present($module);
+        $presentedProducts = [];
+        foreach ($modules as $name => $product) {
+            $presentedProducts[$name] = $this->present($product);
         }
 
-        return $presentedModules;
+        return $presentedProducts;
+    }
+
+    /**
+     * Generate the list of small icons to be displayed near the module name.
+     *
+     * @param array $attributes Attributes of presented module
+     *
+     * @return array
+     */
+    private function addPicos(array $attributes)
+    {
+        $picos = [];
+
+        // PrestaTrust display
+        if (!empty($attributes['prestatrust']) && !empty($attributes['prestatrust']->pico)) {
+            $text = '';
+            $class = '';
+            if (isset($attributes['prestatrust']->status)) {
+                $text = $attributes['prestatrust']->status ? 'OK' : 'KO';
+                $class = $attributes['prestatrust']->status ? 'text-success' : 'text-warning';
+            }
+            $picos['prestatrust'] = [
+                'img' => $attributes['prestatrust']->pico,
+                'label' => 'prestatrust',
+                'text' => $text,
+                'class' => $class,
+            ];
+        }
+
+        return $picos;
     }
 }

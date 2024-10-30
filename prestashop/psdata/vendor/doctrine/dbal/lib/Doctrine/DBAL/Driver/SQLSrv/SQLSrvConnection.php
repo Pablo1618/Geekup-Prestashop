@@ -2,13 +2,10 @@
 
 namespace Doctrine\DBAL\Driver\SQLSrv;
 
-use Doctrine\DBAL\Driver\Connection as ConnectionInterface;
-use Doctrine\DBAL\Driver\Result;
+use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
-use Doctrine\DBAL\Driver\SQLSrv\Exception\Error;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\Deprecations\Deprecation;
-
+use const SQLSRV_ERR_ERRORS;
 use function func_get_args;
 use function is_float;
 use function is_int;
@@ -24,14 +21,10 @@ use function sqlsrv_rows_affected;
 use function sqlsrv_server_info;
 use function str_replace;
 
-use const SQLSRV_ERR_ERRORS;
-
 /**
  * SQL Server implementation for the Connection interface.
- *
- * @deprecated Use {@link Connection} instead
  */
-class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
+class SQLSrvConnection implements Connection, ServerInfoAwareConnection
 {
     /** @var resource */
     protected $conn;
@@ -40,8 +33,6 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     protected $lastInsertId;
 
     /**
-     * @internal The connection can be only instantiated by its driver.
-     *
      * @param string  $serverName
      * @param mixed[] $connectionOptions
      *
@@ -50,16 +41,13 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     public function __construct($serverName, $connectionOptions)
     {
         if (! sqlsrv_configure('WarningsReturnAsErrors', 0)) {
-            throw Error::new();
+            throw SQLSrvException::fromSqlSrvErrors();
         }
 
-        $conn = sqlsrv_connect($serverName, $connectionOptions);
-
-        if ($conn === false) {
-            throw Error::new();
+        $this->conn = sqlsrv_connect($serverName, $connectionOptions);
+        if (! $this->conn) {
+            throw SQLSrvException::fromSqlSrvErrors();
         }
-
-        $this->conn         = $conn;
         $this->lastInsertId = new LastInsertId();
     }
 
@@ -78,12 +66,6 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function requiresQueryForServerVersion()
     {
-        Deprecation::triggerIfCalledFromOutside(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/pull/4114',
-            'ServerInfoAwareConnection::requiresQueryForServerVersion() is deprecated and removed in DBAL 3.'
-        );
-
         return false;
     }
 
@@ -92,7 +74,7 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
      */
     public function prepare($sql)
     {
-        return new Statement($this->conn, $sql, $this->lastInsertId);
+        return new SQLSrvStatement($this->conn, $sql, $this->lastInsertId);
     }
 
     /**
@@ -115,9 +97,7 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     {
         if (is_int($value)) {
             return $value;
-        }
-
-        if (is_float($value)) {
+        } elseif (is_float($value)) {
             return sprintf('%F', $value);
         }
 
@@ -127,21 +107,15 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function exec($sql)
+    public function exec($statement)
     {
-        $stmt = sqlsrv_query($this->conn, $sql);
+        $stmt = sqlsrv_query($this->conn, $statement);
 
         if ($stmt === false) {
-            throw Error::new();
+            throw SQLSrvException::fromSqlSrvErrors();
         }
 
-        $rowsAffected = sqlsrv_rows_affected($stmt);
-
-        if ($rowsAffected === false) {
-            throw Error::new();
-        }
-
-        return $rowsAffected;
+        return sqlsrv_rows_affected($stmt);
     }
 
     /**
@@ -156,10 +130,6 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
             $stmt = $this->query('SELECT @@IDENTITY');
         }
 
-        if ($stmt instanceof Result) {
-            return $stmt->fetchOne();
-        }
-
         return $stmt->fetchColumn();
     }
 
@@ -169,10 +139,8 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     public function beginTransaction()
     {
         if (! sqlsrv_begin_transaction($this->conn)) {
-            throw Error::new();
+            throw SQLSrvException::fromSqlSrvErrors();
         }
-
-        return true;
     }
 
     /**
@@ -181,10 +149,8 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     public function commit()
     {
         if (! sqlsrv_commit($this->conn)) {
-            throw Error::new();
+            throw SQLSrvException::fromSqlSrvErrors();
         }
-
-        return true;
     }
 
     /**
@@ -193,16 +159,12 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
     public function rollBack()
     {
         if (! sqlsrv_rollback($this->conn)) {
-            throw Error::new();
+            throw SQLSrvException::fromSqlSrvErrors();
         }
-
-        return true;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @deprecated The error information is available via exceptions.
      */
     public function errorCode()
     {
@@ -211,16 +173,14 @@ class SQLSrvConnection implements ConnectionInterface, ServerInfoAwareConnection
             return $errors[0]['code'];
         }
 
-        return null;
+        return false;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @deprecated The error information is available via exceptions.
      */
     public function errorInfo()
     {
-        return (array) sqlsrv_errors(SQLSRV_ERR_ERRORS);
+        return sqlsrv_errors(SQLSRV_ERR_ERRORS);
     }
 }

@@ -23,7 +23,7 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CustomerLoginFormatterCore implements FormFormatterInterface
 {
@@ -60,7 +60,8 @@ class CustomerLoginFormatterCore implements FormFormatterInterface
                     'Password',
                     [],
                     'Shop.Forms.Labels'
-                )),
+                ))
+                ->addConstraint('isPasswd'),
         ];
     }
 }

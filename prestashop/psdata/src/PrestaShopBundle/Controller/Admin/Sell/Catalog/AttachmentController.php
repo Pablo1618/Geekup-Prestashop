@@ -38,19 +38,14 @@ use PrestaShop\PrestaShop\Core\Domain\Attachment\Exception\CannotUnlinkAttachmen
 use PrestaShop\PrestaShop\Core\Domain\Attachment\Exception\CannotUpdateAttachmentException;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\Exception\DeleteAttachmentException;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\Exception\EmptyFileException;
-use PrestaShop\PrestaShop\Core\Domain\Attachment\Exception\EmptySearchException;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\Query\GetAttachment;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\Query\GetAttachmentForEditing;
-use PrestaShop\PrestaShop\Core\Domain\Attachment\Query\GetAttachmentInformation;
-use PrestaShop\PrestaShop\Core\Domain\Attachment\Query\SearchAttachment;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\QueryResult\Attachment;
-use PrestaShop\PrestaShop\Core\Domain\Attachment\QueryResult\AttachmentInformation;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\QueryResult\EditableAttachment;
 use PrestaShop\PrestaShop\Core\Search\Filters\AttachmentFilters;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\DemoRestricted;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,7 +56,7 @@ use Symfony\Component\HttpFoundation\Response;
 class AttachmentController extends FrameworkBundleAdminController
 {
     /**
-     * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))")
+     * @AdminSecurity("is_granted(['read'], request.get('_legacy_controller'))")
      */
     public function indexAction(Request $request, AttachmentFilters $filters): Response
     {
@@ -80,7 +75,7 @@ class AttachmentController extends FrameworkBundleAdminController
      * Show "Add new" form and handle form submit.
      *
      * @AdminSecurity(
-     *     "is_granted('create', request.get('_legacy_controller'))",
+     *     "is_granted(['create'], request.get('_legacy_controller'))",
      *     redirectRoute="admin_attachments_index",
      *     message="You do not have permission to create this."
      * )
@@ -97,32 +92,22 @@ class AttachmentController extends FrameworkBundleAdminController
         );
 
         $attachmentForm = $attachmentFormBuilder->getForm();
+
         $attachmentForm->handleRequest($request);
 
         try {
             $handlerResult = $attachmentFormHandler->handle($attachmentForm);
 
             if ($handlerResult->isSubmitted() && $handlerResult->isValid()) {
-                $this->addFlash('success', $this->trans('Successful creation', 'Admin.Notifications.Success'));
-
-                if ($request->get('saveAndStay') !== null) {
-                    // Keep the initial query parameters (to keep liteDisplay or saveAndStay for example)
-                    $parameters = array_merge([
-                        'attachmentId' => $handlerResult->getIdentifiableObjectId(),
-                    ], $request->query->all());
-
-                    return $this->redirectToRoute('admin_attachments_edit', $parameters);
-                }
+                $this->addFlash('success', $this->trans('Successful creation.', 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_attachments_index');
             }
         } catch (Exception $e) {
-            $message = $this->getErrorMessageForException($e, $this->getErrorMessages($e));
-            $this->addFlash('error', $message);
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages($e)));
         }
 
         return $this->render('@PrestaShop/Admin/Sell/Catalog/Attachment/add.html.twig', [
-            'lightDisplay' => $request->query->has('liteDisplaying'),
             'enableSidebar' => true,
             'layoutTitle' => $this->trans('Add new file', 'Admin.Catalog.Feature'),
             'attachmentForm' => $attachmentForm->createView(),
@@ -134,7 +119,7 @@ class AttachmentController extends FrameworkBundleAdminController
      * Show & process attachment editing.
      *
      * @AdminSecurity(
-     *     "is_granted('update', request.get('_legacy_controller'))",
+     *     "is_granted(['update'], request.get('_legacy_controller'))",
      *     redirectRoute="admin_attachments_index",
      *     message="You do not have permission to edit this."
      * )
@@ -162,7 +147,7 @@ class AttachmentController extends FrameworkBundleAdminController
             $result = $attachmentFormHandler->handleFor((int) $attachmentId, $attachmentForm);
 
             if ($result->isSubmitted() && $result->isValid()) {
-                $this->addFlash('success', $this->trans('Successful update', 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_attachments_index');
             }
@@ -201,7 +186,7 @@ class AttachmentController extends FrameworkBundleAdminController
      * View attachment.
      *
      * @AdminSecurity(
-     *     "is_granted('read', request.get('_legacy_controller'))",
+     *     "is_granted(['read'], request.get('_legacy_controller'))",
      *     redirectRoute="admin_attachments_index",
      *     message="You do not have permission to edit this."
      * )
@@ -232,7 +217,7 @@ class AttachmentController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteAttachmentCommand((int) $attachmentId));
             $this->addFlash(
                 'success',
-                $this->trans('Successful deletion', 'Admin.Notifications.Success')
+                $this->trans('Successful deletion.', 'Admin.Notifications.Success')
             );
         } catch (Exception $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages($e)));
@@ -268,64 +253,6 @@ class AttachmentController extends FrameworkBundleAdminController
     }
 
     /**
-     * @AdminSecurity("is_granted('read', 'AdminProducts') || is_granted('read', 'AdminAttachments')")
-     *
-     * @param int $attachmentId
-     *
-     * @return JsonResponse
-     */
-    public function getAttachmentInfoAction(int $attachmentId): JsonResponse
-    {
-        $attachmentInfo = $this->getQueryBus()->handle(new GetAttachmentInformation($attachmentId));
-
-        return $this->json(['attachmentInfo' => $this->presentAttachmentInfo($attachmentInfo)]);
-    }
-
-    /**
-     * @AdminSecurity("is_granted('read', 'AdminProducts') || is_granted('read', 'AdminAttachments')")
-     *
-     * @param string $searchPhrase
-     *
-     * @return JsonResponse
-     */
-    public function searchAction(string $searchPhrase): JsonResponse
-    {
-        try {
-            /** @var AttachmentInformation[] $attachments */
-            $attachments = $this->getCommandBus()->handle(new SearchAttachment($searchPhrase));
-        } catch (EmptySearchException $e) {
-            return $this->json(
-                [$e, 'message' => $this->getErrorMessageForException($e, $this->getErrorMessages($e))],
-                Response::HTTP_NOT_FOUND
-            );
-        }
-
-        $result = [];
-        foreach ($attachments as $attachment) {
-            $result[] = $this->presentAttachmentInfo($attachment);
-        }
-
-        return $this->json($result);
-    }
-
-    /**
-     * @param AttachmentInformation $productAttachmentInfo
-     *
-     * @return array<string, mixed>
-     */
-    private function presentAttachmentInfo(AttachmentInformation $productAttachmentInfo): array
-    {
-        $localizedNames = $productAttachmentInfo->getLocalizedNames();
-
-        return [
-            'attachment_id' => $productAttachmentInfo->getAttachmentId(),
-            'name' => $localizedNames[$this->getContextLangId()] ?? reset($localizedNames),
-            'file_name' => $productAttachmentInfo->getFilename(),
-            'mime_type' => $productAttachmentInfo->getMimeType(),
-        ];
-    }
-
-    /**
      * @param Exception $e
      */
     private function getErrorMessages(Exception $e = null): array
@@ -336,7 +263,7 @@ class AttachmentController extends FrameworkBundleAdminController
                 'Admin.Notifications.Error'
             ),
             AttachmentNotFoundException::class => $this->trans(
-                'The object cannot be loaded (or found).',
+                'The object cannot be loaded (or found)',
                 'Admin.Notifications.Error'
             ),
             AttachmentConstraintException::class => [
@@ -353,7 +280,7 @@ class AttachmentController extends FrameworkBundleAdminController
                     'Admin.Catalog.Notification'
                 ),
                 AttachmentConstraintException::EMPTY_DESCRIPTION => $this->trans(
-                    'Invalid description for %s language.',
+                    'Invalid description for %s language',
                     'Admin.Catalog.Notification'
                 ),
                 AttachmentConstraintException::INVALID_FIELDS => $this->trans(
@@ -361,7 +288,7 @@ class AttachmentController extends FrameworkBundleAdminController
                     'Admin.Notifications.Error'
                     ),
                 AttachmentConstraintException::INVALID_DESCRIPTION => $this->trans(
-                    'Invalid description for %s language.',
+                    'Invalid description for %s language',
                     'Admin.Catalog.Notification'
                 ),
                 AttachmentConstraintException::MISSING_NAME_IN_DEFAULT_LANGUAGE => $this->trans(

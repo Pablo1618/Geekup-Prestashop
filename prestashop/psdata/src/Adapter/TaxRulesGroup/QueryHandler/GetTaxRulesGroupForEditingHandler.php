@@ -47,11 +47,6 @@ final class GetTaxRulesGroupForEditingHandler extends AbstractTaxRulesGroupHandl
         $taxRulesGroupId = $query->getTaxRulesGroupId();
         $taxRulesGroup = $this->getTaxRulesGroup($taxRulesGroupId);
 
-        return new EditableTaxRulesGroup(
-            $taxRulesGroupId,
-            $taxRulesGroup->name,
-            (bool) $taxRulesGroup->active,
-            $taxRulesGroup->getAssociatedShops()
-        );
+        return new EditableTaxRulesGroup($taxRulesGroupId, (bool) $taxRulesGroup->active);
     }
 }

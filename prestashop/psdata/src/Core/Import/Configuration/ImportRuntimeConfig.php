@@ -59,6 +59,11 @@ final class ImportRuntimeConfig implements ImportRuntimeConfigInterface
     /**
      * @var int
      */
+    private $stepIndex;
+
+    /**
+     * @var int
+     */
     private $processedRows = 0;
 
     /**

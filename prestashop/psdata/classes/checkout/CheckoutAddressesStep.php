@@ -23,7 +23,7 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CheckoutAddressesStepCore extends AbstractCheckoutStep
 {
@@ -35,11 +35,6 @@ class CheckoutAddressesStepCore extends AbstractCheckoutStep
     private $show_invoice_address_form = false;
     private $form_has_continue_button = false;
 
-    /**
-     * @param Context $context
-     * @param TranslatorInterface $translator
-     * @param CustomerAddressForm $addressForm
-     */
     public function __construct(
         Context $context,
         TranslatorInterface $translator,
@@ -146,7 +141,7 @@ class CheckoutAddressesStepCore extends AbstractCheckoutStep
             );
             if ($deletionResult) {
                 $this->context->controller->success[] = $this->getTranslator()->trans(
-                    'Address successfully deleted.',
+                    'Address successfully deleted!',
                     [],
                     'Shop.Notifications.Success'
                 );
@@ -240,19 +235,19 @@ class CheckoutAddressesStepCore extends AbstractCheckoutStep
             'use_same_address' => $this->use_same_address,
             'use_different_address_url' => $this->context->link->getPageLink(
                 'order',
-                null,
+                true,
                 null,
                 ['use_same_address' => 0]
             ),
             'new_address_delivery_url' => $this->context->link->getPageLink(
                 'order',
-                null,
+                true,
                 null,
                 ['newAddress' => 'delivery']
             ),
             'new_address_invoice_url' => $this->context->link->getPageLink(
                 'order',
-                null,
+                true,
                 null,
                 ['newAddress' => 'invoice']
             ),
@@ -266,10 +261,14 @@ class CheckoutAddressesStepCore extends AbstractCheckoutStep
 
         /** @var OrderControllerCore $controller */
         $controller = $this->context->controller;
-        if ($controller instanceof OrderController) {
+        if (isset($controller)) {
             $warnings = $controller->checkoutWarning;
-            $addressWarning = $warnings['address'] ?? false;
-            $invalidAddresses = $warnings['invalid_addresses'] ?? [];
+            $addressWarning = isset($warnings['address'])
+                ? $warnings['address']
+                : false;
+            $invalidAddresses = isset($warnings['invalid_addresses'])
+                ? $warnings['invalid_addresses']
+                : [];
 
             $errors = [];
             if (in_array($idAddressDelivery, $invalidAddresses)) {

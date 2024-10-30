@@ -23,33 +23,18 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-
-/**
- * @deprecated deprecated since version 8.1, will be dropped in 9.0
- */
 class QqUploadedFileFormCore
 {
-    public function __construct()
-    {
-        @trigger_error('This class is deprecated since 8.1 and will be dropped in 9.0.', E_USER_DEPRECATED);
-    }
-
     /**
      * Save the file to the specified path.
      *
-     * @return bool|array{"error": string} TRUE on success
+     * @return bool TRUE on success
      */
     public function save()
     {
         $product = new Product($_GET['id_product']);
         if (!Validate::isLoadedObject($product)) {
-            return [
-                'error' => Context::getContext()->getTranslator()->trans(
-                    'Cannot add image because product creation failed.',
-                    [],
-                    'Admin.Catalog.Notification'
-                ),
-            ];
+            return ['error' => Context::getContext()->getTranslator()->trans('Cannot add image because product creation failed.', [], 'Admin.Catalog.Notification')];
         } else {
             $image = new Image();
             $image->id_product = (int) $product->id;
@@ -64,7 +49,11 @@ class QqUploadedFileFormCore
                     }
                 }
             }
-            $image->cover = !Image::getCover($image->id_product);
+            if (!Image::getCover($image->id_product)) {
+                $image->cover = 1;
+            } else {
+                $image->cover = 0;
+            }
 
             if (($validate = $image->validateFieldsLang(false, true)) !== true) {
                 return ['error' => $validate];

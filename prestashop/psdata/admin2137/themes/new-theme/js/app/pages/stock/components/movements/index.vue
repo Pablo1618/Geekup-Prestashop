@@ -27,20 +27,9 @@
     <PSTable class="mt-1">
       <thead>
         <tr>
-          <th
-            scope="col"
-          >
-            <PSSort
-              order="product_id"
-              @sort="sort"
-              :current-sort="currentSort"
-            >
-              {{ trans('title_product_id') }}
-            </PSSort>
-          </th>
           <th width="30%">
             <PSSort
-              order="product_name"
+              order="product"
               @sort="sort"
               :current-sort="currentSort"
             >
@@ -77,7 +66,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="isLoading">
+        <tr v-if="this.isLoading">
           <td colspan="6">
             <PSLoader
               v-for="(n, index) in 3"
@@ -113,68 +102,33 @@
   </section>
 </template>
 
-<script lang="ts">
-  import PSTable from '@app/widgets/ps-table/ps-table.vue';
-  import PSSort from '@app/widgets/ps-table/ps-sort.vue';
-  import PSAlert from '@app/widgets/ps-alert.vue';
-  import PSLoader from '@app/widgets/ps-loader.vue';
-  import {defineComponent} from 'vue';
-  import TranslationMixin from '@app/pages/stock/mixins/translate';
-  import MovementLine from './movement-line.vue';
+<script>
+  import PSTable from '@app/widgets/ps-table/ps-table';
+  import PSSort from '@app/widgets/ps-table/ps-sort';
+  import PSAlert from '@app/widgets/ps-alert';
+  import PSLoader from '@app/widgets/ps-loader';
+  import MovementLine from './movement-line';
 
   const DEFAULT_SORT = 'desc';
 
-  /* eslint-disable camelcase */
-  export interface StockMovement {
-    attribute_name: string | null;
-    combination_cover_id: number;
-    combination_id: number;
-    combination_name: string;
-    combination_thumbnail: string;
-    date_add: string;
-    employee_firstname: string;
-    employee_lastname: string;
-    id_employee: number;
-    id_order: number;
-    id_stock: number;
-    id_stock_mvt: number;
-    id_stock_mvt_reason: number;
-    movement_reason: string;
-    order_link: string;
-    physical_quantity: number;
-    product_attributes: string;
-    product_cover_id: number;
-    product_features: string;
-    product_id: number;
-    product_name: string;
-    product_reference: string;
-    product_thumbnail: string;
-    sign: number;
-    supplier_id: number;
-    supplier_name: string;
-  }
-  /* eslint-enable camelcase */
-
-  export default defineComponent({
+  export default {
     computed: {
-      isLoading(): boolean {
+      isLoading() {
         return this.$store.state.isLoading;
       },
-      movements(): Array<StockMovement> {
+      movements() {
         return this.$store.state.movements;
       },
-      emptyMovements(): boolean {
+      emptyMovements() {
         return !this.$store.state.movements.length;
       },
-      currentSort(): string {
+      currentSort() {
         return this.$store.state.order;
       },
     },
-    mixins: [TranslationMixin],
     methods: {
-      sort(order: string, sortDirection: string): void {
+      sort(order, sortDirection) {
         this.$store.dispatch('updateOrder', order);
-        this.$store.dispatch('updateSort', sortDirection);
         this.$emit('fetch', sortDirection === 'desc' ? 'desc' : 'asc');
       },
     },
@@ -194,5 +148,5 @@
       PSLoader,
       MovementLine,
     },
-  });
+  };
 </script>

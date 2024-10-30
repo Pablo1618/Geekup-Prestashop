@@ -31,8 +31,6 @@ use Pack;
 use Product;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * This class will provide data from DB / ORM about product pack.
  */
 class PackDataProvider

@@ -5,7 +5,6 @@ namespace Doctrine\DBAL\Types;
 use DateInterval;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Throwable;
-
 use function substr;
 
 /**
@@ -20,17 +19,17 @@ class DateIntervalType extends Type
      */
     public function getName()
     {
-        return Types::DATEINTERVAL;
+        return Type::DATEINTERVAL;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        $column['length'] = 255;
+        $fieldDeclaration['length'] = 255;
 
-        return $platform->getVarcharTypeDeclarationSQL($column);
+        return $platform->getVarcharTypeDeclarationSQL($fieldDeclaration);
     }
 
     /**

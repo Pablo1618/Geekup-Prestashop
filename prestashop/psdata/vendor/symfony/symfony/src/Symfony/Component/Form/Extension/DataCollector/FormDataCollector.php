@@ -27,8 +27,6 @@ use Symfony\Component\VarDumper\Cloner\Stub;
  *
  * @author Robert Schönthal <robert.schoenthal@gmail.com>
  * @author Bernhard Schussek <bschussek@gmail.com>
- *
- * @final since Symfony 4.3
  */
 class FormDataCollector extends DataCollector implements FormDataCollectorInterface
 {
@@ -67,25 +65,20 @@ class FormDataCollector extends DataCollector implements FormDataCollectorInterf
      */
     private $formsByView;
 
+    private $hasVarDumper;
+
     public function __construct(FormDataExtractorInterface $dataExtractor)
     {
-        if (!class_exists(ClassStub::class)) {
-            throw new \LogicException(sprintf('The VarDumper component is needed for using the "%s" class. Install symfony/var-dumper version 3.4 or above.', __CLASS__));
-        }
-
         $this->dataExtractor = $dataExtractor;
+        $this->hasVarDumper = class_exists(ClassStub::class);
 
         $this->reset();
     }
 
     /**
      * Does nothing. The data is collected during the form event listeners.
-     *
-     * {@inheritdoc}
-     *
-     * @param \Throwable|null $exception
      */
-    public function collect(Request $request, Response $response/* , \Throwable $exception = null */)
+    public function collect(Request $request, Response $response, \Exception $exception = null)
     {
     }
 
@@ -236,20 +229,17 @@ class FormDataCollector extends DataCollector implements FormDataCollectorInterf
         return $this->data;
     }
 
-    /**
-     * @internal
-     */
-    public function __sleep(): array
+    public function serialize()
     {
-        foreach ($this->data['forms_by_hash'] as &$form) {
-            if (isset($form['type_class']) && !$form['type_class'] instanceof ClassStub) {
-                $form['type_class'] = new ClassStub($form['type_class']);
+        if ($this->hasVarDumper) {
+            foreach ($this->data['forms_by_hash'] as &$form) {
+                if (isset($form['type_class']) && !$form['type_class'] instanceof ClassStub) {
+                    $form['type_class'] = new ClassStub($form['type_class']);
+                }
             }
         }
 
-        $this->data = $this->cloneVar($this->data);
-
-        return parent::__sleep();
+        return serialize($this->cloneVar($this->data));
     }
 
     /**
@@ -290,8 +280,9 @@ class FormDataCollector extends DataCollector implements FormDataCollectorInterf
         $hash = spl_object_hash($form);
 
         $output = &$outputByHash[$hash];
-        $output = $this->dataByForm[$hash]
-            ?? [];
+        $output = isset($this->dataByForm[$hash])
+            ? $this->dataByForm[$hash]
+            : [];
 
         $output['children'] = [];
 
@@ -319,14 +310,16 @@ class FormDataCollector extends DataCollector implements FormDataCollectorInterf
             $output = &$outputByHash[$formHash];
         }
 
-        $output = $this->dataByView[$viewHash]
-            ?? [];
+        $output = isset($this->dataByView[$viewHash])
+            ? $this->dataByView[$viewHash]
+            : [];
 
         if (null !== $formHash) {
             $output = array_replace(
                 $output,
-                $this->dataByForm[$formHash]
-                    ?? []
+                isset($this->dataByForm[$formHash])
+                    ? $this->dataByForm[$formHash]
+                    : []
             );
         }
 

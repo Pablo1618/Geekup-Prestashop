@@ -30,9 +30,7 @@ use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CountryConstraintExcepti
 use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\CustomerId;
 use PrestaShop\PrestaShop\Core\Domain\State\Exception\StateConstraintException;
-use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\NoStateId;
 use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\StateId;
-use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\StateIdInterface;
 
 /**
  * Adds new customer address
@@ -100,7 +98,7 @@ class AddCustomerAddressCommand
     private $address2;
 
     /**
-     * @var StateIdInterface
+     * @var StateId|null
      */
     private $stateId;
 
@@ -170,10 +168,10 @@ class AddCustomerAddressCommand
         $this->company = $company;
         $this->vatNumber = $vat_number;
         $this->address2 = $address2;
+        $this->stateId = new StateId($id_state);
         $this->homePhone = $phone;
         $this->mobilePhone = $phone_mobile;
         $this->other = $other;
-        $this->stateId = $id_state === NoStateId::NO_STATE_ID_VALUE ? new NoStateId() : new StateId($id_state);
     }
 
     /**
@@ -273,9 +271,9 @@ class AddCustomerAddressCommand
     }
 
     /**
-     * @return StateIdInterface
+     * @return StateId|null
      */
-    public function getStateId(): StateIdInterface
+    public function getStateId(): ?StateId
     {
         return $this->stateId;
     }

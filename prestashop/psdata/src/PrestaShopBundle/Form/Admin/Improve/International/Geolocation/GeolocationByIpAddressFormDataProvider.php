@@ -30,6 +30,7 @@ namespace PrestaShopBundle\Form\Admin\Improve\International\Geolocation;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Form\FormDataProviderInterface;
 use PrestaShop\PrestaShop\Core\Geolocation\GeoLite\GeoLiteCityCheckerInterface;
+use PrestaShop\PrestaShop\Core\Validation\ValidatorInterface;
 
 /**
  * Class GeolocationByIpAddressFormDataProvider is responsible for handling geolocation form data.
@@ -47,15 +48,23 @@ final class GeolocationByIpAddressFormDataProvider implements FormDataProviderIn
     private $geoLiteCityChecker;
 
     /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    /**
      * @param DataConfigurationInterface $dataConfiguration
      * @param GeoLiteCityCheckerInterface $geoLiteCityChecker
+     * @param ValidatorInterface $validator
      */
     public function __construct(
         DataConfigurationInterface $dataConfiguration,
-        GeoLiteCityCheckerInterface $geoLiteCityChecker
+        GeoLiteCityCheckerInterface $geoLiteCityChecker,
+        ValidatorInterface $validator
     ) {
         $this->dataConfiguration = $dataConfiguration;
         $this->geoLiteCityChecker = $geoLiteCityChecker;
+        $this->validator = $validator;
     }
 
     /**

@@ -32,11 +32,6 @@ namespace PrestaShop\PrestaShop\Core\Domain\Product\Exception;
 class CannotUpdateProductException extends ProductException
 {
     /**
-     * When generic product update fails
-     */
-    public const FAILED_UPDATE_PRODUCT = 1;
-
-    /**
      * When basic information update fails
      */
     public const FAILED_UPDATE_BASIC_INFO = 10;
@@ -115,19 +110,4 @@ class CannotUpdateProductException extends ProductException
      * When type update fails
      */
     public const FAILED_UPDATE_TYPE = 160;
-
-    /**
-     * When product status update fails
-     */
-    public const FAILED_UPDATE_STATUS = 170;
-
-    /**
-     * When copying from shop to shop fails
-     */
-    public const FAILED_SHOP_COPY = 170;
-
-    /**
-     * When product duplication fails
-     */
-    public const FAILED_DUPLICATION = 180;
 }

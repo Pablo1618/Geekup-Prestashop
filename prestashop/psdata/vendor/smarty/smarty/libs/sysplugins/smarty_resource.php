@@ -72,15 +72,17 @@ abstract class Smarty_Resource
         }
         // try registered resource
         if (isset($smarty->registered_resources[ $type ])) {
-            return $smarty->_cache[ 'resource_handlers' ][ $type ] = $smarty->registered_resources[ $type ];
+            return $smarty->_cache[ 'resource_handlers' ][ $type ] =
+                $smarty->registered_resources[ $type ] instanceof Smarty_Resource ?
+                    $smarty->registered_resources[ $type ] : new Smarty_Internal_Resource_Registered();
         }
         // try sysplugins dir
         if (isset(self::$sysplugins[ $type ])) {
-            $_resource_class = 'Smarty_Internal_Resource_' . smarty_ucfirst_ascii($type);
+            $_resource_class = 'Smarty_Internal_Resource_' . ucfirst($type);
             return $smarty->_cache[ 'resource_handlers' ][ $type ] = new $_resource_class();
         }
         // try plugins dir
-        $_resource_class = 'Smarty_Resource_' . smarty_ucfirst_ascii($type);
+        $_resource_class = 'Smarty_Resource_' . ucfirst($type);
         if ($smarty->loadPlugin($_resource_class)) {
             if (class_exists($_resource_class, false)) {
                 return $smarty->_cache[ 'resource_handlers' ][ $type ] = new $_resource_class();

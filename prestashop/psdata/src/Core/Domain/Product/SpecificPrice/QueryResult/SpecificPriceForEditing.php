@@ -28,9 +28,8 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\Product\SpecificPrice\QueryResult;
 
-use DateTimeInterface;
+use DateTime;
 use PrestaShop\Decimal\DecimalNumber;
-use PrestaShop\PrestaShop\Core\Domain\Product\SpecificPrice\ValueObject\FixedPriceInterface;
 
 class SpecificPriceForEditing
 {
@@ -55,9 +54,9 @@ class SpecificPriceForEditing
     private $includesTax;
 
     /**
-     * @var FixedPriceInterface
+     * @var DecimalNumber
      */
-    private $fixedPrice;
+    private $price;
 
     /**
      * @var int
@@ -65,29 +64,9 @@ class SpecificPriceForEditing
     private $fromQuantity;
 
     /**
-     * @var DateTimeInterface
-     */
-    private $dateTimeFrom;
-
-    /**
-     * @var DateTimeInterface
-     */
-    private $dateTimeTo;
-
-    /**
-     * @var int
-     */
-    private $productId;
-
-    /**
-     * @var CustomerInfo|null
-     */
-    private $customerInfo;
-
-    /**
      * @var int|null
      */
-    private $combinationId;
+    private $shopGroupId;
 
     /**
      * @var int|null
@@ -110,54 +89,66 @@ class SpecificPriceForEditing
     private $groupId;
 
     /**
+     * @var int|null
+     */
+    private $customerId;
+
+    /**
+     * @var DateTime|null
+     */
+    private $dateTimeFrom;
+
+    /**
+     * @var DateTime|null
+     */
+    private $dateTimeTo;
+
+    /**
      * @param int $specificPriceId
      * @param string $reductionType
      * @param DecimalNumber $reductionAmount
      * @param bool $includesTax
-     * @param FixedPriceInterface $fixedPrice
+     * @param DecimalNumber $price
      * @param int $fromQuantity
-     * @param DateTimeInterface $dateTimeFrom
-     * @param DateTimeInterface $dateTimeTo
-     * @param int $productId
-     * @param CustomerInfo|null $customerInfo
-     * @param int|null $combinationId
+     * @param int|null $shopGroupId
      * @param int|null $shopId
      * @param int|null $currencyId
      * @param int|null $countryId
      * @param int|null $groupId
+     * @param int|null $customerId
+     * @param DateTime|null $dateTimeFrom
+     * @param DateTime|null $dateTimeTo
      */
     public function __construct(
         int $specificPriceId,
         string $reductionType,
         DecimalNumber $reductionAmount,
         bool $includesTax,
-        FixedPriceInterface $fixedPrice,
+        DecimalNumber $price,
         int $fromQuantity,
-        DateTimeInterface $dateTimeFrom,
-        DateTimeInterface $dateTimeTo,
-        int $productId,
-        ?CustomerInfo $customerInfo,
-        ?int $combinationId,
+        ?DateTime $dateTimeFrom,
+        ?DateTime $dateTimeTo,
+        ?int $shopGroupId,
         ?int $shopId,
         ?int $currencyId,
         ?int $countryId,
-        ?int $groupId
+        ?int $groupId,
+        ?int $customerId
     ) {
         $this->specificPriceId = $specificPriceId;
         $this->reductionType = $reductionType;
         $this->reductionAmount = $reductionAmount;
         $this->includesTax = $includesTax;
-        $this->fixedPrice = $fixedPrice;
+        $this->price = $price;
         $this->fromQuantity = $fromQuantity;
-        $this->dateTimeFrom = $dateTimeFrom;
-        $this->dateTimeTo = $dateTimeTo;
-        $this->productId = $productId;
-        $this->customerInfo = $customerInfo;
-        $this->combinationId = $combinationId;
+        $this->shopGroupId = $shopGroupId;
         $this->shopId = $shopId;
         $this->currencyId = $currencyId;
         $this->countryId = $countryId;
         $this->groupId = $groupId;
+        $this->customerId = $customerId;
+        $this->dateTimeFrom = $dateTimeFrom;
+        $this->dateTimeTo = $dateTimeTo;
     }
 
     /**
@@ -193,11 +184,11 @@ class SpecificPriceForEditing
     }
 
     /**
-     * @return FixedPriceInterface
+     * @return DecimalNumber
      */
-    public function getFixedPrice(): FixedPriceInterface
+    public function getPrice(): DecimalNumber
     {
-        return $this->fixedPrice;
+        return $this->price;
     }
 
     /**
@@ -206,6 +197,14 @@ class SpecificPriceForEditing
     public function getFromQuantity(): int
     {
         return $this->fromQuantity;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getShopGroupId(): ?int
+    {
+        return $this->shopGroupId;
     }
 
     /**
@@ -241,42 +240,26 @@ class SpecificPriceForEditing
     }
 
     /**
-     * @return CustomerInfo|null
+     * @return int|null
      */
-    public function getCustomerInfo(): ?CustomerInfo
+    public function getCustomerId(): ?int
     {
-        return $this->customerInfo;
+        return $this->customerId;
     }
 
     /**
-     * @return DateTimeInterface
+     * @return DateTime|null
      */
-    public function getDateTimeFrom(): DateTimeInterface
+    public function getDateTimeFrom(): ?DateTime
     {
         return $this->dateTimeFrom;
     }
 
     /**
-     * @return DateTimeInterface
+     * @return DateTime|null
      */
-    public function getDateTimeTo(): DateTimeInterface
+    public function getDateTimeTo(): ?DateTime
     {
         return $this->dateTimeTo;
-    }
-
-    /**
-     * @return int
-     */
-    public function getProductId(): int
-    {
-        return $this->productId;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getCombinationId(): ?int
-    {
-        return $this->combinationId;
     }
 }

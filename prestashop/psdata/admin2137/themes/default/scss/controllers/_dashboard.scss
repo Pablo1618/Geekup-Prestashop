@@ -453,3 +453,15 @@
     }
   }
 }
+
+.dash_news {
+  h3 {
+    // stylelint-disable-next-line
+    font-size: 14px !important;
+
+    i {
+      font-size: 20px;
+      color: $medium-gray;
+    }
+  }
+}

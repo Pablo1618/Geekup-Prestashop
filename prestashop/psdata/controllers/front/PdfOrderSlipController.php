@@ -25,11 +25,8 @@
  */
 class PdfOrderSlipControllerCore extends FrontController
 {
-    /** @var string */
     public $php_self = 'pdf-order-slip';
-    /** @var bool */
     protected $display_header = false;
-    /** @var bool */
     protected $display_footer = false;
 
     protected $order_slip;
@@ -51,11 +48,6 @@ class PdfOrderSlipControllerCore extends FrontController
         }
     }
 
-    /**
-     * @return bool|void
-     *
-     * @throws PrestaShopException
-     */
     public function display()
     {
         $pdf = new PDF($this->order_slip, PDF::TEMPLATE_ORDER_SLIP, $this->context->smarty);

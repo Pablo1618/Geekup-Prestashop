@@ -32,7 +32,7 @@ use PrestaShopBundle\Form\Admin\Type\RadioWithChoiceChildrenType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class ExportThemeLanguageType is responsible for building export language form

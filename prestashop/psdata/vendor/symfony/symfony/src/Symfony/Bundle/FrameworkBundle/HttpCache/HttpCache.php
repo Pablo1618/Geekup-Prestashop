@@ -23,15 +23,16 @@ use Symfony\Component\HttpKernel\KernelInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class HttpCache extends BaseHttpCache
+abstract class HttpCache extends BaseHttpCache
 {
     protected $cacheDir;
     protected $kernel;
 
     /**
-     * @param string $cacheDir The cache directory (default used if null)
+     * @param KernelInterface $kernel   A KernelInterface instance
+     * @param string          $cacheDir The cache directory (default used if null)
      */
-    public function __construct(KernelInterface $kernel, string $cacheDir = null)
+    public function __construct(KernelInterface $kernel, $cacheDir = null)
     {
         $this->kernel = $kernel;
         $this->cacheDir = $cacheDir;
@@ -49,8 +50,9 @@ class HttpCache extends BaseHttpCache
     /**
      * Forwards the Request to the backend and returns the Response.
      *
-     * @param bool     $raw   Whether to catch exceptions or not
-     * @param Response $entry A Response instance (the stale entry if present, null otherwise)
+     * @param Request  $request A Request instance
+     * @param bool     $raw     Whether to catch exceptions or not
+     * @param Response $entry   A Response instance (the stale entry if present, null otherwise)
      *
      * @return Response A Response instance
      */

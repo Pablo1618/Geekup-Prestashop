@@ -186,7 +186,7 @@ class RequirementCollection implements IteratorAggregate
      *
      * @return Traversable A Traversable interface
      */
-    public function getIterator(): Traversable
+    public function getIterator()
     {
         return new ArrayIterator($this->requirements);
     }

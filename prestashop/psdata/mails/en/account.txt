@@ -22,8 +22,8 @@ Important Security Tips:
 
 4. Should you suspect someone is using your account illegally, please notify us immediately.
 
-You can now place orders on our store: [{shop_name}]({shop_url})
+You can now place orders on our shop: [{shop_name}]({shop_url})
 
 [{shop_name}]({shop_url})
 
-Powered by [PrestaShop](https://www.prestashop-project.org/)
+Powered by [PrestaShop](https://www.prestashop.com/?utm_source=marchandprestashop&utm_medium=e-mail&utm_campaign=footer_1-7)

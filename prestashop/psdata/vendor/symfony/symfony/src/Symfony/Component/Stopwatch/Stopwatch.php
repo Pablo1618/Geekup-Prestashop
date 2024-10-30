@@ -11,17 +11,12 @@
 
 namespace Symfony\Component\Stopwatch;
 
-use Symfony\Contracts\Service\ResetInterface;
-
-// Help opcache.preload discover always-needed symbols
-class_exists(Section::class);
-
 /**
  * Stopwatch provides a way to profile code.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class Stopwatch implements ResetInterface
+class Stopwatch
 {
     /**
      * @var bool
@@ -41,7 +36,7 @@ class Stopwatch implements ResetInterface
     /**
      * @param bool $morePrecision If true, time is stored as float to keep the original microsecond precision
      */
-    public function __construct(bool $morePrecision = false)
+    public function __construct($morePrecision = false)
     {
         $this->morePrecision = $morePrecision;
         $this->reset();

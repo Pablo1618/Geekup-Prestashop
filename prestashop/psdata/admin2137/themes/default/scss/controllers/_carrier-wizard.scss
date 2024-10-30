@@ -18,6 +18,7 @@
     clear: both;
 
     div.content {
+      position: absolute;
       display: block;
       width: 100%;
       clear: both;
@@ -155,11 +156,11 @@
     background-color: #ffd;
     border: 1px solid #ffd700;
     @include border-radius(5px);
+  }
 
-    .content {
-      float: left;
-      padding: 0;
-    }
+  .msgBox .content {
+    float: left;
+    padding: 0;
   }
 
   #carrier_logo_block {
@@ -205,11 +206,11 @@
   }
 
   .actionBar {
-    display: flex;
-    flex-direction: row-reverse;
+    height: 30px;
+  }
 
-    a {
-      margin-right: 10px;
-    }
+  .actionBar a {
+    float: right;
+    margin-right: 10px;
   }
 }

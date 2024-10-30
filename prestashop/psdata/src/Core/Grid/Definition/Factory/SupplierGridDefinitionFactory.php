@@ -36,10 +36,10 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ImageColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\LinkColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
@@ -52,13 +52,13 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class SupplierGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
 {
-    use BulkDeleteActionTrait;
-    use DeleteActionTrait;
-
     /**
      * @var string
      */
     public const GRID_ID = 'supplier';
+
+    use BulkDeleteActionTrait;
+    use DeleteActionTrait;
 
     /**
      * {@inheritdoc}
@@ -192,9 +192,11 @@ final class SupplierGridDefinitionFactory extends AbstractFilterableGridDefiniti
                 'required' => false,
             ])
             )
-            ->add(
-                (new Filter('active', YesAndNoChoiceType::class))
-                    ->setAssociatedColumn('active')
+            ->add((new Filter('active', YesAndNoChoiceType::class))
+            ->setAssociatedColumn('active')
+            ->setTypeOptions([
+                'required' => false,
+            ])
             )
             ->add((new Filter('actions', SearchAndResetType::class))
             ->setAssociatedColumn('actions')

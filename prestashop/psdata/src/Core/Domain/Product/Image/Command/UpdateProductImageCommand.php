@@ -29,7 +29,6 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Domain\Product\Image\Command;
 
 use PrestaShop\PrestaShop\Core\Domain\Product\Image\ValueObject\ImageId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 
 class UpdateProductImageCommand
 {
@@ -59,26 +58,34 @@ class UpdateProductImageCommand
     private $position;
 
     /**
-     * @var ShopConstraint
+     * @param int $imageId
      */
-    private $shopConstraint;
-
-    public function __construct(int $imageId, ShopConstraint $shopConstraint)
+    public function __construct(int $imageId)
     {
         $this->imageId = new ImageId($imageId);
-        $this->shopConstraint = $shopConstraint;
     }
 
+    /**
+     * @return ImageId
+     */
     public function getImageId(): ImageId
     {
         return $this->imageId;
     }
 
+    /**
+     * @return string|null
+     */
     public function getFilePath(): ?string
     {
         return $this->filePath;
     }
 
+    /**
+     * @param string|null $filePath
+     *
+     * @return self
+     */
     public function setFilePath(?string $filePath): self
     {
         $this->filePath = $filePath;
@@ -86,11 +93,19 @@ class UpdateProductImageCommand
         return $this;
     }
 
+    /**
+     * @return bool|null
+     */
     public function isCover(): ?bool
     {
         return $this->isCover;
     }
 
+    /**
+     * @param bool|null $isCover
+     *
+     * @return self
+     */
     public function setIsCover(?bool $isCover): self
     {
         $this->isCover = $isCover;
@@ -118,20 +133,23 @@ class UpdateProductImageCommand
         return $this;
     }
 
+    /**
+     * @return int|null
+     */
     public function getPosition(): ?int
     {
         return $this->position;
     }
 
+    /**
+     * @param int|null $position
+     *
+     * @return self
+     */
     public function setPosition(?int $position): self
     {
         $this->position = $position;
 
         return $this;
-    }
-
-    public function getShopConstraint(): ShopConstraint
-    {
-        return $this->shopConstraint;
     }
 }

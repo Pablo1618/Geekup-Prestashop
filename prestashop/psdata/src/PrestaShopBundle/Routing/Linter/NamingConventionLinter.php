@@ -26,10 +26,9 @@
 
 namespace PrestaShopBundle\Routing\Linter;
 
-use PrestaShop\PrestaShop\Core\Util\Inflector;
-use PrestaShopBundle\Routing\Linter\Exception\ControllerNotFoundException;
+use Doctrine\Common\Inflector\Inflector;
 use PrestaShopBundle\Routing\Linter\Exception\NamingConventionException;
-use PrestaShopBundle\Routing\Linter\Exception\SymfonyControllerConventionException;
+use Symfony\Bundle\FrameworkBundle\Controller\ControllerNameParser;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -38,19 +37,32 @@ use Symfony\Component\Routing\Route;
 final class NamingConventionLinter implements RouteLinterInterface
 {
     /**
+     * @var ControllerNameParser
+     */
+    private $controllerNameParser;
+
+    /**
+     * @param ControllerNameParser $controllerNameParser
+     */
+    public function __construct(ControllerNameParser $controllerNameParser)
+    {
+        $this->controllerNameParser = $controllerNameParser;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function lint($routeName, Route $route)
     {
         $controllerAndMethodName = $this->getControllerAndMethodName($route);
 
-        $pluralizedController = Inflector::getInflector()->tableize(
-            Inflector::getInflector()->pluralize($controllerAndMethodName['controller'])
+        $pluralizedController = Inflector::tableize(
+            Inflector::pluralize($controllerAndMethodName['controller'])
         );
 
         $expectedRouteName = strtr('admin_{resources}_{action}', [
             '{resources}' => $pluralizedController,
-            '{action}' => Inflector::getInflector()->tableize($controllerAndMethodName['method']),
+            '{action}' => Inflector::tableize($controllerAndMethodName['method']),
         ]);
 
         if ($routeName !== $expectedRouteName) {
@@ -70,21 +82,13 @@ final class NamingConventionLinter implements RouteLinterInterface
      */
     private function getControllerAndMethodName(Route $route)
     {
-        $defaultController = $route->getDefault('_controller');
-        if (false === strpos($defaultController, '::')) {
-            throw new SymfonyControllerConventionException(
-                sprintf('Controller "%s" does not follow symfony convention.', $defaultController),
-                $defaultController
-            );
+        $controller = $route->getDefault('_controller');
+
+        if (strpos($controller, '::') === false) {
+            $controller = $this->controllerNameParser->parse($controller);
         }
 
-        list($controller, $method) = explode('::', $defaultController, 2);
-        if (!method_exists($controller, $method)) {
-            throw new ControllerNotFoundException(
-                sprintf('Controller "%s" does not exist.', $defaultController),
-                $defaultController
-            );
-        }
+        list($controller, $method) = explode('::', $controller, 2);
 
         $controllerParts = explode('\\', $controller);
         $controller = preg_replace('/Controller$/', '', end($controllerParts));

@@ -54,23 +54,19 @@
   </div>
 </template>
 
-<script lang="ts">
-  import PSTags from '@app/widgets/ps-tags.vue';
-  import PSButton from '@app/widgets/ps-button.vue';
-  import {defineComponent} from 'vue';
-  import TranslationMixin from '@app/pages/translations/mixins/translate';
+<script>
+  import PSTags from '@app/widgets/ps-tags';
+  import PSButton from '@app/widgets/ps-button';
 
-  export default defineComponent({
+  export default {
     components: {
       PSTags,
       PSButton,
     },
-    mixins: [TranslationMixin],
     methods: {
       onClick() {
-        const refPsTags = this.$refs.psTags as VTags;
-        const {tag} = refPsTags;
-        refPsTags.add(tag);
+        const {tag} = this.$refs.psTags;
+        this.$refs.psTags.add(tag);
       },
       onSearch() {
         this.$store.dispatch('updateSearch', this.tags);
@@ -87,5 +83,5 @@
         tags: [],
       };
     },
-  });
+  };
 </script>

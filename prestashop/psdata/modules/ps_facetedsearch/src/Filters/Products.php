@@ -65,13 +65,17 @@ class Products
         ProductSearchQuery $query,
         array $selectedFilters = []
     ) {
+        // Get pagination
+        $productsPerPage = (int) $query->getResultsPerPage();
+        $page = (int) $query->getPage();
+
         // Load sorting type and direction, validate it and apply fallback if needed
         $orderBy = $query->getSortOrder()->toLegacyOrderBy(false);
         $orderWay = $query->getSortOrder()->toLegacyOrderWay();
         $orderWay = Validate::isOrderWay($orderWay) ? $orderWay : 'ASC';
         $orderBy = Validate::isOrderBy($orderBy) ? $orderBy : 'position';
 
-        // Apply it to the filter
+        $this->searchAdapter->setLimit($productsPerPage, ($page - 1) * $productsPerPage);
         $this->searchAdapter->setOrderField($orderBy);
         $this->searchAdapter->setOrderDirection($orderWay);
 
@@ -83,29 +87,19 @@ class Products
             $this->searchAdapter->addSelectField('price_max');
         }
 
-        // Get full list of matching products
-        $fullProductList = $this->searchAdapter->execute();
+        $matchingProductList = $this->searchAdapter->execute();
 
-        // Count them
-        $totalProductCount = count($fullProductList);
+        $this->pricePostFiltering($matchingProductList, $selectedFilters);
 
-        // Get pagination
-        $productsPerPage = (int) $query->getResultsPerPage();
-        $page = (int) $query->getPage();
+        $nbrProducts = $this->searchAdapter->count();
 
-        // Cut them down by pagination
-        $finalProductList = array_slice(
-            $fullProductList,
-            ($page - 1) * $productsPerPage,
-            $productsPerPage
-        );
-
-        // And run post filter
-        $this->pricePostFiltering($finalProductList, $selectedFilters);
+        if (empty($nbrProducts)) {
+            $matchingProductList = [];
+        }
 
         return [
-            'products' => $finalProductList,
-            'count' => $totalProductCount,
+            'products' => $matchingProductList,
+            'count' => $nbrProducts,
         ];
     }
 

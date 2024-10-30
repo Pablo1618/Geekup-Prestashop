@@ -198,8 +198,7 @@ class PriceCalculator
         int $combinationId,
         bool $withTaxes,
         bool $useReduction,
-        bool $withEcoTax,
-        int $customizationId = 0
+        bool $withEcoTax
     ): ?float {
         return Product::getPriceFromOrder(
             $orderId,
@@ -207,8 +206,7 @@ class PriceCalculator
             $combinationId,
             $withTaxes,
             $useReduction,
-            $withEcoTax,
-            $customizationId
+            $withEcoTax
         );
     }
 }

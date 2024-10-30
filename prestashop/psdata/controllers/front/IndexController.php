@@ -25,7 +25,6 @@
  */
 class IndexControllerCore extends FrontController
 {
-    /** @var string */
     public $php_self = 'index';
 
     /**
@@ -40,13 +39,5 @@ class IndexControllerCore extends FrontController
             'HOOK_HOME' => Hook::exec('displayHome'),
         ]);
         $this->setTemplate('index');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getCanonicalURL()
-    {
-        return $this->context->link->getPageLink('index');
     }
 }

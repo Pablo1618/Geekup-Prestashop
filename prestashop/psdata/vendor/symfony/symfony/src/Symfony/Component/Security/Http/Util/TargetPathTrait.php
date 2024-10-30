@@ -22,24 +22,33 @@ trait TargetPathTrait
      * Sets the target path the user should be redirected to after authentication.
      *
      * Usually, you do not need to set this directly.
+     *
+     * @param string $providerKey The name of your firewall
+     * @param string $uri         The URI to set as the target path
      */
-    private function saveTargetPath(SessionInterface $session, string $providerKey, string $uri)
+    private function saveTargetPath(SessionInterface $session, $providerKey, $uri)
     {
         $session->set('_security.'.$providerKey.'.target_path', $uri);
     }
 
     /**
      * Returns the URL (if any) the user visited that forced them to login.
+     *
+     * @param string $providerKey The name of your firewall
+     *
+     * @return string|null
      */
-    private function getTargetPath(SessionInterface $session, string $providerKey): ?string
+    private function getTargetPath(SessionInterface $session, $providerKey)
     {
         return $session->get('_security.'.$providerKey.'.target_path');
     }
 
     /**
      * Removes the target path from the session.
+     *
+     * @param string $providerKey The name of your firewall
      */
-    private function removeTargetPath(SessionInterface $session, string $providerKey)
+    private function removeTargetPath(SessionInterface $session, $providerKey)
     {
         $session->remove('_security.'.$providerKey.'.target_path');
     }

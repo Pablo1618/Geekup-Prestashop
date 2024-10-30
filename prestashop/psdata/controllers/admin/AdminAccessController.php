@@ -151,10 +151,10 @@ class AdminAccessControllerCore extends AdminController
                 throw new PrestaShopException('permission does not exist');
             }
 
-            $enabled = (bool) Tools::getValue('enabled');
+            $enabled = (int) Tools::getValue('enabled');
             $id_tab = (int) Tools::getValue('id_tab');
             $id_profile = (int) Tools::getValue('id_profile');
-            $addFromParent = (bool) Tools::getValue('addFromParent');
+            $addFromParent = (int) Tools::getValue('addFromParent');
 
             die($access->updateLgcAccess((int) $id_profile, $id_tab, $perm, $enabled, $addFromParent));
         }
@@ -172,7 +172,7 @@ class AdminAccessControllerCore extends AdminController
         if (Tools::isSubmit('changeModuleAccess')) {
             $access = new Access();
             $perm = Tools::getValue('perm');
-            $enabled = (bool) Tools::getValue('enabled');
+            $enabled = (int) Tools::getValue('enabled');
             $id_module = (int) Tools::getValue('id_module');
             $id_profile = (int) Tools::getValue('id_profile');
 

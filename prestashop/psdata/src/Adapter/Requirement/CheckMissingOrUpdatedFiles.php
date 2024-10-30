@@ -26,7 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Requirement;
 
-use PrestaShop\PrestaShop\Core\Version;
+use AppKernel;
 
 /**
  * Part of requirements for a PrestaShop website
@@ -48,7 +48,7 @@ class CheckMissingOrUpdatedFiles
         ];
 
         if (null === $dir) {
-            $xml = @simplexml_load_file(_PS_API_URL_ . '/xml/md5-' . Version::MAJOR_VERSION . '/' . Version::VERSION . '.xml');
+            $xml = @simplexml_load_file(_PS_API_URL_ . '/xml/md5-' . AppKernel::MAJOR_VERSION . '/' . AppKernel::VERSION . '.xml');
             if (!$xml) {
                 return $fileList;
             }

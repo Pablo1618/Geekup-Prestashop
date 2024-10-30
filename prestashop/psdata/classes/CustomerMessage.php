@@ -30,11 +30,10 @@
 class CustomerMessageCore extends ObjectModel
 {
     public $id;
-
     /** @var int CustomerThread ID */
     public $id_customer_thread;
 
-    /** @var int */
+    /** @var   */
     public $id_employee;
 
     /** @var string */
@@ -71,7 +70,7 @@ class CustomerMessageCore extends ObjectModel
             'id_employee' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'id_customer_thread' => ['type' => self::TYPE_INT],
             'ip_address' => ['type' => self::TYPE_STRING, 'validate' => 'isIp2Long', 'size' => 15],
-            'message' => ['type' => self::TYPE_HTML, 'required' => true, 'size' => 4194303, 'validate' => 'isCleanHtml'],
+            'message' => ['type' => self::TYPE_STRING, 'validate' => 'isCleanHtml', 'required' => true, 'size' => 16777216],
             'file_name' => ['type' => self::TYPE_STRING],
             'user_agent' => ['type' => self::TYPE_STRING],
             'private' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
@@ -162,7 +161,7 @@ class CustomerMessageCore extends ObjectModel
     public function delete()
     {
         if (!empty($this->file_name)) {
-            @unlink(_PS_UPLOAD_DIR_ . basename($this->file_name));
+            @unlink(_PS_UPLOAD_DIR_ . $this->file_name);
         }
 
         return parent::delete();
@@ -171,7 +170,7 @@ class CustomerMessageCore extends ObjectModel
     /**
      * Get the last message for a thread customer.
      *
-     * @param int $id_customer_thread Thread customer reference
+     * @param $id_customer_thread   Thread customer reference
      *
      * @return string Last message
      */

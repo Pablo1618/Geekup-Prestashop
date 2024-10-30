@@ -50,7 +50,7 @@ final class Converter
     }
 
     /**
-     * @param string $locale the locale (like "fr-FR")
+     * @var string the locale (like "fr-FR")
      *
      * @return string|bool the legacy PrestaShop locale (like "fr")
      *

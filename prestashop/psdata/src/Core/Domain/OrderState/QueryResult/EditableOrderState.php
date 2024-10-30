@@ -86,10 +86,6 @@ class EditableOrderState
      * @var array
      */
     private $localizedTemplates;
-    /**
-     * @var bool
-     */
-    private $isDeleted;
 
     public function __construct(
         OrderStateId $orderStateId,
@@ -104,8 +100,7 @@ class EditableOrderState
         bool $shipped,
         bool $paid,
         bool $delivery,
-        array $localizedTemplates,
-        bool $isDeleted
+        array $localizedTemplates
     ) {
         $this->orderStateId = $orderStateId;
         $this->localizedNames = $name;
@@ -120,7 +115,6 @@ class EditableOrderState
         $this->paid = $paid;
         $this->delivery = $delivery;
         $this->localizedTemplates = $localizedTemplates;
-        $this->isDeleted = $isDeleted;
     }
 
     /**
@@ -145,14 +139,6 @@ class EditableOrderState
     public function getColor()
     {
         return $this->color;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDeleted(): bool
-    {
-        return $this->isDeleted;
     }
 
     /**

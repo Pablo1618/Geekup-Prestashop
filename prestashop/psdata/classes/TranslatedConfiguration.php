@@ -29,7 +29,6 @@
  */
 class TranslatedConfigurationCore extends Configuration
 {
-    /** @var array */
     protected $webserviceParameters = [
         'objectNodeName' => 'translated_configuration',
         'objectsNodeName' => 'translated_configurations',
@@ -40,7 +39,6 @@ class TranslatedConfigurationCore extends Configuration
         ],
     ];
 
-    /** @var array */
     public static $definition = [
         'table' => 'configuration',
         'primary' => 'id_configuration',
@@ -58,8 +56,8 @@ class TranslatedConfigurationCore extends Configuration
     /**
      * TranslatedConfigurationCore constructor.
      *
-     * @param int|null $id
-     * @param int|null $idLang
+     * @param null $id
+     * @param null $idLang
      */
     public function __construct($id = null, $idLang = null)
     {
@@ -67,7 +65,7 @@ class TranslatedConfigurationCore extends Configuration
         // Check if the id configuration is set in the configuration_lang table.
         // Otherwise configuration is not set as translated configuration.
         if ($id !== null) {
-            $idTranslated = Db::getInstance()->executeS('SELECT `' . bqSQL($this->def['primary']) . '`
+            $idTranslated = Db::getInstance()->executeS('				SELECT `' . bqSQL($this->def['primary']) . '`
 				FROM `' . bqSQL(_DB_PREFIX_ . $this->def['table']) . '_lang`
 				WHERE `' . bqSQL($this->def['primary']) . '`=' . (int) $id . ' LIMIT 0,1
 			');
@@ -98,13 +96,11 @@ class TranslatedConfigurationCore extends Configuration
     public function update($nullValues = false)
     {
         $ishtml = false;
-        if (is_array($this->value)) {
-            foreach ($this->value as $i18NValue) {
-                if (Validate::isCleanHtml($i18NValue)) {
-                    $ishtml = true;
+        foreach ($this->value as $i18NValue) {
+            if (Validate::isCleanHtml($i18NValue)) {
+                $ishtml = true;
 
-                    break;
-                }
+                break;
             }
         }
         Configuration::updateValue($this->name, $this->value, $ishtml);

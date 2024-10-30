@@ -12,7 +12,6 @@
 namespace Symfony\Bridge\Twig\TokenParser;
 
 use Symfony\Bridge\Twig\Node\DumpNode;
-use Twig\Node\Node;
 use Twig\Token;
 use Twig\TokenParser\AbstractTokenParser;
 
@@ -26,15 +25,11 @@ use Twig\TokenParser\AbstractTokenParser;
  *     {% dump foo, bar %}
  *
  * @author Julien Galenski <julien.galenski@gmail.com>
- *
- * @final since Symfony 4.4
  */
 class DumpTokenParser extends AbstractTokenParser
 {
     /**
      * {@inheritdoc}
-     *
-     * @return Node
      */
     public function parse(Token $token)
     {
@@ -49,8 +44,6 @@ class DumpTokenParser extends AbstractTokenParser
 
     /**
      * {@inheritdoc}
-     *
-     * @return string
      */
     public function getTag()
     {

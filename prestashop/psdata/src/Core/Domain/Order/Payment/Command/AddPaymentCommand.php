@@ -29,7 +29,6 @@ namespace PrestaShop\PrestaShop\Core\Domain\Order\Payment\Command;
 use DateTimeImmutable;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Core\Domain\Currency\ValueObject\CurrencyId;
-use PrestaShop\PrestaShop\Core\Domain\Employee\ValueObject\EmployeeId;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\NegativePaymentAmountException;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
@@ -80,14 +79,9 @@ class AddPaymentCommand
     private $transactionId;
 
     /**
-     * @var int|null
+     * @var null
      */
     private $orderInvoiceId;
-
-    /**
-     * @var EmployeeId
-     */
-    protected $employeeId;
 
     /**
      * @param int $orderId
@@ -95,7 +89,6 @@ class AddPaymentCommand
      * @param string $paymentMethod
      * @param string $paymentAmount
      * @param int $paymentCurrencyId
-     * @param int $employeeId
      * @param int|null $orderInvoiceId
      * @param string|null $transactionId transaction ID, usually payment ID from payment gateway
      */
@@ -105,7 +98,6 @@ class AddPaymentCommand
         string $paymentMethod,
         string $paymentAmount,
         int $paymentCurrencyId,
-        int $employeeId,
         ?int $orderInvoiceId = null,
         ?string $transactionId = null
     ) {
@@ -118,7 +110,6 @@ class AddPaymentCommand
         $this->paymentMethod = $paymentMethod;
         $this->paymentAmount = $amount;
         $this->paymentCurrencyId = new CurrencyId($paymentCurrencyId);
-        $this->employeeId = new EmployeeId($employeeId);
         $this->orderInvoiceId = $orderInvoiceId;
         $this->transactionId = $transactionId;
     }
@@ -163,20 +154,9 @@ class AddPaymentCommand
         return $this->paymentCurrencyId;
     }
 
-    /**
-     * @return int|null
-     */
     public function getOrderInvoiceId()
     {
         return $this->orderInvoiceId;
-    }
-
-    /**
-     * @return EmployeeId
-     */
-    public function getEmployeeId(): EmployeeId
-    {
-        return $this->employeeId;
     }
 
     /**
@@ -189,12 +169,8 @@ class AddPaymentCommand
 
     /**
      * @param string $paymentMethod
-     *
-     * @return void
-     *
-     * @throws OrderConstraintException
      */
-    private function assertPaymentMethodIsGenericName(string $paymentMethod): void
+    private function assertPaymentMethodIsGenericName($paymentMethod)
     {
         if (empty($paymentMethod) || !preg_match(self::PATTERN_PAYMENT_METHOD_NAME, $paymentMethod)) {
             throw new OrderConstraintException(
@@ -204,14 +180,7 @@ class AddPaymentCommand
         }
     }
 
-    /**
-     * @param DecimalNumber $amount
-     *
-     * @return void
-     *
-     * @throws NegativePaymentAmountException
-     */
-    private function assertAmountIsPositive(DecimalNumber $amount): void
+    private function assertAmountIsPositive(DecimalNumber $amount)
     {
         if ($amount->isNegative()) {
             throw new NegativePaymentAmountException('The amount should be greater than 0.');

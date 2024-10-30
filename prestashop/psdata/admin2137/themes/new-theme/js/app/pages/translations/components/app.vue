@@ -42,11 +42,11 @@
 
       <div class="row">
         <Sidebar
-          :modal="$refs.transModal"
-          :principal="$refs.principal"
+          :modal="this.$refs.transModal"
+          :principal="this.$refs.principal"
         />
         <Principal
-          :modal="$refs.transModal"
+          :modal="this.$refs.transModal"
           ref="principal"
         />
       </div>
@@ -58,37 +58,34 @@
   </div>
 </template>
 
-<script lang="ts">
-  import {defineComponent} from 'vue';
-  import Search from '@app/pages/translations/components/header/search.vue';
-  import Sidebar from '@app/pages/translations/components/sidebar/index.vue';
-  import Principal from '@app/pages/translations/components/principal/index.vue';
-  import TranslationMixin from '@app/pages/translations/mixins/translate';
-  import PSModal from '@app/widgets/ps-modal.vue';
+<script>
+  import Search from '@app/pages/translations/components/header/search';
+  import Sidebar from '@app/pages/translations/components/sidebar';
+  import Principal from '@app/pages/translations/components/principal';
+  import PSModal from '@app/widgets/ps-modal';
 
-  export default defineComponent({
+  export default {
     name: 'App',
-    mixins: [TranslationMixin],
     computed: {
-      isReady(): boolean {
+      isReady() {
         return this.$store.getters.isReady;
       },
-      totalTranslations(): string {
+      totalTranslations() {
         return this.$store.state.totalTranslations <= 1
           ? this.trans('label_total_domain_singular')
-            .replace('%nb_translation%', this.$store.state.totalTranslations.toString())
+            .replace('%nb_translation%', this.$store.state.totalTranslations)
           : this.trans('label_total_domain')
-            .replace('%nb_translations%', this.$store.state.totalTranslations.toString());
+            .replace('%nb_translations%', this.$store.state.totalTranslations);
       },
-      totalMissingTranslations(): number {
+      totalMissingTranslations() {
         return this.$store.state.totalMissingTranslations;
       },
-      totalMissingTranslationsString(): string {
+      totalMissingTranslationsString() {
         return this.totalMissingTranslations === 1
           ? this.trans('label_missing_singular')
-          : this.trans('label_missing').replace('%d', <string><unknown> this.totalMissingTranslations);
+          : this.trans('label_missing').replace('%d', this.totalMissingTranslations);
       },
-      translations(): Record<string, any> {
+      translations() {
         return {
           button_save: this.trans('button_save'),
           button_leave: this.trans('button_leave'),
@@ -97,16 +94,13 @@
         };
       },
     },
-    beforeMount() {
-      this.$store.dispatch('getTranslations');
-    },
     mounted() {
-      $('a').on('click', (e: JQueryEventObject): void => {
+      $('a').on('click', (e) => {
         if ($(e.currentTarget).attr('href')) {
-          this.destHref = <string>$(e.currentTarget).attr('href');
+          this.destHref = $(e.currentTarget).attr('href');
         }
       });
-      window.onbeforeunload = (): any => {
+      window.onbeforeunload = () => {
         if (!this.destHref && this.isEdited() && !this.leave) {
           return true;
         }
@@ -116,18 +110,15 @@
             window.stop();
           }, 500);
 
-          if (this.$refs.transModal && this.$refs.principal) {
-            const refTransModal = this.$refs.transModal as VTransModal;
-            refTransModal.showModal();
-            refTransModal.$once('save', (): void => {
-              (this.$refs.principal as VPrincipal).saveTranslations();
-              this.leavePage();
-            });
+          this.$refs.transModal.showModal();
+          this.$refs.transModal.$once('save', () => {
+            this.$refs.principal.saveTranslations();
+            this.leavePage();
+          });
 
-            refTransModal.$once('leave', () => {
-              this.leavePage();
-            });
-          }
+          this.$refs.transModal.$once('leave', () => {
+            this.leavePage();
+          });
           return null;
         }
 
@@ -135,25 +126,25 @@
       };
     },
     methods: {
-      onSearch(): void {
+      onSearch() {
         this.$store.dispatch('getDomainsTree', {
           store: this.$store,
         });
-        this.$store.state.currentDomain = '';
+        this.$store.currentDomain = '';
       },
       /**
        * Set leave to true and redirect the user to the new location
        */
-      leavePage(): void {
+      leavePage() {
         this.leave = true;
-        window.location.href = <string> this.destHref;
+        window.location.href = this.destHref;
       },
-      isEdited(): boolean {
-        return (this.$refs.principal as VPrincipal).edited();
+      isEdited() {
+        return this.$refs.principal.edited();
       },
     },
     data: () => ({
-      destHref: null as null | string,
+      destHref: null,
       leave: false,
     }),
     components: {
@@ -162,7 +153,7 @@
       Principal,
       PSModal,
     },
-  });
+  };
 </script>
 
 <style lang="scss" type="text/scss">

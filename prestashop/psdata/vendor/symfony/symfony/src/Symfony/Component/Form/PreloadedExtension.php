@@ -29,17 +29,10 @@ class PreloadedExtension implements FormExtensionInterface
      *
      * @param FormTypeInterface[]            $types          The types that the extension should support
      * @param FormTypeExtensionInterface[][] $typeExtensions The type extensions that the extension should support
+     * @param FormTypeGuesserInterface|null  $typeGuesser    The guesser that the extension should support
      */
     public function __construct(array $types, array $typeExtensions, FormTypeGuesserInterface $typeGuesser = null)
     {
-        foreach ($typeExtensions as $extensions) {
-            foreach ($extensions as $typeExtension) {
-                if (!method_exists($typeExtension, 'getExtendedTypes')) {
-                    @trigger_error(sprintf('Not implementing the "%s::getExtendedTypes()" method in "%s" is deprecated since Symfony 4.2.', FormTypeExtensionInterface::class, \get_class($typeExtension)), \E_USER_DEPRECATED);
-                }
-            }
-        }
-
         $this->typeExtensions = $typeExtensions;
         $this->typeGuesser = $typeGuesser;
 
@@ -73,8 +66,9 @@ class PreloadedExtension implements FormExtensionInterface
      */
     public function getTypeExtensions($name)
     {
-        return $this->typeExtensions[$name]
-            ?? [];
+        return isset($this->typeExtensions[$name])
+            ? $this->typeExtensions[$name]
+            : [];
     }
 
     /**

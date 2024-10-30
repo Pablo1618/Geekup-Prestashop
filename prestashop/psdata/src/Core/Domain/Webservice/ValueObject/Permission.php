@@ -47,11 +47,6 @@ class Permission
     public const MODIFY = 'PUT';
 
     /**
-     * @var string Permission to patch existing resource
-     */
-    public const PATCH = 'PATCH';
-
-    /**
      * @var string Permission to add new resource
      */
     public const ADD = 'POST';

@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\Workflow\MarkingStore;
 
-@trigger_error(sprintf('"%s" is deprecated since Symfony 4.3, use "%s" instead.', MultipleStateMarkingStore::class, MethodMarkingStore::class), \E_USER_DEPRECATED);
-
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Workflow\Marking;
@@ -24,8 +22,6 @@ use Symfony\Component\Workflow\Marking;
  * This store deals with a "multiple state" Marking. It means a subject can be
  * in many states at the same time.
  *
- * @deprecated since Symfony 4.3, use MethodMarkingStore instead.
- *
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
  */
 class MultipleStateMarkingStore implements MarkingStoreInterface
@@ -33,7 +29,10 @@ class MultipleStateMarkingStore implements MarkingStoreInterface
     private $property;
     private $propertyAccessor;
 
-    public function __construct(string $property = 'marking', PropertyAccessorInterface $propertyAccessor = null)
+    /**
+     * @param string $property
+     */
+    public function __construct($property = 'marking', PropertyAccessorInterface $propertyAccessor = null)
     {
         $this->property = $property;
         $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
@@ -49,10 +48,8 @@ class MultipleStateMarkingStore implements MarkingStoreInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param array $context Some context
      */
-    public function setMarking($subject, Marking $marking/* , array $context = [] */)
+    public function setMarking($subject, Marking $marking)
     {
         $this->propertyAccessor->setValue($subject, $this->property, $marking->getPlaces());
     }

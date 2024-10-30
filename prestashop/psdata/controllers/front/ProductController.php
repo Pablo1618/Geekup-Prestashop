@@ -29,24 +29,18 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductListingPresenter;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\RedirectType;
+use PrestaShop\PrestaShop\Core\Addon\Module\ModuleManagerBuilder;
 use PrestaShop\PrestaShop\Core\Product\ProductExtraContentFinder;
+use PrestaShop\PrestaShop\Core\Product\ProductInterface;
 
 class ProductControllerCore extends ProductPresentingFrontControllerCore
 {
-    /** @var string */
     public $php_self = 'product';
-
-    /** @var int */
-    protected $id_product;
-
-    /** @var int|null */
-    protected $id_product_attribute;
 
     /** @var Product */
     protected $product;
 
-    /** @var Category|null */
+    /** @var Category */
     protected $category;
 
     protected $redirectionExtraExcludedKeys = ['id_product_attribute', 'rewrite'];
@@ -57,10 +51,6 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     protected $combinations;
 
     protected $quantity_discounts;
-
-    /**
-     * @var array
-     */
     protected $adminNotifications = [];
 
     /**
@@ -68,41 +58,32 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
      */
     protected $isQuickView = false;
 
-    /**
-     * @var bool
-     */
-    protected $isPreview = false;
-
     public function canonicalRedirection($canonical_url = '')
     {
-        // This is there to prevent error, because this function is also called
-        // in parent front controller before we have even loaded our data.
-        if (!Validate::isLoadedObject($this->product)) {
-            return;
-        }
+        if (Validate::isLoadedObject($this->product)) {
+            $idProductAttribute = Tools::getValue('id_product_attribute', null);
+            if (!$this->product->hasCombinations() || !$this->isValidCombination($idProductAttribute, $this->product->id)) {
+                //Invalid combination we redirect to the canonical url (without attribute id)
+                unset($_GET['id_product_attribute']);
+                $idProductAttribute = null;
+            }
 
-        // We check if the combination is valid, if not, we reset it redirect to pure product URL without combination.
-        if (!$this->product->hasCombinations() || !$this->isValidCombination($this->id_product_attribute, $this->product->id)) {
-            unset($_GET['id_product_attribute']);
-            $this->id_product_attribute = null;
+            // If the attribute id is present in the url we use it to perform the redirection, this will fix any domain
+            // or rewriting error and redirect to the appropriate url
+            // If the attribute is not present or invalid, we set it to null so that the request is redirected to the
+            // real canonical url (without any attribute)
+            parent::canonicalRedirection($this->context->link->getProductLink(
+                $this->product,
+                null,
+                null,
+                null,
+                null,
+                null,
+                $idProductAttribute
+            ));
         }
-
-        // If the attribute id is present in the url we use it to perform the redirection, this will fix any domain
-        // or rewriting error and redirect to the appropriate url.
-        parent::canonicalRedirection($this->context->link->getProductLink(
-            $this->product,
-            null,
-            null,
-            null,
-            null,
-            null,
-            $this->id_product_attribute
-        ));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCanonicalURL(): string
     {
         $product = $this->context->smarty->getTemplateVars('product');
@@ -123,185 +104,144 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     {
         parent::init();
 
-        // Get proper IDs
-        $this->id_product = (int) Tools::getValue('id_product');
-        $this->id_product_attribute = (int) Tools::getValue('id_product_attribute', null);
+        $id_product = (int) Tools::getValue('id_product');
 
-        // Load viewing modes
-        if ('1' === Tools::getValue('quickview')) {
-            $this->setQuickViewMode();
+        $this->setTemplate('catalog/product', [
+            'entity' => 'product',
+            'id' => $id_product,
+        ]);
+
+        if ($id_product) {
+            $this->product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         }
 
-        // We are in a preview mode only if proper admin token was also provided in the URL
-        if ('1' === Tools::getValue('preview') && Tools::getValue('adtoken') == Tools::getAdminToken(
-            'AdminProducts'
-            . (int) Tab::getIdFromClassName('AdminProducts')
-            . (int) Tools::getValue('id_employee')
-        )) {
-            $this->setPreviewMode();
-        }
-
-        // Try to load product object, otherwise immediately redirect to 404
-        if ($this->id_product) {
-            $this->product = new Product($this->id_product, true, $this->context->language->id, $this->context->shop->id);
-        }
         if (!Validate::isLoadedObject($this->product)) {
             header('HTTP/1.1 404 Not Found');
             header('Status: 404 Not Found');
             $this->errors[] = $this->trans('This product is no longer available.', [], 'Shop.Notifications.Error');
             $this->setTemplate('errors/404');
+        } else {
+            $this->canonicalRedirection();
+            /*
+             * If the product is associated to the shop
+             * and is active or not active but preview mode (need token + file_exists)
+             * allow showing the product
+             * In all the others cases => 404 "Product is no longer available"
+             */
+            $isAssociatedToProduct = (
+                Tools::getValue('adtoken') == Tools::getAdminToken(
+                    'AdminProducts'
+                    . (int) Tab::getIdFromClassName('AdminProducts')
+                    . (int) Tools::getValue('id_employee')
+                )
+                && $this->product->isAssociatedToShop()
+            );
+            $isPreview = ('1' === Tools::getValue('preview'));
+            if ((!$this->product->isAssociatedToShop() || !$this->product->active) && !$isPreview) {
+                if ($isAssociatedToProduct) {
+                    $this->adminNotifications['inactive_product'] = [
+                        'type' => 'warning',
+                        'message' => $this->trans('This product is not visible to your customers.', [], 'Shop.Notifications.Warning'),
+                    ];
+                } else {
+                    if (!$this->product->id_type_redirected) {
+                        if (in_array($this->product->redirect_type, [ProductInterface::REDIRECT_TYPE_CATEGORY_MOVED_PERMANENTLY, ProductInterface::REDIRECT_TYPE_CATEGORY_FOUND])) {
+                            $this->product->id_type_redirected = $this->product->id_category_default;
+                        } else {
+                            $this->product->redirect_type = ProductInterface::REDIRECT_TYPE_NOT_FOUND;
+                        }
+                    } elseif (in_array($this->product->redirect_type, [ProductInterface::REDIRECT_TYPE_PRODUCT_MOVED_PERMANENTLY, ProductInterface::REDIRECT_TYPE_PRODUCT_FOUND]) && $this->product->id_type_redirected == $this->product->id) {
+                        $this->product->redirect_type = ProductInterface::REDIRECT_TYPE_NOT_FOUND;
+                    }
 
-            return;
-        }
+                    switch ($this->product->redirect_type) {
+                        case ProductInterface::REDIRECT_TYPE_PRODUCT_MOVED_PERMANENTLY:
+                            header('HTTP/1.1 301 Moved Permanently');
+                            header('Location: ' . $this->context->link->getProductLink($this->product->id_type_redirected));
+                            exit;
 
-        // Check if the user is on correct URL and redirect if needed
-        $this->canonicalRedirection();
+                        break;
+                        case ProductInterface::REDIRECT_TYPE_PRODUCT_FOUND:
+                            header('HTTP/1.1 302 Moved Temporarily');
+                            header('Cache-Control: no-cache');
+                            header('Location: ' . $this->context->link->getProductLink($this->product->id_type_redirected));
+                            exit;
 
-        // Set proper template to product
-        $this->setTemplate('catalog/product', [
-            'entity' => 'product',
-            'id' => $this->id_product,
-        ]);
+                        break;
+                        case ProductInterface::REDIRECT_TYPE_CATEGORY_MOVED_PERMANENTLY:
+                            header('HTTP/1.1 301 Moved Permanently');
+                            header('Location: ' . $this->context->link->getCategoryLink($this->product->id_type_redirected));
+                            exit;
 
-        // Performs multiple checks and redirects user to error page if needed
-        $this->checkPermissionsToViewProduct();
+                            break;
+                        case ProductInterface::REDIRECT_TYPE_CATEGORY_FOUND:
+                            header('HTTP/1.1 302 Moved Temporarily');
+                            header('Cache-Control: no-cache');
+                            header('Location: ' . $this->context->link->getCategoryLink($this->product->id_type_redirected));
+                            exit;
 
-        // Load product category
-        $this->initializeCategory();
-    }
+                            break;
+                        case ProductInterface::REDIRECT_TYPE_NOT_FOUND:
+                        default:
+                            header('HTTP/1.1 404 Not Found');
+                            header('Status: 404 Not Found');
+                            $this->errors[] = $this->trans('This product is no longer available.', [], 'Shop.Notifications.Error');
+                            $this->setTemplate('errors/404');
 
-    /**
-     * Performs multiple checks and redirects user to error page if needed
-     */
-    public function checkPermissionsToViewProduct()
-    {
-        // If the person accessing the product page is admin with proper token, we only do limited checks
-        if ($this->isPreview()) {
-            if (!$this->product->isAssociatedToShop() || !$this->product->active) {
-                $this->adminNotifications['inactive_product'] = [
-                    'type' => 'warning',
-                    'message' => $this->trans('This product is not visible to your customers.', [], 'Shop.Notifications.Warning'),
-                ];
-            }
-
-            return;
-        }
-
-        // Now the checks for public
-        // If product is disabled or doesn't belong to this shop, we respect the redirection settings
-        if (!$this->product->isAssociatedToShop() || !$this->product->active) {
-            if (!$this->product->id_type_redirected) {
-                if (in_array($this->product->redirect_type, [RedirectType::TYPE_CATEGORY_PERMANENT, RedirectType::TYPE_CATEGORY_TEMPORARY])) {
-                    $this->product->id_type_redirected = $this->product->id_category_default;
+                            break;
+                    }
                 }
-            } elseif (in_array($this->product->redirect_type, [RedirectType::TYPE_PRODUCT_PERMANENT, RedirectType::TYPE_PRODUCT_TEMPORARY]) && $this->product->id_type_redirected == $this->product->id) {
-                $this->product->redirect_type = RedirectType::TYPE_NOT_FOUND;
-            }
+            } elseif (!$this->product->checkAccess(isset($this->context->customer->id) && $this->context->customer->id ? (int) $this->context->customer->id : 0)) {
+                header('HTTP/1.1 403 Forbidden');
+                header('Status: 403 Forbidden');
+                $this->errors[] = $this->trans('You do not have access to this product.', [], 'Shop.Notifications.Error');
+                $this->setTemplate('errors/forbidden');
+            } else {
+                if (!$isAssociatedToProduct && $isPreview && !$this->ajax) {
+                    header('HTTP/1.1 403 Forbidden');
+                    header('Status: 403 Forbidden');
+                    $this->errors[] = $this->trans('You do not have access to this product.', [], 'Shop.Notifications.Error');
+                    $this->setTemplate('errors/forbidden');
+                }
 
-            $redirect_type = $this->product->redirect_type;
-            // If product has no specified redirect settings, we get default from configuration
-            if (empty($redirect_type) || $redirect_type == RedirectType::TYPE_DEFAULT) {
-                $redirect_type = Configuration::get('PS_PRODUCT_REDIRECTION_DEFAULT');
-            }
-
-            switch ($redirect_type) {
-                case RedirectType::TYPE_PRODUCT_PERMANENT:
-                    header('HTTP/1.1 301 Moved Permanently');
-                    header('Location: ' . $this->context->link->getProductLink($this->product->id_type_redirected));
-                    exit;
-                case RedirectType::TYPE_PRODUCT_TEMPORARY:
-                    header('HTTP/1.1 302 Moved Temporarily');
-                    header('Cache-Control: no-cache');
-                    header('Location: ' . $this->context->link->getProductLink($this->product->id_type_redirected));
-                    exit;
-                case RedirectType::TYPE_CATEGORY_PERMANENT:
-                    header('HTTP/1.1 301 Moved Permanently');
-                    header('Location: ' . $this->context->link->getCategoryLink($this->product->id_type_redirected));
-                    exit;
-                case RedirectType::TYPE_CATEGORY_TEMPORARY:
-                    header('HTTP/1.1 302 Moved Temporarily');
-                    header('Cache-Control: no-cache');
-                    header('Location: ' . $this->context->link->getCategoryLink($this->product->id_type_redirected));
-                    exit;
-                case RedirectType::TYPE_SUCCESS_DISPLAYED:
-                    break;
-                case RedirectType::TYPE_NOT_FOUND_DISPLAYED:
-                    // We want to send this response only on initial page load
-                    // Sending it for ajax requests can cause problems in scripts relying on 200 response
-                    if (!$this->ajax) {
-                        header('HTTP/1.1 404 Not Found');
-                        header('Status: 404 Not Found');
+                if ($isAssociatedToProduct && $isPreview) {
+                    $this->adminNotifications['inactive_product'] = [
+                        'type' => 'warning',
+                        'message' => $this->trans('This product is not visible to your customers.', [], 'Shop.Notifications.Warning'),
+                    ];
+                }
+                // Load category
+                $id_category = false;
+                if (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] == Tools::secureReferrer($_SERVER['HTTP_REFERER']) // Assure us the previous page was one of the shop
+                    && preg_match('~^.*(?<!\/content)\/([0-9]+)\-(.*[^\.])|(.*)id_(category|product)=([0-9]+)(.*)$~', $_SERVER['HTTP_REFERER'], $regs)) {
+                    // If the previous page was a category and is a parent category of the product use this category as parent category
+                    $id_object = false;
+                    if (isset($regs[1]) && is_numeric($regs[1])) {
+                        $id_object = (int) $regs[1];
+                    } elseif (isset($regs[5]) && is_numeric($regs[5])) {
+                        $id_object = (int) $regs[5];
                     }
-
-                    break;
-                case RedirectType::TYPE_GONE_DISPLAYED:
-                    // We want to send this response only on initial page load
-                    // Sending it for ajax requests can cause problems in scripts relying on 200 response
-                    if (!$this->ajax) {
-                        header('HTTP/1.1 410 Gone');
-                        header('Status: 410 Gone');
+                    if ($id_object) {
+                        $referers = [$_SERVER['HTTP_REFERER'], urldecode($_SERVER['HTTP_REFERER'])];
+                        if (in_array($this->context->link->getCategoryLink($id_object), $referers)) {
+                            $id_category = (int) $id_object;
+                        } elseif (isset($this->context->cookie->last_visited_category) && (int) $this->context->cookie->last_visited_category && in_array($this->context->link->getProductLink($id_object), $referers)) {
+                            $id_category = (int) $this->context->cookie->last_visited_category;
+                        }
                     }
+                }
+                if (!$id_category || !Category::inShopStatic($id_category, $this->context->shop) || !Product::idIsOnCategoryId((int) $this->product->id, ['0' => ['id_category' => $id_category]])) {
+                    $id_category = (int) $this->product->id_category_default;
+                }
+                $this->category = new Category((int) $id_category, (int) $this->context->cookie->id_lang);
+                $moduleManagerBuilder = ModuleManagerBuilder::getInstance();
+                $moduleManager = $moduleManagerBuilder->build();
 
-                    break;
-                case RedirectType::TYPE_GONE:
-                    header('HTTP/1.1 410 Gone');
-                    header('Status: 410 Gone');
-                    $this->errors[] = $this->trans('This product is no longer available.', [], 'Shop.Notifications.Error');
-                    $this->setTemplate('errors/410');
-
-                    break;
-                case RedirectType::TYPE_NOT_FOUND:
-                default:
-                    header('HTTP/1.1 404 Not Found');
-                    header('Status: 404 Not Found');
-                    $this->errors[] = $this->trans('This product is no longer available.', [], 'Shop.Notifications.Error');
-                    $this->setTemplate('errors/404');
-
-                    break;
-            }
-        }
-
-        // Check if customer is allowed to access this product
-        if (!$this->product->checkAccess(isset($this->context->customer->id) && $this->context->customer->id ? (int) $this->context->customer->id : 0)) {
-            header('HTTP/1.1 403 Forbidden');
-            header('Status: 403 Forbidden');
-            $this->errors[] = $this->trans('You do not have access to this product.', [], 'Shop.Notifications.Error');
-            $this->setTemplate('errors/forbidden');
-        }
-    }
-
-    /**
-     * Loads related category to current visit. First it tries to get a category the user came from - it uses HTTP referer for this.
-     * If no category is found (or it's invalid), we use product's default category.
-     */
-    public function initializeCategory()
-    {
-        $id_category = false;
-        if (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] == Tools::secureReferrer($_SERVER['HTTP_REFERER']) // Assure us the previous page was one of the shop
-            && preg_match('~^.*(?<!\/content)\/([0-9]+)\-(.*[^\.])|(.*)id_(category|product)=([0-9]+)(.*)$~', $_SERVER['HTTP_REFERER'], $regs)) {
-            // If the previous page was a category and is a parent category of the product use this category as parent category
-            $id_object = false;
-            if (isset($regs[1]) && is_numeric($regs[1])) {
-                $id_object = (int) $regs[1];
-            } elseif (isset($regs[5]) && is_numeric($regs[5])) {
-                $id_object = (int) $regs[5];
-            }
-            if ($id_object) {
-                $referers = [$_SERVER['HTTP_REFERER'], urldecode($_SERVER['HTTP_REFERER'])];
-                if (in_array($this->context->link->getCategoryLink($id_object), $referers)) {
-                    $id_category = (int) $id_object;
-                } elseif (isset($this->context->cookie->last_visited_category) && (int) $this->context->cookie->last_visited_category && in_array($this->context->link->getProductLink($id_object), $referers)) {
-                    $id_category = (int) $this->context->cookie->last_visited_category;
+                if (isset($this->context->cookie, $this->category->id_category) && !($moduleManager->isInstalled('ps_categorytree') && $moduleManager->isEnabled('ps_categorytree'))) {
+                    $this->context->cookie->last_visited_category = (int) $this->category->id_category;
                 }
             }
         }
-        if (!$id_category || !Category::inShopStatic($id_category, $this->context->shop) || !Product::idIsOnCategoryId((int) $this->product->id, ['0' => ['id_category' => $id_category]])) {
-            $id_category = (int) $this->product->id_category_default;
-        }
-
-        // Load category and store it in cookie
-        $this->category = new Category((int) $id_category, (int) $this->context->cookie->id_lang);
-        $this->context->cookie->last_visited_category = (int) $this->category->id_category;
     }
 
     /**
@@ -330,6 +270,19 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
             } elseif ($priceDisplay == 1) {
                 $productPrice = $this->product->getPrice(false, null, 6);
                 $productPriceWithoutReduction = $this->product->getPriceWithoutReduct(true, null);
+            }
+
+            if (Tools::isSubmit('submitCustomizedData')) {
+                // If cart has not been saved, we need to do it so that customization fields can have an id_cart
+                // We check that the cookie exists first to avoid ghost carts
+                if (!$this->context->cart->id && isset($_COOKIE[$this->context->cookie->getName()])) {
+                    $this->context->cart->add();
+                    $this->context->cookie->id_cart = (int) $this->context->cart->id;
+                }
+                $this->pictureUpload();
+                $this->textRecord();
+            } elseif (Tools::getIsset('deletePicture') && !$this->context->cart->deleteCustomizationToProduct($this->product->id, Tools::getValue('deletePicture'))) {
+                $this->errors[] = $this->trans('An error occurred while deleting the selected picture.', [], 'Shop.Notifications.Error');
             }
 
             $pictures = [];
@@ -420,7 +373,6 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
 
             $product_for_template = $this->getTemplateVarProduct();
 
-            // Chained hook call - if multiple modules are hooked here, they will receive the result of the previous one as a parameter
             $filteredProduct = Hook::exec(
                 'filterProductContent',
                 ['object' => $product_for_template],
@@ -438,7 +390,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
             $productManufacturer = new Manufacturer((int) $this->product->id_manufacturer, $this->context->language->id);
 
             $manufacturerImageUrl = $this->context->link->getManufacturerImageLink($productManufacturer->id);
-            $undefinedImage = $this->context->link->getManufacturerImageLink(0);
+            $undefinedImage = $this->context->link->getManufacturerImageLink(null);
             if ($manufacturerImageUrl === $undefinedImage) {
                 $manufacturerImageUrl = null;
             }
@@ -452,7 +404,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
                 'id_customization' => empty($customization_datas) ? null : $customization_datas[0]['id_customization'],
                 'accessories' => $accessories,
                 'product' => $product_for_template,
-                'displayUnitPrice' => !empty($product_for_template['unit_price_tax_excluded']),
+                'displayUnitPrice' => (!empty($this->product->unity) && $this->product->unit_price_ratio > 0.000000) ? true : false,
                 'product_manufacturer' => $productManufacturer,
                 'manufacturer_image_url' => $manufacturerImageUrl,
                 'product_brand_url' => $productBrandUrl,
@@ -465,27 +417,6 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         parent::initContent();
     }
 
-    /**
-     * Processes submitted customizations
-     *
-     * @see FrontController::postProcess()
-     */
-    public function postProcess()
-    {
-        if (Tools::isSubmit('submitCustomizedData')) {
-            // If cart has not been saved, we need to do it so that customization fields can have an id_cart
-            // We check that the cookie exists first to avoid ghost carts
-            if (!$this->context->cart->id && isset($_COOKIE[$this->context->cookie->getName()])) {
-                $this->context->cart->add();
-                $this->context->cookie->id_cart = (int) $this->context->cart->id;
-            }
-            $this->pictureUpload();
-            $this->textRecord();
-        } elseif (Tools::getIsset('deletePicture') && !$this->context->cart->deleteCustomizationToProduct($this->product->id, Tools::getValue('deletePicture'))) {
-            $this->errors[] = $this->trans('An error occurred while deleting the selected picture.', [], 'Shop.Notifications.Error');
-        }
-    }
-
     public function displayAjaxQuickview()
     {
         $productForTemplate = $this->getTemplateVarProduct();
@@ -494,7 +425,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
 
         $this->setQuickViewMode();
 
-        $this->ajaxRender(json_encode([
+        $this->ajaxRender(Tools::jsonEncode([
             'quickview_html' => $this->render(
                 'catalog/_partials/quickview',
                 $productForTemplate instanceof AbstractLazyArray ?
@@ -509,15 +440,16 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     {
         $product = $this->getTemplateVarProduct();
         $minimalProductQuantity = $this->getProductMinimalQuantity($product);
+        $isPreview = ('1' === Tools::getValue('preview'));
+        $isQuickView = ('1' === Tools::getValue('quickview'));
 
-        // If the product is already in the cart, we can set the minimal quantity to 1
-        if ($product['cart_quantity'] >= $minimalProductQuantity) {
-            $minimalProductQuantity = 1;
+        if ($isQuickView) {
+            $this->setQuickViewMode();
         }
 
         ob_end_clean();
         header('Content-Type: application/json');
-        $this->ajaxRender(json_encode([
+        $this->ajaxRender(Tools::jsonEncode([
             'product_prices' => $this->render('catalog/_partials/product-prices'),
             'product_cover_thumbnails' => $this->render('catalog/_partials/product-cover-thumbnails'),
             'product_customization' => $this->render(
@@ -544,14 +476,16 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
                 false,
                 false,
                 true,
-                $this->isPreview() ? ['preview' => '1'] : []
+                $isPreview ? ['preview' => '1'] : []
             ),
             'product_minimal_quantity' => $minimalProductQuantity,
             'product_has_combinations' => !empty($this->combinations),
             'id_product_attribute' => $product['id_product_attribute'],
             'id_customization' => $product['id_customization'],
-            'product_title' => $this->getTemplateVarPage()['meta']['title'],
-            'is_quick_view' => $this->isQuickView(),
+            'product_title' => $this->getProductPageTitle(
+                $this->getTemplateVarPage()['meta'] ?? []
+            ),
+            'is_quick_view' => $isQuickView,
         ]));
     }
 
@@ -560,7 +494,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
      *
      * @deprecated This method is deprecated since 1.7.5 and will be dropped in 1.8.0, please use getProductMinimalQuantity instead.
      *
-     * @param array $product
+     * @param $product
      *
      * @return int
      */
@@ -701,14 +635,12 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
                 $this->combinations[$row['id_product_attribute']]['isbn'] = $row['isbn'];
                 $this->combinations[$row['id_product_attribute']]['unit_impact'] = $row['unit_price_impact'];
                 $this->combinations[$row['id_product_attribute']]['minimal_quantity'] = $row['minimal_quantity'];
-                if (!empty($row['available_date']) && $row['available_date'] != '0000-00-00' && Validate::isDate($row['available_date'])) {
+                if ($row['available_date'] != '0000-00-00' && Validate::isDate($row['available_date'])) {
                     $this->combinations[$row['id_product_attribute']]['available_date'] = $row['available_date'];
                     $this->combinations[$row['id_product_attribute']]['date_formatted'] = Tools::displayDate($row['available_date']);
                 } else {
                     $this->combinations[$row['id_product_attribute']]['available_date'] = $this->combinations[$row['id_product_attribute']]['date_formatted'] = '';
                 }
-                $this->combinations[$row['id_product_attribute']]['available_now'] = $row['available_now'];
-                $this->combinations[$row['id_product_attribute']]['available_later'] = $row['available_later'];
 
                 if (!isset($combination_images[$row['id_product_attribute']][0]['id_image'])) {
                     $this->combinations[$row['id_product_attribute']]['id_image'] = -1;
@@ -741,7 +673,9 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
                             if (isset($product_images) && is_array($product_images) && isset($product_images[$id_image])) {
                                 $product_images[$id_image]['cover'] = 1;
                                 $this->context->smarty->assign('mainImage', $product_images[$id_image]);
-                                $this->context->smarty->assign('images', $product_images);
+                                if (count($product_images)) {
+                                    $this->context->smarty->assign('images', $product_images);
+                                }
                             }
 
                             $cover = $current_cover;
@@ -867,7 +801,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         if (is_array($attributes_combinations) && count($attributes_combinations)) {
             foreach ($attributes_combinations as &$ac) {
                 foreach ($ac as &$val) {
-                    $val = str_replace(Configuration::get('PS_ATTRIBUTE_ANCHOR_SEPARATOR'), '_', Tools::str2url(str_replace([',', '.'], '-', $val)));
+                    $val = str_replace(Configuration::get('PS_ATTRIBUTE_ANCHOR_SEPARATOR'), '_', Tools::link_rewrite(str_replace([',', '.'], '-', $val)));
                 }
             }
         } else {
@@ -885,10 +819,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     protected function assignCategory()
     {
         // Assign category to the template
-        if (
-            (empty($this->category) || !Validate::isLoadedObject($this->category) || !$this->category->inShop() || !$this->category->isAssociatedToShop())
-            && Category::inShopStatic($this->product->id_category_default, $this->context->shop)
-        ) {
+        if (($this->category === false || !Validate::isLoadedObject($this->category) || !$this->category->inShop() || !$this->category->isAssociatedToShop()) && Category::inShopStatic($this->product->id_category_default, $this->context->shop)) {
             $this->category = new Category((int) $this->product->id_category_default, (int) $this->context->language->id);
         }
 
@@ -936,7 +867,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         $indexes = array_flip($authorized_file_fields);
         foreach ($_FILES as $field_name => $file) {
             if (in_array($field_name, $authorized_file_fields) && isset($file['tmp_name']) && !empty($file['tmp_name'])) {
-                $file_name = md5(uniqid((string) mt_rand(0, mt_getrandmax()), true));
+                $file_name = md5(uniqid(mt_rand(0, mt_getrandmax()), true));
                 if ($error = ImageManager::validateUpload($file, (int) Configuration::get('PS_PRODUCT_PICTURE_MAX_SIZE'))) {
                     $this->errors[] = $error;
                 }
@@ -979,7 +910,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         foreach ($_POST as $field_name => $value) {
             if (in_array($field_name, $authorized_text_fields) && $value != '') {
                 if (!Validate::isMessage($value)) {
-                    $this->errors[] = $this->trans('Invalid message.', [], 'Shop.Notifications.Error');
+                    $this->errors[] = $this->trans('Invalid message', [], 'Shop.Notifications.Error');
                 } else {
                     $this->context->cart->addTextFieldToProduct($this->product->id, $indexes[$field_name], Product::CUSTOMIZE_TEXTFIELD, $value);
                 }
@@ -1022,17 +953,11 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         return $specific_prices;
     }
 
-    /**
-     * @return Product
-     */
     public function getProduct()
     {
         return $this->product;
     }
 
-    /**
-     * @return Category|null
-     */
     public function getCategory()
     {
         return $this->category;
@@ -1043,7 +968,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
      *
      * @return int
      */
-    protected function getIdProductAttributeByRequest()
+    private function getIdProductAttributeByRequest()
     {
         $requestedIdProductAttribute = (int) Tools::getValue('id_product_attribute');
 
@@ -1060,20 +985,11 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
      */
     private function getIdProductAttributeByGroupOrRequestOrDefault()
     {
-        // If the product has no combinations, we return early
-        if (!$this->product->hasCombinations()) {
-            return null;
-        }
-
-        // Try to retrieve associated product combination id by group
         $idProductAttribute = $this->getIdProductAttributeByGroup();
-
-        // Try to retrieve associated product combination id in request (GET/POST)
         if (null === $idProductAttribute) {
             $idProductAttribute = (int) Tools::getValue('id_product_attribute');
         }
 
-        // Try to retrieve default associated product combination id
         if (0 === $idProductAttribute) {
             $idProductAttribute = (int) Product::getDefaultAttribute($this->product->id);
         }
@@ -1091,7 +1007,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
      *
      * @return int
      */
-    protected function tryToGetAvailableIdProductAttribute($checkedIdProductAttribute)
+    private function tryToGetAvailableIdProductAttribute($checkedIdProductAttribute)
     {
         if (!Configuration::get('PS_DISP_UNAVAILABLE_ATTR')) {
             $productCombinations = $this->product->getAttributeCombinations();
@@ -1169,27 +1085,16 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
      */
     private function getIdProductAttributeByGroup()
     {
-        try {
-            $groups = Tools::getValue('group');
-            if (empty($groups)) {
-                return null;
-            }
-
-            return (int) Product::getIdProductAttributeByIdAttributes(
-                $this->product->id,
-                $groups,
-                true
-            );
-        } catch (Exception $e) {
-            PrestaShopLogger::addLog(
-                'Error: ' . $e->getMessage(),
-                1,
-                $e->getCode(),
-                'Product'
-            );
+        $groups = Tools::getValue('group');
+        if (empty($groups)) {
+            return null;
         }
 
-        return 0;
+        return (int) Product::getIdProductAttributeByIdAttributes(
+            $this->product->id,
+            $groups,
+            true
+        );
     }
 
     public function getTemplateVarProduct()
@@ -1204,10 +1109,9 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         $product['new'] = (int) $this->product->new;
         $product['id_product_attribute'] = $this->getIdProductAttributeByGroupOrRequestOrDefault();
         $product['minimal_quantity'] = $this->getProductMinimalQuantity($product);
-        $product['cart_quantity'] = $this->context->cart->getProductQuantity($product['id_product'], $product['id_product_attribute'])['quantity'];
         $product['quantity_wanted'] = $this->getRequiredQuantity($product);
         $product['extraContent'] = $extraContentFinder->addParams(['product' => $this->product])->present();
-        $product['ecotax_tax_inc'] = $this->product->getEcotax(null, true, true);
+
         $product['ecotax'] = Tools::convertPrice($this->getProductEcotax($product), $this->context->currency, true, $this->context);
 
         $product_full = Product::getProductProperties($this->context->language->id, $product, $this->context);
@@ -1223,6 +1127,11 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         );
         $product_full['quantity_label'] = ($this->product->quantity > 1) ? $this->trans('Items', [], 'Shop.Theme.Catalog') : $this->trans('Item', [], 'Shop.Theme.Catalog');
         $product_full['quantity_discounts'] = $this->quantity_discounts;
+
+        if ($product_full['unit_price_ratio'] > 0) {
+            $unitPrice = ($productSettings->include_taxes) ? $product_full['price'] : $product_full['price_tax_exc'];
+            $product_full['unit_price'] = $unitPrice / $product_full['unit_price_ratio'];
+        }
 
         $group_reduction = GroupReduction::getValueForProduct($this->product->id, (int) Group::getCurrent()->id);
         if ($group_reduction === false) {
@@ -1247,7 +1156,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     }
 
     /**
-     * @param array $product
+     * @param $product
      *
      * @return int
      */
@@ -1299,7 +1208,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     }
 
     /**
-     * @param int $combinationId
+     * @param $combinationId
      *
      * @return ProductController|null
      */
@@ -1307,7 +1216,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     {
         $combinations = $this->product->getAttributesGroups($this->context->language->id, $combinationId);
 
-        if (!is_array($combinations) || empty($combinations)) {
+        if ($combinations === false || !is_array($combinations) || empty($combinations)) {
             return null;
         }
 
@@ -1315,7 +1224,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     }
 
     /**
-     * @param array $product
+     * @param $product
      *
      * @return int
      */
@@ -1324,10 +1233,6 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         $requiredQuantity = (int) Tools::getValue('quantity_wanted', $this->getProductMinimalQuantity($product));
         if ($requiredQuantity < $product['minimal_quantity']) {
             $requiredQuantity = $product['minimal_quantity'];
-        }
-
-        if ($product['cart_quantity'] >= $requiredQuantity) {
-            return 0;
         }
 
         return $requiredQuantity;
@@ -1340,7 +1245,6 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         $categoryDefault = new Category($this->product->id_category_default, $this->context->language->id);
 
         foreach ($categoryDefault->getAllParents() as $category) {
-            /** @var Category $category */
             if ($category->id_parent != 0 && !$category->is_root_category && $category->active) {
                 $breadcrumb['links'][] = [
                     'title' => $category->name,
@@ -1562,25 +1466,5 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     public function setQuickViewMode(bool $enabled = true)
     {
         $this->isQuickView = $enabled;
-    }
-
-    /**
-     * Return information whether we are or not in preview mode.
-     *
-     * @return bool
-     */
-    public function isPreview(): bool
-    {
-        return $this->isPreview;
-    }
-
-    /**
-     * Set preview mode.
-     *
-     * @param bool $enabled
-     */
-    public function setPreviewMode(bool $enabled = true)
-    {
-        $this->isPreview = $enabled;
     }
 }

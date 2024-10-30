@@ -29,7 +29,6 @@ declare(strict_types=1);
 namespace PrestaShopBundle\Form\Admin\Extension;
 
 use Symfony\Component\Form\AbstractTypeExtension;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -39,12 +38,9 @@ class CommaTransformerExtension extends AbstractTypeExtension
     /**
      * {@inheritdoc}
      */
-    public static function getExtendedTypes(): iterable
+    public function getExtendedType(): string
     {
-        return [
-            NumberType::class,
-            MoneyType::class,
-        ];
+        return NumberType::class;
     }
 
     /**
@@ -55,13 +51,12 @@ class CommaTransformerExtension extends AbstractTypeExtension
         parent::configureOptions($resolver);
 
         $resolver->setNormalizer('attr', function (Options $options, $value) {
-            $classAttribute = $value['class'] ?? '';
-            $classes = explode(' ', $classAttribute);
-            if (!in_array('js-comma-transformer', $classes)) {
-                $classes[] = 'js-comma-transformer';
+            $classes = 'js-comma-transformer';
+            if (!empty($value['class'])) {
+                $classes .= ' ' . $value['class'];
             }
 
-            $value['class'] = implode(' ', $classes);
+            $value['class'] = $classes;
 
             return $value;
         });

@@ -44,7 +44,7 @@ final class BackUrlRedirectResponseListener
     private $backUrlProvider;
 
     /**
-     * @var int|null
+     * @var int
      */
     private $employeeId;
 
@@ -65,7 +65,7 @@ final class BackUrlRedirectResponseListener
     public function onKernelResponse(FilterResponseEvent $event)
     {
         // No need to continue because the employee is not connected
-        if (!$this->employeeId) {
+        if (empty($this->employeeId)) {
             return;
         }
 

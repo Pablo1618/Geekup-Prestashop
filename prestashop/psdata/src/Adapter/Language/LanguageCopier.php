@@ -32,6 +32,7 @@ use PrestaShop\PrestaShop\Core\Language\Copier\LanguageCopierConfigInterface;
 use PrestaShop\PrestaShop\Core\Language\Copier\LanguageCopierInterface;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class LanguageCopier responsible for copying a language into another language.
@@ -42,6 +43,11 @@ final class LanguageCopier implements LanguageCopierInterface
      * @var LanguageDataProvider
      */
     private $languageDataProvider;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
 
     /**
      * @var Filesystem
@@ -55,15 +61,18 @@ final class LanguageCopier implements LanguageCopierInterface
 
     /**
      * @param LanguageDataProvider $languageDataProvider
+     * @param TranslatorInterface $translator
      * @param Filesystem $filesystem
      * @param ThemeCollection $themeCollection
      */
     public function __construct(
         LanguageDataProvider $languageDataProvider,
+        TranslatorInterface $translator,
         Filesystem $filesystem,
         ThemeCollection $themeCollection
     ) {
         $this->languageDataProvider = $languageDataProvider;
+        $this->translator = $translator;
         $this->filesystem = $filesystem;
         $this->themeCollection = $themeCollection;
     }

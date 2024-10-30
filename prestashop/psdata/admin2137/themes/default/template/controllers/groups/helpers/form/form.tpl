@@ -81,7 +81,7 @@
 				return;
 			$.ajax({
 				type:"POST",
-				url: "index.php",
+				url: "ajax-tab.php",
 				async: true,
 				dataType: "json",
 				data : {

@@ -29,7 +29,7 @@ declare(strict_types=1);
 namespace PrestaShopBundle\EventListener;
 
 use PrestaShopBundle\Routing\Converter\LegacyParametersConverter;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Tools;
 
 /**
@@ -55,9 +55,9 @@ class LegacyParametersListener
     }
 
     /**
-     * @param RequestEvent $event
+     * @param GetResponseEvent $event
      */
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(GetResponseEvent $event)
     {
         if (!$event->isMasterRequest()) {
             return;

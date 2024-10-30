@@ -32,7 +32,7 @@ namespace PrestaShop\PrestaShop\Core\Domain\Profile\Exception;
 class ProfileConstraintException extends ProfileException
 {
     /**
-     * @var int Code is used when invalid profile name is encountered
+     * @var string Code is used when invalid profile name is encountered
      */
     public const INVALID_NAME = 1;
 }

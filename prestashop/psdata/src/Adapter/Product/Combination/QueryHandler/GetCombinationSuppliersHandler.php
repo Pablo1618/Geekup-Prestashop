@@ -29,11 +29,13 @@ namespace PrestaShop\PrestaShop\Adapter\Product\Combination\QueryHandler;
 
 use PrestaShop\PrestaShop\Adapter\Product\AbstractProductSupplierHandler;
 use PrestaShop\PrestaShop\Adapter\Product\Combination\Repository\CombinationRepository;
+use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductSupplierRepository;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\Query\GetCombinationSuppliers;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\QueryHandler\GetCombinationSuppliersHandlerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 
-class GetCombinationSuppliersHandler extends AbstractProductSupplierHandler implements GetCombinationSuppliersHandlerInterface
+final class GetCombinationSuppliersHandler extends AbstractProductSupplierHandler implements GetCombinationSuppliersHandlerInterface
 {
     /**
      * @var CombinationRepository
@@ -41,15 +43,23 @@ class GetCombinationSuppliersHandler extends AbstractProductSupplierHandler impl
     private $combinationRepository;
 
     /**
+     * @var ProductRepository
+     */
+    private $productRepository;
+
+    /**
      * @param ProductSupplierRepository $productSupplierRepository
      * @param CombinationRepository $combinationRepository
+     * @param ProductRepository $productRepository
      */
     public function __construct(
         ProductSupplierRepository $productSupplierRepository,
-        CombinationRepository $combinationRepository
+        CombinationRepository $combinationRepository,
+        ProductRepository $productRepository
     ) {
         parent::__construct($productSupplierRepository);
         $this->combinationRepository = $combinationRepository;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -57,11 +67,11 @@ class GetCombinationSuppliersHandler extends AbstractProductSupplierHandler impl
      */
     public function handle(GetCombinationSuppliers $query): array
     {
-        $combinationId = $query->getCombinationId();
+        $combination = $this->combinationRepository->get($query->getCombinationId());
 
         return $this->getProductSuppliersInfo(
-            $this->combinationRepository->getProductId($combinationId),
-            $combinationId
+            new ProductId((int) $combination->id_product),
+            $query->getCombinationId()
         );
     }
 }

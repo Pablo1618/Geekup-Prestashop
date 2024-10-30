@@ -50,14 +50,12 @@ use ShopUrl;
 use SpecificPrice;
 use SpecificPriceRule;
 use StockAvailable;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Tax;
 use Tools;
 use Validate;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * Admin controller wrapper for new Architecture, about Product admin controller.
  */
 class AdminProductWrapper
@@ -307,11 +305,11 @@ class AdminProductWrapper
 
         // ---- validation ----
         if (($price == '-1') && ((float) $reduction == '0')) {
-            $this->errors[] = $this->translator->trans('No reduction value has been submitted.', [], 'Admin.Catalog.Notification');
+            $this->errors[] = $this->translator->trans('No reduction value has been submitted', [], 'Admin.Catalog.Notification');
         } elseif ($to != '0000-00-00 00:00:00' && strtotime($to) < strtotime($from)) {
             $this->errors[] = $this->translator->trans('Invalid date range', [], 'Admin.Catalog.Notification');
         } elseif ($reduction_type == 'percentage' && ((float) $reduction <= 0 || (float) $reduction > 100)) {
-            $this->errors[] = $this->translator->trans('The submitted reduction value (0-100) is out-of-range.', [], 'Admin.Catalog.Notification');
+            $this->errors[] = $this->translator->trans('Submitted reduction value (0-100) is out-of-range', [], 'Admin.Catalog.Notification');
         }
         $validationResult = $this->validateSpecificPrice(
             $id_product,
@@ -421,7 +419,6 @@ class AdminProductWrapper
      */
     public function getSpecificPricesList($product, $defaultCurrency, $shops, $currencies, $countries, $groups)
     {
-        $context = Context::getContext();
         $content = [];
         $specific_prices = array_merge(
             SpecificPrice::getByProductId((int) $product->id),
@@ -479,7 +476,7 @@ class AdminProductWrapper
                 }
                 if ($specific_price['id_product_attribute']) {
                     $combination = new Combination((int) $specific_price['id_product_attribute']);
-                    $attributes = $combination->getAttributesName($context->language->id);
+                    $attributes = $combination->getAttributesName(1);
                     $attributes_name = '';
                     foreach ($attributes as $attribute) {
                         $attributes_name .= $attribute['name'] . ' - ';
@@ -514,7 +511,7 @@ class AdminProductWrapper
                         'id_product' => $product->id,
                         'rule_name' => $rule_name,
                         'attributes_name' => $attributes_name,
-                        'shop' => ($specific_price['id_shop'] ? $shops[$specific_price['id_shop']]['name'] : $this->translator->trans('All stores', [], 'Admin.Global')),
+                        'shop' => ($specific_price['id_shop'] ? $shops[$specific_price['id_shop']]['name'] : $this->translator->trans('All shops', [], 'Admin.Global')),
                         'currency' => ($specific_price['id_currency'] ? $currencies[$specific_price['id_currency']]['name'] : $this->translator->trans('All currencies', [], 'Admin.Global')),
                         'country' => ($specific_price['id_country'] ? $countries[$specific_price['id_country']]['name'] : $this->translator->trans('All countries', [], 'Admin.Global')),
                         'group' => ($specific_price['id_group'] ? $groups[$specific_price['id_group']]['name'] : $this->translator->trans('All groups', [], 'Admin.Global')),
@@ -907,7 +904,7 @@ class AdminProductWrapper
     public function getPreviewUrl($product, $preview = true)
     {
         $context = Context::getContext();
-        $id_lang = (int) Configuration::get('PS_LANG_DEFAULT', null, null, $context->shop->id);
+        $id_lang = Configuration::get('PS_LANG_DEFAULT', null, null, $context->shop->id);
 
         if (!ShopUrl::getMainShopDomain()) {
             return false;

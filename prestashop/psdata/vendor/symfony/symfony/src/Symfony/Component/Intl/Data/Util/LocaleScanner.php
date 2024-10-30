@@ -33,12 +33,14 @@ class LocaleScanner
     /**
      * Returns all locales found in the given directory.
      *
+     * @param string $sourceDir The directory with ICU files
+     *
      * @return array An array of locales. The result also contains locales that
      *               are in fact just aliases for other locales. Use
      *               {@link scanAliases()} to determine which of the locales
      *               are aliases
      */
-    public function scanLocales(string $sourceDir): array
+    public function scanLocales($sourceDir)
     {
         $locales = glob($sourceDir.'/*.txt', \GLOB_NOSORT);
 
@@ -58,10 +60,12 @@ class LocaleScanner
     /**
      * Returns all locale aliases found in the given directory.
      *
+     * @param string $sourceDir The directory with ICU files
+     *
      * @return array An array with the locale aliases as keys and the aliased
      *               locales as values
      */
-    public function scanAliases(string $sourceDir): array
+    public function scanAliases($sourceDir)
     {
         $locales = $this->scanLocales($sourceDir);
         $aliases = [];
@@ -77,25 +81,5 @@ class LocaleScanner
         }
 
         return $aliases;
-    }
-
-    /**
-     * Returns all locale parents found in the given directory.
-     */
-    public function scanParents(string $sourceDir): array
-    {
-        $locales = $this->scanLocales($sourceDir);
-        $fallbacks = [];
-
-        foreach ($locales as $locale) {
-            $content = file_get_contents($sourceDir.'/'.$locale.'.txt');
-
-            // Aliases contain the text "%%PARENT" followed by the aliased locale
-            if (preg_match('/%%Parent{"([^"]+)"}/', $content, $matches)) {
-                $fallbacks[$locale] = $matches[1];
-            }
-        }
-
-        return $fallbacks;
     }
 }

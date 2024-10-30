@@ -84,10 +84,6 @@ final class EditRootCategoryHandler extends AbstractObjectModelHandler implement
             $category->description = $command->getLocalizedDescriptions();
         }
 
-        if (null !== $command->getLocalizedAdditionalDescriptions()) {
-            $category->additional_description = $command->getLocalizedAdditionalDescriptions();
-        }
-
         if (null !== $command->getLocalizedMetaTitles()) {
             $category->meta_title = $command->getLocalizedMetaTitles();
         }
@@ -109,11 +105,11 @@ final class EditRootCategoryHandler extends AbstractObjectModelHandler implement
         }
 
         if (false === $category->validateFields(false)) {
-            throw new CategoryException('Invalid data for updating root category.');
+            throw new CategoryException('Invalid data for updating category root');
         }
 
         if (false === $category->validateFieldsLang(false)) {
-            throw new CategoryException('Invalid language data for updating root category.');
+            throw new CategoryException('Invalid data for updating category root');
         }
 
         if (false === $category->update()) {

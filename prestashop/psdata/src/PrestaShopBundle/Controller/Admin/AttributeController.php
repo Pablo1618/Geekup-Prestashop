@@ -26,15 +26,12 @@
 
 namespace PrestaShopBundle\Controller\Admin;
 
-use PrestaShop\PrestaShop\Adapter\Attribute\AdminAttributeGeneratorControllerWrapper;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use Product;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @deprecated since 8.1 and will be removed in next major.
- *
  * Admin controller for the attribute / attribute group.
  */
 class AttributeController extends FrameworkBundleAdminController
@@ -42,7 +39,7 @@ class AttributeController extends FrameworkBundleAdminController
     /**
      * get All Attributes as json.
      *
-     * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))")
+     * @AdminSecurity("is_granted(['read'], request.get('_legacy_controller'))")
      *
      * @return JsonResponse
      */
@@ -85,9 +82,7 @@ class AttributeController extends FrameworkBundleAdminController
     /**
      * Attributes generator.
      *
-     * @AdminSecurity(
-     *     "is_granted('create', request.get('_legacy_controller')) && is_granted('update', request.get('_legacy_controller'))"
-     * )
+     * @AdminSecurity("is_granted(['create', 'update'], request.get('_legacy_controller'))")
      *
      * @param Request $request The request
      *
@@ -133,7 +128,7 @@ class AttributeController extends FrameworkBundleAdminController
         }
 
         //create attributes
-        $this->get(AdminAttributeGeneratorControllerWrapper::class)->processGenerate($product, $newOptions);
+        $this->get('prestashop.adapter.admin.controller.attribute_generator')->processGenerate($product, $newOptions);
 
         //get all product combinations
         $allCombinations = $product->getAttributeCombinations(1, false);
@@ -205,7 +200,7 @@ class AttributeController extends FrameworkBundleAdminController
     /**
      * Delete a product attribute.
      *
-     * @AdminSecurity("is_granted('delete', request.get('_legacy_controller'))")
+     * @AdminSecurity("is_granted(['delete'], request.get('_legacy_controller'))")
      *
      * @param int $idProduct The product ID
      * @param Request $request The request
@@ -225,7 +220,7 @@ class AttributeController extends FrameworkBundleAdminController
         if ($request->request->has('attribute-ids')) {
             $attributeIds = $request->request->get('attribute-ids');
             foreach ($attributeIds as $attributeId) {
-                $legacyResponse = $this->get(AdminAttributeGeneratorControllerWrapper::class)
+                $legacyResponse = $this->get('prestashop.adapter.admin.controller.attribute_generator')
                     ->ajaxProcessDeleteProductAttribute($attributeId, $idProduct);
             }
 
@@ -242,7 +237,7 @@ class AttributeController extends FrameworkBundleAdminController
     /**
      * Delete all product attributes.
      *
-     * @AdminSecurity("is_granted('delete', request.get('_legacy_controller'))")
+     * @AdminSecurity("is_granted(['delete'], request.get('_legacy_controller'))")
      *
      * @param int $idProduct The product ID
      * @param Request $request The request
@@ -264,7 +259,7 @@ class AttributeController extends FrameworkBundleAdminController
         $res = false;
 
         foreach ($combinations as $combination) {
-            $res = $this->get(AdminAttributeGeneratorControllerWrapper::class)
+            $res = $this->get('prestashop.adapter.admin.controller.attribute_generator')
                 ->ajaxProcessDeleteProductAttribute($combination['id_product_attribute'], $idProduct);
 
             if ($res['status'] == 'error') {
@@ -282,7 +277,7 @@ class AttributeController extends FrameworkBundleAdminController
     /**
      * get the images form for a product combinations.
      *
-     * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))")
+     * @AdminSecurity("is_granted(['read'], request.get('_legacy_controller'))")
      *
      * @param int $idProduct The product id
      * @param Request $request The request

@@ -2,22 +2,16 @@
 
 namespace Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\Cache\Adapter\DoctrineDbalAdapter;
+use Doctrine\DBAL\Configuration;
 use Symfony\Component\Cache\Adapter\PdoAdapter;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
-use Symfony\Component\Lock\Store\DoctrineDbalStore;
 use Symfony\Component\Lock\Store\PdoStore;
-use Symfony\Component\Messenger\Bridge\Doctrine\Transport\Connection;
-use Symfony\Component\Messenger\Transport\Doctrine\Connection as LegacyConnection;
-
-use function array_keys;
+use Symfony\Component\Messenger\Transport\Doctrine\Connection;
 
 /**
  * Blacklist tables used by well-known Symfony classes.
- *
- * @deprecated Implement your own include/exclude mechanism
  */
 class WellKnownSchemaFilterPass implements CompilerPassInterface
 {
@@ -26,6 +20,11 @@ class WellKnownSchemaFilterPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
+        if (! method_exists(Configuration::class, 'setSchemaAssetsFilter')) {
+            // only supported when using doctrine/dbal 2.9 or higher
+            return;
+        }
+
         $blacklist = [];
 
         foreach ($container->getDefinitions() as $definition) {
@@ -34,7 +33,6 @@ class WellKnownSchemaFilterPass implements CompilerPassInterface
             }
 
             switch ($definition->getClass()) {
-                case DoctrineDbalAdapter::class:
                 case PdoAdapter::class:
                     $blacklist[] = $definition->getArguments()[3]['db_table'] ?? 'cache_items';
                     break;
@@ -43,12 +41,10 @@ class WellKnownSchemaFilterPass implements CompilerPassInterface
                     $blacklist[] = $definition->getArguments()[1]['db_table'] ?? 'sessions';
                     break;
 
-                case DoctrineDbalStore::class:
                 case PdoStore::class:
                     $blacklist[] = $definition->getArguments()[1]['db_table'] ?? 'lock_keys';
                     break;
 
-                case LegacyConnection::class:
                 case Connection::class:
                     $blacklist[] = $definition->getArguments()[0]['table_name'] ?? 'messenger_messages';
                     break;

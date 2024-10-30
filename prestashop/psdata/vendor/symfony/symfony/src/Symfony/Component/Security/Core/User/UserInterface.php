@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\Role\Role;
  * loaded by different objects that implement UserProviderInterface.
  *
  * @see UserProviderInterface
+ * @see AdvancedUserInterface
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
@@ -40,11 +41,11 @@ interface UserInterface
      *         return ['ROLE_USER'];
      *     }
      *
-     * Alternatively, the roles might be stored in a ``roles`` property,
+     * Alternatively, the roles might be stored on a ``roles`` property,
      * and populated in any number of different ways when the user object
      * is created.
      *
-     * @return array<Role|string> The user roles
+     * @return (Role|string)[] The user roles
      */
     public function getRoles();
 

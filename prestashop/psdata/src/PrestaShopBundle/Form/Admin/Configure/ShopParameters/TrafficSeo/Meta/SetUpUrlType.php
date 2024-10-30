@@ -26,12 +26,11 @@
 
 namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\TrafficSeo\Meta;
 
-use PrestaShopBundle\Form\Admin\Type\MultistoreConfigurationType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class SetUpUrlType is responsible for providing form fields for Set up urls block located in
@@ -52,6 +51,11 @@ class SetUpUrlType extends TranslatorAwareType
     /**
      * @var bool
      */
+    private $isHostMode;
+
+    /**
+     * @var bool
+     */
     private $isModRewriteActive;
 
     /**
@@ -66,6 +70,7 @@ class SetUpUrlType extends TranslatorAwareType
      * @param array $locales
      * @param array $canonicalUrlChoices
      * @param bool $isHtaccessFileWritable
+     * @param bool $isHostMode
      * @param bool $doesMainShopUrlExist
      */
     public function __construct(
@@ -73,6 +78,7 @@ class SetUpUrlType extends TranslatorAwareType
         array $locales,
         array $canonicalUrlChoices,
         $isHtaccessFileWritable,
+        $isHostMode,
         $isModRewriteActive,
         $doesMainShopUrlExist
     ) {
@@ -80,6 +86,7 @@ class SetUpUrlType extends TranslatorAwareType
         $this->canonicalUrlChoices = $canonicalUrlChoices;
         $this->isHtaccessFileWritable = $isHtaccessFileWritable;
         $this->isModRewriteActive = $isModRewriteActive;
+        $this->isHostMode = $isHostMode;
         $this->doesMainShopUrlExist = $doesMainShopUrlExist;
     }
 
@@ -105,7 +112,6 @@ class SetUpUrlType extends TranslatorAwareType
             ->add('friendly_url', SwitchType::class, [
                 'label' => $this->trans('Friendly URL', 'Admin.Global'),
                 'help' => $friendlyUrlHelp,
-                'multistore_configuration_key' => 'PS_REWRITING_SETTINGS',
             ])
             ->add('accented_url', SwitchType::class, [
                 'label' => $this->trans('Accented URL', 'Admin.Shopparameters.Feature'),
@@ -113,7 +119,6 @@ class SetUpUrlType extends TranslatorAwareType
                     'Enable this option if you want to allow accented characters in your friendly URLs. You should only activate this option if you are using non-Latin characters; for all the Latin charsets, your SEO will be better without this option.',
                     'Admin.Shopparameters.Help'
                 ),
-                'multistore_configuration_key' => 'PS_ALLOW_ACCENTED_CHARS_URL',
             ])
             ->add(
                 'canonical_url_redirection',
@@ -122,11 +127,10 @@ class SetUpUrlType extends TranslatorAwareType
                     'choices' => $this->canonicalUrlChoices,
                     'translation_domain' => false,
                     'label' => $this->trans('Redirect to the canonical URL', 'Admin.Shopparameters.Feature'),
-                    'multistore_configuration_key' => 'PS_CANONICAL_REDIRECT',
                 ]
             );
 
-        if ($this->isHtaccessFileWritable && $this->doesMainShopUrlExist) {
+        if (!$this->isHostMode && $this->isHtaccessFileWritable && $this->doesMainShopUrlExist) {
             $builder
                 ->add('disable_apache_multiview', SwitchType::class, [
                     'label' => $this->trans('Disable Apache\'s MultiViews option', 'Admin.Shopparameters.Feature'),
@@ -134,7 +138,6 @@ class SetUpUrlType extends TranslatorAwareType
                         'Enable this option only if you have problems with URL rewriting.',
                         'Admin.Shopparameters.Help'
                     ),
-                    'multistore_configuration_key' => 'PS_HTACCESS_DISABLE_MULTIVIEWS',
                 ])
                 ->add('disable_apache_mod_security', SwitchType::class, [
                     'label' => $this->trans('Disable Apache\'s mod_security module', 'Admin.Shopparameters.Feature'),
@@ -142,18 +145,7 @@ class SetUpUrlType extends TranslatorAwareType
                         'Some of PrestaShop\'s features might not work correctly with a specific configuration of Apache\'s mod_security module. We recommend to turn it off.',
                         'Admin.Shopparameters.Help'
                     ),
-                    'multistore_configuration_key' => 'PS_HTACCESS_DISABLE_MODSEC',
                 ]);
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see MultistoreConfigurationTypeExtension
-     */
-    public function getParent(): string
-    {
-        return MultistoreConfigurationType::class;
     }
 }

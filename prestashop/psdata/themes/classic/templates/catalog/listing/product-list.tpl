@@ -80,8 +80,6 @@
       {/if}
     </section>
 
-    {block name='product_list_footer'}{/block}
-
     {hook h="displayFooterCategory"}
 
   </section>

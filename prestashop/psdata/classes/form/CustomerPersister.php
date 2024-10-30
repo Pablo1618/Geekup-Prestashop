@@ -24,7 +24,7 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 use PrestaShop\PrestaShop\Core\Crypto\Hashing as Crypto;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CustomerPersisterCore
 {
@@ -51,28 +51,19 @@ class CustomerPersisterCore
         return $this->errors;
     }
 
-    /**
-     * READ ME - This class deals with many different use cases, make sure to check them when modifying anything!
-     * - Creating a customer with no pasword from checkout (guest checkout enabled/disabled)
-     * - Creating a customer with password from checkout
-     * - Creating a customer from register form
-     * - Converting guest to customer either by filling password in checkout or using the register form
-     * - Editing customer details in my-account section
-     */
-    public function save(Customer $customer, $plainTextPassword, $newPlainTextPassword = '', $passwordRequired = true)
+    public function save(Customer $customer, $clearTextPassword, $newPassword = '', $passwordRequired = true)
     {
-        // If customer already exists in context, we will keep the ID and only update him
         if ($customer->id) {
-            return $this->update($customer, $plainTextPassword, $newPlainTextPassword, $passwordRequired);
+            return $this->update($customer, $clearTextPassword, $newPassword, $passwordRequired);
         }
 
-        return $this->create($customer, $plainTextPassword);
+        return $this->create($customer, $clearTextPassword);
     }
 
-    private function update(Customer $customer, $plainTextPassword, $newPlainTextPassword, $passwordRequired = true)
+    private function update(Customer $customer, $clearTextPassword, $newPassword, $passwordRequired = true)
     {
         if (!$customer->is_guest && $passwordRequired && !$this->crypto->checkHash(
-            $plainTextPassword,
+            $clearTextPassword,
             $customer->passwd,
             _COOKIE_KEY_
         )) {
@@ -89,7 +80,7 @@ class CustomerPersisterCore
 
         if (!$customer->is_guest) {
             $customer->passwd = $this->crypto->hash(
-                $newPlainTextPassword ? $newPlainTextPassword : $plainTextPassword,
+                $newPassword ? $newPassword : $clearTextPassword,
                 _COOKIE_KEY_
             );
         }
@@ -116,26 +107,18 @@ class CustomerPersisterCore
             }
         }
 
-        $guestToCustomerConversion = false;
+        $guest_to_customer = false;
 
-        /*
-         * If context customer is a guest and a new password was provided in the form,
-         * we start the customer conversion.
-         *
-         * This consists of setting is_guest property to false, setting proper password
-         * assigning him to proper group and changing his default group.
-         */
-        if ($plainTextPassword && $customer->is_guest) {
-            $guestToCustomerConversion = true;
+        if ($clearTextPassword && $customer->is_guest) {
+            $guest_to_customer = true;
             $customer->is_guest = false;
             $customer->passwd = $this->crypto->hash(
-                $plainTextPassword,
+                $clearTextPassword,
                 _COOKIE_KEY_
             );
-            $customer->id_default_group = (int) Configuration::get('PS_CUSTOMER_GROUP');
         }
 
-        if ($customer->is_guest || $guestToCustomerConversion) {
+        if ($customer->is_guest || $guest_to_customer) {
             // guest cannot update their email to that of an existing real customer
             if (Customer::customerExists($customer->email, false, true)) {
                 $this->errors['email'][] = $this->translator->trans(
@@ -160,13 +143,7 @@ class CustomerPersisterCore
             Hook::exec('actionCustomerAccountUpdate', [
                 'customer' => $customer,
             ]);
-
-            // If converting from guest to customer, we need to assign proper group
-            // and inform him if needed. This is intentionally done after saving the customer,
-            // so we don't mess up his groups if the saving failed.
-            if ($guestToCustomerConversion) {
-                $customer->cleanGroups();
-                $customer->addGroups([Configuration::get('PS_CUSTOMER_GROUP')]);
+            if ($guest_to_customer) {
                 $this->sendConfirmationMail($customer);
             }
         }
@@ -174,13 +151,9 @@ class CustomerPersisterCore
         return $ok;
     }
 
-    private function create(Customer $customer, $plainTextPassword)
+    private function create(Customer $customer, $clearTextPassword)
     {
-        /*
-         * If there is no password provided, we are registering a guest
-         */
-        if (!$plainTextPassword) {
-            // If ordering without registration is not enabled, we need to force it
+        if (!$clearTextPassword) {
             if (!$this->guest_allowed) {
                 $this->errors['password'][] = $this->translator->trans(
                     'Password is required',
@@ -196,7 +169,7 @@ class CustomerPersisterCore
              * that guests cannot log in even with the generated
              * password. That's the case at least at the time of writing.
              */
-            $plainTextPassword = $this->crypto->hash(
+            $clearTextPassword = $this->crypto->hash(
                 microtime(),
                 _COOKIE_KEY_
             );
@@ -204,13 +177,11 @@ class CustomerPersisterCore
             $customer->is_guest = true;
         }
 
-        /*
-         * Check that there is not a customer registered with this email,
-         * we can't have two registered customers with the same email.
-         *
-         * Currently, it also checks for guests, because we don't allow guest checkout
-         * if there is a registered customer already, will be changed.
-         */
+        $customer->passwd = $this->crypto->hash(
+            $clearTextPassword,
+            _COOKIE_KEY_
+        );
+
         if (Customer::customerExists($customer->email, false, true)) {
             $this->errors['email'][] = $this->translator->trans(
                 'An account was already registered with this email address',
@@ -221,21 +192,11 @@ class CustomerPersisterCore
             return false;
         }
 
-        /*
-         * Create a password hash and assign it to the customer
-         */
-        $customer->passwd = $this->crypto->hash(
-            $plainTextPassword,
-            _COOKIE_KEY_
-        );
-
         $ok = $customer->save();
 
-        // If the customer himself was saved properly, we need to update the global context and the cookie
         if ($ok) {
             $this->context->updateCustomer($customer);
             $this->context->cart->update();
-            // Send a welcome information email, only for registered customers
             $this->sendConfirmationMail($customer);
             Hook::exec('actionCustomerAccountAdd', [
                 'newCustomer' => $customer,
@@ -245,13 +206,6 @@ class CustomerPersisterCore
         return $ok;
     }
 
-    /**
-     * Send a welcome email after converting the customer, if configured.
-     *
-     * @param Customer $customer
-     *
-     * @return bool Indicates if mail was sent OK
-     */
     private function sendConfirmationMail(Customer $customer)
     {
         if ($customer->is_guest || !Configuration::get('PS_CUSTOMER_CREATION_EMAIL')) {

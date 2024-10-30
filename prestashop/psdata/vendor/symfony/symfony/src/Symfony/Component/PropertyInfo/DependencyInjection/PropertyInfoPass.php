@@ -30,16 +30,14 @@ class PropertyInfoPass implements CompilerPassInterface
     private $typeExtractorTag;
     private $descriptionExtractorTag;
     private $accessExtractorTag;
-    private $initializableExtractorTag;
 
-    public function __construct(string $propertyInfoService = 'property_info', string $listExtractorTag = 'property_info.list_extractor', string $typeExtractorTag = 'property_info.type_extractor', string $descriptionExtractorTag = 'property_info.description_extractor', string $accessExtractorTag = 'property_info.access_extractor', string $initializableExtractorTag = 'property_info.initializable_extractor')
+    public function __construct($propertyInfoService = 'property_info', $listExtractorTag = 'property_info.list_extractor', $typeExtractorTag = 'property_info.type_extractor', $descriptionExtractorTag = 'property_info.description_extractor', $accessExtractorTag = 'property_info.access_extractor')
     {
         $this->propertyInfoService = $propertyInfoService;
         $this->listExtractorTag = $listExtractorTag;
         $this->typeExtractorTag = $typeExtractorTag;
         $this->descriptionExtractorTag = $descriptionExtractorTag;
         $this->accessExtractorTag = $accessExtractorTag;
-        $this->initializableExtractorTag = $initializableExtractorTag;
     }
 
     /**
@@ -64,8 +62,5 @@ class PropertyInfoPass implements CompilerPassInterface
 
         $accessExtractors = $this->findAndSortTaggedServices($this->accessExtractorTag, $container);
         $definition->replaceArgument(3, new IteratorArgument($accessExtractors));
-
-        $initializableExtractors = $this->findAndSortTaggedServices($this->initializableExtractorTag, $container);
-        $definition->setArgument(4, new IteratorArgument($initializableExtractors));
     }
 }

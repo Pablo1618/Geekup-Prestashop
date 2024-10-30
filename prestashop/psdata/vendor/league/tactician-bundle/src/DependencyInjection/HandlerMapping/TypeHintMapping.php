@@ -57,9 +57,8 @@ final class TypeHintMapping extends TagBasedMapping
 
             $parameter = $method->getParameters()[0];
             if (!$parameter->hasType()
-                || $parameter->getType() instanceof \ReflectionUnionType
                 || $parameter->getType()->isBuiltin()
-                || (new ReflectionClass($parameter->getType()->getName()))->isInterface()
+                || $parameter->getClass()->isInterface()
             ) {
                 continue;
             }

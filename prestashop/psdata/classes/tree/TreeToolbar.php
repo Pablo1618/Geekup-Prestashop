@@ -25,8 +25,8 @@
  */
 class TreeToolbarCore implements ITreeToolbarCore
 {
-    public const DEFAULT_TEMPLATE_DIRECTORY = 'helpers/tree';
-    public const DEFAULT_TEMPLATE = 'tree_toolbar.tpl';
+    const DEFAULT_TEMPLATE_DIRECTORY = 'helpers/tree';
+    const DEFAULT_TEMPLATE = 'tree_toolbar.tpl';
 
     private $_actions;
     private $_context;
@@ -155,9 +155,9 @@ class TreeToolbarCore implements ITreeToolbarCore
     }
 
     /**
-     * @param ITreeToolbarButtonCore $action
+     * @param ITreeToolbarButton $action
      *
-     * @return $this
+     * @return TreeToolbar
      *
      * @throws PrestaShopException
      */

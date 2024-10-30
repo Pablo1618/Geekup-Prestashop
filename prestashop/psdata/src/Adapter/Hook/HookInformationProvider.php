@@ -68,16 +68,4 @@ class HookInformationProvider
     {
         return Hook::getModulesFromHook($hookId, $moduleId);
     }
-
-    /**
-     * @param string $hookName
-     *
-     * @return array
-     */
-    public function getRegisteredModulesByHookName(string $hookName): array
-    {
-        $extraModulesList = Hook::getHookModuleExecList($hookName);
-
-        return empty($extraModulesList) ? [] : $extraModulesList;
-    }
 }

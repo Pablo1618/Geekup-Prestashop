@@ -13,7 +13,7 @@
  * Smarty Internal Plugin Resource Stream
  * Implements the streams as resource for Smarty template
  *
- * @link       https://php.net/streams
+ * @link       http://php.net/streams
  * @package    Smarty
  * @subpackage TemplateResources
  */

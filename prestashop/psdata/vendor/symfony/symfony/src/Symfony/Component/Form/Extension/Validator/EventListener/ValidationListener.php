@@ -41,6 +41,11 @@ class ValidationListener implements EventSubscriberInterface
         $this->violationMapper = $violationMapper;
     }
 
+    /**
+     * Validates the form and its domain object.
+     *
+     * @param FormEvent $event The event object
+     */
     public function validateForm(FormEvent $event)
     {
         $form = $event->getForm();

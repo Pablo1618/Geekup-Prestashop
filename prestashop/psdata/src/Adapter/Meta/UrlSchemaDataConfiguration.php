@@ -26,17 +26,14 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Meta;
 
-use PrestaShop\PrestaShop\Adapter\Configuration;
-use PrestaShop\PrestaShop\Adapter\Shop\Context;
-use PrestaShop\PrestaShop\Core\Configuration\AbstractMultistoreConfiguration;
-use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
+use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 
 /**
  * Class UrlSchemaDataConfiguration is responsible for validating, updating and retrieving data used in
- * Shop parameters -> Traffic & Seo -> Seo & Urls -> Set Shop URL form field.
+ * Shop parameters -> Traffix & Seo -> Seo & Urls -> Set Shop URL form field.
  */
-final class UrlSchemaDataConfiguration extends AbstractMultistoreConfiguration
+final class UrlSchemaDataConfiguration implements DataConfigurationInterface
 {
     /**
      * @var array
@@ -44,18 +41,20 @@ final class UrlSchemaDataConfiguration extends AbstractMultistoreConfiguration
     private $rules;
 
     /**
+     * @var ConfigurationInterface
+     */
+    private $configuration;
+
+    /**
      * UrlSchemaDataConfiguration constructor.
      *
-     * @param Configuration $configuration
-     * @param Context $shopContext
-     * @param FeatureInterface $multistoreFeature
+     * @param ConfigurationInterface $configuration
      * @param array $rules
      */
-    public function __construct(Configuration $configuration, Context $shopContext, FeatureInterface $multistoreFeature, array $rules)
+    public function __construct(ConfigurationInterface $configuration, array $rules)
     {
-        parent::__construct($configuration, $shopContext, $multistoreFeature);
-
         $this->rules = $rules;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -64,10 +63,8 @@ final class UrlSchemaDataConfiguration extends AbstractMultistoreConfiguration
     public function getConfiguration()
     {
         $configResult = [];
-        $shopConstraint = $this->getShopConstraint();
-
         foreach ($this->rules as $routeId => $defaultRule) {
-            $result = $this->configuration->get($this->getConfigurationKey($routeId), null, $shopConstraint) ?: $defaultRule;
+            $result = $this->getConfigurationValue($routeId) ?: $defaultRule;
             $configResult[$routeId] = $result;
         }
 
@@ -80,10 +77,8 @@ final class UrlSchemaDataConfiguration extends AbstractMultistoreConfiguration
     public function updateConfiguration(array $configuration)
     {
         if ($this->validateConfiguration($configuration)) {
-            $shopConstraint = $this->getShopConstraint();
-
             foreach ($configuration as $routeId => $value) {
-                $this->updateConfigurationValue($this->getConfigurationKey($routeId), $routeId, $configuration, $shopConstraint);
+                $this->updateConfigurationValue($routeId, $value);
             }
         }
 
@@ -91,19 +86,41 @@ final class UrlSchemaDataConfiguration extends AbstractMultistoreConfiguration
     }
 
     /**
-     * @return OptionsResolver
+     * {@inheritdoc}
      */
-    protected function buildResolver(): OptionsResolver
+    public function validateConfiguration(array $configuration)
     {
-        $rulesIds = array_keys($this->rules);
-
-        $resolver = new OptionsResolver();
-        $resolver->setDefined($rulesIds);
-        foreach ($rulesIds as $ruleId) {
-            $resolver->setAllowedTypes($ruleId, 'string');
+        $configurationExists = true;
+        foreach (array_keys($configuration) as $routeId) {
+            $configurationExists &= isset($this->rules[$routeId]);
         }
 
-        return $resolver;
+        return $configurationExists;
+    }
+
+    /**
+     * Gets configuration from configuration table.
+     *
+     * @param string $routeId
+     *
+     * @return string
+     */
+    private function getConfigurationValue($routeId)
+    {
+        return $this->configuration->get($this->getConfigurationKey($routeId));
+    }
+
+    /**
+     * Updates configuration data.
+     *
+     * @param string $routeId
+     * @param string $rule
+     *
+     * @return mixed
+     */
+    private function updateConfigurationValue($routeId, $rule)
+    {
+        return $this->configuration->set($this->getConfigurationKey($routeId), $rule);
     }
 
     /**

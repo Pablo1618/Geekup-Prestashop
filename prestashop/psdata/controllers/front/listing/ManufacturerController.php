@@ -29,10 +29,8 @@ use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
 
 class ManufacturerControllerCore extends ProductListingFrontController
 {
-    /** @var string */
     public $php_self = 'manufacturer';
 
-    /** @var Manufacturer|null */
     protected $manufacturer;
     protected $label;
 
@@ -43,15 +41,6 @@ class ManufacturerControllerCore extends ProductListingFrontController
         } elseif ($canonicalURL) {
             parent::canonicalRedirection($canonicalURL);
         }
-    }
-
-    public function getCanonicalURL(): string
-    {
-        if (Validate::isLoadedObject($this->manufacturer)) {
-            return $this->buildPaginatedUrl($this->context->link->getManufacturerLink($this->manufacturer));
-        }
-
-        return $this->context->link->getPageLink('manufacturer');
     }
 
     /**
@@ -113,25 +102,16 @@ class ManufacturerControllerCore extends ProductListingFrontController
         }
     }
 
-    /**
-     * @return ProductSearchQuery
-     *
-     * @throws \PrestaShop\PrestaShop\Core\Product\Search\Exception\InvalidSortOrderDirectionException
-     */
     protected function getProductSearchQuery()
     {
         $query = new ProductSearchQuery();
         $query
-            ->setQueryType('manufacturer')
             ->setIdManufacturer($this->manufacturer->id)
             ->setSortOrder(new SortOrder('product', Tools::getProductsOrder('by'), Tools::getProductsOrder('way')));
 
         return $query;
     }
 
-    /**
-     * @return ManufacturerProductSearchProvider
-     */
     protected function getDefaultProductSearchProvider()
     {
         return new ManufacturerProductSearchProvider(
@@ -147,16 +127,15 @@ class ManufacturerControllerCore extends ProductListingFrontController
     {
         $manufacturerVar = $this->objectPresenter->present($this->manufacturer);
 
-        // Chained hook call - if multiple modules are hooked here, they will receive the result of the previous one as a parameter
         $filteredManufacturer = Hook::exec(
             'filterManufacturerContent',
             ['filtered_content' => $manufacturerVar['description']],
-            null,
-            false,
-            true,
-            false,
-            null,
-            true
+            $id_module = null,
+            $array_return = false,
+            $check_exceptions = true,
+            $use_push = false,
+            $id_shop = null,
+            $chain = true
         );
         if (!empty($filteredManufacturer)) {
             $manufacturerVar['description'] = $filteredManufacturer;
@@ -176,16 +155,15 @@ class ManufacturerControllerCore extends ProductListingFrontController
 
         if (!empty($manufacturersVar)) {
             foreach ($manufacturersVar as $k => $manufacturer) {
-                // Chained hook call - if multiple modules are hooked here, they will receive the result of the previous one as a parameter
                 $filteredManufacturer = Hook::exec(
                     'filterManufacturerContent',
                     ['filtered_content' => $manufacturer['text']],
-                    null,
-                    false,
-                    true,
-                    false,
-                    null,
-                    true
+                    $id_module = null,
+                    $array_return = false,
+                    $check_exceptions = true,
+                    $use_push = false,
+                    $id_shop = null,
+                    $chain = true
                 );
                 if (!empty($filteredManufacturer)) {
                     $manufacturersVar[$k]['text'] = $filteredManufacturer;
@@ -200,14 +178,14 @@ class ManufacturerControllerCore extends ProductListingFrontController
 
     public function getTemplateVarManufacturers()
     {
-        $manufacturers = Manufacturer::getManufacturers(true, $this->context->language->id);
+        $manufacturers = Manufacturer::getManufacturers(true, $this->context->language->id, true, $this->p, $this->n, false);
         $manufacturers_for_display = [];
 
         foreach ($manufacturers as $manufacturer) {
             $manufacturers_for_display[$manufacturer['id_manufacturer']] = $manufacturer;
             $manufacturers_for_display[$manufacturer['id_manufacturer']]['text'] = $manufacturer['short_description'];
             $manufacturers_for_display[$manufacturer['id_manufacturer']]['image'] = $this->context->link->getManufacturerImageLink($manufacturer['id_manufacturer'], 'small_default');
-            $manufacturers_for_display[$manufacturer['id_manufacturer']]['url'] = $this->context->link->getManufacturerLink($manufacturer['id_manufacturer']);
+            $manufacturers_for_display[$manufacturer['id_manufacturer']]['url'] = $this->context->link->getmanufacturerLink($manufacturer['id_manufacturer']);
             $manufacturers_for_display[$manufacturer['id_manufacturer']]['nb_products'] = $manufacturer['nb_products'] > 1 ? ($this->trans('%number% products', ['%number%' => $manufacturer['nb_products']], 'Shop.Theme.Catalog')) : $this->trans('%number% product', ['%number%' => $manufacturer['nb_products']], 'Shop.Theme.Catalog');
         }
 
@@ -224,10 +202,10 @@ class ManufacturerControllerCore extends ProductListingFrontController
         $breadcrumb = parent::getBreadcrumbLinks();
         $breadcrumb['links'][] = [
             'title' => $this->getTranslator()->trans('Brands', [], 'Shop.Theme.Global'),
-            'url' => $this->context->link->getPageLink('manufacturer'),
+            'url' => $this->context->link->getPageLink('manufacturer', true),
         ];
 
-        if (!empty($this->manufacturer)) {
+        if (Validate::isLoadedObject($this->manufacturer) && $this->manufacturer->active && $this->manufacturer->isAssociatedToShop()) {
             $breadcrumb['links'][] = [
                 'title' => $this->manufacturer->name,
                 'url' => $this->context->link->getManufacturerLink($this->manufacturer),
@@ -235,25 +213,5 @@ class ManufacturerControllerCore extends ProductListingFrontController
         }
 
         return $breadcrumb;
-    }
-
-    public function getTemplateVarPage()
-    {
-        $page = parent::getTemplateVarPage();
-
-        if (!empty($this->manufacturer)) {
-            $page['body_classes']['manufacturer-id-' . $this->manufacturer->id] = true;
-            $page['body_classes']['manufacturer-' . $this->manufacturer->name] = true;
-        }
-
-        return $page;
-    }
-
-    /**
-     * @return Manufacturer
-     */
-    public function getManufacturer()
-    {
-        return $this->manufacturer;
     }
 }

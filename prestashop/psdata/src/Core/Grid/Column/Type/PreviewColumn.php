@@ -26,10 +26,40 @@
 
 namespace PrestaShop\PrestaShop\Core\Grid\Column\Type;
 
+use PrestaShop\PrestaShop\Core\Grid\Column\AbstractColumn;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
 /**
- * @deprecated since 8.1 and will be removed in next major.
- * Use \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\PreviewColumn instead.
+ * Allows adding Preview functionality to grid rows
  */
-final class PreviewColumn extends \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\PreviewColumn
+final class PreviewColumn extends AbstractColumn
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getType()
+    {
+        return 'preview';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver
+            ->setRequired([
+                'icon_expand',
+                'icon_collapse',
+                'preview_data_route',
+            ])
+            ->setDefined([
+                'preview_route_params',
+            ])
+            ->setAllowedTypes('preview_data_route', 'string')
+            ->setAllowedTypes('preview_route_params', 'array')
+            ->setAllowedTypes('icon_expand', 'string')
+            ->setAllowedTypes('icon_collapse', 'string')
+        ;
+    }
 }

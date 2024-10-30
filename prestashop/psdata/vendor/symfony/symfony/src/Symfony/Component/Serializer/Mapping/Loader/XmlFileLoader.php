@@ -14,7 +14,6 @@ namespace Symfony\Component\Serializer\Mapping\Loader;
 use Symfony\Component\Config\Util\XmlUtils;
 use Symfony\Component\Serializer\Exception\MappingException;
 use Symfony\Component\Serializer\Mapping\AttributeMetadata;
-use Symfony\Component\Serializer\Mapping\ClassDiscriminatorMapping;
 use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 
 /**
@@ -66,23 +65,6 @@ class XmlFileLoader extends FileLoader
                 if (isset($attribute['max-depth'])) {
                     $attributeMetadata->setMaxDepth((int) $attribute['max-depth']);
                 }
-
-                if (isset($attribute['serialized-name'])) {
-                    $attributeMetadata->setSerializedName((string) $attribute['serialized-name']);
-                }
-            }
-
-            if (isset($xml->{'discriminator-map'})) {
-                $mapping = [];
-                foreach ($xml->{'discriminator-map'}->mapping as $element) {
-                    $elementAttributes = $element->attributes();
-                    $mapping[(string) $elementAttributes->type] = (string) $elementAttributes->class;
-                }
-
-                $classMetadata->setClassDiscriminatorMapping(new ClassDiscriminatorMapping(
-                    (string) $xml->{'discriminator-map'}->attributes()->{'type-property'},
-                    $mapping
-                ));
             }
 
             return true;
@@ -106,11 +88,15 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
-     * Parses an XML File.
+     * Parses a XML File.
+     *
+     * @param string $file Path of file
+     *
+     * @return \SimpleXMLElement
      *
      * @throws MappingException
      */
-    private function parseFile(string $file): \SimpleXMLElement
+    private function parseFile($file)
     {
         try {
             $dom = XmlUtils::loadFile($file, __DIR__.'/schema/dic/serializer-mapping/serializer-mapping-1.0.xsd');
@@ -121,7 +107,7 @@ class XmlFileLoader extends FileLoader
         return simplexml_import_dom($dom);
     }
 
-    private function getClassesFromXml(): array
+    private function getClassesFromXml()
     {
         $xml = $this->parseFile($this->file);
         $classes = [];

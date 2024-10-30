@@ -2,7 +2,6 @@
 
 namespace PhpOffice\PhpSpreadsheet\Collection;
 
-use Generator;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
@@ -12,28 +11,28 @@ use Psr\SimpleCache\CacheInterface;
 class Cells
 {
     /**
-     * @var CacheInterface
+     * @var \Psr\SimpleCache\CacheInterface
      */
     private $cache;
 
     /**
      * Parent worksheet.
      *
-     * @var null|Worksheet
+     * @var Worksheet
      */
     private $parent;
 
     /**
      * The currently active Cell.
      *
-     * @var null|Cell
+     * @var Cell
      */
     private $currentCell;
 
     /**
      * Coordinate of the currently active Cell.
      *
-     * @var null|string
+     * @var string
      */
     private $currentCoordinate;
 
@@ -62,6 +61,7 @@ class Cells
      * Initialise this new cell collection.
      *
      * @param Worksheet $parent The worksheet for this cell collection
+     * @param CacheInterface $cache
      */
     public function __construct(Worksheet $parent, CacheInterface $cache)
     {
@@ -86,24 +86,26 @@ class Cells
     /**
      * Whether the collection holds a cell for the given coordinate.
      *
-     * @param string $cellCoordinate Coordinate of the cell to check
+     * @param string $pCoord Coordinate of the cell to check
      *
      * @return bool
      */
-    public function has($cellCoordinate)
+    public function has($pCoord)
     {
-        if ($cellCoordinate === $this->currentCoordinate) {
+        if ($pCoord === $this->currentCoordinate) {
             return true;
         }
 
         // Check if the requested entry exists in the index
-        return isset($this->index[$cellCoordinate]);
+        return isset($this->index[$pCoord]);
     }
 
     /**
      * Add or update a cell in the collection.
      *
      * @param Cell $cell Cell to update
+     *
+     * @throws PhpSpreadsheetException
      *
      * @return Cell
      */
@@ -115,21 +117,21 @@ class Cells
     /**
      * Delete a cell in cache identified by coordinate.
      *
-     * @param string $cellCoordinate Coordinate of the cell to delete
+     * @param string $pCoord Coordinate of the cell to delete
      */
-    public function delete($cellCoordinate): void
+    public function delete($pCoord)
     {
-        if ($cellCoordinate === $this->currentCoordinate && $this->currentCell !== null) {
+        if ($pCoord === $this->currentCoordinate && $this->currentCell !== null) {
             $this->currentCell->detach();
             $this->currentCoordinate = null;
             $this->currentCell = null;
             $this->currentCellIsDirty = false;
         }
 
-        unset($this->index[$cellCoordinate]);
+        unset($this->index[$pCoord]);
 
         // Delete the entry from cache
-        $this->cache->delete($this->cachePrefix . $cellCoordinate);
+        $this->cache->delete($this->cachePrefix . $pCoord);
     }
 
     /**
@@ -304,16 +306,16 @@ class Cells
     /**
      * Clone the cell collection.
      *
-     * @param Worksheet $worksheet The new worksheet that we're copying to
+     * @param Worksheet $parent The new worksheet that we're copying to
      *
      * @return self
      */
-    public function cloneCellCollection(Worksheet $worksheet)
+    public function cloneCellCollection(Worksheet $parent)
     {
         $this->storeCurrentCell();
         $newCollection = clone $this;
 
-        $newCollection->parent = $worksheet;
+        $newCollection->parent = $parent;
         if (($newCollection->currentCell !== null) && (is_object($newCollection->currentCell))) {
             $newCollection->currentCell->attach($this);
         }
@@ -346,7 +348,7 @@ class Cells
      *
      * @param string $row Row number to remove
      */
-    public function removeRow($row): void
+    public function removeRow($row)
     {
         foreach ($this->getCoordinates() as $coord) {
             $c = '';
@@ -364,7 +366,7 @@ class Cells
      *
      * @param string $column Column ID to remove
      */
-    public function removeColumn($column): void
+    public function removeColumn($column)
     {
         foreach ($this->getCoordinates() as $coord) {
             $c = '';
@@ -380,8 +382,10 @@ class Cells
     /**
      * Store cell data in cache for the current cell object if it's "dirty",
      * and the 'nullify' the current cell object.
+     *
+     * @throws PhpSpreadsheetException
      */
-    private function storeCurrentCell(): void
+    private function storeCurrentCell()
     {
         if ($this->currentCellIsDirty && !empty($this->currentCoordinate)) {
             $this->currentCell->detach();
@@ -402,19 +406,21 @@ class Cells
     /**
      * Add or update a cell identified by its coordinate into the collection.
      *
-     * @param string $cellCoordinate Coordinate of the cell to update
+     * @param string $pCoord Coordinate of the cell to update
      * @param Cell $cell Cell to update
      *
-     * @return Cell
+     * @throws PhpSpreadsheetException
+     *
+     * @return \PhpOffice\PhpSpreadsheet\Cell\Cell
      */
-    public function add($cellCoordinate, Cell $cell)
+    public function add($pCoord, Cell $cell)
     {
-        if ($cellCoordinate !== $this->currentCoordinate) {
+        if ($pCoord !== $this->currentCoordinate) {
             $this->storeCurrentCell();
         }
-        $this->index[$cellCoordinate] = true;
+        $this->index[$pCoord] = true;
 
-        $this->currentCoordinate = $cellCoordinate;
+        $this->currentCoordinate = $pCoord;
         $this->currentCell = $cell;
         $this->currentCellIsDirty = true;
 
@@ -424,30 +430,32 @@ class Cells
     /**
      * Get cell at a specific coordinate.
      *
-     * @param string $cellCoordinate Coordinate of the cell
+     * @param string $pCoord Coordinate of the cell
      *
-     * @return null|Cell Cell that was found, or null if not found
+     * @throws PhpSpreadsheetException
+     *
+     * @return \PhpOffice\PhpSpreadsheet\Cell\Cell Cell that was found, or null if not found
      */
-    public function get($cellCoordinate)
+    public function get($pCoord)
     {
-        if ($cellCoordinate === $this->currentCoordinate) {
+        if ($pCoord === $this->currentCoordinate) {
             return $this->currentCell;
         }
         $this->storeCurrentCell();
 
         // Return null if requested entry doesn't exist in collection
-        if (!$this->has($cellCoordinate)) {
+        if (!$this->has($pCoord)) {
             return null;
         }
 
         // Check if the entry that has been requested actually exists
-        $cell = $this->cache->get($this->cachePrefix . $cellCoordinate);
+        $cell = $this->cache->get($this->cachePrefix . $pCoord);
         if ($cell === null) {
-            throw new PhpSpreadsheetException("Cell entry {$cellCoordinate} no longer exists in cache. This probably means that the cache was cleared by someone else.");
+            throw new PhpSpreadsheetException("Cell entry {$pCoord} no longer exists in cache. This probably means that the cache was cleared by someone else.");
         }
 
         // Set current entry to the requested entry
-        $this->currentCoordinate = $cellCoordinate;
+        $this->currentCoordinate = $pCoord;
         $this->currentCell = $cell;
         // Re-attach this as the cell's parent
         $this->currentCell->attach($this);
@@ -459,7 +467,7 @@ class Cells
     /**
      * Clear the cell collection and disconnect from our parent.
      */
-    public function unsetWorksheetCells(): void
+    public function unsetWorksheetCells()
     {
         if ($this->currentCell !== null) {
             $this->currentCell->detach();
@@ -487,7 +495,7 @@ class Cells
     /**
      * Returns all known cache keys.
      *
-     * @return Generator|string[]
+     * @return \Generator|string[]
      */
     private function getAllCacheKeys()
     {

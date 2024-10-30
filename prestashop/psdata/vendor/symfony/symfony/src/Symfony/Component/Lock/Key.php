@@ -22,32 +22,52 @@ final class Key
     private $expiringTime;
     private $state = [];
 
-    public function __construct(string $resource)
+    /**
+     * @param string $resource
+     */
+    public function __construct($resource)
     {
-        $this->resource = $resource;
+        $this->resource = (string) $resource;
     }
 
-    public function __toString(): string
+    public function __toString()
     {
         return $this->resource;
     }
 
-    public function hasState(string $stateKey): bool
+    /**
+     * @param string $stateKey
+     *
+     * @return bool
+     */
+    public function hasState($stateKey)
     {
         return isset($this->state[$stateKey]);
     }
 
-    public function setState(string $stateKey, $state): void
+    /**
+     * @param string $stateKey
+     * @param mixed  $state
+     */
+    public function setState($stateKey, $state)
     {
         $this->state[$stateKey] = $state;
     }
 
-    public function removeState(string $stateKey): void
+    /**
+     * @param string $stateKey
+     */
+    public function removeState($stateKey)
     {
         unset($this->state[$stateKey]);
     }
 
-    public function getState(string $stateKey)
+    /**
+     * @param $stateKey
+     *
+     * @return mixed
+     */
+    public function getState($stateKey)
     {
         return $this->state[$stateKey];
     }
@@ -60,7 +80,7 @@ final class Key
     /**
      * @param float $ttl the expiration delay of locks in seconds
      */
-    public function reduceLifetime(float $ttl)
+    public function reduceLifetime($ttl)
     {
         $newTime = microtime(true) + $ttl;
 
@@ -74,12 +94,15 @@ final class Key
      *
      * @return float|null Remaining lifetime in seconds. Null when the key won't expire.
      */
-    public function getRemainingLifetime(): ?float
+    public function getRemainingLifetime()
     {
         return null === $this->expiringTime ? null : $this->expiringTime - microtime(true);
     }
 
-    public function isExpired(): bool
+    /**
+     * @return bool
+     */
+    public function isExpired()
     {
         return null !== $this->expiringTime && $this->expiringTime <= microtime(true);
     }

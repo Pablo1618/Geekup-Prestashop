@@ -31,7 +31,6 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use PrestaShop\PrestaShop\Core\Addon\Theme\Theme as AddonTheme;
-use Traversable;
 
 /**
  * An ArrayCollection is a Collection implementation that wraps a regular PHP array.
@@ -81,9 +80,9 @@ class ThemeCollection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * @return ArrayIterator|Traversable
+     * @return ArrayIterator|\Traversable
      */
-    public function getIterator(): Traversable
+    public function getIterator()
     {
         return new ArrayIterator($this->addons);
     }
@@ -91,7 +90,7 @@ class ThemeCollection implements ArrayAccess, Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function offsetExists($offset): bool
+    public function offsetExists($offset)
     {
         return $this->containsKey($offset);
     }
@@ -99,7 +98,6 @@ class ThemeCollection implements ArrayAccess, Countable, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);
@@ -110,7 +108,7 @@ class ThemeCollection implements ArrayAccess, Countable, IteratorAggregate
      *
      * {@inheritdoc}
      */
-    public function offsetSet($offset, $addon): void
+    public function offsetSet($offset, $addon)
     {
         if (!isset($offset)) {
             $this->add($addon);
@@ -126,7 +124,7 @@ class ThemeCollection implements ArrayAccess, Countable, IteratorAggregate
      *
      * {@inheritdoc}
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset($offset)
     {
         $this->remove($offset);
     }
@@ -264,7 +262,7 @@ class ThemeCollection implements ArrayAccess, Countable, IteratorAggregate
      *
      * @return int
      */
-    public function count(): int
+    public function count()
     {
         return count($this->addons);
     }

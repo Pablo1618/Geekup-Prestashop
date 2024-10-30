@@ -27,7 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter\Security;
 
 use Configuration;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Tools;
 
 /**
@@ -44,9 +44,9 @@ class SslMiddleware
      *
      * If the condition needs a redirection to HTTPS, then the current process is interrupted, the headers are sent directly.
      *
-     * @param RequestEvent $event
+     * @param GetResponseEvent $event
      */
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(GetResponseEvent $event)
     {
         // already SSL, do nothing more
         if (Tools::usingSecureMode()) {
@@ -63,7 +63,7 @@ class SslMiddleware
         }
     }
 
-    private function redirectToSsl(RequestEvent $event)
+    private function redirectToSsl(GetResponseEvent $event)
     {
         $event->stopPropagation();
         $redirect = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];

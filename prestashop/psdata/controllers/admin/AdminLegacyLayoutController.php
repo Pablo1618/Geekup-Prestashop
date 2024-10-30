@@ -52,7 +52,7 @@ class AdminLegacyLayoutControllerCore extends AdminController
      *
      * If $enableSidebar is false, the 'Help' button is a link that redirects to $helpLink
      *
-     * @var string|bool
+     * @var string
      */
     protected $helpLink;
     /** @var bool */
@@ -87,19 +87,15 @@ class AdminLegacyLayoutControllerCore extends AdminController
         $useRegularH1Structure = true
     ) {
         // Compatibility with legacy behavior.
-        // Some controllers can only be used in "All stores" context.
+        // Some controllers can only be used in "All shops" context.
         // This makes sure that user cannot switch shop contexts
         // when in one of pages (controller) below.
         $controllers = [
-            'AdminAccess',
             'AdminFeatureFlag',
             'AdminLanguages',
             'AdminProfiles',
             'AdminSpecificPriceRule',
             'AdminStatuses',
-            'AdminSecurity',
-            'AdminSecuritySessionEmployee',
-            'AdminSecuritySessionCustomer',
             'AdminTranslations',
         ];
 
@@ -179,7 +175,6 @@ class AdminLegacyLayoutControllerCore extends AdminController
 
         $vars = [
             'maintenance_mode' => !(bool) Configuration::get('PS_SHOP_ENABLE'),
-            'maintenance_allow_admins' => (bool) Configuration::get('PS_MAINTENANCE_ALLOW_ADMINS'),
             'debug_mode' => (bool) _PS_MODE_DEV_,
             'headerTabContent' => $this->headerTabContent,
             'content' => '{$content}', //replace content by original smarty tag var
@@ -199,7 +194,7 @@ class AdminLegacyLayoutControllerCore extends AdminController
             /* allow complex <h1> structure. @since 1.7.7 */
             'use_regular_h1_structure' => $this->useRegularH1Structure,
             // legacy context selector is hidden on migrated pages when multistore feature is used
-            'hideLegacyStoreContextSelector' => $this->isMultistoreEnabled(),
+            'hideLegacyStoreContextSelector' => $this->container->get('prestashop.adapter.multistore_feature')->isUsed(),
         ];
 
         if ($this->helpLink === false || !empty($this->helpLink)) {

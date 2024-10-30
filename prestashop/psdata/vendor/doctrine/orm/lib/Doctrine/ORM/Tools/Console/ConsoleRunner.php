@@ -1,22 +1,31 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Tools\Console;
 
-use Composer\InstalledVersions;
 use Doctrine\DBAL\Tools\Console as DBALConsole;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Console\EntityManagerProvider\ConnectionFromManagerProvider;
-use Doctrine\ORM\Tools\Console\EntityManagerProvider\HelperSetManagerProvider;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
 use OutOfBoundsException;
+use PackageVersions\Versions;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Helper\HelperSet;
-
-use function assert;
-use function class_exists;
 
 /**
  * Handles running the Console Tools inside Symfony Console context.
@@ -26,28 +35,31 @@ final class ConsoleRunner
     /**
      * Create a Symfony Console HelperSet
      *
-     * @deprecated This method will be removed in ORM 3.0 without replacement.
+     * @param EntityManagerInterface $entityManager
+     *
+     * @return HelperSet
      */
-    public static function createHelperSet(EntityManagerInterface $entityManager): HelperSet
+    public static function createHelperSet(EntityManagerInterface $entityManager) : HelperSet
     {
-        $helpers = ['em' => new EntityManagerHelper($entityManager)];
-
-        if (class_exists(DBALConsole\Helper\ConnectionHelper::class)) {
-            $helpers['db'] = new DBALConsole\Helper\ConnectionHelper($entityManager->getConnection());
-        }
-
-        return new HelperSet($helpers);
+        return new HelperSet(
+            [
+                'db' => new DBALConsole\Helper\ConnectionHelper($entityManager->getConnection()),
+                'em' => new EntityManagerHelper($entityManager),
+            ]
+        );
     }
 
     /**
      * Runs console with the given helper set.
      *
-     * @param HelperSet|EntityManagerProvider $helperSetOrProvider
-     * @param SymfonyCommand[]                $commands
+     * @param \Symfony\Component\Console\Helper\HelperSet  $helperSet
+     * @param \Symfony\Component\Console\Command\Command[] $commands
+     *
+     * @return void
      */
-    public static function run($helperSetOrProvider, array $commands = []): void
+    public static function run(HelperSet $helperSet, array $commands = []) : void
     {
-        $cli = self::createApplication($helperSetOrProvider, $commands);
+        $cli = self::createApplication($helperSet, $commands);
         $cli->run();
     }
 
@@ -55,77 +67,62 @@ final class ConsoleRunner
      * Creates a console application with the given helperset and
      * optional commands.
      *
-     * @param HelperSet|EntityManagerProvider $helperSetOrProvider
-     * @param SymfonyCommand[]                $commands
+     * @param \Symfony\Component\Console\Helper\HelperSet $helperSet
+     * @param array                                       $commands
      *
+     * @return \Symfony\Component\Console\Application
      * @throws OutOfBoundsException
      */
-    public static function createApplication($helperSetOrProvider, array $commands = []): Application
+    public static function createApplication(HelperSet $helperSet, array $commands = []) : Application
     {
-        $version = InstalledVersions::getVersion('doctrine/orm');
-        assert($version !== null);
-
-        $cli = new Application('Doctrine Command Line Interface', $version);
+        $cli = new Application('Doctrine Command Line Interface', Versions::getVersion('doctrine/orm'));
         $cli->setCatchExceptions(true);
-
-        if ($helperSetOrProvider instanceof HelperSet) {
-            $cli->setHelperSet($helperSetOrProvider);
-
-            $helperSetOrProvider = new HelperSetManagerProvider($helperSetOrProvider);
-        }
-
-        self::addCommands($cli, $helperSetOrProvider);
+        $cli->setHelperSet($helperSet);
+        self::addCommands($cli);
         $cli->addCommands($commands);
 
         return $cli;
     }
 
-    public static function addCommands(Application $cli, ?EntityManagerProvider $entityManagerProvider = null): void
+    /**
+     * @param Application $cli
+     *
+     * @return void
+     */
+    public static function addCommands(Application $cli) : void
     {
-        if ($entityManagerProvider === null) {
-            $entityManagerProvider = new HelperSetManagerProvider($cli->getHelperSet());
-        }
-
-        $connectionProvider = new ConnectionFromManagerProvider($entityManagerProvider);
-
-        if (class_exists(DBALConsole\Command\ImportCommand::class)) {
-            $cli->add(new DBALConsole\Command\ImportCommand());
-        }
-
         $cli->addCommands(
             [
                 // DBAL Commands
-                new DBALConsole\Command\ReservedWordsCommand($connectionProvider),
-                new DBALConsole\Command\RunSqlCommand($connectionProvider),
+                new DBALConsole\Command\ImportCommand(),
+                new DBALConsole\Command\ReservedWordsCommand(),
+                new DBALConsole\Command\RunSqlCommand(),
 
                 // ORM Commands
-                new Command\ClearCache\CollectionRegionCommand($entityManagerProvider),
-                new Command\ClearCache\EntityRegionCommand($entityManagerProvider),
-                new Command\ClearCache\MetadataCommand($entityManagerProvider),
-                new Command\ClearCache\QueryCommand($entityManagerProvider),
-                new Command\ClearCache\QueryRegionCommand($entityManagerProvider),
-                new Command\ClearCache\ResultCommand($entityManagerProvider),
-                new Command\SchemaTool\CreateCommand($entityManagerProvider),
-                new Command\SchemaTool\UpdateCommand($entityManagerProvider),
-                new Command\SchemaTool\DropCommand($entityManagerProvider),
-                new Command\EnsureProductionSettingsCommand($entityManagerProvider),
+                new Command\ClearCache\CollectionRegionCommand(),
+                new Command\ClearCache\EntityRegionCommand(),
+                new Command\ClearCache\MetadataCommand(),
+                new Command\ClearCache\QueryCommand(),
+                new Command\ClearCache\QueryRegionCommand(),
+                new Command\ClearCache\ResultCommand(),
+                new Command\SchemaTool\CreateCommand(),
+                new Command\SchemaTool\UpdateCommand(),
+                new Command\SchemaTool\DropCommand(),
+                new Command\EnsureProductionSettingsCommand(),
                 new Command\ConvertDoctrine1SchemaCommand(),
-                new Command\GenerateRepositoriesCommand($entityManagerProvider),
-                new Command\GenerateEntitiesCommand($entityManagerProvider),
-                new Command\GenerateProxiesCommand($entityManagerProvider),
-                new Command\ConvertMappingCommand($entityManagerProvider),
-                new Command\RunDqlCommand($entityManagerProvider),
-                new Command\ValidateSchemaCommand($entityManagerProvider),
-                new Command\InfoCommand($entityManagerProvider),
-                new Command\MappingDescribeCommand($entityManagerProvider),
+                new Command\GenerateRepositoriesCommand(),
+                new Command\GenerateEntitiesCommand(),
+                new Command\GenerateProxiesCommand(),
+                new Command\ConvertMappingCommand(),
+                new Command\RunDqlCommand(),
+                new Command\ValidateSchemaCommand(),
+                new Command\InfoCommand(),
+                new Command\MappingDescribeCommand(),
             ]
         );
     }
 
-    /**
-     * @deprecated This method will be removed in ORM 3.0 without replacement.
-     */
-    public static function printCliConfigTemplate(): void
+    public static function printCliConfigTemplate() : void
     {
         echo <<<'HELP'
 You are missing a "cli-config.php" or "config/cli-config.php" file in your

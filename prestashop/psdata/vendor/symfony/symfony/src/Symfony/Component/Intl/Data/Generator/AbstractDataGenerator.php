@@ -30,10 +30,10 @@ abstract class AbstractDataGenerator
     private $compiler;
     private $dirName;
 
-    public function __construct(BundleCompilerInterface $compiler, string $dirName)
+    public function __construct(BundleCompilerInterface $compiler, $dirName)
     {
         $this->compiler = $compiler;
-        $this->dirName = $dirName;
+        $this->dirName = (string) $dirName;
     }
 
     public function generateData(GeneratorConfig $config)
@@ -91,17 +91,39 @@ abstract class AbstractDataGenerator
     }
 
     /**
+     * @param string $sourceDir
+     *
      * @return string[]
      */
-    abstract protected function scanLocales(LocaleScanner $scanner, string $sourceDir): array;
+    abstract protected function scanLocales(LocaleScanner $scanner, $sourceDir);
 
-    abstract protected function compileTemporaryBundles(BundleCompilerInterface $compiler, string $sourceDir, string $tempDir);
+    /**
+     * @param string $sourceDir
+     * @param string $tempDir
+     */
+    abstract protected function compileTemporaryBundles(BundleCompilerInterface $compiler, $sourceDir, $tempDir);
 
     abstract protected function preGenerate();
 
-    abstract protected function generateDataForLocale(BundleEntryReaderInterface $reader, string $tempDir, string $displayLocale): ?array;
+    /**
+     * @param string $tempDir
+     * @param string $displayLocale
+     *
+     * @return array|null
+     */
+    abstract protected function generateDataForLocale(BundleEntryReaderInterface $reader, $tempDir, $displayLocale);
 
-    abstract protected function generateDataForRoot(BundleEntryReaderInterface $reader, string $tempDir): ?array;
+    /**
+     * @param string $tempDir
+     *
+     * @return array|null
+     */
+    abstract protected function generateDataForRoot(BundleEntryReaderInterface $reader, $tempDir);
 
-    abstract protected function generateDataForMeta(BundleEntryReaderInterface $reader, string $tempDir): ?array;
+    /**
+     * @param string $tempDir
+     *
+     * @return array|null
+     */
+    abstract protected function generateDataForMeta(BundleEntryReaderInterface $reader, $tempDir);
 }

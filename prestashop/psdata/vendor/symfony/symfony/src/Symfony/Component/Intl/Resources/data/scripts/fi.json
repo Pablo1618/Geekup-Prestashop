@@ -29,7 +29,6 @@
         "Chrs": "horemzi",
         "Cirt": "cirth",
         "Copt": "koptilainen",
-        "Cpmn": "kypro-minolainen",
         "Cprt": "muinaiskyproslainen",
         "Cyrl": "kyrillinen",
         "Cyrs": "kyrillinen muinaiskirkkoslaavimuunnelma",
@@ -128,7 +127,6 @@
         "Orya": "orijalainen",
         "Osge": "osagen aakkosto",
         "Osma": "osmanjalainen",
-        "Ougr": "vanha uiguurilainen",
         "Palm": "palmyralainen",
         "Pauc": "zotuallai",
         "Perm": "muinaispermiläinen",
@@ -141,7 +139,7 @@
         "Prti": "piirtokirjoitusparthialainen",
         "Qaag": "burmalainen zawgyi-toteutus",
         "Rjng": "rejang",
-        "Rohg": "rohingalainen hanifi",
+        "Rohg": "rohinjalainen hanifi",
         "Roro": "rongorongo",
         "Runr": "riimukirjoitus",
         "Samr": "samarianaramealainen",
@@ -179,12 +177,9 @@
         "Thai": "thailainen",
         "Tibt": "tiibetiläinen",
         "Tirh": "tirhuta",
-        "Tnsa": "tangsa",
-        "Toto": "toto",
         "Ugar": "ugaritilainen",
         "Vaii": "vailainen",
         "Visp": "näkyvä puhe",
-        "Vith": "vithkuqi",
         "Wara": "varang kshiti",
         "Wcho": "wancholainen",
         "Wole": "woleai",
@@ -198,6 +193,7 @@
         "Zsye": "emoji-symbolit",
         "Zsym": "symbolit",
         "Zxxx": "kirjoittamaton",
-        "Zyyy": "määrittämätön"
+        "Zyyy": "määrittämätön",
+        "Zzzz": "tuntematon kirjoitusjärjestelmä"
     }
 }

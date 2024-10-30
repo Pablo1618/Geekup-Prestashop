@@ -11,8 +11,6 @@
 
 namespace Symfony\Bundle\TwigBundle\Loader;
 
-@trigger_error('The '.FilesystemLoader::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig notation for templates instead.', \E_USER_DEPRECATED);
-
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Templating\TemplateNameParserInterface;
 use Symfony\Component\Templating\TemplateReferenceInterface;
@@ -24,8 +22,6 @@ use Twig\Loader\FilesystemLoader as BaseFilesystemLoader;
  * to work with the Symfony paths and template references.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig notation for templates instead.
  */
 class FilesystemLoader extends BaseFilesystemLoader
 {
@@ -35,7 +31,7 @@ class FilesystemLoader extends BaseFilesystemLoader
     /**
      * @param string|null $rootPath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct(FileLocatorInterface $locator, TemplateNameParserInterface $parser, string $rootPath = null)
+    public function __construct(FileLocatorInterface $locator, TemplateNameParserInterface $parser, $rootPath = null)
     {
         parent::__construct([], $rootPath);
 
@@ -47,8 +43,6 @@ class FilesystemLoader extends BaseFilesystemLoader
      * {@inheritdoc}
      *
      * The name parameter might also be a TemplateReferenceInterface.
-     *
-     * @return bool
      */
     public function exists($name)
     {
@@ -96,7 +90,7 @@ class FilesystemLoader extends BaseFilesystemLoader
                 throw $twigLoaderException;
             }
 
-            return null;
+            return false;
         }
 
         return $this->cache[$logicalName] = $file;

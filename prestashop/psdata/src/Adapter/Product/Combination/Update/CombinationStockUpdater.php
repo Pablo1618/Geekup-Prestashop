@@ -30,18 +30,13 @@ namespace PrestaShop\PrestaShop\Adapter\Product\Combination\Update;
 
 use Combination;
 use PrestaShop\PrestaShop\Adapter\Product\Combination\Repository\CombinationRepository;
-use PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\MovementReasonRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository;
-use PrestaShop\PrestaShop\Core\Domain\Configuration\ShopConfigurationInterface;
-use PrestaShop\PrestaShop\Core\Domain\OrderState\ValueObject\OrderStateId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Combination\Exception\CannotUpdateCombinationException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\ValueObject\StockId;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\ValueObject\StockModification;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
-use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
+use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShop\PrestaShop\Core\Stock\StockManager;
-use StockAvailable;
+use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime;
+use PrestaShopException;
 
 /**
  * Updates stock for product combination
@@ -59,150 +54,137 @@ class CombinationStockUpdater
     private $combinationRepository;
 
     /**
-     * @var MovementReasonRepository
-     */
-    private $movementReasonRepository;
-
-    /**
      * @var StockManager
      */
     private $stockManager;
 
     /**
-     * @var ShopConfigurationInterface
+     * @param StockAvailableRepository $stockAvailableRepository
+     * @param CombinationRepository $combinationRepository
+     * @param StockManager $stockManager
      */
-    private $configuration;
-
-    /**
-     * @var HookDispatcherInterface
-     */
-    private $hookDispatcher;
-
     public function __construct(
         StockAvailableRepository $stockAvailableRepository,
         CombinationRepository $combinationRepository,
-        MovementReasonRepository $movementReasonRepository,
-        StockManager $stockManager,
-        ShopConfigurationInterface $configuration,
-        HookDispatcherInterface $hookDispatcher
+        StockManager $stockManager
     ) {
         $this->stockAvailableRepository = $stockAvailableRepository;
         $this->combinationRepository = $combinationRepository;
         $this->stockManager = $stockManager;
-        $this->configuration = $configuration;
-        $this->movementReasonRepository = $movementReasonRepository;
-        $this->hookDispatcher = $hookDispatcher;
     }
 
     /**
      * @param CombinationId $combinationId
      * @param CombinationStockProperties $properties
      */
-    public function update(
-        CombinationId $combinationId,
-        CombinationStockProperties $properties,
-        ShopConstraint $shopConstraint
-    ): void {
-        $combination = $this->combinationRepository->getByShopConstraint($combinationId, $shopConstraint);
-        $this->updateStockByShopConstraint(
+    public function update(CombinationId $combinationId, CombinationStockProperties $properties): void
+    {
+        $combination = $this->combinationRepository->get($combinationId);
+        $this->combinationRepository->partialUpdate(
             $combination,
-            $properties,
-            $shopConstraint
+            $this->fillUpdatableProperties($combination, $properties),
+            CannotUpdateCombinationException::FAILED_UPDATE_STOCK
         );
+
+        $this->updateStockAvailable($combination, $properties);
     }
 
     /**
-     * @param StockAvailable $stockAvailable
+     * @param Combination $combination
+     * @param CombinationStockProperties $properties
+     *
+     * @return string[]
+     */
+    private function fillUpdatableProperties(Combination $combination, CombinationStockProperties $properties): array
+    {
+        $updatableProperties = [];
+
+        if (null !== $properties->getQuantity()) {
+            $combination->quantity = $properties->getQuantity();
+            $updatableProperties[] = 'quantity';
+        }
+
+        if (null !== $properties->getAvailableDate()) {
+            $combination->available_date = $properties->getAvailableDate()->format(DateTime::DEFAULT_DATE_FORMAT);
+            $updatableProperties[] = 'available_date';
+        }
+
+        if (null !== $properties->getLocation()) {
+            $combination->location = $properties->getLocation();
+            $updatableProperties[] = 'location';
+        }
+
+        if (null !== $properties->getLowStockThreshold()) {
+            $combination->low_stock_threshold = $properties->getLowStockThreshold();
+            $updatableProperties[] = 'low_stock_threshold';
+        }
+
+        if (null !== $properties->getMinimalQuantity()) {
+            $combination->minimal_quantity = $properties->getMinimalQuantity();
+            $updatableProperties[] = 'minimal_quantity';
+        }
+
+        if (null !== $properties->isLowStockAlertEnabled()) {
+            $combination->low_stock_alert = $properties->isLowStockAlertEnabled();
+            $updatableProperties[] = 'low_stock_alert';
+        }
+
+        return $updatableProperties;
+    }
+
+    /**
+     * @param Combination $combination
      * @param CombinationStockProperties $properties
      */
-    private function updateStockAvailable(StockAvailable $stockAvailable, CombinationStockProperties $properties): void
+    private function updateStockAvailable(Combination $combination, CombinationStockProperties $properties): void
     {
+        $updateQuantity = null !== $properties->getQuantity();
         $updateLocation = null !== $properties->getLocation();
-        $stockModification = $properties->getStockModification();
 
-        if (!$stockModification && !$updateLocation) {
+        if (!$updateQuantity && !$updateLocation) {
             return;
         }
 
-        if ($stockModification) {
-            $previousQuantity = (int) $stockAvailable->quantity;
-            if (null !== $stockModification->getDeltaQuantity()) {
-                $stockAvailable->quantity += $stockModification->getDeltaQuantity();
-            } else {
-                $stockAvailable->quantity = $stockModification->getFixedQuantity();
-            }
+        $newQuantity = $properties->getQuantity();
+        $newLocation = $properties->getLocation();
+
+        $stockAvailable = $this->stockAvailableRepository->getForCombination(new CombinationId((int) $combination->id));
+
+        if ($updateQuantity) {
+            $this->saveMovement($combination, (int) $stockAvailable->quantity, $newQuantity);
+            $stockAvailable->quantity = $newQuantity;
         }
 
         if ($updateLocation) {
-            $stockAvailable->location = $properties->getLocation();
+            $stockAvailable->location = $newLocation;
         }
 
-        $fallbackShopId = $this->stockAvailableRepository->getFallbackShopId($stockAvailable);
-        $this->stockAvailableRepository->update($stockAvailable, $fallbackShopId);
-        // save movement only after stockAvailable has been updated
-        if ($stockModification) {
-            $this->saveMovement($stockAvailable, $stockModification, $previousQuantity, $fallbackShopId->getValue());
-
-            // Update reserved and physical quantity for this stock
-            $shopConstraint = ShopConstraint::shop($fallbackShopId->getValue());
-            $this->stockAvailableRepository->updatePhysicalProductQuantity(
-                new StockId((int) $stockAvailable->id),
-                new OrderStateId((int) $this->configuration->get('PS_OS_ERROR', null, $shopConstraint)),
-                new OrderStateId((int) $this->configuration->get('PS_OS_CANCELED', null, $shopConstraint))
-            );
-        }
+        $this->stockAvailableRepository->update($stockAvailable);
     }
 
-    private function saveMovement(StockAvailable $stockAvailable, StockModification $stockModification, int $previousQuantity, int $affectedShopId): void
+    /**
+     * @param Combination $combination
+     * @param int $oldQuantity
+     * @param int $newQuantity
+     *
+     * @throws CoreException
+     */
+    private function saveMovement(Combination $combination, int $oldQuantity, int $newQuantity): void
     {
-        if (null !== $stockModification->getDeltaQuantity()) {
-            $deltaQuantity = $stockModification->getDeltaQuantity();
-        } else {
-            $deltaQuantity = $stockModification->getFixedQuantity() - $previousQuantity;
+        $combinationId = $combination->id;
+        $deltaQuantity = $newQuantity - $oldQuantity;
+
+        if (0 === $deltaQuantity) {
+            return;
         }
 
-        $movementReasonId = $this->movementReasonRepository->getEmployeeEditionReasonId($deltaQuantity > $previousQuantity);
-
-        $this->stockManager->saveMovement(
-            $stockAvailable->id_product,
-            $stockAvailable->id_product_attribute,
-            $deltaQuantity,
-            [
-                'id_stock_mvt_reason' => $movementReasonId->getValue(),
-                'id_shop' => (int) $affectedShopId,
-            ]
-        );
-
-        $this->hookDispatcher->dispatchWithParameters('actionUpdateQuantity',
-            [
-                'id_product' => $stockAvailable->id_product,
-                'id_product_attribute' => $stockAvailable->id_product_attribute,
-                'quantity' => $stockAvailable->quantity,
-                'delta_quantity' => $deltaQuantity,
-                'id_shop' => $stockAvailable->id_shop,
-            ]);
-    }
-
-    private function updateStockByShopConstraint(
-        Combination $combination,
-        CombinationStockProperties $properties,
-        ShopConstraint $shopConstraint
-    ): void {
-        $combinationId = new CombinationId((int) $combination->id);
-        if ($shopConstraint->forAllShops()) {
-            // Since each stock has a distinct ID we can't use the ObjectModel multi shop feature based on id_shop_list,
-            // so we manually loop to update each associated stocks
-            $shops = $this->combinationRepository->getAssociatedShopIds($combinationId);
-            foreach ($shops as $shopId) {
-                $this->updateStockAvailable(
-                    $this->stockAvailableRepository->getForCombination($combinationId, $shopId),
-                    $properties
-                );
-            }
-        } else {
-            $this->updateStockAvailable(
-                $this->stockAvailableRepository->getForCombination($combinationId, new ShopId($combination->getShopId())),
-                $properties
+        try {
+            $this->stockManager->saveMovement($combination->id_product, $combinationId, $deltaQuantity);
+        } catch (PrestaShopException $e) {
+            throw new CoreException(
+                sprintf('Error occurred when trying to save stock movement for combination %d', $combinationId),
+                0,
+                $e
             );
         }
     }

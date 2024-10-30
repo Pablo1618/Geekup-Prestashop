@@ -3,7 +3,6 @@
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-
 use function explode;
 use function implode;
 use function is_resource;
@@ -19,9 +18,9 @@ class SimpleArrayType extends Type
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return $platform->getClobTypeDeclarationSQL($column);
+        return $platform->getClobTypeDeclarationSQL($fieldDeclaration);
     }
 
     /**
@@ -55,7 +54,7 @@ class SimpleArrayType extends Type
      */
     public function getName()
     {
-        return Types::SIMPLE_ARRAY;
+        return Type::SIMPLE_ARRAY;
     }
 
     /**

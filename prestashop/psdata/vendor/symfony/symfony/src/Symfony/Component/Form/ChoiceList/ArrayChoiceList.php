@@ -15,7 +15,7 @@ namespace Symfony\Component\Form\ChoiceList;
  * A list of choices with arbitrary data types.
  *
  * The user of this class is responsible for assigning string values to the
- * choices and for their uniqueness.
+ * choices annd for their uniqueness.
  * Both the choices and their values are passed to the constructor.
  * Each choice must have a corresponding value (with the same key) in
  * the values array.
@@ -57,7 +57,7 @@ class ArrayChoiceList implements ChoiceListInterface
      *                               incrementing integers are used as
      *                               values
      */
-    public function __construct(iterable $choices, callable $value = null)
+    public function __construct($choices, callable $value = null)
     {
         if ($choices instanceof \Traversable) {
             $choices = iterator_to_array($choices);
@@ -150,7 +150,7 @@ class ArrayChoiceList implements ChoiceListInterface
             $givenValues = [];
 
             foreach ($choices as $i => $givenChoice) {
-                $givenValues[$i] = (string) ($this->valueCallback)($givenChoice);
+                $givenValues[$i] = (string) \call_user_func($this->valueCallback, $givenChoice);
             }
 
             return array_intersect($givenValues, array_keys($this->choices));
@@ -182,7 +182,7 @@ class ArrayChoiceList implements ChoiceListInterface
      *
      * @internal
      */
-    protected function flatten(array $choices, callable $value, ?array &$choicesByValues, ?array &$keysByValues, ?array &$structuredValues)
+    protected function flatten(array $choices, $value, &$choicesByValues, &$keysByValues, &$structuredValues)
     {
         if (null === $choicesByValues) {
             $choicesByValues = [];
@@ -197,7 +197,7 @@ class ArrayChoiceList implements ChoiceListInterface
                 continue;
             }
 
-            $choiceValue = (string) $value($choice);
+            $choiceValue = (string) \call_user_func($value, $choice);
             $choicesByValues[$choiceValue] = $choice;
             $keysByValues[$choiceValue] = $key;
             $structuredValues[$key] = $choiceValue;
@@ -209,8 +209,14 @@ class ArrayChoiceList implements ChoiceListInterface
      * generating duplicates.
      * This method is responsible for preventing conflict between scalar values
      * and the empty value.
+     *
+     * @param array      $choices The choices
+     * @param array|null $cache   The cache for previously checked entries. Internal
+     *
+     * @return bool returns true if the choices can be cast to strings and
+     *              false otherwise
      */
-    private function castableToString(array $choices, array &$cache = []): bool
+    private function castableToString(array $choices, array &$cache = [])
     {
         foreach ($choices as $choice) {
             if (\is_array($choice)) {
@@ -219,7 +225,7 @@ class ArrayChoiceList implements ChoiceListInterface
                 }
 
                 continue;
-            } elseif (!\is_scalar($choice)) {
+            } elseif (!is_scalar($choice)) {
                 return false;
             }
 

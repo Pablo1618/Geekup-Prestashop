@@ -81,23 +81,25 @@ class ShopLogosType extends AbstractType
     {
         $shopLogoSettings = new ShopLogoSettings();
 
+        $availableLogoFileTypes = implode(',', $shopLogoSettings->getLogoImageExtensionsWithDot());
+
         $builder
             ->add('header_logo', FileType::class, [
                 'required' => false,
                 'attr' => [
-                    'accept' => implode(',', $shopLogoSettings->getLogoImageExtensionsWithDot()),
+                    'accept' => $availableLogoFileTypes,
                 ],
             ])
             ->add('mail_logo', FileType::class, [
                 'required' => false,
                 'attr' => [
-                    'accept' => implode(',', $shopLogoSettings->getLogoImageExtensionsWithDot('PS_LOGO_MAIL')),
+                    'accept' => $availableLogoFileTypes,
                 ],
             ])
             ->add('invoice_logo', FileType::class, [
                 'required' => false,
                 'attr' => [
-                    'accept' => implode(',', $shopLogoSettings->getLogoImageExtensionsWithDot('PS_LOGO_INVOICE')),
+                    'accept' => $availableLogoFileTypes,
                 ],
             ])
             ->add('favicon', FileType::class, [

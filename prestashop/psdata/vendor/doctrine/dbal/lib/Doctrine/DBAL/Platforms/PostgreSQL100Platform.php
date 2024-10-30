@@ -11,15 +11,15 @@ use Doctrine\DBAL\Platforms\Keywords\PostgreSQL100Keywords;
  */
 class PostgreSQL100Platform extends PostgreSQL94Platform
 {
-    protected function getReservedKeywordsClass(): string
+    /**
+     * {@inheritdoc}
+     */
+    protected function getReservedKeywordsClass() : string
     {
         return PostgreSQL100Keywords::class;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getListSequencesSQL($database): string
+    public function getListSequencesSQL($database) : string
     {
         return 'SELECT sequence_name AS relname,
                        sequence_schema AS schemaname,

@@ -18,15 +18,7 @@ namespace Symfony\Component\Security\Core\Encoder;
  */
 abstract class BasePasswordEncoder implements PasswordEncoderInterface
 {
-    public const MAX_PASSWORD_LENGTH = 4096;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function needsRehash(string $encoded): bool
-    {
-        return false;
-    }
+    const MAX_PASSWORD_LENGTH = 4096;
 
     /**
      * Demerges a merge password and salt string.

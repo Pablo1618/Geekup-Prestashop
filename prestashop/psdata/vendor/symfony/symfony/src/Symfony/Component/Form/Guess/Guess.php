@@ -27,22 +27,22 @@ abstract class Guess
     /**
      * Marks an instance with a value that is extremely likely to be correct.
      */
-    public const VERY_HIGH_CONFIDENCE = 3;
+    const VERY_HIGH_CONFIDENCE = 3;
 
     /**
      * Marks an instance with a value that is very likely to be correct.
      */
-    public const HIGH_CONFIDENCE = 2;
+    const HIGH_CONFIDENCE = 2;
 
     /**
      * Marks an instance with a value that is likely to be correct.
      */
-    public const MEDIUM_CONFIDENCE = 1;
+    const MEDIUM_CONFIDENCE = 1;
 
     /**
      * Marks an instance with a value that may be correct.
      */
-    public const LOW_CONFIDENCE = 0;
+    const LOW_CONFIDENCE = 0;
 
     /**
      * The confidence about the correctness of the value.
@@ -80,9 +80,11 @@ abstract class Guess
     }
 
     /**
+     * @param int $confidence The confidence
+     *
      * @throws InvalidArgumentException if the given value of confidence is unknown
      */
-    public function __construct(int $confidence)
+    public function __construct($confidence)
     {
         if (self::VERY_HIGH_CONFIDENCE !== $confidence && self::HIGH_CONFIDENCE !== $confidence &&
             self::MEDIUM_CONFIDENCE !== $confidence && self::LOW_CONFIDENCE !== $confidence) {

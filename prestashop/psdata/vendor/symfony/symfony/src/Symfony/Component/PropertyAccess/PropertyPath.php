@@ -25,7 +25,7 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * Character used for separating between plural and singular of an element.
      */
-    public const SINGULAR_SEPARATOR = '|';
+    const SINGULAR_SEPARATOR = '|';
 
     /**
      * The elements of the property path.
@@ -154,7 +154,6 @@ class PropertyPath implements \IteratorAggregate, PropertyPathInterface
      *
      * @return PropertyPathIteratorInterface
      */
-    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new PropertyPathIterator($this);

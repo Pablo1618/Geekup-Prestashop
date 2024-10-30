@@ -27,6 +27,7 @@
 		<h1 class="text-center">
 			<img id="logo" src="{$img_dir}prestashop@2x.png" width="123px" height="24px" alt="PrestaShop" />
 		</h1>
+		<div class="text-center">{$ps_version}</div>
 		<div id="error" class="hide alert alert-danger">
 		{if isset($errors)}
 			<h4>
@@ -141,7 +142,7 @@
 			</div>
 
 			<div class="front forgot_confirm" style="display: none">
-				<h4 id="forgot_confirm_name">{l s='Please, check your mailbox.' d='Admin.Login.Notification'}<br/><br/>{l s='If this email address has been registered in our store, you will receive a link to reset your password.' d='Admin.Login.Notification'}</h4>
+				<h4 id="forgot_confirm_name">{l s='Please, check your mailbox.' d='Admin.Login.Notification'}<br/><br/>{l s='A link to reset your password has been sent to you.' d='Admin.Login.Notification'}</h4>
 			</div>
 		</div>
 		{else}
@@ -163,11 +164,8 @@
 		</div>
 		{/if}
 	</div>
-
-  <a class='login-back' href='{$homeUrl}'><i class="material-icons rtl-flip">arrow_back</i> <span>{l s='Back to' d='Admin.Actions'}</span> <span class="login-back-shop">{$shop_name}</span></a>
-
+    <p class='text-center'><i class="icon-caret-left"></i> {l s='Back to' d='Admin.Actions'} <a href='{$homeUrl}'>{$shop_name}</a></p>
 	{hook h="displayAdminLogin"}
-
 	<div id="login-footer">
 		<p class="text-center text-muted">
 			<a href="https://www.prestashop.com/" onclick="return !window.open(this.href);">

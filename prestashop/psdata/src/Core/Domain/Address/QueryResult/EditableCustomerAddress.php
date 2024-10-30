@@ -23,7 +23,6 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\Address\QueryResult;
 
@@ -31,7 +30,6 @@ use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
 use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\CustomerId;
 use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\StateId;
-use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\StateIdInterface;
 
 /**
  * Transfers customer address data for editing
@@ -109,7 +107,7 @@ class EditableCustomerAddress
     private $address2;
 
     /**
-     * @var StateIdInterface
+     * @var StateId|null
      */
     private $stateId;
 
@@ -169,7 +167,7 @@ class EditableCustomerAddress
         string $company,
         string $vatNumber,
         string $address2,
-        StateIdInterface $stateId,
+        StateId $stateId,
         string $homePhone,
         string $mobilePhone,
         string $other,
@@ -317,9 +315,9 @@ class EditableCustomerAddress
     }
 
     /**
-     * @return StateIdInterface
+     * @return StateId|null
      */
-    public function getStateId(): StateIdInterface
+    public function getStateId(): ?StateId
     {
         return $this->stateId;
     }

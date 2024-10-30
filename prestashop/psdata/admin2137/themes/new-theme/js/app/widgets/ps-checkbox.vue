@@ -37,13 +37,8 @@
   </div>
 </template>
 
-<script lang="ts">
-  import {defineComponent} from 'vue';
-
-  /**
-   * @deprecated since 8.0, use app/components/checkbox.vue instead
-   */
-  export default defineComponent({
+<script>
+  export default {
     props: {
       id: {
         type: String,
@@ -62,17 +57,15 @@
       },
     },
     watch: {
-      checked(val: boolean): void {
+      checked(val) {
         this.$emit('checked', {
           checked: val,
           item: this.model,
         });
       },
     },
-    data() {
-      return {
-        checked: false,
-      };
-    },
-  });
+    data: () => ({
+      checked: false,
+    }),
+  };
 </script>

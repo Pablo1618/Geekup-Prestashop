@@ -26,26 +26,35 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Webservice;
 
-use PrestaShop\PrestaShop\Core\Configuration\AbstractMultistoreConfiguration;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use PrestaShop\PrestaShop\Adapter\Configuration;
+use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
 
 /**
  * Manages the configuration data about upload quota options.
  */
-final class WebserviceConfiguration extends AbstractMultistoreConfiguration
+final class WebserviceConfiguration implements DataConfigurationInterface
 {
-    private const CONFIGURATION_FIELDS = ['enable_webservice', 'enable_cgi'];
+    /**
+     * @var Configuration
+     */
+    private $configuration;
+
+    /**
+     * @param Configuration $configuration
+     */
+    public function __construct(Configuration $configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getConfiguration()
     {
-        $shopConstraint = $this->getShopConstraint();
-
         return [
-            'enable_webservice' => (bool) $this->configuration->get('PS_WEBSERVICE', false, $shopConstraint),
-            'enable_cgi' => (bool) $this->configuration->get('PS_WEBSERVICE_CGI_HOST', false, $shopConstraint),
+            'enable_webservice' => $this->configuration->getBoolean('PS_WEBSERVICE'),
+            'enable_cgi' => $this->configuration->getBoolean('PS_WEBSERVICE_CGI_HOST'),
         ];
     }
 
@@ -55,24 +64,21 @@ final class WebserviceConfiguration extends AbstractMultistoreConfiguration
     public function updateConfiguration(array $configuration)
     {
         if ($this->validateConfiguration($configuration)) {
-            $shopConstraint = $this->getShopConstraint();
-            $this->updateConfigurationValue('PS_WEBSERVICE', 'enable_webservice', $configuration, $shopConstraint);
-            $this->updateConfigurationValue('PS_WEBSERVICE_CGI_HOST', 'enable_cgi', $configuration, $shopConstraint);
+            $this->configuration->set('PS_WEBSERVICE', $configuration['enable_webservice']);
+            $this->configuration->set('PS_WEBSERVICE_CGI_HOST', $configuration['enable_cgi']);
         }
 
         return [];
     }
 
     /**
-     * @return OptionsResolver
+     * {@inheritdoc}
      */
-    protected function buildResolver(): OptionsResolver
+    public function validateConfiguration(array $configuration)
     {
-        $resolver = (new OptionsResolver())
-            ->setDefined(self::CONFIGURATION_FIELDS)
-            ->setAllowedTypes('enable_webservice', 'bool')
-            ->setAllowedTypes('enable_cgi', 'bool');
+        $enableWebserviceisValid = (isset($configuration['enable_webservice']) && (is_bool($configuration['enable_webservice'])));
+        $enableCGI = (isset($configuration['enable_webservice']) && (is_bool($configuration['enable_webservice'])));
 
-        return $resolver;
+        return $enableWebserviceisValid && $enableCGI;
     }
 }

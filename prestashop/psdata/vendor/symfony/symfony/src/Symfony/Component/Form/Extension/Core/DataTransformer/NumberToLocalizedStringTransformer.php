@@ -28,69 +28,80 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
      *
      * Rounds 1.4 to 2 and -1.4 to -1.
      */
-    public const ROUND_CEILING = \NumberFormatter::ROUND_CEILING;
+    const ROUND_CEILING = \NumberFormatter::ROUND_CEILING;
 
     /**
      * Rounds a number towards negative infinity.
      *
      * Rounds 1.4 to 1 and -1.4 to -2.
      */
-    public const ROUND_FLOOR = \NumberFormatter::ROUND_FLOOR;
+    const ROUND_FLOOR = \NumberFormatter::ROUND_FLOOR;
 
     /**
      * Rounds a number away from zero.
      *
      * Rounds 1.4 to 2 and -1.4 to -2.
      */
-    public const ROUND_UP = \NumberFormatter::ROUND_UP;
+    const ROUND_UP = \NumberFormatter::ROUND_UP;
 
     /**
      * Rounds a number towards zero.
      *
      * Rounds 1.4 to 1 and -1.4 to -1.
      */
-    public const ROUND_DOWN = \NumberFormatter::ROUND_DOWN;
+    const ROUND_DOWN = \NumberFormatter::ROUND_DOWN;
 
     /**
      * Rounds to the nearest number and halves to the next even number.
      *
      * Rounds 2.5, 1.6 and 1.5 to 2 and 1.4 to 1.
      */
-    public const ROUND_HALF_EVEN = \NumberFormatter::ROUND_HALFEVEN;
+    const ROUND_HALF_EVEN = \NumberFormatter::ROUND_HALFEVEN;
 
     /**
      * Rounds to the nearest number and halves away from zero.
      *
      * Rounds 2.5 to 3, 1.6 and 1.5 to 2 and 1.4 to 1.
      */
-    public const ROUND_HALF_UP = \NumberFormatter::ROUND_HALFUP;
+    const ROUND_HALF_UP = \NumberFormatter::ROUND_HALFUP;
 
     /**
      * Rounds to the nearest number and halves towards zero.
      *
      * Rounds 2.5 and 1.6 to 2, 1.5 and 1.4 to 1.
      */
-    public const ROUND_HALF_DOWN = \NumberFormatter::ROUND_HALFDOWN;
+    const ROUND_HALF_DOWN = \NumberFormatter::ROUND_HALFDOWN;
 
     protected $grouping;
 
     protected $roundingMode;
 
     private $scale;
-    private $locale;
 
-    public function __construct(int $scale = null, ?bool $grouping = false, ?int $roundingMode = self::ROUND_HALF_UP, string $locale = null)
+    /**
+     * @param int|null  $scale
+     * @param bool|null $grouping
+     * @param int|null  $roundingMode
+     */
+    public function __construct($scale = null, $grouping = false, $roundingMode = self::ROUND_HALF_UP)
     {
+        if (null === $grouping) {
+            $grouping = false;
+        }
+
+        if (null === $roundingMode) {
+            $roundingMode = self::ROUND_HALF_UP;
+        }
+
         $this->scale = $scale;
-        $this->grouping = $grouping ?? false;
-        $this->roundingMode = $roundingMode ?? self::ROUND_HALF_UP;
-        $this->locale = $locale;
+        $this->grouping = $grouping;
+        $this->roundingMode = $roundingMode;
     }
 
     /**
      * Transforms a number type into localized number.
      *
-     * @param int|float|null $value Number value
+     * @param int|float $value Number value
      *
      * @return string Localized value
      *
@@ -125,7 +136,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
      *
      * @param string $value The localized value
      *
-     * @return int|float|null The numeric value
+     * @return int|float The numeric value
      *
      * @throws TransformationFailedException if the given value is not a string
      *                                       or if the value can not be transformed
@@ -157,7 +168,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
             $value = str_replace(',', $decSep, $value);
         }
 
-        if (str_contains($value, $decSep)) {
+        if (false !== strpos($value, $decSep)) {
             $type = \NumberFormatter::TYPE_DOUBLE;
         } else {
             $type = \PHP_INT_SIZE === 8
@@ -208,7 +219,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
      */
     protected function getNumberFormatter()
     {
-        $formatter = new \NumberFormatter($this->locale ?? \Locale::getDefault(), \NumberFormatter::DECIMAL);
+        $formatter = new \NumberFormatter(\Locale::getDefault(), \NumberFormatter::DECIMAL);
 
         if (null !== $this->scale) {
             $formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $this->scale);
@@ -243,7 +254,7 @@ class NumberToLocalizedStringTransformer implements DataTransformerInterface
     {
         if (null !== $this->scale && null !== $this->roundingMode) {
             // shift number to maintain the correct scale during rounding
-            $roundingCoef = 10 ** $this->scale;
+            $roundingCoef = pow(10, $this->scale);
             // string representation to avoid rounding errors, similar to bcmul()
             $number = (string) ($number * $roundingCoef);
 

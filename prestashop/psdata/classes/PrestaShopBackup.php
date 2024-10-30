@@ -29,7 +29,7 @@
  */
 class PrestaShopBackupCore
 {
-    /** @var string Object id */
+    /** @var int Object id */
     public $id;
 
     /** @var string Last error messages */
@@ -41,9 +41,7 @@ class PrestaShopBackupCore
     /** @var string custom backup directory. */
     public $customBackupDir = null;
 
-    /** @var bool|string */
     public $psBackupAll = true;
-    /** @var bool|string */
     public $psBackupDropTable = true;
 
     /**
@@ -70,18 +68,18 @@ class PrestaShopBackupCore
      *
      * @param string $dir
      *
-     * @return bool
+     * @return bool bo
      */
     public function setCustomBackupPath($dir)
     {
         $customDir = DIRECTORY_SEPARATOR . trim($dir, '/') . DIRECTORY_SEPARATOR;
-        if (is_dir(_PS_ADMIN_DIR_ . $customDir)) {
+        if (is_dir((defined('_PS_HOST_MODE_') ? _PS_ROOT_DIR_ : _PS_ADMIN_DIR_) . $customDir)) {
             $this->customBackupDir = $customDir;
-
-            return true;
+        } else {
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -96,8 +94,8 @@ class PrestaShopBackupCore
         $backupDir = PrestaShopBackup::getBackupPath($filename);
         if (!empty($this->customBackupDir)) {
             $backupDir = str_replace(
-                _PS_ADMIN_DIR_ . self::$backupDir,
-                _PS_ADMIN_DIR_ . $this->customBackupDir,
+                (defined('_PS_HOST_MODE_') ? _PS_ROOT_DIR_ : _PS_ADMIN_DIR_) . self::$backupDir,
+                (defined('_PS_HOST_MODE_') ? _PS_ROOT_DIR_ : _PS_ADMIN_DIR_) . $this->customBackupDir,
                 $backupDir
             );
 
@@ -118,7 +116,7 @@ class PrestaShopBackupCore
      */
     public static function getBackupPath($filename = '')
     {
-        $backupdir = realpath(_PS_ADMIN_DIR_ . self::$backupDir);
+        $backupdir = realpath((defined('_PS_HOST_MODE_') ? _PS_ROOT_DIR_ : _PS_ADMIN_DIR_) . self::$backupDir);
 
         if ($backupdir === false) {
             die(Tools::displayError(Context::getContext()->getTranslator()->trans('"Backup" directory does not exist.', [], 'Admin.Advparameters.Notification')));
@@ -132,7 +130,7 @@ class PrestaShopBackupCore
         }
 
         if ($backupfile === false || strncmp($backupdir, $backupfile, strlen($backupdir)) != 0) {
-            die(Tools::displayError('Invalid backup file.'));
+            die(Tools::displayError());
         }
 
         return $backupfile;
@@ -147,7 +145,7 @@ class PrestaShopBackupCore
      */
     public static function backupExist($filename)
     {
-        $backupdir = realpath(_PS_ADMIN_DIR_ . self::$backupDir);
+        $backupdir = realpath((defined('_PS_HOST_MODE_') ? _PS_ROOT_DIR_ : _PS_ADMIN_DIR_) . self::$backupDir);
 
         if ($backupdir === false) {
             die(Tools::displayError(Context::getContext()->getTranslator()->trans('"Backup" directory does not exist.', [], 'Admin.Advparameters.Notification')));
@@ -233,7 +231,7 @@ class PrestaShopBackupCore
         }
 
         // Generate some random number, to make it extra hard to guess backup file names
-        $rand = dechex(mt_rand(0, min(0xFFFFFFFF, mt_getrandmax())));
+        $rand = dechex(mt_rand(0, min(0xffffffff, mt_getrandmax())));
         $date = time();
         $backupfile = $this->getRealBackupPath() . $date . '-' . $rand . '.sql';
 
@@ -256,7 +254,7 @@ class PrestaShopBackupCore
 
         $this->id = realpath($backupfile);
 
-        fwrite($fp, '/* Backup for ' . Tools::getHttpHost(false, false) . __PS_BASE_URI__ . "\n *  at " . date('Y-m-d H:i:s', $date) . "\n */\n");
+        fwrite($fp, '/* Backup for ' . Tools::getHttpHost(false, false) . __PS_BASE_URI__ . "\n *  at " . date($date) . "\n */\n");
         fwrite($fp, "\n" . 'SET NAMES \'utf8mb4\';');
         fwrite($fp, "\n" . 'SET FOREIGN_KEY_CHECKS = 0;');
         fwrite($fp, "\n" . 'SET SESSION sql_mode = \'\';' . "\n\n");
@@ -292,23 +290,33 @@ class PrestaShopBackupCore
             fwrite($fp, $schema[0]['Create Table'] . ";\n\n");
 
             if (!in_array($schema[0]['Table'], $ignoreInsertTable)) {
-                $data = Db::getInstance()->query('SELECT * FROM `' . $schema[0]['Table'] . '`');
+                $data = Db::getInstance()->query('SELECT * FROM `' . $schema[0]['Table'] . '`', false);
                 $sizeof = Db::getInstance()->numRows();
+                $lines = explode("\n", $schema[0]['Create Table']);
 
                 if ($data && $sizeof > 0) {
-                    // First we write the beginning of an insert query
+                    // Export the table data
                     fwrite($fp, 'INSERT INTO `' . $schema[0]['Table'] . "` VALUES\n");
-
-                    // We start a counter, because we want to separate the queries by batches of 200 lines
                     $i = 1;
                     while ($row = Db::getInstance()->nextRow($data)) {
                         $s = '(';
 
-                        foreach ($row as $value) {
-                            if ($value === null) {
-                                $s .= 'NULL,';
+                        foreach ($row as $field => $value) {
+                            $tmp = "'" . pSQL($value, true) . "',";
+                            if ($tmp != "'',") {
+                                $s .= $tmp;
                             } else {
-                                $s .= "'" . pSQL($value, true) . "',";
+                                foreach ($lines as $line) {
+                                    if (strpos($line, '`' . $field . '`') !== false) {
+                                        if (preg_match('/(.*NOT NULL.*)/Ui', $line)) {
+                                            $s .= "'',";
+                                        } else {
+                                            $s .= 'NULL,';
+                                        }
+
+                                        break;
+                                    }
+                                }
                             }
                         }
                         $s = rtrim($s, ',');

@@ -24,12 +24,20 @@ final class PersistentToken implements PersistentTokenInterface
     private $tokenValue;
     private $lastUsed;
 
-    public function __construct(string $class, string $username, string $series, string $tokenValue, \DateTime $lastUsed)
+    /**
+     * @param string $class
+     * @param string $username
+     * @param string $series
+     * @param string $tokenValue
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function __construct($class, $username, $series, $tokenValue, \DateTime $lastUsed)
     {
         if (empty($class)) {
             throw new \InvalidArgumentException('$class must not be empty.');
         }
-        if ('' === $username) {
+        if ('' === $username || null === $username) {
             throw new \InvalidArgumentException('$username must not be empty.');
         }
         if (empty($series)) {
@@ -49,7 +57,7 @@ final class PersistentToken implements PersistentTokenInterface
     /**
      * {@inheritdoc}
      */
-    public function getClass(): string
+    public function getClass()
     {
         return $this->class;
     }
@@ -57,7 +65,7 @@ final class PersistentToken implements PersistentTokenInterface
     /**
      * {@inheritdoc}
      */
-    public function getUsername(): string
+    public function getUsername()
     {
         return $this->username;
     }
@@ -65,7 +73,7 @@ final class PersistentToken implements PersistentTokenInterface
     /**
      * {@inheritdoc}
      */
-    public function getSeries(): string
+    public function getSeries()
     {
         return $this->series;
     }
@@ -73,7 +81,7 @@ final class PersistentToken implements PersistentTokenInterface
     /**
      * {@inheritdoc}
      */
-    public function getTokenValue(): string
+    public function getTokenValue()
     {
         return $this->tokenValue;
     }
@@ -81,7 +89,7 @@ final class PersistentToken implements PersistentTokenInterface
     /**
      * {@inheritdoc}
      */
-    public function getLastUsed(): \DateTime
+    public function getLastUsed()
     {
         return $this->lastUsed;
     }

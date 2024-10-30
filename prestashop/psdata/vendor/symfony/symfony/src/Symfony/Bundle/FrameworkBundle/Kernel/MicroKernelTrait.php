@@ -28,7 +28,7 @@ trait MicroKernelTrait
      * Add or import routes into your application.
      *
      *     $routes->import('config/routing.yml');
-     *     $routes->add('/admin', 'App\Controller\AdminController::dashboard', 'admin_dashboard');
+     *     $routes->add('/admin', 'AppBundle:Admin:dashboard', 'admin_dashboard');
      */
     abstract protected function configureRoutes(RouteCollectionBuilder $routes);
 
@@ -37,19 +37,19 @@ trait MicroKernelTrait
      *
      * You can register extensions:
      *
-     *     $container->loadFromExtension('framework', [
+     *     $c->loadFromExtension('framework', [
      *         'secret' => '%secret%'
      *     ]);
      *
      * Or services:
      *
-     *     $container->register('halloween', 'FooBundle\HalloweenProvider');
+     *     $c->register('halloween', 'FooBundle\HalloweenProvider');
      *
      * Or parameters:
      *
-     *     $container->setParameter('halloween', 'lot of fun');
+     *     $c->setParameter('halloween', 'lot of fun');
      */
-    abstract protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader);
+    abstract protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader);
 
     /**
      * {@inheritdoc}
@@ -59,23 +59,17 @@ trait MicroKernelTrait
         $loader->load(function (ContainerBuilder $container) use ($loader) {
             $container->loadFromExtension('framework', [
                 'router' => [
-                    'resource' => 'kernel::loadRoutes',
+                    'resource' => 'kernel:loadRoutes',
                     'type' => 'service',
                 ],
             ]);
 
-            if (!$container->hasDefinition('kernel')) {
+            if ($this instanceof EventSubscriberInterface) {
                 $container->register('kernel', static::class)
                     ->setSynthetic(true)
                     ->setPublic(true)
+                    ->addTag('kernel.event_subscriber')
                 ;
-            }
-
-            $kernelDefinition = $container->getDefinition('kernel');
-            $kernelDefinition->addTag('routing.route_loader');
-
-            if ($this instanceof EventSubscriberInterface) {
-                $kernelDefinition->addTag('kernel.event_subscriber');
             }
 
             $this->configureContainer($container, $loader);

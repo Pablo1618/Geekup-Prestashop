@@ -27,17 +27,9 @@
   <div class="product-line-grid-left col-md-3 col-xs-4">
     <span class="product-image media-middle">
       {if $product.default_image}
-        <picture>
-          {if !empty($product.default_image.bySize.cart_default.sources.avif)}<source srcset="{$product.default_image.bySize.cart_default.sources.avif}" type="image/avif">{/if}
-          {if !empty($product.default_image.bySize.cart_default.sources.webp)}<source srcset="{$product.default_image.bySize.cart_default.sources.webp}" type="image/webp">{/if}
-          <img src="{$product.default_image.bySize.cart_default.url}" alt="{$product.name|escape:'quotes'}" loading="lazy">
-        </picture>
+        <img src="{$product.default_image.bySize.cart_default.url}" alt="{$product.name|escape:'quotes'}" loading="lazy">
       {else}
-        <picture>
-          {if !empty($urls.no_picture_image.bySize.cart_default.sources.avif)}<source srcset="{$urls.no_picture_image.bySize.cart_default.sources.avif}" type="image/avif">{/if}
-          {if !empty($urls.no_picture_image.bySize.cart_default.sources.webp)}<source srcset="{$urls.no_picture_image.bySize.cart_default.sources.webp}" type="image/webp">{/if}
-          <img src="{$urls.no_picture_image.bySize.cart_default.url}" loading="lazy" />
-        </picture>
+        <img src="{$urls.no_picture_image.bySize.cart_default.url}" loading="lazy" />
       {/if}
     </span>
   </div>
@@ -86,7 +78,7 @@
       {block name='cart_detailed_product_line_customization'}
         {foreach from=$product.customizations item="customization"}
           <a href="#" data-toggle="modal" data-target="#product-customizations-modal-{$customization.id_customization}">{l s='Product customization' d='Shop.Theme.Catalog'}</a>
-          <div class="modal fade customization-modal js-customization-modal" id="product-customizations-modal-{$customization.id_customization}" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal fade customization-modal" id="product-customizations-modal-{$customization.id_customization}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -170,7 +162,7 @@
               data-link-action            = "delete-from-cart"
               data-id-product             = "{$product.id_product|escape:'javascript'}"
               data-id-product-attribute   = "{$product.id_product_attribute|escape:'javascript'}"
-              data-id-customization       = "{$product.id_customization|default|escape:'javascript'}"
+              data-id-customization   	  = "{$product.id_customization|escape:'javascript'}"
           >
             {if empty($product.is_gift)}
               <i class="material-icons float-xs-left">delete</i>

@@ -25,9 +25,9 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
  */
 class AuthenticatedVoter implements VoterInterface
 {
-    public const IS_AUTHENTICATED_FULLY = 'IS_AUTHENTICATED_FULLY';
-    public const IS_AUTHENTICATED_REMEMBERED = 'IS_AUTHENTICATED_REMEMBERED';
-    public const IS_AUTHENTICATED_ANONYMOUSLY = 'IS_AUTHENTICATED_ANONYMOUSLY';
+    const IS_AUTHENTICATED_FULLY = 'IS_AUTHENTICATED_FULLY';
+    const IS_AUTHENTICATED_REMEMBERED = 'IS_AUTHENTICATED_REMEMBERED';
+    const IS_AUTHENTICATED_ANONYMOUSLY = 'IS_AUTHENTICATED_ANONYMOUSLY';
 
     private $authenticationTrustResolver;
 

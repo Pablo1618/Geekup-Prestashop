@@ -43,7 +43,6 @@ use PrestaShop\PrestaShop\Core\Domain\Language\QueryResult\EditableLanguage;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\LanguageGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\UploadedImageConstraintException;
 use PrestaShop\PrestaShop\Core\Search\Filters\LanguageFilters;
-use PrestaShop\PrestaShop\Core\Util\Url\UrlFileCheckerInterface;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use PrestaShopBundle\Security\Annotation\DemoRestricted;
@@ -74,7 +73,7 @@ class LanguageController extends FrameworkBundleAdminController
 
         return $this->render('@PrestaShop/Admin/Improve/International/Language/index.html.twig', [
             'languageGrid' => $this->presentGrid($languageGrid),
-            'isHtaccessFileWriter' => $this->get(UrlFileCheckerInterface::class)->isHtaccessFileWritable(),
+            'isHtaccessFileWriter' => $this->get('prestashop.core.util.url.url_file_checker')->isHtaccessFileWritable(),
             'help_link' => $this->generateSidebarLink($request->attributes->get('_legacy_controller')),
             'multistoreInfoTip' => $this->trans(
                 'Note that this page is available in all shops context only, this is why your context has just switched.',
@@ -89,7 +88,7 @@ class LanguageController extends FrameworkBundleAdminController
      *
      * Process Grid search.
      *
-     * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))")
+     * @AdminSecurity("is_granted(['read'], request.get('_legacy_controller'))")
      *
      * @param Request $request
      *
@@ -129,7 +128,7 @@ class LanguageController extends FrameworkBundleAdminController
             $result = $languageFormHandler->handle($languageForm);
 
             if (null !== $result->getIdentifiableObjectId()) {
-                $this->addFlash('success', $this->trans('Successful creation', 'Admin.Notifications.Success'));
+                $this->addFlash('success', $this->trans('Successful creation.', 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_languages_index');
             }
@@ -179,7 +178,7 @@ class LanguageController extends FrameworkBundleAdminController
             if ($result->isSubmitted() && $result->isValid()) {
                 $this->addFlash(
                     'success',
-                    $this->trans('Successful update', 'Admin.Notifications.Success')
+                    $this->trans('Successful update.', 'Admin.Notifications.Success')
                 );
 
                 return $this->redirectToRoute('admin_languages_index');
@@ -218,7 +217,7 @@ class LanguageController extends FrameworkBundleAdminController
         try {
             $this->getCommandBus()->handle(new DeleteLanguageCommand((int) $languageId));
 
-            $this->addFlash('success', $this->trans('Successful deletion', 'Admin.Notifications.Success'));
+            $this->addFlash('success', $this->trans('Successful deletion.', 'Admin.Notifications.Success'));
         } catch (LanguageException $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages($e)));
         }
@@ -330,7 +329,7 @@ class LanguageController extends FrameworkBundleAdminController
 
         return [
             LanguageNotFoundException::class => $this->trans(
-                'The object cannot be loaded (or found).',
+                'The object cannot be loaded (or found)',
                 'Admin.Notifications.Error'
             ),
             CannotDisableDefaultLanguageException::class => $this->trans(

@@ -21,7 +21,7 @@ namespace Symfony\Component\Intl;
 final class Locale extends \Locale
 {
     /**
-     * @var string|null
+     * @var string
      */
     private static $defaultFallback = 'en';
 
@@ -35,7 +35,7 @@ final class Locale extends \Locale
      *
      * @see getFallback()
      */
-    public static function setDefaultFallback(?string $locale)
+    public static function setDefaultFallback($locale)
     {
         self::$defaultFallback = $locale;
     }
@@ -48,7 +48,7 @@ final class Locale extends \Locale
      * @see setDefaultFallback()
      * @see getFallback()
      */
-    public static function getDefaultFallback(): ?string
+    public static function getDefaultFallback()
     {
         return self::$defaultFallback;
     }
@@ -65,11 +65,10 @@ final class Locale extends \Locale
      * @return string|null The ICU locale code of the fallback locale, or null
      *                     if no fallback exists
      */
-    public static function getFallback(string $locale): ?string
+    public static function getFallback($locale)
     {
         if (\function_exists('locale_parse')) {
-            $localeSubTags = locale_parse($locale) ?? ['language' => $locale];
-
+            $localeSubTags = locale_parse($locale);
             if (1 === \count($localeSubTags)) {
                 if ('root' !== self::$defaultFallback && self::$defaultFallback === $localeSubTags['language']) {
                     return 'root';

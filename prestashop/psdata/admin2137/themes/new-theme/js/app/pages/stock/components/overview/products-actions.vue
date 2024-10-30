@@ -40,14 +40,12 @@
         <PSNumber
           class="bulk-qty"
           :danger="danger"
-          :value="bulkValue"
-          :buttons="isFocused"
-          :hover-buttons="isFocused"
-          @keyup="onKeyup($event)"
-          @keydown="onKeydown($event)"
-          @change="onChange($event)"
-          @focus="focusIn($event)"
-          @blur="focusOut"
+          :value="bulkEditQty"
+          :buttons="this.isFocused"
+          @focus="focusIn"
+          @blur="focusOut($event)"
+          @change="onChange"
+          @keyup="onKeyUp"
         />
       </div>
     </div>
@@ -67,34 +65,28 @@
   </div>
 </template>
 
-<script lang="ts">
-  import PSNumber from '@app/widgets/ps-number.vue';
-  import PSCheckbox from '@app/widgets/ps-checkbox.vue';
-  import PSButton from '@app/widgets/ps-button.vue';
-  import {EventEmitter} from '@components/event-emitter';
-  import {defineComponent} from 'vue';
-  import TranslationMixin from '@app/pages/stock/mixins/translate';
-  import isNumber from 'lodash/isNumber';
+<script>
+  import PSNumber from '@app/widgets/ps-number';
+  import PSCheckbox from '@app/widgets/ps-checkbox';
+  import PSButton from '@app/widgets/ps-button';
+  import {EventBus} from '@app/utils/event-bus';
 
-  export default defineComponent({
+  export default {
     computed: {
-      disabled(): boolean {
-        return !this.$store.state.hasQty || this.bulkValue === 0;
+      disabled() {
+        return !this.$store.state.hasQty;
       },
-      selectedProductsLng(): any {
+      bulkEditQty() {
+        return this.$store.state.bulkEditQty;
+      },
+      selectedProductsLng() {
         return this.$store.getters.selectedProductsLng;
       },
     },
-    mixins: [TranslationMixin],
     watch: {
-      bulkValue(val: number): void {
-        if (isNumber(val)) {
-          this.$store.dispatch('updateBulkEditQty', val);
-        }
-      },
-      selectedProductsLng(value: number): void {
+      selectedProductsLng(value) {
         if (value === 0 && this.$refs['bulk-action']) {
-          (<HTMLInputElement> this.$refs['bulk-action']).checked = false;
+          this.$refs['bulk-action'].checked = false;
           this.isFocused = false;
         }
         if (value === 1 && this.$refs['bulk-action']) {
@@ -103,79 +95,54 @@
       },
     },
     methods: {
-      isChecked(): boolean {
-        return (<HTMLInputElement> this.$refs['bulk-action']).checked;
-      },
-      isIndeterminate(): boolean {
+      isIndeterminate() {
         const {selectedProductsLng} = this;
         const productsLng = this.$store.state.products.length;
         const isIndeterminate = (selectedProductsLng > 0 && selectedProductsLng < productsLng);
 
         if (isIndeterminate) {
-          (<HTMLInputElement> this.$refs['bulk-action']).checked = true;
+          this.$refs['bulk-action'].checked = true;
         }
         return isIndeterminate;
       },
-      focusIn(event: Event): void {
+      focusIn() {
         this.danger = !this.selectedProductsLng;
         this.isFocused = !this.danger;
         if (this.danger) {
-          EventEmitter.emit('displayBulkAlert', 'error');
-        } else {
-          (<HTMLInputElement>event.target).select();
+          EventBus.$emit('displayBulkAlert', 'error');
         }
       },
-      focusOut(): void {
-        this.isFocused = this.isChecked();
+      focusOut(event) {
+        this.isFocused = $(event.target).hasClass('ps-number');
         this.danger = false;
       },
-      bulkChecked(checkbox: HTMLInputElement): void {
+      bulkChecked(checkbox) {
         if (!checkbox.checked) {
-          this.bulkValue = '';
+          this.$store.dispatch('updateBulkEditQty', null);
         }
         if (!this.isIndeterminate()) {
-          EventEmitter.emit('toggleProductsCheck', checkbox.checked);
+          EventBus.$emit('toggleProductsCheck', checkbox.checked);
         }
       },
-      sendQty(): void {
-        this.$store.state.hasQty = false;
+      sendQty() {
         this.$store.dispatch('updateQtyByProductsId');
       },
-      onChange(event: Event): void {
-        if (this.isChecked()) {
-          const value = (<HTMLInputElement>event.target).value !== ''
-            ? parseInt((<HTMLInputElement>event.target).value, 10)
-            : 0;
-          this.bulkValue = value;
-          this.disabled = !!value;
-        }
+      onChange(value) {
+        this.$store.dispatch('updateBulkEditQty', value);
       },
-      onKeydown(event: KeyboardEvent): void {
-        if (event.key === '.' || event.key === ',') {
-          event.preventDefault();
-        }
-      },
-      onKeyup(event: KeyboardEvent): void {
-        if (this.isChecked() && event.key !== '-') {
-          const value = (<HTMLInputElement>event.target).value !== ''
-            ? parseInt((<HTMLInputElement>event.target).value, 10)
-            : 0;
-          this.bulkValue = value;
-          this.disabled = !!value;
-        }
+      onKeyUp(event) {
+        this.isFocused = true;
+        this.$store.dispatch('updateBulkEditQty', event.target.value);
       },
     },
-    data() {
-      return {
-        bulkValue: '' as string | number,
-        isFocused: false,
-        danger: false,
-      };
-    },
+    data: () => ({
+      isFocused: false,
+      danger: false,
+    }),
     components: {
       PSNumber,
       PSCheckbox,
       PSButton,
     },
-  });
+  };
 </script>

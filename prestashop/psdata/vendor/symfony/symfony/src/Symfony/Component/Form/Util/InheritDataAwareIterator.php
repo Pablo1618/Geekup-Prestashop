@@ -27,19 +27,15 @@ class InheritDataAwareIterator extends \IteratorIterator implements \RecursiveIt
 {
     /**
      * {@inheritdoc}
-     *
-     * @return static
      */
-    #[\ReturnTypeWillChange]
     public function getChildren()
     {
         return new static($this->current());
     }
 
     /**
-     * @return bool
+     * {@inheritdoc}
      */
-    #[\ReturnTypeWillChange]
     public function hasChildren()
     {
         return (bool) $this->current()->getConfig()->getInheritData();

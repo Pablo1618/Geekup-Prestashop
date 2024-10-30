@@ -11,9 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating\Helper;
 
-@trigger_error('The '.RequestHelper::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig instead.', \E_USER_DEPRECATED);
-
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Templating\Helper\Helper;
 
@@ -21,8 +18,6 @@ use Symfony\Component\Templating\Helper\Helper;
  * RequestHelper provides access to the current request parameters.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class RequestHelper extends Helper
 {
@@ -58,7 +53,7 @@ class RequestHelper extends Helper
         return $this->getRequest()->getLocale();
     }
 
-    private function getRequest(): Request
+    private function getRequest()
     {
         if (!$this->requestStack->getCurrentRequest()) {
             throw new \LogicException('A Request must be available.');

@@ -43,15 +43,12 @@
   </div>
 </template>
 
-<script lang="ts">
-  import PSButton from '@app/widgets/ps-button.vue';
-  import {EventEmitter} from '@components/event-emitter';
-  import TranslationMixin from '@app/pages/translations/mixins/translate';
-  import {defineComponent} from 'vue';
+<script>
+  import PSButton from '@app/widgets/ps-button';
+  import {EventBus} from '@app/utils/event-bus';
 
-  export default defineComponent({
+  export default {
     name: 'TranslationInput',
-    mixins: [TranslationMixin],
     props: {
       id: {
         type: Number,
@@ -74,10 +71,10 @@
     },
     computed: {
       getTranslated: {
-        get(): any {
+        get() {
           return this.translated.user ? this.translated.user : this.translated.project;
         },
-        set(modifiedValue: any): void {
+        set(modifiedValue) {
           const modifiedTranslated = this.translated;
           modifiedTranslated.user = modifiedValue;
           modifiedTranslated.edited = modifiedValue;
@@ -88,20 +85,20 @@
           });
         },
       },
-      isMissing(): boolean {
+      isMissing() {
         return this.getTranslated === null;
       },
     },
     methods: {
-      resetTranslation(): void {
+      resetTranslation() {
         this.getTranslated = '';
-        EventEmitter.emit('resetTranslation', this.translated);
+        EventBus.$emit('resetTranslation', this.translated);
       },
     },
     components: {
       PSButton,
     },
-  });
+  };
 </script>
 
 <style lang="scss" scoped>

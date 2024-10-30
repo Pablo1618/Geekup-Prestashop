@@ -34,9 +34,10 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Type\SimpleGridAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
+use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -48,14 +49,37 @@ final class ContactGridDefinitionFactory extends AbstractGridDefinitionFactory
     use BulkDeleteActionTrait;
     use DeleteActionTrait;
 
-    public const GRID_ID = 'contact';
+    /**
+     * @var string
+     */
+    private $resetSearchUrl;
+
+    /**
+     * @var string
+     */
+    private $redirectionUrl;
+
+    /**
+     * @param HookDispatcherInterface $hookDispatcher
+     * @param string $resetSearchUrl
+     * @param string $redirectionUrl
+     */
+    public function __construct(
+        HookDispatcherInterface $hookDispatcher,
+        $resetSearchUrl,
+        $redirectionUrl
+    ) {
+        parent::__construct($hookDispatcher);
+        $this->resetSearchUrl = $resetSearchUrl;
+        $this->redirectionUrl = $redirectionUrl;
+    }
 
     /**
      * {@inheritdoc}
      */
     protected function getId()
     {
-        return self::GRID_ID;
+        return 'contact';
     }
 
     /**
@@ -171,11 +195,10 @@ final class ContactGridDefinitionFactory extends AbstractGridDefinitionFactory
             ->add(
                 (new Filter('actions', SearchAndResetType::class))
                     ->setTypeOptions([
-                        'reset_route' => 'admin_common_reset_search_by_filter_id',
-                        'reset_route_params' => [
-                            'filterId' => self::GRID_ID,
+                        'attr' => [
+                            'data-url' => $this->resetSearchUrl,
+                            'data-redirect' => $this->redirectionUrl,
                         ],
-                        'redirect_route' => 'admin_contacts_index',
                     ])
                     ->setAssociatedColumn('actions')
             );

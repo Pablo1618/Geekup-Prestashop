@@ -66,6 +66,7 @@ class SystemInformation
     public function getSummary()
     {
         return [
+            'notHostMode' => !$this->hostingInformation->isHostMode(),
             'server' => $this->hostingInformation->getServerInformation(),
             'instaWebInstalled' => $this->hostingInformation->isApacheInstawebModule(),
             'uname' => $this->hostingInformation->getUname(),

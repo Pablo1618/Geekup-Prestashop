@@ -26,8 +26,8 @@
   <div class="col-sm-3">
     <div class="card p-3">
       <PSTree
-        ref="domainsTree"
-        :model="$store.getters.domainsTree"
+        ref="domainTree"
+        :model="domainsTree"
         class-name="translationTree"
         :translations="translations"
         :current-item="currentItem"
@@ -38,14 +38,12 @@
   </div>
 </template>
 
-<script lang="ts">
-  import PSTree from '@app/widgets/ps-tree/ps-tree.vue';
-  import PSSpinner from '@app/widgets/ps-spinner.vue';
-  import {EventEmitter} from '@components/event-emitter';
-  import TranslationMixin from '@app/pages/translations/mixins/translate';
-  import {defineComponent} from 'vue';
+<script>
+  import PSTree from '@app/widgets/ps-tree/ps-tree';
+  import PSSpinner from '@app/widgets/ps-spinner';
+  import {EventBus} from '@app/utils/event-bus';
 
-  export default defineComponent({
+  export default {
     props: {
       modal: {
         type: Object,
@@ -58,22 +56,21 @@
         default: () => ({}),
       },
     },
-    mixins: [TranslationMixin],
     computed: {
-      treeReady(): boolean {
+      treeReady() {
         return !this.$store.state.sidebarLoading;
       },
-      currentItem(): string {
+      currentItem() {
         if (this.$store.getters.currentDomain === '' || typeof this.$store.getters.currentDomain === 'undefined') {
-          if (this.$store.getters.domainsTree.length) {
-            const domain = this.getFirstDomainToDisplay(this.$store.getters.domainsTree);
-            EventEmitter.emit('reduce');
+          if (this.domainsTree.length) {
+            const domain = this.getFirstDomainToDisplay(this.domainsTree);
+            EventBus.$emit('reduce');
             this.$store.dispatch('updateCurrentDomain', domain);
 
             if (domain !== '') {
-              this.$store.dispatch('getCatalog', {url: (<Record<string, any>>domain).dataValue});
-              EventEmitter.emit('setCurrentElement', (<Record<string, any>>domain).full_name);
-              return (<Record<string, any>>domain).full_name;
+              this.$store.dispatch('getCatalog', {url: domain.dataValue});
+              EventBus.$emit('setCurrentElement', domain.full_name);
+              return domain.full_name;
             }
 
             this.$store.dispatch('updatePrincipalLoading', false);
@@ -83,7 +80,10 @@
 
         return this.$store.getters.currentDomain;
       },
-      translations(): Record<string, any> {
+      domainsTree() {
+        return this.$store.getters.domainsTree;
+      },
+      translations() {
         return {
           expand: this.trans('sidebar_expand'),
           reduce: this.trans('sidebar_collapse'),
@@ -96,7 +96,7 @@
       this.$store.dispatch('getDomainsTree', {
         store: this.$store,
       });
-      EventEmitter.on('lastTreeItemClick', (el: any): void => {
+      EventBus.$on('lastTreeItemClick', (el) => {
         if (this.edited()) {
           this.modal.showModal();
           this.modal.$once('save', () => {
@@ -117,20 +117,20 @@
        * and reset the modified translations
        * @param {object} el - Domain to set
        */
-      itemClick(el: any): void {
+      itemClick: function itemClick(el) {
         this.$store.dispatch('updateCurrentDomain', el.item);
         this.$store.dispatch('getCatalog', {url: el.item.dataValue});
         this.$store.dispatch('updatePageIndex', 1);
         this.$store.state.modifiedTranslations = [];
       },
-      getFirstDomainToDisplay(tree: any): string | Record<string, any> {
+      getFirstDomainToDisplay: function getFirstDomainToDisplay(tree) {
         const keys = Object.keys(tree);
         let toDisplay = '';
 
         for (let i = 0; i < tree.length; i += 1) {
           if (!tree[keys[i]].disable) {
             if (tree[keys[i]].children && tree[keys[i]].children.length > 0) {
-              return this.getFirstDomainToDisplay(tree[keys[i]].children);
+              return getFirstDomainToDisplay(tree[keys[i]].children);
             }
 
             toDisplay = tree[keys[i]];
@@ -144,7 +144,7 @@
        * Check if some translations have been edited
        * @returns {boolean}
        */
-      edited: function edited(): boolean {
+      edited: function edited() {
         return Object.keys(this.$store.state.modifiedTranslations).length > 0;
       },
     },
@@ -152,7 +152,7 @@
       PSTree,
       PSSpinner,
     },
-  });
+  };
 </script>
 
 <style lang="scss" type="text/scss">
@@ -170,7 +170,6 @@
         color: $danger;
       }
     }
-
     .tree-extra-label {
       color: $danger;
       text-transform: uppercase;
@@ -193,16 +192,13 @@
       }
     }
   }
-
   .ps-loader {
     $loader-white-height: 20px;
     $loader-line-height: 16px;
-
     .animated-background {
       height: 144px!important;
       animation-duration: 2s!important;
     }
-
     .background-masker {
       &.header-left {
         left: 0;
@@ -210,25 +206,21 @@
         height: 108px;
         width: 20px;
       }
-
       &.content-top {
         left: 0;
         top: $loader-line-height;
         height: $loader-white-height;
       }
-
       &.content-first-end {
         left: 0;
         top: $loader-line-height*2+$loader-white-height;
         height: $loader-white-height;
       }
-
       &.content-second-end {
         left: 0;
         top: $loader-line-height*3+$loader-white-height*2;
         height: $loader-white-height;
       }
-
       &.content-third-end {
         left: 0;
         top: $loader-line-height*4+$loader-white-height*3;

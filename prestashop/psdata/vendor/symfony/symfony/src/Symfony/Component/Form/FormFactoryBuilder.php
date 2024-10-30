@@ -38,7 +38,7 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
     private $types = [];
 
     /**
-     * @var FormTypeExtensionInterface[][]
+     * @var FormTypeExtensionInterface[]
      */
     private $typeExtensions = [];
 
@@ -47,7 +47,10 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
      */
     private $typeGuessers = [];
 
-    public function __construct(bool $forceCoreExtension = false)
+    /**
+     * @param bool $forceCoreExtension
+     */
+    public function __construct($forceCoreExtension = false)
     {
         $this->forceCoreExtension = $forceCoreExtension;
     }
@@ -109,13 +112,7 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
      */
     public function addTypeExtension(FormTypeExtensionInterface $typeExtension)
     {
-        if (method_exists($typeExtension, 'getExtendedTypes')) {
-            foreach ($typeExtension::getExtendedTypes() as $extendedType) {
-                $this->typeExtensions[$extendedType][] = $typeExtension;
-            }
-        } else {
-            $this->typeExtensions[$typeExtension->getExtendedType()][] = $typeExtension;
-        }
+        $this->typeExtensions[$typeExtension->getExtendedType()][] = $typeExtension;
 
         return $this;
     }
@@ -126,7 +123,7 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
     public function addTypeExtensions(array $typeExtensions)
     {
         foreach ($typeExtensions as $typeExtension) {
-            $this->addTypeExtension($typeExtension);
+            $this->typeExtensions[$typeExtension->getExtendedType()][] = $typeExtension;
         }
 
         return $this;
@@ -178,13 +175,13 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
             if (\count($this->typeGuessers) > 1) {
                 $typeGuesser = new FormTypeGuesserChain($this->typeGuessers);
             } else {
-                $typeGuesser = $this->typeGuessers[0] ?? null;
+                $typeGuesser = isset($this->typeGuessers[0]) ? $this->typeGuessers[0] : null;
             }
 
             $extensions[] = new PreloadedExtension($this->types, $this->typeExtensions, $typeGuesser);
         }
 
-        $registry = new FormRegistry($extensions, $this->resolvedTypeFactory ?? new ResolvedFormTypeFactory());
+        $registry = new FormRegistry($extensions, $this->resolvedTypeFactory ?: new ResolvedFormTypeFactory());
 
         return new FormFactory($registry);
     }

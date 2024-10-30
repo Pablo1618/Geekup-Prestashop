@@ -11,6 +11,7 @@
 
 namespace Symfony\Bridge\Doctrine\Test;
 
+use Doctrine\Common\Persistence\ObjectRepository as LegacyObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Repository\RepositoryFactory;
@@ -29,7 +30,7 @@ final class TestRepositoryFactory implements RepositoryFactory
     /**
      * {@inheritdoc}
      *
-     * @return ObjectRepository
+     * @return ObjectRepository|LegacyObjectRepository
      */
     public function getRepository(EntityManagerInterface $entityManager, $entityName)
     {
@@ -42,14 +43,17 @@ final class TestRepositoryFactory implements RepositoryFactory
         return $this->repositoryList[$repositoryHash] = $this->createRepository($entityManager, $entityName);
     }
 
-    public function setRepository(EntityManagerInterface $entityManager, string $entityName, ObjectRepository $repository)
+    public function setRepository(EntityManagerInterface $entityManager, $entityName, LegacyObjectRepository $repository)
     {
         $repositoryHash = $this->getRepositoryHash($entityManager, $entityName);
 
         $this->repositoryList[$repositoryHash] = $repository;
     }
 
-    private function createRepository(EntityManagerInterface $entityManager, string $entityName): ObjectRepository
+    /**
+     * @return ObjectRepository|LegacyObjectRepository
+     */
+    private function createRepository(EntityManagerInterface $entityManager, $entityName)
     {
         /* @var $metadata ClassMetadata */
         $metadata = $entityManager->getClassMetadata($entityName);
@@ -58,7 +62,7 @@ final class TestRepositoryFactory implements RepositoryFactory
         return new $repositoryClassName($entityManager, $metadata);
     }
 
-    private function getRepositoryHash(EntityManagerInterface $entityManager, string $entityName): string
+    private function getRepositoryHash(EntityManagerInterface $entityManager, $entityName)
     {
         return $entityManager->getClassMetadata($entityName)->getName().spl_object_hash($entityManager);
     }

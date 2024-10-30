@@ -26,10 +26,38 @@
 
 namespace PrestaShop\PrestaShop\Core\Grid\Column\Type;
 
+use PrestaShop\PrestaShop\Core\Grid\Column\AbstractColumn;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
 /**
- * @deprecated since 8.1 and will be removed in next major.
- * Use \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn instead.
+ * Class Column defines most simple column in the grid that renders raw data.
  */
-final class DataColumn extends \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn
+final class DataColumn extends AbstractColumn
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getType()
+    {
+        return 'data';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        $resolver
+            ->setRequired([
+                'field',
+            ])
+            ->setDefaults([
+                'clickable' => true,
+            ])
+            ->setAllowedTypes('field', 'string')
+            ->setAllowedTypes('clickable', 'bool')
+        ;
+    }
 }

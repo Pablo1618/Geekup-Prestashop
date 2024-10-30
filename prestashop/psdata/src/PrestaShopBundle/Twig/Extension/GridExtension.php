@@ -28,12 +28,10 @@ namespace PrestaShopBundle\Twig\Extension;
 
 use RuntimeException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFunction;
-use Twig\TwigTest;
+use Twig\Loader\ExistsLoaderInterface;
+use Twig_SimpleFunction as SimpleFunction;
 
 /**
  * Class GridExtension is responsible for providing grid helpers functions.
@@ -72,30 +70,15 @@ class GridExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('column_content', [$this, 'renderColumnContent'], [
+            new SimpleFunction('column_content', [$this, 'renderColumnContent'], [
                 'is_safe' => ['html'],
             ]),
-            new TwigFunction('column_header', [$this, 'renderColumnHeader'], [
+            new SimpleFunction('column_header', [$this, 'renderColumnHeader'], [
                 'is_safe' => ['html'],
             ]),
-            new TwigFunction('is_ordering_column', [$this, 'isOrderingColumn'], [
+            new SimpleFunction('is_ordering_column', [$this, 'isOrderingColumn'], [
                 'is_safe' => ['html'],
             ]),
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getTests()
-    {
-        return [
-            new TwigTest('formview', static function ($value) {
-                return $value instanceof FormView;
-            }),
-            new TwigTest('form', static function ($value) {
-                return $value instanceof FormInterface;
-            }),
         ];
     }
 
@@ -223,6 +206,9 @@ class GridExtension extends AbstractExtension
         $columnTemplate = sprintf('%s/%s.html.twig', $basePath, $columnType);
 
         $loader = $this->twig->getLoader();
+        if (!($loader instanceof ExistsLoaderInterface)) {
+            return null;
+        }
 
         if ($loader->exists($columnGridTemplate)) {
             return $columnGridTemplate;

@@ -107,7 +107,6 @@ class Hashing
             'bcrypt' => [
                 'option' => [],
                 'hash' => function ($passwd, $staticSalt, $option) {
-                    /* @phpstan-ignore-next-line */
                     return password_hash($passwd, PASSWORD_BCRYPT);
                 },
                 'verify' => function ($passwd, $hash, $staticSalt) {

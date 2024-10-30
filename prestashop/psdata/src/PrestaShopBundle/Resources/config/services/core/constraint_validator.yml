@@ -18,13 +18,15 @@ services:
 
   prestashop.core.constraint_validator.customer_name_validator:
     class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\CustomerNameValidator'
+    arguments:
+      - '@prestashop.core.string.character_cleaner'
     tags:
       - { name: validator.constraint_validator }
 
   prestashop.core.constraint_validator.typed_regex_validator:
     class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\TypedRegexValidator'
     arguments:
-      - '@prestashop.adapter.legacy.configuration'
+      - '@prestashop.core.string.character_cleaner'
     tags:
       - { name: validator.constraint_validator }
 
@@ -58,13 +60,9 @@ services:
       - { name: validator.constraint_validator }
 
   prestashop.core.constraint_validator.clean_html_validator:
-    class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\CleanHtmlValidator'
-    arguments:
-      - "@=service('prestashop.adapter.legacy.configuration').getBoolean('PS_ALLOW_HTML_IFRAME')"
-    tags:
-      - { name: validator.constraint_validator }
+      class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\CleanHtmlValidator'
+      arguments:
+        - "@=service('prestashop.adapter.legacy.configuration').getBoolean('PS_ALLOW_HTML_IFRAME')"
+      tags:
+        - { name: validator.constraint_validator }
 
-  prestashop.validator.constraint.unique_state_iso_code:
-    class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\UniqueStateIsoCodeValidator'
-    tags:
-      - { name: validator.constraint_validator }

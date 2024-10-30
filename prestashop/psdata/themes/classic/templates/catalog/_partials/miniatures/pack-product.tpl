@@ -30,27 +30,19 @@
           <div class="mask">
             <a href="{$product.url}" title="{$product.name}">
               {if !empty($product.default_image.medium)}
-                <picture>
-                  {if !empty($product.default_image.medium.sources.avif)}<source srcset="{$product.default_image.medium.sources.avif}" type="image/avif">{/if}
-                  {if !empty($product.default_image.medium.sources.webp)}<source srcset="{$product.default_image.medium.sources.webp}" type="image/webp">{/if}
-                  <img
-                          src="{$product.default_image.medium.url}"
-                          {if !empty($product.default_image.legend)}
-                            alt="{$product.default_image.legend}"
-                            title="{$product.default_image.legend}"
-                          {else}
-                            alt="{$product.name}"
-                          {/if}
-                          loading="lazy"
-                          data-full-size-image-url="{$product.default_image.large.url}"
-                  >
-                </picture>
+                <img
+                        src="{$product.default_image.medium.url}"
+                        {if !empty($product.default_image.legend)}
+                          alt="{$product.default_image.legend}"
+                          title="{$product.default_image.legend}"
+                        {else}
+                          alt="{$product.name}"
+                        {/if}
+                        loading="lazy"
+                        data-full-size-image-url="{$product.default_image.large.url}"
+                >
               {else}
-                <picture>
-                  {if !empty($urls.no_picture_image.bySize.medium_default.sources.avif)}<source srcset="{$urls.no_picture_image.bySize.medium_default.sources.avif}" type="image/avif">{/if}
-                  {if !empty($urls.no_picture_image.bySize.medium_default.sources.webp)}<source srcset="{$urls.no_picture_image.bySize.medium_default.sources.webp}" type="image/webp">{/if}
-                  <img src="{$urls.no_picture_image.bySize.medium_default.url}" loading="lazy" />
-                </picture>
+                <img src="{$urls.no_picture_image.bySize.medium_default.url}" loading="lazy" />
               {/if}
             </a>
           </div>

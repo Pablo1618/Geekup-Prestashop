@@ -28,7 +28,6 @@ namespace PrestaShopBundle\Controller\Admin\Sell\Catalog;
 
 use Exception;
 use PrestaShop\PrestaShop\Core\Domain\Product\Command\BulkDeleteProductCommand;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Domain\ShowcaseCard\Query\GetShowcaseCardIsClosed;
 use PrestaShop\PrestaShop\Core\Domain\ShowcaseCard\ValueObject\ShowcaseCard;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\Monitoring\DisabledProductGridDefinitionFactory;
@@ -158,13 +157,10 @@ class MonitoringController extends FrameworkBundleAdminController
         $productIds = $this->getBulkProductsFromRequest($request, $gridIdentifiers);
 
         try {
-            $this->getCommandBus()->handle(new BulkDeleteProductCommand(
-                $productIds,
-                ShopConstraint::shop($this->getContextShopId())
-            ));
+            $this->getCommandBus()->handle(new BulkDeleteProductCommand($productIds));
             $this->addFlash(
                 'success',
-                $this->trans('Successful deletion', 'Admin.Notifications.Success')
+                $this->trans('Successful deletion.', 'Admin.Notifications.Success')
             );
         } catch (Exception $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, [$e->getMessage()]));

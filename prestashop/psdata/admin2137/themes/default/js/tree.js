@@ -66,9 +66,8 @@ Tree.prototype = {
             const useCheckBox = inputType === 'checkbox' ? 1 : 0;
 
             $.get(
-              'index.php',
+              'ajax-tab.php',
               {
-                ajax: 1,
                 controller: 'AdminProducts',
                 token: currentToken,
                 action: 'getCategoryTree',
@@ -175,7 +174,6 @@ Tree.prototype = {
       const useCheckBox = inputType === 'checkbox' ? 1 : 0;
 
       const data = {
-        ajax: 1,
         controller: 'AdminProducts',
         token: currentToken,
         action: 'getCategoryTree',
@@ -192,7 +190,7 @@ Tree.prototype = {
       }
 
       $.get(
-        'index.php',
+        'ajax-tab.php',
         data,
         (content) => {
           targetTree.html(content);

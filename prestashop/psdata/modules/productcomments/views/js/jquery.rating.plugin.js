@@ -96,7 +96,6 @@ jQuery.fn.rating = function(generalOptions) {
         newStar.on('click', function selectGrade() {
           var selectedGrade = $(this).data('grade');
           ratingInput.val(selectedGrade);
-          ratingChosen = true;
         });
         fullStars.append(newStar);
       }

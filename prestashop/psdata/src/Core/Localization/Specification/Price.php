@@ -47,11 +47,6 @@ class Price extends NumberSpecification
     public const CURRENCY_DISPLAY_CODE = 'code';
 
     /**
-     * Price value placeholder without symbols
-     */
-    public const PATTERN_BASE_PLACEHOLDER = '#,##0.00';
-
-    /**
      * Type of display for currency symbol
      * cf. self::CURRENCY_DISPLAY_SYMBOL and self::CURRENCY_DISPLAY_CODE constants.
      *
@@ -159,7 +154,9 @@ class Price extends NumberSpecification
     {
         parent::validateData();
 
-        if (!in_array($this->currencyDisplay, [self::CURRENCY_DISPLAY_CODE, self::CURRENCY_DISPLAY_SYMBOL])) {
+        if (!isset($this->currencyDisplay)
+            || !in_array($this->currencyDisplay, [self::CURRENCY_DISPLAY_CODE, self::CURRENCY_DISPLAY_SYMBOL])
+        ) {
             throw new LocalizationException('Invalid currencyDisplay');
         }
     }

@@ -29,13 +29,9 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderReturnPresenter;
 
 class OrderReturnControllerCore extends FrontController
 {
-    /** @var bool */
     public $auth = true;
-    /** @var string */
     public $php_self = 'order-return';
-    /** @var string */
     public $authRedirection = 'order-follow';
-    /** @var bool */
     public $ssl = true;
 
     /**
@@ -49,7 +45,7 @@ class OrderReturnControllerCore extends FrontController
 
         $id_order_return = (int) Tools::getValue('id_order_return');
 
-        if (!Validate::isUnsignedId($id_order_return)) {
+        if (!isset($id_order_return) || !Validate::isUnsignedId($id_order_return)) {
             $this->redirect_after = '404';
             $this->redirect();
         } else {
@@ -94,10 +90,11 @@ class OrderReturnControllerCore extends FrontController
 
     public function getTemplateVarOrderReturn($orderReturn)
     {
-        $orderReturns = OrderReturn::getOrdersReturn($orderReturn->id_customer, $orderReturn->id_order, false, null, $orderReturn->id);
-
-        if (empty($orderReturns)) {
-            return [];
+        $orderReturns = OrderReturn::getOrdersReturn($orderReturn->id_customer, $orderReturn->id_order);
+        foreach ($orderReturns as $return) {
+            if ($orderReturn->id_order == $return['id_order']) {
+                break;
+            }
         }
 
         $orderReturnPresenter = new OrderReturnPresenter(
@@ -105,7 +102,7 @@ class OrderReturnControllerCore extends FrontController
             $this->context->link
         );
 
-        return $orderReturnPresenter->present(array_shift($orderReturns));
+        return $orderReturnPresenter->present($return);
     }
 
     public function getTemplateVarProducts($order_return_id, $order)

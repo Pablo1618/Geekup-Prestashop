@@ -16,14 +16,6 @@ services:
     arguments:
       - "@=service('prestashop.adapter.legacy.context').getContext().link"
 
-  prestashop.adapter.shop.url.help_provider:
-    class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\HelpProvider'
-    arguments:
-      - '@prestashop.adapter.legacy.context'
-      - '@translator'
-      - '@router'
-      - '@PrestaShop\PrestaShop\Core\Help\Documentation'
-
   prestashop.adapter.shop.url.category_provider:
     class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\CategoryProvider'
     arguments:
@@ -35,16 +27,9 @@ services:
       - "@=service('prestashop.adapter.legacy.context').getContext().link"
 
   prestashop.adapter.shop.url.product_provider:
-    class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\ProductProvider'
-    arguments:
-      - '@=service("prestashop.adapter.legacy.context").getContext().link'
-
-  prestashop.adapter.shop.url.product_preview_provider:
-    class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\ProductPreviewProvider'
-    arguments:
-      - "@=service('prestashop.adapter.legacy.context').getContext().link"
-      - '@=service("prestashop.adapter.legacy.configuration").getBoolean("PS_REWRITING_SETTINGS")'
-      - '@=service("prestashop.adapter.legacy.context").getContext().employee.id'
+      class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\ProductProvider'
+      arguments:
+          - "@=service('prestashop.adapter.legacy.context').getContext().link"
 
   prestashop.adapter.shop.query_handler.get_logos_paths_handler:
     class: 'PrestaShop\PrestaShop\Adapter\Shop\QueryHandler\GetLogosPathsHandler'
@@ -65,23 +50,7 @@ services:
         command: PrestaShop\PrestaShop\Core\Domain\Shop\Query\SearchShops
 
   prestashop.adapter.shop.url.product_image_folder_provider:
-    class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\ImageFolderProvider'
-    arguments:
-      - "@=service('prestashop.adapter.legacy.context').getContext().link"
-      - 'img/p'
-
-  prestashop.adapter.shop.url.category_image_folder_provider:
-    class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\ImageFolderProvider'
-    arguments:
-      - "@=service('prestashop.adapter.legacy.context').getContext().link"
-      - 'img/c'
-
-  PrestaShop\PrestaShop\Adapter\Shop\Repository\ShopGroupRepository:
-    arguments:
-      - '@doctrine.dbal.default_connection'
-      - '%database_prefix%'
-
-  PrestaShop\PrestaShop\Adapter\Shop\Repository\ShopRepository:
-    arguments:
-      - '@doctrine.dbal.default_connection'
-      - '%database_prefix%'
+      class: 'PrestaShop\PrestaShop\Adapter\Shop\Url\ProductImageFolderProvider'
+      arguments:
+          - "@=service('prestashop.adapter.legacy.context').getContext().link"
+          - 'img/p'

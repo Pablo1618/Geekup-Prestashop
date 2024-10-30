@@ -3,24 +3,17 @@
 namespace Doctrine\DBAL\Cache;
 
 use ArrayIterator;
-use Doctrine\DBAL\Driver\FetchUtils;
-use Doctrine\DBAL\Driver\Result;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\FetchMode;
 use InvalidArgumentException;
 use IteratorAggregate;
 use PDO;
-use ReturnTypeWillChange;
-
 use function array_merge;
 use function array_values;
 use function count;
 use function reset;
 
-/**
- * @deprecated
- */
-class ArrayStatement implements IteratorAggregate, ResultStatement, Result
+class ArrayStatement implements IteratorAggregate, ResultStatement
 {
     /** @var mixed[] */
     private $data;
@@ -49,22 +42,10 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use free() instead.
      */
     public function closeCursor()
     {
-        $this->free();
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rowCount()
-    {
-        return count($this->data);
+        unset($this->data);
     }
 
     /**
@@ -77,8 +58,6 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use one of the fetch- or iterate-related methods.
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
@@ -93,10 +72,7 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use iterateNumeric(), iterateAssociative() or iterateColumn() instead.
      */
-    #[ReturnTypeWillChange]
     public function getIterator()
     {
         $data = $this->fetchAll();
@@ -106,8 +82,6 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use fetchNumeric(), fetchAssociative() or fetchOne() instead.
      */
     public function fetch($fetchMode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
@@ -139,8 +113,6 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use fetchAllNumeric(), fetchAllAssociative() or fetchFirstColumn() instead.
      */
     public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
@@ -154,8 +126,6 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated Use fetchOne() instead.
      */
     public function fetchColumn($columnIndex = 0)
     {
@@ -163,82 +133,5 @@ class ArrayStatement implements IteratorAggregate, ResultStatement, Result
 
         // TODO: verify that return false is the correct behavior
         return $row[$columnIndex] ?? false;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchNumeric()
-    {
-        $row = $this->doFetch();
-
-        if ($row === false) {
-            return false;
-        }
-
-        return array_values($row);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchAssociative()
-    {
-        return $this->doFetch();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchOne()
-    {
-        $row = $this->doFetch();
-
-        if ($row === false) {
-            return false;
-        }
-
-        return reset($row);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchAllNumeric(): array
-    {
-        return FetchUtils::fetchAllNumeric($this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchAllAssociative(): array
-    {
-        return FetchUtils::fetchAllAssociative($this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchFirstColumn(): array
-    {
-        return FetchUtils::fetchFirstColumn($this);
-    }
-
-    public function free(): void
-    {
-        $this->data = [];
-    }
-
-    /**
-     * @return mixed|false
-     */
-    private function doFetch()
-    {
-        if (! isset($this->data[$this->num])) {
-            return false;
-        }
-
-        return $this->data[$this->num++];
     }
 }

@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Serializer\Mapping\Factory;
 
+use Doctrine\Common\Cache\Cache;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Symfony\Component\Serializer\Mapping\ClassMetadata;
 use Symfony\Component\Serializer\Mapping\Loader\LoaderInterface;
 
@@ -24,15 +26,17 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
     use ClassResolverTrait;
 
     private $loader;
-
-    /**
-     * @var array
-     */
+    private $cache;
     private $loadedClasses;
 
-    public function __construct(LoaderInterface $loader)
+    public function __construct(LoaderInterface $loader, Cache $cache = null)
     {
         $this->loader = $loader;
+        $this->cache = $cache;
+
+        if (null !== $cache) {
+            @trigger_error(sprintf('Passing a Doctrine Cache instance as 2nd parameter of the "%s" constructor is deprecated since Symfony 3.1. This parameter will be removed in Symfony 4.0. Use the "%s" class instead.', __CLASS__, CacheClassMetadataFactory::class), \E_USER_DEPRECATED);
+        }
     }
 
     /**
@@ -43,6 +47,10 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
         $class = $this->getClass($value);
 
         if (isset($this->loadedClasses[$class])) {
+            return $this->loadedClasses[$class];
+        }
+
+        if ($this->cache && ($this->loadedClasses[$class] = $this->cache->fetch($class))) {
             return $this->loadedClasses[$class];
         }
 
@@ -61,6 +69,10 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
             $classMetadata->merge($this->getMetadataFor($interface->name));
         }
 
+        if ($this->cache) {
+            $this->cache->save($class, $classMetadata);
+        }
+
         return $this->loadedClasses[$class] = $classMetadata;
     }
 
@@ -69,6 +81,14 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
      */
     public function hasMetadataFor($value)
     {
-        return \is_object($value) || (\is_string($value) && (class_exists($value) || interface_exists($value, false)));
+        try {
+            $this->getClass($value);
+
+            return true;
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            // Return false in case of exception
+        }
+
+        return false;
     }
 }

@@ -352,10 +352,6 @@
             "LRD",
             "dólar liberiano"
         ],
-        "LSL": [
-            "LSL",
-            "loti lesotiano"
-        ],
         "LTL": [
             "LTL",
             "Litas da Lituânia"
@@ -662,7 +658,7 @@
             "dólar das Caraíbas Orientais"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "franco CFA (BCEAO)"
         ],
         "XPF": [

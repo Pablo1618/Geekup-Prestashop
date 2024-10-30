@@ -22,14 +22,14 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class ChainUserProvider implements UserProviderInterface, PasswordUpgraderInterface
+class ChainUserProvider implements UserProviderInterface
 {
     private $providers;
 
     /**
      * @param iterable|UserProviderInterface[] $providers
      */
-    public function __construct(iterable $providers)
+    public function __construct($providers)
     {
         $this->providers = $providers;
     }
@@ -107,21 +107,5 @@ class ChainUserProvider implements UserProviderInterface, PasswordUpgraderInterf
         }
 
         return false;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
-    {
-        foreach ($this->providers as $provider) {
-            if ($provider instanceof PasswordUpgraderInterface) {
-                try {
-                    $provider->upgradePassword($user, $newEncodedPassword);
-                } catch (UnsupportedUserException $e) {
-                    // ignore: password upgrades are opportunistic
-                }
-            }
-        }
     }
 }

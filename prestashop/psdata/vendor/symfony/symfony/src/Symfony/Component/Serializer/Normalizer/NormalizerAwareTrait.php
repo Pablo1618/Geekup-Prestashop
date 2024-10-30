@@ -21,6 +21,11 @@ trait NormalizerAwareTrait
      */
     protected $normalizer;
 
+    /**
+     * Sets the normalizer.
+     *
+     * @param NormalizerInterface $normalizer A NormalizerInterface instance
+     */
     public function setNormalizer(NormalizerInterface $normalizer)
     {
         $this->normalizer = $normalizer;

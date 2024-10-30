@@ -13,8 +13,6 @@ namespace Symfony\Bundle\WebServerBundle;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since Symfony 4.4, to be removed in 5.0; the new Symfony local server has more features, you can use it instead.
  */
 class WebServerConfig
 {
@@ -24,7 +22,7 @@ class WebServerConfig
     private $env;
     private $router;
 
-    public function __construct(string $documentRoot, string $env, string $address = null, string $router = null)
+    public function __construct($documentRoot, $env, $address = null, $router = null)
     {
         if (!is_dir($documentRoot)) {
             throw new \InvalidArgumentException(sprintf('The document root directory "%s" does not exist.', $documentRoot));
@@ -104,22 +102,12 @@ class WebServerConfig
     }
 
     /**
-     * @return string contains resolved hostname if available, empty string otherwise
+     * @param string $documentRoot
+     * @param string $env
+     *
+     * @return string|null
      */
-    public function getDisplayAddress()
-    {
-        if ('0.0.0.0' !== $this->hostname) {
-            return '';
-        }
-
-        if (false === $localHostname = gethostname()) {
-            return '';
-        }
-
-        return gethostbyname($localHostname).':'.$this->port;
-    }
-
-    private function findFrontController(string $documentRoot, string $env): ?string
+    private function findFrontController($documentRoot, $env)
     {
         $fileNames = $this->getFrontControllerFileNames($env);
 
@@ -132,12 +120,20 @@ class WebServerConfig
         return null;
     }
 
-    private function getFrontControllerFileNames(string $env): array
+    /**
+     * @param string $env
+     *
+     * @return array
+     */
+    private function getFrontControllerFileNames($env)
     {
         return ['app_'.$env.'.php', 'app.php', 'index_'.$env.'.php', 'index.php'];
     }
 
-    private function findBestPort(): int
+    /**
+     * @return int
+     */
+    private function findBestPort()
     {
         $port = 8000;
         while (false !== $fp = @fsockopen($this->hostname, $port, $errno, $errstr, 1)) {

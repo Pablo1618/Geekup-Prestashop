@@ -29,7 +29,6 @@ use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
 
 class SearchControllerCore extends ProductListingFrontController
 {
-    /** @var string */
     public $php_self = 'search';
     public $instant_search;
     public $ajax_search;
@@ -62,11 +61,6 @@ class SearchControllerCore extends ProductListingFrontController
         );
     }
 
-    public function getCanonicalURL(): string
-    {
-        return $this->buildPaginatedUrl($this->context->link->getPageLink('search', null, null, ['s' => $this->search_string]));
-    }
-
     /**
      * Ensure that no search results page is indexed by search engines.
      */
@@ -89,14 +83,10 @@ class SearchControllerCore extends ProductListingFrontController
         $this->doProductSearch('catalog/listing/search', ['entity' => 'search']);
     }
 
-    /**
-     * @return ProductSearchQuery
-     */
     protected function getProductSearchQuery()
     {
         $query = new ProductSearchQuery();
         $query
-            ->setQueryType('search')
             ->setSortOrder(new SortOrder('product', 'position', 'desc'))
             ->setSearchString($this->search_string)
             ->setSearchTag($this->search_tag);
@@ -104,9 +94,6 @@ class SearchControllerCore extends ProductListingFrontController
         return $query;
     }
 
-    /**
-     * @return SearchProductSearchProvider
-     */
     protected function getDefaultProductSearchProvider()
     {
         return new SearchProductSearchProvider(

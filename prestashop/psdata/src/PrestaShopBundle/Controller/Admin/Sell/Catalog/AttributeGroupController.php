@@ -27,15 +27,13 @@
 namespace PrestaShopBundle\Controller\Admin\Sell\Catalog;
 
 use Exception;
-use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Command\BulkDeleteAttributeGroupCommand;
-use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Command\DeleteAttributeGroupCommand;
-use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Exception\AttributeGroupNotFoundException;
-use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Exception\DeleteAttributeGroupException;
+use PrestaShop\PrestaShop\Core\Domain\Product\AttributeGroup\Command\BulkDeleteAttributeGroupCommand;
+use PrestaShop\PrestaShop\Core\Domain\Product\AttributeGroup\Command\DeleteAttributeGroupCommand;
+use PrestaShop\PrestaShop\Core\Domain\Product\AttributeGroup\Exception\AttributeGroupNotFoundException;
+use PrestaShop\PrestaShop\Core\Domain\Product\AttributeGroup\Exception\DeleteAttributeGroupException;
 use PrestaShop\PrestaShop\Core\Domain\ShowcaseCard\Query\GetShowcaseCardIsClosed;
 use PrestaShop\PrestaShop\Core\Domain\ShowcaseCard\ValueObject\ShowcaseCard;
 use PrestaShop\PrestaShop\Core\Exception\TranslatableCoreException;
-use PrestaShop\PrestaShop\Core\Grid\Position\GridPositionUpdaterInterface;
-use PrestaShop\PrestaShop\Core\Grid\Position\PositionUpdateFactoryInterface;
 use PrestaShop\PrestaShop\Core\Search\Filters\AttributeGroupFilters;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
@@ -75,7 +73,7 @@ class AttributeGroupController extends FrameworkBundleAdminController
 
     /**
      * @AdminSecurity(
-     *     "is_granted('create', request.get('_legacy_controller'))",
+     *     "is_granted(['create'], request.get('_legacy_controller'))",
      *     message="You do not have permission to create this."
      * )
      *
@@ -89,7 +87,7 @@ class AttributeGroupController extends FrameworkBundleAdminController
 
     /**
      * @AdminSecurity(
-     *     "is_granted('update', request.get('_legacy_controller'))",
+     *     "is_granted(['update'], request.get('_legacy_controller'))",
      *     message="You do not have permission to update this."
      * )
      *
@@ -105,7 +103,7 @@ class AttributeGroupController extends FrameworkBundleAdminController
 
     /**
      * @AdminSecurity(
-     *     "is_granted('read', request.get('_legacy_controller'))",
+     *     "is_granted(['read'], request.get('_legacy_controller'))",
      *     message="You do not have permission to export this."
      * )
 
@@ -138,13 +136,13 @@ class AttributeGroupController extends FrameworkBundleAdminController
         ];
 
         $positionDefinition = $this->get('prestashop.core.grid.attribute_group.position_definition');
-        $positionUpdateFactory = $this->get(PositionUpdateFactoryInterface::class);
+        $positionUpdateFactory = $this->get('prestashop.core.grid.position.position_update_factory');
 
         try {
             $positionUpdate = $positionUpdateFactory->buildPositionUpdate($positionsData, $positionDefinition);
-            $updater = $this->get(GridPositionUpdaterInterface::class);
+            $updater = $this->get('prestashop.core.grid.position.doctrine_grid_position_updater');
             $updater->update($positionUpdate);
-            $this->addFlash('success', $this->trans('Successful update', 'Admin.Notifications.Success'));
+            $this->addFlash('success', $this->trans('Successful update.', 'Admin.Notifications.Success'));
         } catch (TranslatableCoreException $e) {
             $errors = [$e->toArray()];
             $this->flashErrors($errors);
@@ -172,7 +170,7 @@ class AttributeGroupController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteAttributeGroupCommand((int) $attributeGroupId));
             $this->addFlash(
                 'success',
-                $this->trans('Successful deletion', 'Admin.Notifications.Success')
+                $this->trans('Successful deletion.', 'Admin.Notifications.Success')
             );
         } catch (Exception $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
@@ -200,7 +198,7 @@ class AttributeGroupController extends FrameworkBundleAdminController
             );
             $this->addFlash(
                 'success',
-                $this->trans('Successful deletion', 'Admin.Notifications.Success')
+                $this->trans('Successful deletion.', 'Admin.Notifications.Success')
             );
         } catch (Exception $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
@@ -238,7 +236,7 @@ class AttributeGroupController extends FrameworkBundleAdminController
     {
         return [
             AttributeGroupNotFoundException::class => $this->trans(
-                'The object cannot be loaded (or found).',
+                'The object cannot be loaded (or found)',
                 'Admin.Notifications.Error'
             ),
             DeleteAttributeGroupException::class => [

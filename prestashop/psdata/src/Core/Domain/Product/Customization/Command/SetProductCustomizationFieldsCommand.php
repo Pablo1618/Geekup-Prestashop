@@ -29,9 +29,7 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Domain\Product\Customization\Command;
 
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\CustomizationField;
-use PrestaShop\PrestaShop\Core\Domain\Product\Customization\CustomizationShopConstraintTrait;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use RuntimeException;
 
 /**
@@ -39,8 +37,6 @@ use RuntimeException;
  */
 class SetProductCustomizationFieldsCommand
 {
-    use CustomizationShopConstraintTrait;
-
     /**
      * @var ProductId
      */
@@ -52,23 +48,13 @@ class SetProductCustomizationFieldsCommand
     private $customizationFields = [];
 
     /**
-     * @var ShopConstraint
-     */
-    private $shopConstraint;
-
-    /**
      * @param int $productId
-     * @param array{'type': int, "localized_names": array<int, string>, "is_required": bool, "added_by_module": bool, "id"?: int|null}[] $customizationFields
+     * @param array $customizationFields
      */
-    public function __construct(
-        int $productId,
-        array $customizationFields,
-        ShopConstraint $shopConstraint
-    ) {
+    public function __construct(int $productId, array $customizationFields)
+    {
         $this->productId = new ProductId($productId);
         $this->setCustomizationFields($customizationFields);
-        $this->checkShopConstraint($shopConstraint);
-        $this->shopConstraint = $shopConstraint;
     }
 
     /**
@@ -88,15 +74,7 @@ class SetProductCustomizationFieldsCommand
     }
 
     /**
-     * @return ShopConstraint
-     */
-    public function getShopConstraint(): ShopConstraint
-    {
-        return $this->shopConstraint;
-    }
-
-    /**
-     * @param array{'type': int, "localized_names": array<int, string>, "is_required": bool, "added_by_module": bool, "id"?: int|null}[] $customizationFields $customizationFields
+     * @param array $customizationFields
      */
     private function setCustomizationFields(array $customizationFields): void
     {

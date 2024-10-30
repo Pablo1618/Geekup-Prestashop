@@ -27,7 +27,7 @@
 namespace PrestaShop\PrestaShop\Core\Domain\Product\Pack\QueryHandler;
 
 use PrestaShop\PrestaShop\Core\Domain\Product\Pack\Query\GetPackedProducts;
-use PrestaShop\PrestaShop\Core\Domain\Product\Pack\QueryResult\PackedProductDetails;
+use PrestaShop\PrestaShop\Core\Domain\Product\Pack\QueryResult\PackedProduct;
 
 /**
  * Defines contract for GetPackedProductsHandler
@@ -37,7 +37,7 @@ interface GetPackedProductsHandlerInterface
     /**
      * @param GetPackedProducts $query
      *
-     * @return PackedProductDetails[]
+     * @return PackedProduct[]
      */
     public function handle(GetPackedProducts $query): array;
 }

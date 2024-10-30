@@ -1,18 +1,32 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Repository;
 
-use Doctrine\Deprecations\Deprecation;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
-
-use function spl_object_id;
 
 /**
  * This factory is used to create default repository objects for entities at runtime.
+ *
+ * @author Guilherme Blanco <guilhermeblanco@hotmail.com>
+ * @since 2.4
  */
 final class DefaultRepositoryFactory implements RepositoryFactory
 {
@@ -20,16 +34,15 @@ final class DefaultRepositoryFactory implements RepositoryFactory
      * The list of EntityRepository instances.
      *
      * @var ObjectRepository[]
-     * @psalm-var array<string, ObjectRepository>
      */
     private $repositoryList = [];
 
     /**
      * {@inheritdoc}
      */
-    public function getRepository(EntityManagerInterface $entityManager, $entityName): ObjectRepository
+    public function getRepository(EntityManagerInterface $entityManager, $entityName)
     {
-        $repositoryHash = $entityManager->getClassMetadata($entityName)->getName() . spl_object_id($entityManager);
+        $repositoryHash = $entityManager->getClassMetadata($entityName)->getName() . spl_object_hash($entityManager);
 
         if (isset($this->repositoryList[$repositoryHash])) {
             return $this->repositoryList[$repositoryHash];
@@ -41,28 +54,17 @@ final class DefaultRepositoryFactory implements RepositoryFactory
     /**
      * Create a new repository instance for an entity class.
      *
-     * @param EntityManagerInterface $entityManager The EntityManager instance.
-     * @param string                 $entityName    The name of the entity.
+     * @param \Doctrine\ORM\EntityManagerInterface $entityManager The EntityManager instance.
+     * @param string                               $entityName    The name of the entity.
+     *
+     * @return ObjectRepository
      */
-    private function createRepository(
-        EntityManagerInterface $entityManager,
-        string $entityName
-    ): ObjectRepository {
+    private function createRepository(EntityManagerInterface $entityManager, $entityName)
+    {
         $metadata            = $entityManager->getClassMetadata($entityName);
         $repositoryClassName = $metadata->customRepositoryClassName
             ?: $entityManager->getConfiguration()->getDefaultRepositoryClassName();
 
-        $repository = new $repositoryClassName($entityManager, $metadata);
-        if (! $repository instanceof EntityRepository) {
-            Deprecation::trigger(
-                'doctrine/orm',
-                'https://github.com/doctrine/orm/pull/9533',
-                'Configuring %s as repository class is deprecated because it does not extend %s.',
-                $repositoryClassName,
-                EntityRepository::class
-            );
-        }
-
-        return $repository;
+        return new $repositoryClassName($entityManager, $metadata);
     }
 }

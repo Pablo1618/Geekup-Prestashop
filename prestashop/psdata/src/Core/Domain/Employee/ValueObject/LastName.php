@@ -34,7 +34,7 @@ use PrestaShop\PrestaShop\Core\Domain\Employee\Exception\EmployeeConstraintExcep
 class LastName
 {
     /**
-     * @var int Maximum allowed length for last name
+     * @var string Maximum allowed length for last name
      */
     public const MAX_LENGTH = 255;
 
@@ -85,7 +85,8 @@ class LastName
     {
         $lastName = html_entity_decode($lastName, ENT_COMPAT, 'UTF-8');
 
-        if (self::MAX_LENGTH < mb_strlen($lastName, 'UTF-8')) {
+        $length = function_exists('mb_strlen') ? mb_strlen($lastName, 'UTF-8') : strlen($lastName);
+        if (self::MAX_LENGTH < $length) {
             throw new EmployeeConstraintException(sprintf('Employee last name is too long. Max allowed length is %s', self::MAX_LENGTH), EmployeeConstraintException::INVALID_LAST_NAME);
         }
     }

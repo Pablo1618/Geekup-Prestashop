@@ -2,7 +2,7 @@
     "Names": {
         "AED": [
             "AED",
-            "Dirham de Emiratos Árabes Unidos"
+            "AED"
         ],
         "AFN": [
             "AFN",
@@ -14,7 +14,7 @@
         ],
         "AMD": [
             "AMD",
-            "Dram Armenio"
+            "AMD"
         ],
         "ANG": [
             "ANG",
@@ -38,7 +38,7 @@
         ],
         "AZN": [
             "AZN",
-            "Manat Azerbaiyano"
+            "AZN"
         ],
         "BAM": [
             "BAM",
@@ -328,10 +328,6 @@
             "LRD",
             "Dólar Liberiano"
         ],
-        "LSL": [
-            "LSL",
-            "Lesoto Loti Qullqi"
-        ],
         "LYD": [
             "LYD",
             "Dinar Libio"
@@ -605,7 +601,7 @@
             "Dólar del Caribe Oriental"
         ],
         "XOF": [
-            "F CFA",
+            "CFA",
             "Franco CFA de África Occidental"
         ],
         "XPF": [

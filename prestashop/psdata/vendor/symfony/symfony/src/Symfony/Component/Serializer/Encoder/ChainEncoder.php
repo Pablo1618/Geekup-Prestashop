@@ -20,9 +20,9 @@ use Symfony\Component\Serializer\Exception\RuntimeException;
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  *
- * @final
+ * @final since version 3.3.
  */
-class ChainEncoder implements ContextAwareEncoderInterface
+class ChainEncoder implements EncoderInterface /*, ContextAwareEncoderInterface*/
 {
     protected $encoders = [];
     protected $encoderByFormat = [];
@@ -43,8 +43,10 @@ class ChainEncoder implements ContextAwareEncoderInterface
     /**
      * {@inheritdoc}
      */
-    public function supportsEncoding($format, array $context = []): bool
+    public function supportsEncoding($format/*, array $context = []*/)
     {
+        $context = \func_num_args() > 1 ? func_get_arg(1) : [];
+
         try {
             $this->getEncoder($format, $context);
         } catch (RuntimeException $e) {
@@ -56,9 +58,14 @@ class ChainEncoder implements ContextAwareEncoderInterface
 
     /**
      * Checks whether the normalization is needed for the given format.
+     *
+     * @param string $format
+     *
+     * @return bool
      */
-    public function needsNormalization(string $format, array $context = []): bool
+    public function needsNormalization($format/*, array $context = []*/)
     {
+        $context = \func_num_args() > 1 ? func_get_arg(1) : [];
         $encoder = $this->getEncoder($format, $context);
 
         if (!$encoder instanceof NormalizationAwareInterface) {
@@ -75,9 +82,13 @@ class ChainEncoder implements ContextAwareEncoderInterface
     /**
      * Gets the encoder supporting the format.
      *
+     * @param string $format
+     *
+     * @return EncoderInterface
+     *
      * @throws RuntimeException if no encoder is found
      */
-    private function getEncoder(string $format, array $context): EncoderInterface
+    private function getEncoder($format, array $context)
     {
         if (isset($this->encoderByFormat[$format])
             && isset($this->encoders[$this->encoderByFormat[$format]])
@@ -85,13 +96,9 @@ class ChainEncoder implements ContextAwareEncoderInterface
             return $this->encoders[$this->encoderByFormat[$format]];
         }
 
-        $cache = true;
         foreach ($this->encoders as $i => $encoder) {
-            $cache = $cache && !$encoder instanceof ContextAwareEncoderInterface;
             if ($encoder->supportsEncoding($format, $context)) {
-                if ($cache) {
-                    $this->encoderByFormat[$format] = $i;
-                }
+                $this->encoderByFormat[$format] = $i;
 
                 return $encoder;
             }

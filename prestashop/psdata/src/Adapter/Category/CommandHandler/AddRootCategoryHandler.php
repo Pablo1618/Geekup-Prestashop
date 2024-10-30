@@ -88,10 +88,6 @@ final class AddRootCategoryHandler extends AbstractObjectModelHandler implements
             $category->description = $command->getLocalizedDescriptions();
         }
 
-        if (null !== $command->getLocalizedAdditionalDescriptions()) {
-            $category->additional_description = $command->getLocalizedAdditionalDescriptions();
-        }
-
         if (null !== $command->getLocalizedMetaTitles()) {
             $category->meta_title = $command->getLocalizedMetaTitles();
         }
@@ -109,15 +105,15 @@ final class AddRootCategoryHandler extends AbstractObjectModelHandler implements
         }
 
         if (false === $category->validateFields(false)) {
-            throw new CategoryException('Invalid data for creating root category.');
+            throw new CategoryException('Invalid data for root category creation');
         }
 
         if (false === $category->validateFieldsLang(false)) {
-            throw new CategoryException('Invalid language data for creating root category.');
+            throw new CategoryException('Invalid data for root category creation');
         }
 
         if (false === $category->save()) {
-            throw new CannotAddCategoryException('Failed to create root category.');
+            throw new CannotAddCategoryException('Failed to create root category');
         }
 
         if ($command->getAssociatedShopIds()) {

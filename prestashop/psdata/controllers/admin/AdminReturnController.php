@@ -42,8 +42,6 @@ class AdminReturnControllerCore extends AdminController
         $this->_join = 'LEFT JOIN ' . _DB_PREFIX_ . 'order_return_state ors ON (ors.`id_order_return_state` = a.`state`)';
         $this->_join .= 'LEFT JOIN ' . _DB_PREFIX_ . 'order_return_state_lang orsl ON (orsl.`id_order_return_state` = a.`state` AND orsl.`id_lang` = ' . (int) $this->context->language->id . ')';
         $this->_join .= ' LEFT JOIN ' . _DB_PREFIX_ . 'orders o ON (o.`id_order` = a.`id_order`)';
-        $this->_orderBy = 'id_order_return';
-        $this->_orderWay = 'DESC';
 
         $this->fields_list = [
             'id_order_return' => ['title' => $this->trans('ID', [], 'Admin.Global'), 'align' => 'center', 'width' => 25],
@@ -150,15 +148,6 @@ class AdminReturnControllerCore extends AdminController
             'submit' => [
                 'title' => $this->trans('Save', [], 'Admin.Actions'),
             ],
-            'buttons' => [
-                'save-and-stay' => [
-                    'title' => $this->trans('Save and stay', [], 'Admin.Actions'),
-                    'name' => 'submitAdd' . $this->table . 'AndStay',
-                    'type' => 'submit',
-                    'class' => 'btn btn-default pull-right',
-                    'icon' => 'process-icon-save',
-                ],
-            ],
         ];
 
         $order = new Order($this->object->id_order);
@@ -232,7 +221,7 @@ class AdminReturnControllerCore extends AdminController
                     if (($id_order_return = (int) (Tools::getValue('id_order_return'))) && Validate::isUnsignedId($id_order_return)) {
                         $orderReturn = new OrderReturn($id_order_return);
                         if (!Validate::isLoadedObject($orderReturn)) {
-                            die(Tools::displayError(sprintf('Order return with ID "%s" could not be loaded.', $id_order_return)));
+                            die(Tools::displayError());
                         }
                         if ((int) ($orderReturn->countProduct()) > 1) {
                             if (OrderReturn::deleteOrderReturnDetail($id_order_return, $id_order_detail, (int) (Tools::getValue('id_customization', 0)))) {

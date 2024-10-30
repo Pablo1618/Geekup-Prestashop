@@ -26,10 +26,9 @@
 
 namespace PrestaShopBundle\Command;
 
-use PrestaShopBundle\Routing\Linter\AdminRouteProvider;
 use PrestaShopBundle\Routing\Linter\Exception\LinterException;
 use PrestaShopBundle\Routing\Linter\SecurityAnnotationLinter;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -41,67 +40,10 @@ use Symfony\Component\Routing\Route;
  *
  * @see \PrestaShopBundle\Security\Annotation\AdminSecurity
  */
-final class SecurityAnnotationLinterCommand extends Command
+final class SecurityAnnotationLinterCommand extends ContainerAwareCommand
 {
     public const ACTION_LIST_ALL = 'list';
     public const ACTION_FIND_MISSING = 'find-missing';
-    /**
-     * @var AdminRouteProvider
-     */
-    private $adminRouteProvider;
-
-    /**
-     * @var SecurityAnnotationLinter
-     */
-    private $securityAnnotationLinter;
-
-    /**
-     * @var array
-     */
-    private const EXCEPTION_ROUTES = [
-        'admin_category_simple_add_form',
-        'admin_common_notifications',
-        'admin_common_notifications_ack',
-        'admin_common_pagination',
-        'admin_common_reset_search',
-        'admin_common_reset_search_by_filter_id',
-        'admin_common_secured_file_image_reader',
-        'admin_common_sidebar',
-        'admin_country_states',
-        'admin_currencies_update_live_exchange_rates',
-        'admin_emails_send_test',
-        'admin_employees_change_form_language',
-        'admin_employees_edit',
-        'admin_employees_toggle_navigation',
-        'admin_feature_get_feature_values',
-        'admin_get_ajax_categories',
-        'admin_import_data_configuration_index_redirect',
-        'admin_import_file_upload',
-        'admin_mail_theme_save_configuration_deprecated', // Deprecated
-        'admin_mail_theme_send_test_mail_deprecated',  // Deprecated
-        'admin_mail_theme_send_test_module_mail_deprecated',  // Deprecated
-        'admin_module_import',
-        'admin_module_manage_action',
-        'admin_module_manage_action_bulk',
-        'admin_module_manage_update_all',
-        'admin_module_notification_count',
-        'admin_product_bulk_action', // Back-office product page v1 has its own security system
-        'admin_product_form',
-        'admin_product_list', // Back-office product page v1 has its own security system
-        'admin_product_mass_edit_action', // Back-office product page v1 has its own security system
-        'admin_product_new',
-        'admin_product_unit_action', // Back-office product page v1 has its own security system
-        'admin_security_compromised',
-        'admin_shops_search',
-        'admin_theme_customize_layouts',
-    ];
-
-    public function __construct(AdminRouteProvider $adminRouteProvider, SecurityAnnotationLinter $securityAnnotationLinter)
-    {
-        parent::__construct();
-        $this->adminRouteProvider = $adminRouteProvider;
-        $this->securityAnnotationLinter = $securityAnnotationLinter;
-    }
 
     /**
      * @param string $expression
@@ -188,12 +130,20 @@ final class SecurityAnnotationLinterCommand extends Command
      */
     private function listAllRoutesAndRelatedPermissions(InputInterface $input, OutputInterface $output)
     {
+        $container = $this->getContainer();
+
+        $adminRouteProvider = $container
+            ->get('prestashop.bundle.routing.linter.admin_route_provider');
+        /** @var SecurityAnnotationLinter $securityAnnotationLinter */
+        $securityAnnotationLinter = $container
+            ->get('prestashop.bundle.routing.linter.security_annotation_linter');
+
         $listing = [];
 
-        foreach ($this->adminRouteProvider->getRoutes() as $routeName => $route) {
+        foreach ($adminRouteProvider->getRoutes() as $routeName => $route) {
             /* @var Route $route */
             try {
-                $annotation = $this->securityAnnotationLinter->getRouteSecurityAnnotation($routeName, $route);
+                $annotation = $securityAnnotationLinter->getRouteSecurityAnnotation($routeName, $route);
                 $listing[] = [
                     $route->getDefault('_controller'),
                     implode(', ', $route->getMethods()),
@@ -222,15 +172,20 @@ final class SecurityAnnotationLinterCommand extends Command
      */
     private function findRoutesWithMissingSecurityAnnotations(InputInterface $input, OutputInterface $output)
     {
+        $container = $this->getContainer();
+
+        $adminRouteProvider = $container
+            ->get('prestashop.bundle.routing.linter.admin_route_provider');
+        /** @var SecurityAnnotationLinter $securityAnnotationLinter */
+        $securityAnnotationLinter = $container
+            ->get('prestashop.bundle.routing.linter.security_annotation_linter');
+
         $notConfiguredRoutes = [];
 
         /** @var Route $route */
-        foreach ($this->adminRouteProvider->getRoutes() as $routeName => $route) {
-            if (in_array($routeName, self::EXCEPTION_ROUTES)) {
-                continue;
-            }
+        foreach ($adminRouteProvider->getRoutes() as $routeName => $route) {
             try {
-                $this->securityAnnotationLinter->lint($routeName, $route);
+                $securityAnnotationLinter->lint($routeName, $route);
             } catch (LinterException $e) {
                 $notConfiguredRoutes[] = $routeName;
             }

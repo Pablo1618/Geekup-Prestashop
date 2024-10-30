@@ -717,17 +717,17 @@ function isCleanHtml(content)
   events += '|onloadedmetadata|onloadstart|onpause|onplay|onplaying|onpopstate|onprogress|onratechange|onreset|onseeked|onseeking|onshow|onsort|onstalled|onstorage|onsuspend|ontimeupdate';
   events += '|ontoggle|onvolumechange|onwaiting';
 
-	var script1 = /<[\s]*script/im;
-	var script2 = new RegExp('('+events+')[\s]*=', 'im');
-	var script3 = /.*script\:/im;
-	var script4 = /<[\s]*(i?frame|embed|object)/im;
+  var script1 = /<[\s]*script/im;
+  var script2 = new RegExp('('+events+')[\s]*=', 'im');
+  var script3 = /.*script\:/im;
+  var script4 = /<[\s]*(i?frame|embed|object)/im;
   var script5 = /<\s*\w+[^>]*\s(on\w+)=["'][^"']*["']/ims;
   var rloCharacter = "\xE2\x80\xAE";
 
-	if (script1.test(content) || script2.test(content) || script3.test(content) || script4.test(content) || script5.test(content) || content.indexOf(rloCharacter) !== -1)
-		return false;
+  if (script1.test(content) || script2.test(content) || script3.test(content) || script4.test(content) || script5.test(content) || content.indexOf(rloCharacter) !== -1)
+    return false;
 
-	return true;
+  return true;
 }
 
 function getStorageAvailable() {

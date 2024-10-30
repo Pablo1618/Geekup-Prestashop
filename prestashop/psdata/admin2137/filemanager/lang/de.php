@@ -1,7 +1,5 @@
 <?php
-/*
-* Important - this file MUST implement all strings defined in base en.php file
-*/
+
 define('lang_Select', 'Ausw&auml;hlen');
 define('lang_Erase', 'L&ouml;schen');
 define('lang_Open', '&Ouml;ffnen');
@@ -47,8 +45,8 @@ define('lang_Type', 'Art');
 define('lang_Dimension', 'Dimensionen');
 define('lang_Size', 'Gr&ouml;&szlig;e');
 define('lang_Date', 'Datum');
-define('lang_Filename', 'Dateiname');
 define('lang_Operations', 'Aktionen');
+define('lang_Filename', 'Dateiname');
 define('lang_Date_type', 'd.m.Y');    //y-m-d
 define('lang_OK', 'OK');
 define('lang_Cancel', 'Abbrechen');

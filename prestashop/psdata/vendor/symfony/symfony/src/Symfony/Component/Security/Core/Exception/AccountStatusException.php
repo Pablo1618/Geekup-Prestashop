@@ -27,7 +27,7 @@ abstract class AccountStatusException extends AuthenticationException
     /**
      * Get the user.
      *
-     * @return UserInterface|null
+     * @return UserInterface
      */
     public function getUser()
     {
@@ -42,18 +42,20 @@ abstract class AccountStatusException extends AuthenticationException
     /**
      * {@inheritdoc}
      */
-    public function __serialize(): array
+    public function serialize()
     {
-        return [$this->user, parent::__serialize()];
+        $serialized = [$this->user, parent::serialize(true)];
+
+        return $this->doSerialize($serialized, \func_num_args() ? func_get_arg(0) : null);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function __unserialize(array $data): void
+    public function unserialize($str)
     {
-        [$this->user, $parentData] = $data;
-        $parentData = \is_array($parentData) ? $parentData : unserialize($parentData);
-        parent::__unserialize($parentData);
+        list($this->user, $parentData) = \is_array($str) ? $str : unserialize($str);
+
+        parent::unserialize($parentData);
     }
 }

@@ -12,12 +12,10 @@
 namespace Symfony\Bridge\Doctrine\Test;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
-use Doctrine\ORM\Mapping\Driver\XmlDriver;
-use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
-use Doctrine\Persistence\Mapping\Driver\SymfonyFileLocator;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -61,28 +59,8 @@ class DoctrineTestHelper
         $config->setProxyDir(sys_get_temp_dir());
         $config->setProxyNamespace('SymfonyTests\Doctrine');
         $config->setMetadataDriverImpl(new AnnotationDriver(new AnnotationReader()));
-
-        return $config;
-    }
-
-    /**
-     * @return Configuration
-     */
-    public static function createTestConfigurationWithXmlLoader()
-    {
-        $config = static::createTestConfiguration();
-
-        $driverChain = new MappingDriverChain();
-        $driverChain->addDriver(
-            new XmlDriver(
-                new SymfonyFileLocator(
-                    [__DIR__.'/../Tests/Resources/orm' => 'Symfony\\Bridge\\Doctrine\\Tests\\Fixtures'], '.orm.xml'
-                )
-            ),
-            'Symfony\\Bridge\\Doctrine\\Tests\\Fixtures'
-        );
-
-        $config->setMetadataDriverImpl($driverChain);
+        $config->setQueryCacheImpl(new ArrayCache());
+        $config->setMetadataCacheImpl(new ArrayCache());
 
         return $config;
     }

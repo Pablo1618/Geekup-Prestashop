@@ -31,6 +31,7 @@ namespace PrestaShop\PrestaShop\Adapter\Feature\Repository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use FeatureValue;
+use PrestaShop\PrestaShop\Adapter\AbstractObjectModelRepository;
 use PrestaShop\PrestaShop\Adapter\Feature\Validate\FeatureValueValidator;
 use PrestaShop\PrestaShop\Core\Domain\Feature\Exception\CannotAddFeatureValueException;
 use PrestaShop\PrestaShop\Core\Domain\Feature\Exception\CannotUpdateFeatureValueException;
@@ -39,7 +40,6 @@ use PrestaShop\PrestaShop\Core\Domain\Feature\Exception\InvalidFeatureValueIdExc
 use PrestaShop\PrestaShop\Core\Domain\Feature\ValueObject\FeatureValueId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
-use PrestaShop\PrestaShop\Core\Repository\AbstractObjectModelRepository;
 
 /**
  * Methods to access data storage for FeatureValue
@@ -153,54 +153,7 @@ class FeatureValueRepository extends AbstractObjectModelRepository
      */
     public function getProductFeatureValues(ProductId $productId, ?int $limit = null, ?int $offset = null, ?array $filters = []): array
     {
-        return $this->getFeatureValues($limit, $offset, array_merge($filters ?? [], ['id_product' => $productId->getValue()]));
-    }
-
-    public function getAllProductFeatureValues(ProductId $productId): array
-    {
-        $qb = $this->connection->createQueryBuilder();
-        $qb
-            ->from($this->dbPrefix . 'feature_value', 'fv')
-            ->innerJoin('fv', $this->dbPrefix . 'feature_product', 'fp', 'fp.id_feature_value = fv.id_feature_value AND fp.id_product = :productId')
-            ->leftJoin('fv', $this->dbPrefix . 'feature_value_lang', 'fvl', 'fvl.id_feature_value = fv.id_feature_value')
-            ->select('fv.*, fvl.*')
-            ->setParameter('productId', $productId->getValue())
-        ;
-
-        $result = $qb->execute()->fetchAllAssociative();
-        $featureValues = [];
-        foreach ($result as $featureValue) {
-            $featureValueId = (int) $featureValue['id_feature_value'];
-            if (!isset($featureValues[$featureValueId])) {
-                $featureValues[$featureValueId] = [
-                    'id_feature_value' => $featureValueId,
-                    'id_feature' => (int) $featureValue['id_feature'],
-                    'custom' => (int) $featureValue['custom'],
-                ];
-            }
-            $featureValues[$featureValueId]['localized_values'][(int) $featureValue['id_lang']] = $featureValue['value'];
-        }
-
-        return array_values($featureValues);
-    }
-
-    /**
-     * @param int $langId
-     * @param array $filters
-     *
-     * @return array
-     */
-    public function getFeatureValuesByLang(int $langId, array $filters): array
-    {
-        $qb = $this->getFeatureValuesQueryBuilder(array_merge($filters, ['id_lang' => $langId]))
-            ->leftJoin('f', $this->dbPrefix . 'feature_value_lang', 'fvl', 'fvl.id_feature_value = fv.id_feature_value AND fvl.id_lang = :langId')
-            ->setParameter('langId', $langId)
-            ->select('fv.*, fvl.value')
-            // Override the default order by feature position and ID
-            ->orderBy('fvl.value')
-        ;
-
-        return $qb->execute()->fetchAllAssociative();
+        return $this->getFeatureValues($limit, $offset, array_merge($filters, ['id_product' => $productId->getValue()]));
     }
 
     /**
@@ -218,20 +171,12 @@ class FeatureValueRepository extends AbstractObjectModelRepository
             ->setMaxResults($limit)
         ;
 
-        $featureValues = $qb->execute()->fetchAllAssociative();
-
-        $indexedFeatureValues = [];
-        foreach ($featureValues as $featureValue) {
-            $indexedFeatureValues[$featureValue['id_feature_value']] = $featureValue;
-        }
-        $featureValueIds = array_keys($indexedFeatureValues);
-
-        $localizedFeatureValues = $this->getFeatureValueLocalizedValues($featureValueIds, $filters);
-        foreach ($localizedFeatureValues as $localizedFeatureValue) {
-            $indexedFeatureValues[$localizedFeatureValue['id_feature_value']]['localized_values'][$localizedFeatureValue['id_lang']] = $localizedFeatureValue['value'];
+        $featureValues = $qb->execute()->fetchAll();
+        foreach ($featureValues as $index => $featureValue) {
+            $featureValues[$index]['localized_values'] = $this->getFeatureValueLocalizedValues((int) $featureValue['id_feature_value']);
         }
 
-        return array_values($indexedFeatureValues);
+        return $featureValues;
     }
 
     /**
@@ -260,29 +205,26 @@ class FeatureValueRepository extends AbstractObjectModelRepository
     }
 
     /**
-     * @param array $featureValuesIds
-     * @param array $filters
+     * @param int $featureValueId
      *
      * @return array
      */
-    private function getFeatureValueLocalizedValues(array $featureValuesIds, array $filters): array
+    private function getFeatureValueLocalizedValues(int $featureValueId): array
     {
         $qb = $this->connection->createQueryBuilder();
         $qb->from($this->dbPrefix . 'feature_value_lang', 'fvl')
             ->select('fvl.*')
-            ->where('fvl.id_feature_value IN(:featureValueIds)')
-            ->setParameter('featureValueIds', $featureValuesIds, Connection::PARAM_INT_ARRAY)
+            ->where('fvl.id_feature_value= :featureValueId')
+            ->setParameter('featureValueId', $featureValueId)
         ;
 
-        if (!empty($filters['id_lang'])) {
-            $languageIds = is_array($filters['id_lang']) ? $filters['id_lang'] : [$filters['id_lang']];
-            $qb
-                ->andWhere('fvl.id_lang IN (:languageIds)')
-                ->setParameter('languageIds', $languageIds, Connection::PARAM_INT_ARRAY)
-            ;
+        $values = $qb->execute()->fetchAll();
+        $localizedValues = [];
+        foreach ($values as $value) {
+            $localizedValues[(int) $value['id_lang']] = $value['value'];
         }
 
-        return $qb->execute()->fetchAllAssociative();
+        return $localizedValues;
     }
 
     /**
@@ -293,34 +235,13 @@ class FeatureValueRepository extends AbstractObjectModelRepository
     private function getFeatureValuesQueryBuilder(?array $filters): QueryBuilder
     {
         $qb = $this->connection->createQueryBuilder();
-        $qb
-            ->from($this->dbPrefix . 'feature_value', 'fv')
-        ;
-
-        // Join only on specified feature if requested
-        if (!empty($filters['id_feature'])) {
-            $qb
-                ->innerJoin('fv', $this->dbPrefix . 'feature', 'f', 'f.id_feature = fv.id_feature AND f.id_feature = :featureId')
-                ->setParameter('featureId', (int) $filters['id_feature'])
-            ;
-        } else {
-            $qb->leftJoin('fv', $this->dbPrefix . 'feature', 'f', 'f.id_feature = fv.id_feature');
-        }
-
-        // Join only on specified product if requested
-        if (!empty($filters['id_product'])) {
-            $qb
-                ->innerJoin('fv', $this->dbPrefix . 'feature_product', 'fp', 'fp.id_feature_value = fv.id_feature_value AND fp.id_product = :productId')
-                ->setParameter('productId', (int) $filters['id_product'])
-            ;
-        }
-
-        $qb
-            ->addGroupBy('fv.id_feature_value')
-            ->orderBy('f.position, fv.id_feature_value', 'ASC')
+        $qb->from($this->dbPrefix . 'feature_value', 'fv')
+            ->leftJoin('fv', $this->dbPrefix . 'feature_product', 'fp', 'fp.id_feature_value = fv.id_feature_value')
         ;
 
         $availableFilters = [
+            'id_product',
+            'id_feature',
             'id_feature_value',
             'custom',
         ];
@@ -330,10 +251,20 @@ class FeatureValueRepository extends AbstractObjectModelRepository
                 continue;
             }
 
-            $qb
-                ->andWhere(sprintf('fv.%s = :%s', $key, $key))
-                ->setParameter($key, $value)
-            ;
+            switch ($key) {
+                case 'id_product':
+                    $qb
+                        ->andWhere('fp.id_product = :productId')
+                        ->setParameter('productId', (int) $value)
+                    ;
+                break;
+                default:
+                    $qb
+                        ->andWhere(sprintf('fv.%s = :%s', $key, $key))
+                        ->setParameter($key, $value)
+                    ;
+                break;
+            }
         }
 
         return $qb;

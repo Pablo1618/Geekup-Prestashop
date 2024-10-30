@@ -29,7 +29,6 @@
  */
 class AdminSuppliersControllerCore extends AdminController
 {
-    /** @var bool */
     public $bootstrap = true;
 
     public function __construct()
@@ -90,12 +89,6 @@ class AdminSuppliersControllerCore extends AdminController
         parent::initPageHeaderToolbar();
     }
 
-    /**
-     * @return string|void
-     *
-     * @throws PrestaShopDatabaseException
-     * @throws SmartyException
-     */
     public function renderForm()
     {
         // loads current warehouse
@@ -342,7 +335,7 @@ class AdminSuppliersControllerCore extends AdminController
         if (Shop::isFeatureActive()) {
             $this->fields_form['input'][] = [
                 'type' => 'shop',
-                'label' => $this->trans('Store association', [], 'Admin.Global'),
+                'label' => $this->trans('Shop association', [], 'Admin.Global'),
                 'name' => 'checkBoxShopAsso',
             ];
         }
@@ -406,7 +399,7 @@ class AdminSuppliersControllerCore extends AdminController
                     }
                     $comb_array[$key]['attributes'] = rtrim($list, ', ');
                 }
-                $products[$i]->combination = $comb_array;
+                isset($comb_array) ? $products[$i]->combination = $comb_array : '';
                 unset($comb_array);
             } else {
                 $product_infos = Supplier::getProductInformationsBySupplier(
@@ -433,14 +426,11 @@ class AdminSuppliersControllerCore extends AdminController
     protected function afterImageUpload()
     {
         $return = true;
-
-        // Should we generate high DPI images?
         $generate_hight_dpi_images = (bool) Configuration::get('PS_HIGHT_DPI');
 
         /* Generate image with differents size */
-        if (($id_supplier = (int) Tools::getValue('id_supplier'))
-            && count($_FILES)
-            && file_exists(_PS_SUPP_IMG_DIR_ . $id_supplier . '.jpg')) {
+        if (($id_supplier = (int) Tools::getValue('id_supplier')) &&
+             isset($_FILES) && count($_FILES) && file_exists(_PS_SUPP_IMG_DIR_ . $id_supplier . '.jpg')) {
             $images_types = ImageType::getImagesTypes('suppliers');
             foreach ($images_types as $image_type) {
                 $file = _PS_SUPP_IMG_DIR_ . $id_supplier . '.jpg';

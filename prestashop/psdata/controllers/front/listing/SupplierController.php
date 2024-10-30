@@ -29,12 +29,9 @@ use PrestaShop\PrestaShop\Core\Product\Search\SortOrder;
 
 class SupplierControllerCore extends ProductListingFrontController
 {
-    /**
-     * @var string
-     */
     public $php_self = 'supplier';
 
-    /** @var Supplier|null */
+    /** @var Supplier */
     protected $supplier;
     protected $label;
 
@@ -45,15 +42,6 @@ class SupplierControllerCore extends ProductListingFrontController
         } elseif ($canonicalURL) {
             parent::canonicalRedirection($canonicalURL);
         }
-    }
-
-    public function getCanonicalURL(): string
-    {
-        if (Validate::isLoadedObject($this->supplier)) {
-            return $this->buildPaginatedUrl($this->context->link->getSupplierLink($this->supplier));
-        }
-
-        return $this->context->link->getPageLink('supplier');
     }
 
     /**
@@ -115,23 +103,16 @@ class SupplierControllerCore extends ProductListingFrontController
         }
     }
 
-    /**
-     * @return ProductSearchQuery
-     */
     protected function getProductSearchQuery()
     {
         $query = new ProductSearchQuery();
         $query
-            ->setQueryType('supplier')
             ->setIdSupplier($this->supplier->id)
             ->setSortOrder(new SortOrder('product', 'position', 'asc'));
 
         return $query;
     }
 
-    /**
-     * @return SupplierProductSearchProvider
-     */
     protected function getDefaultProductSearchProvider()
     {
         return new SupplierProductSearchProvider(
@@ -147,16 +128,15 @@ class SupplierControllerCore extends ProductListingFrontController
     {
         $supplierVar = $this->objectPresenter->present($this->supplier);
 
-        // Chained hook call - if multiple modules are hooked here, they will receive the result of the previous one as a parameter
         $filteredSupplier = Hook::exec(
             'filterSupplierContent',
             ['object' => $supplierVar],
-            null,
-            false,
-            true,
-            false,
-            null,
-            true
+            $id_module = null,
+            $array_return = false,
+            $check_exceptions = true,
+            $use_push = false,
+            $id_shop = null,
+            $chain = true
         );
         if (!empty($filteredSupplier['object'])) {
             $supplierVar = $filteredSupplier['object'];
@@ -176,16 +156,15 @@ class SupplierControllerCore extends ProductListingFrontController
 
         if (!empty($suppliersVar)) {
             foreach ($suppliersVar as $k => $supplier) {
-                // Chained hook call - if multiple modules are hooked here, they will receive the result of the previous one as a parameter
                 $filteredSupplier = Hook::exec(
                     'filterSupplierContent',
                     ['object' => $supplier],
-                    null,
-                    false,
-                    true,
-                    false,
-                    null,
-                    true
+                    $id_module = null,
+                    $array_return = false,
+                    $check_exceptions = true,
+                    $use_push = false,
+                    $id_shop = null,
+                    $chain = true
                 );
                 if (!empty($filteredSupplier['object'])) {
                     $suppliersVar[$k] = $filteredSupplier['object'];
@@ -207,7 +186,7 @@ class SupplierControllerCore extends ProductListingFrontController
             $suppliers_for_display[$supplier['id_supplier']] = $supplier;
             $suppliers_for_display[$supplier['id_supplier']]['text'] = $supplier['description'];
             $suppliers_for_display[$supplier['id_supplier']]['image'] = $this->context->link->getSupplierImageLink($supplier['id_supplier'], 'small_default');
-            $suppliers_for_display[$supplier['id_supplier']]['url'] = $this->context->link->getSupplierLink($supplier['id_supplier']);
+            $suppliers_for_display[$supplier['id_supplier']]['url'] = $this->context->link->getsupplierLink($supplier['id_supplier']);
             $suppliers_for_display[$supplier['id_supplier']]['nb_products'] = $supplier['nb_products'] > 1
                 ? $this->trans('%number% products', ['%number%' => $supplier['nb_products']], 'Shop.Theme.Catalog')
                 : $this->trans('%number% product', ['%number%' => $supplier['nb_products']], 'Shop.Theme.Catalog');
@@ -227,10 +206,10 @@ class SupplierControllerCore extends ProductListingFrontController
 
         $breadcrumb['links'][] = [
             'title' => $this->trans('All suppliers', [], 'Shop.Theme.Catalog'),
-            'url' => $this->context->link->getPageLink('supplier'),
+            'url' => $this->context->link->getPageLink('supplier', true),
         ];
 
-        if (!empty($this->supplier)) {
+        if (Validate::isLoadedObject($this->supplier) && $this->supplier->active && $this->supplier->isAssociatedToShop()) {
             $breadcrumb['links'][] = [
                 'title' => $this->supplier->name,
                 'url' => $this->context->link->getSupplierLink($this->supplier),
@@ -238,25 +217,5 @@ class SupplierControllerCore extends ProductListingFrontController
         }
 
         return $breadcrumb;
-    }
-
-    public function getTemplateVarPage()
-    {
-        $page = parent::getTemplateVarPage();
-
-        if (!empty($this->supplier)) {
-            $page['body_classes']['supplier-id-' . $this->supplier->id] = true;
-            $page['body_classes']['supplier-' . $this->supplier->name] = true;
-        }
-
-        return $page;
-    }
-
-    /**
-     * @return Supplier
-     */
-    public function getSupplier()
-    {
-        return $this->supplier;
     }
 }

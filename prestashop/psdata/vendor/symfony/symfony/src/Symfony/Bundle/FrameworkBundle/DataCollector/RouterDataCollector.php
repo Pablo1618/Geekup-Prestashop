@@ -16,9 +16,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector as BaseRouterDataCollector;
 
 /**
- * @author Fabien Potencier <fabien@symfony.com>
+ * RouterDataCollector.
  *
- * @final since Symfony 4.4
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class RouterDataCollector extends BaseRouterDataCollector
 {

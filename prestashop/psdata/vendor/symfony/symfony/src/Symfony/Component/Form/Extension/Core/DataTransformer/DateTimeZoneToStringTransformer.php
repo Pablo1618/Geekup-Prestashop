@@ -23,7 +23,7 @@ class DateTimeZoneToStringTransformer implements DataTransformerInterface
 {
     private $multiple;
 
-    public function __construct(bool $multiple = false)
+    public function __construct($multiple = false)
     {
         $this->multiple = $multiple;
     }

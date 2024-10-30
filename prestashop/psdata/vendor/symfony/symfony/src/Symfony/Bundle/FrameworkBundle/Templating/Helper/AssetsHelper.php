@@ -11,8 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating\Helper;
 
-@trigger_error('The '.AssetsHelper::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig instead.', \E_USER_DEPRECATED);
-
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\Templating\Helper\Helper;
 
@@ -20,8 +18,6 @@ use Symfony\Component\Templating\Helper\Helper;
  * AssetsHelper helps manage asset URLs.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class AssetsHelper extends Helper
 {

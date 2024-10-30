@@ -29,29 +29,18 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Adapter\Product\QueryHandler;
 
 use Customization;
-use PrestaShop\PrestaShop\Adapter\Attachment\AttachmentRepository;
-use PrestaShop\PrestaShop\Adapter\Category\Repository\CategoryRepository;
-use PrestaShop\PrestaShop\Adapter\Configuration;
-use PrestaShop\PrestaShop\Adapter\Product\Image\ProductImagePathFactory;
-use PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepository;
-use PrestaShop\PrestaShop\Adapter\Product\Options\RedirectTargetProvider;
+use DateTime;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
-use PrestaShop\PrestaShop\Adapter\Product\SpecificPrice\Repository\SpecificPriceRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository;
 use PrestaShop\PrestaShop\Adapter\Product\VirtualProduct\Repository\VirtualProductFileRepository;
 use PrestaShop\PrestaShop\Adapter\Tax\TaxComputer;
-use PrestaShop\PrestaShop\Core\Category\NameBuilder\CategoryDisplayNameBuilder;
-use PrestaShop\PrestaShop\Core\Domain\Attachment\QueryResult\AttachmentInformation;
-use PrestaShop\PrestaShop\Core\Domain\Category\ValueObject\CategoryId;
 use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
-use PrestaShop\PrestaShop\Core\Domain\Language\ValueObject\LanguageId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ProductCustomizabilitySettings;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetProductForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryHandler\GetProductForEditingHandlerInterface;
-use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\CategoriesInformation;
-use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\CategoryInformation;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\LocalizedTags;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductBasicInformation;
+use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductCategoriesInformation;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductCustomizationOptions;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductDetails;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductForEditing;
@@ -60,12 +49,9 @@ use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductPricesInformati
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductSeoOptions;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductShippingInformation;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductStockInformation;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\Exception\StockAvailableNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\Product\VirtualProductFile\Exception\VirtualProductFileNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Product\VirtualProductFile\QueryResult\VirtualProductFileForEditing;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 use PrestaShop\PrestaShop\Core\Domain\TaxRulesGroup\ValueObject\TaxRulesGroupId;
 use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime as DateTimeUtil;
 use PrestaShop\PrestaShop\Core\Util\Number\NumberExtractor;
@@ -74,9 +60,9 @@ use Product;
 use Tag;
 
 /**
- * Handles the query @see GetProductForEditing using legacy ObjectModel
+ * Handles the query GetEditableProduct using legacy ObjectModel
  */
-class GetProductForEditingHandler implements GetProductForEditingHandlerInterface
+final class GetProductForEditingHandler implements GetProductForEditingHandlerInterface
 {
     /**
      * @var NumberExtractor
@@ -89,11 +75,6 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
     private $productRepository;
 
     /**
-     * @var CategoryRepository
-     */
-    private $categoryRepository;
-
-    /**
      * @var StockAvailableRepository
      */
     private $stockAvailableRepository;
@@ -102,11 +83,6 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
      * @var VirtualProductFileRepository
      */
     private $virtualProductFileRepository;
-
-    /**
-     * @var ProductImageRepository
-     */
-    private $productImageRepository;
 
     /**
      * @var TaxComputer
@@ -119,81 +95,27 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
     private $countryId;
 
     /**
-     * @var RedirectTargetProvider
-     */
-    private $targetProvider;
-
-    /**
-     * @var ProductImagePathFactory
-     */
-    private $productImageUrlFactory;
-
-    /**
-     * @var AttachmentRepository
-     */
-    private $attachmentRepository;
-
-    /**
-     * @var SpecificPriceRepository
-     */
-    private $specificPriceRepository;
-
-    /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
-     * @var CategoryDisplayNameBuilder
-     */
-    private $categoryDisplayNameBuilder;
-
-    /**
      * @param NumberExtractor $numberExtractor
      * @param ProductRepository $productRepository
-     * @param CategoryRepository $categoryRepository
      * @param StockAvailableRepository $stockAvailableRepository
      * @param VirtualProductFileRepository $virtualProductFileRepository
-     * @param ProductImageRepository $productImageRepository
-     * @param AttachmentRepository $attachmentRepository
      * @param TaxComputer $taxComputer
      * @param int $countryId
-     * @param RedirectTargetProvider $targetProvider
-     * @param ProductImagePathFactory $productImageUrlFactory
-     * @param SpecificPriceRepository $specificPriceRepository
-     * @param Configuration $configuration
-     * @param CategoryDisplayNameBuilder $categoryDisplayNameBuilder
      */
     public function __construct(
         NumberExtractor $numberExtractor,
         ProductRepository $productRepository,
-        CategoryRepository $categoryRepository,
         StockAvailableRepository $stockAvailableRepository,
         VirtualProductFileRepository $virtualProductFileRepository,
-        ProductImageRepository $productImageRepository,
-        AttachmentRepository $attachmentRepository,
         TaxComputer $taxComputer,
-        int $countryId,
-        RedirectTargetProvider $targetProvider,
-        ProductImagePathFactory $productImageUrlFactory,
-        SpecificPriceRepository $specificPriceRepository,
-        Configuration $configuration,
-        CategoryDisplayNameBuilder $categoryDisplayNameBuilder
+        int $countryId
     ) {
         $this->numberExtractor = $numberExtractor;
-        $this->productRepository = $productRepository;
-        $this->categoryRepository = $categoryRepository;
         $this->stockAvailableRepository = $stockAvailableRepository;
         $this->virtualProductFileRepository = $virtualProductFileRepository;
         $this->taxComputer = $taxComputer;
         $this->countryId = $countryId;
-        $this->attachmentRepository = $attachmentRepository;
-        $this->targetProvider = $targetProvider;
-        $this->productImageRepository = $productImageRepository;
-        $this->productImageUrlFactory = $productImageUrlFactory;
-        $this->specificPriceRepository = $specificPriceRepository;
-        $this->configuration = $configuration;
-        $this->categoryDisplayNameBuilder = $categoryDisplayNameBuilder;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -201,52 +123,23 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
      */
     public function handle(GetProductForEditing $query): ProductForEditing
     {
-        $product = $this->productRepository->getByShopConstraint(
-            $query->getProductId(),
-            $query->getShopConstraint()
-        );
+        $product = $this->productRepository->get($query->getProductId());
 
         return new ProductForEditing(
             (int) $product->id,
             $product->getProductType(),
-            (bool) $product->active,
             $this->getCustomizationOptions($product),
             $this->getBasicInformation($product),
-            $this->getCategoriesInformation($product, $query->getDisplayLanguageId()),
-            $this->getPricesInformation($product, $query->getShopConstraint()),
+            $this->getCategoriesInformation($product),
+            $this->getPricesInformation($product),
             $this->getOptions($product),
             $this->getDetails($product),
             $this->getShippingInformation($product),
             $this->getSeoOptions($product),
-            $this->getAttachments($query->getProductId()),
+            $product->getAssociatedAttachmentIds(),
             $this->getProductStockInformation($product),
-            $this->getVirtualProductFile($product),
-            $this->getCover($query->getProductId(), $product->getShopId())
+            $this->getVirtualProductFile($product)
         );
-    }
-
-    /**
-     * @param ProductId $productId
-     *
-     * @return AttachmentInformation[]
-     */
-    private function getAttachments(ProductId $productId): array
-    {
-        $attachments = $this->attachmentRepository->getProductAttachments($productId);
-
-        $attachmentsInfo = [];
-        foreach ($attachments as $attachment) {
-            $attachmentsInfo[] = new AttachmentInformation(
-                (int) $attachment['id_attachment'],
-                $attachment['name'],
-                $attachment['description'],
-                $attachment['file_name'],
-                $attachment['mime'],
-                (int) $attachment['file_size']
-            );
-        }
-
-        return $attachmentsInfo;
     }
 
     /**
@@ -266,98 +159,41 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
 
     /**
      * @param Product $product
-     * @param LanguageId $languageId
      *
-     * @return CategoriesInformation
+     * @return ProductCategoriesInformation
      */
-    private function getCategoriesInformation(Product $product, LanguageId $languageId): CategoriesInformation
+    private function getCategoriesInformation(Product $product): ProductCategoriesInformation
     {
-        $shopId = new ShopId($product->getShopId());
-        $productId = new ProductId((int) $product->id);
-
-        $categoryIds = $this->categoryRepository->getProductCategoryIds($productId, ShopConstraint::shop($shopId->getValue()));
+        $categoryIds = array_map('intval', $product->getCategories());
         $defaultCategoryId = (int) $product->id_category_default;
 
-        $categoryNames = $this->categoryRepository->getLocalizedNames($categoryIds);
-
-        $categoriesInformation = [];
-        foreach ($categoryNames as $categoryId => $localizedNames) {
-            $categoryName = $categoryNames[$categoryId][$languageId->getValue()];
-            $displayName = $this->categoryDisplayNameBuilder->build(
-                $categoryName,
-                $shopId,
-                $languageId,
-                new CategoryId($categoryId)
-            );
-            $categoriesInformation[] = new CategoryInformation(
-                $categoryId,
-                $categoryName,
-                $displayName
-            );
-        }
-
-        return new CategoriesInformation($categoriesInformation, $defaultCategoryId);
+        return new ProductCategoriesInformation($categoryIds, $defaultCategoryId);
     }
 
     /**
      * @param Product $product
-     * @param ShopConstraint $shopConstraint
      *
      * @return ProductPricesInformation
-     *
-     * @throws NumberExtractorException
      */
-    private function getPricesInformation(Product $product, ShopConstraint $shopConstraint): ProductPricesInformation
+    private function getPricesInformation(Product $product): ProductPricesInformation
     {
-        $productId = new ProductId((int) $product->id);
-
-        $taxEnabled = (bool) $this->configuration->get('PS_TAX', null, $shopConstraint);
-        $ecotaxEnabled = (bool) $this->configuration->get('PS_USE_ECOTAX', null, $shopConstraint);
-        $ecoTaxGroupId = (int) $this->configuration->get('PS_ECOTAX_TAX_RULES_GROUP_ID', null, $shopConstraint);
         $priceTaxExcluded = $this->numberExtractor->extract($product, 'price');
-        $unitPriceTaxExcluded = $this->numberExtractor->extract($product, 'unit_price');
-        $ecotaxTaxExcluded = $this->numberExtractor->extract($product, 'ecotax');
-
-        if ($taxEnabled) {
-            $priceTaxIncluded = $this->taxComputer->computePriceWithTaxes(
-                $priceTaxExcluded,
-                new TaxRulesGroupId((int) $product->id_tax_rules_group),
-                new CountryId($this->countryId)
-            );
-            $unitPriceTaxIncluded = $this->taxComputer->computePriceWithTaxes(
-                $unitPriceTaxExcluded,
-                new TaxRulesGroupId((int) $product->id_tax_rules_group),
-                new CountryId($this->countryId)
-            );
-            $ecotaxTaxIncluded = $this->taxComputer->computePriceWithTaxes(
-                $ecotaxTaxExcluded,
-                new TaxRulesGroupId($ecoTaxGroupId),
-                new CountryId($this->countryId)
-            );
-        } else {
-            $priceTaxIncluded = $priceTaxExcluded;
-            $unitPriceTaxIncluded = $unitPriceTaxExcluded;
-            $ecotaxTaxIncluded = $ecotaxTaxExcluded;
-        }
-
-        // Ecotax is applied independently of tax enabled
-        if ($ecotaxEnabled) {
-            $priceTaxIncluded = $priceTaxIncluded->plus($ecotaxTaxIncluded);
-        }
+        $priceTaxIncluded = $this->taxComputer->computePriceWithTaxes(
+            $priceTaxExcluded,
+            new TaxRulesGroupId((int) $product->id_tax_rules_group),
+            new CountryId($this->countryId)
+        );
 
         return new ProductPricesInformation(
             $priceTaxExcluded,
             $priceTaxIncluded,
-            $ecotaxTaxExcluded,
-            $ecotaxTaxIncluded,
+            $this->numberExtractor->extract($product, 'ecotax'),
             (int) $product->id_tax_rules_group,
             (bool) $product->on_sale,
             $this->numberExtractor->extract($product, 'wholesale_price'),
-            $unitPriceTaxExcluded,
-            $unitPriceTaxIncluded,
+            $this->numberExtractor->extract($product, 'unit_price'),
             (string) $product->unity,
-            $this->numberExtractor->extract($product, 'unit_price_ratio'),
-            $this->specificPriceRepository->findPrioritiesForProduct($productId)
+            $this->numberExtractor->extract($product, 'unit_price_ratio')
         );
     }
 
@@ -369,6 +205,7 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
     private function getOptions(Product $product): ProductOptions
     {
         return new ProductOptions(
+            (bool) $product->active,
             $product->visibility,
             (bool) $product->available_for_order,
             (bool) $product->online_only,
@@ -478,17 +315,12 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
      */
     private function getSeoOptions(Product $product): ProductSeoOptions
     {
-        $redirectTarget = $this->targetProvider->getRedirectTarget(
-            $product->redirect_type,
-            (int) $product->id_type_redirected
-        );
-
         return new ProductSeoOptions(
             $product->meta_title,
             $product->meta_description,
             $product->link_rewrite,
             $product->redirect_type,
-            $redirectTarget
+            (int) $product->id_type_redirected
         );
     }
 
@@ -501,11 +333,10 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
      */
     private function getProductStockInformation(Product $product): ProductStockInformation
     {
-        try {
-            $stockAvailable = $this->stockAvailableRepository->getForProduct(new ProductId($product->id), new ShopId($product->getShopId()));
-        } catch (StockAvailableNotFoundException $e) {
-            $stockAvailable = $this->stockAvailableRepository->createStockAvailable(new ProductId($product->id), new ShopId($product->getShopId()));
-        }
+        //@todo: In theory StockAvailable is created for each product when Product::add is called,
+        //  but we should explore some multishop edgecases
+        //  (like shop ids might be missing and foreach loop won't start resulting in a missing StockAvailable for product)
+        $stockAvailable = $this->stockAvailableRepository->getForProduct(new ProductId($product->id));
 
         return new ProductStockInformation(
             (int) $product->pack_stock_type,
@@ -517,7 +348,7 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
             $product->available_now,
             $product->available_later,
             $stockAvailable->location,
-            DateTimeUtil::buildDateTimeOrNull($product->available_date)
+            DateTimeUtil::NULL_DATE === $product->available_date ? null : new DateTime($product->available_date)
         );
     }
 
@@ -543,18 +374,7 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
             $virtualProductFile->display_filename,
             (int) $virtualProductFile->nb_days_accessible,
             (int) $virtualProductFile->nb_downloadable,
-            DateTimeUtil::buildDateTimeOrNull($virtualProductFile->date_expiration)
+            $virtualProductFile->date_expiration === DateTimeUtil::NULL_DATETIME ? null : new DateTime($virtualProductFile->date_expiration)
         );
-    }
-
-    private function getCover(ProductId $productId, int $shopId): string
-    {
-        $idOfCoverImage = $this->productImageRepository->findCoverImageId($productId, new ShopId($shopId));
-
-        if ($idOfCoverImage) {
-            return $this->productImageUrlFactory->getPathByType($idOfCoverImage, ProductImagePathFactory::IMAGE_TYPE_CART_DEFAULT);
-        }
-
-        return $this->productImageUrlFactory->getNoImagePath(ProductImagePathFactory::IMAGE_TYPE_CART_DEFAULT);
     }
 }

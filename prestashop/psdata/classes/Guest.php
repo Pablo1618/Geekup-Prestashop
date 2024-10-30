@@ -92,7 +92,7 @@ class GuestCore extends ObjectModel
     /**
      * Get Guest Language.
      *
-     * @param string $acceptLanguage
+     * @param $acceptLanguage
      *
      * @return mixed|string
      */
@@ -187,7 +187,7 @@ class GuestCore extends ObjectModel
      *
      * @param int $idCustomer Customer ID
      *
-     * @return bool|int
+     * @return bool
      */
     public static function getFromCustomer($idCustomer)
     {
@@ -199,7 +199,7 @@ class GuestCore extends ObjectModel
 		FROM `' . _DB_PREFIX_ . 'guest`
 		WHERE `id_customer` = ' . (int) ($idCustomer));
 
-        return $result['id_guest'] ?? false;
+        return $result['id_guest'];
     }
 
     /**
@@ -242,11 +242,11 @@ class GuestCore extends ObjectModel
     /**
      * Set new guest.
      *
-     * @param CookieCore $cookie
+     * @param Cookie $cookie
      */
     public static function setNewGuest($cookie)
     {
-        $guest = new Guest(isset($cookie->id_customer) ? (int) Guest::getFromCustomer((int) ($cookie->id_customer)) : null);
+        $guest = new Guest(isset($cookie->id_customer) ? Guest::getFromCustomer((int) ($cookie->id_customer)) : null);
         $guest->userAgent();
         $guest->save();
         $cookie->id_guest = (int) ($guest->id);

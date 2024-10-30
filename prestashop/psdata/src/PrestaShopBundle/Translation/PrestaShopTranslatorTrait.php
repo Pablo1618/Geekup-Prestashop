@@ -50,27 +50,31 @@ trait PrestaShopTranslatorTrait
     public function trans($id, array $parameters = [], $domain = null, $locale = null)
     {
         if (isset($parameters['legacy'])) {
-            @trigger_error(
-                'The legacy parameter is deprecated and will be removed in the next major version.',
-                E_USER_DEPRECATED
-            );
+            $legacy = $parameters['legacy'];
             unset($parameters['legacy']);
         }
-
-        $isSprintf = !empty($parameters) && $this->isSprintfString($id);
 
         if (empty($locale)) {
             $locale = null;
         }
 
-        if ($this->shouldFallbackToLegacyModuleTranslation($id, $domain)) {
+        $translated = parent::trans($id, [], $this->normalizeDomain($domain), $locale);
+
+        // @todo to remove after the legacy translation system has ben phased out
+        if ($this->shouldFallbackToLegacyModuleTranslation($id, $domain, $translated)) {
             return $this->translateUsingLegacySystem($id, $parameters, $domain, $locale);
         }
 
-        $translated = parent::trans($id, $isSprintf ? [] : $parameters, $this->normalizeDomain($domain), $locale);
+        if (isset($legacy) && 'htmlspecialchars' === $legacy) {
+            $translated = call_user_func($legacy, $translated, ENT_NOQUOTES);
+        } elseif (isset($legacy)) {
+            $translated = call_user_func($legacy, $translated);
+        }
 
-        if ($isSprintf) {
+        if (!empty($parameters) && $this->isSprintfString($id)) {
             $translated = vsprintf($translated, $parameters);
+        } elseif (!empty($parameters)) {
+            $translated = strtr($translated, $parameters);
         }
 
         return $translated;
@@ -171,14 +175,16 @@ trait PrestaShopTranslatorTrait
      * Indicates if we should try and translate the provided wording using the legacy system.
      *
      * @param string $message Message to translate
-     * @param ?string $domain Translation domain
+     * @param string $domain Translation domain
+     * @param string $translated Message after first translation attempt
      *
      * @return bool
      */
-    private function shouldFallbackToLegacyModuleTranslation(string $message, ?string $domain): bool
+    private function shouldFallbackToLegacyModuleTranslation($message, $domain, $translated)
     {
         return
-            'Modules.' === substr($domain ?? '', 0, 8)
+            $message === $translated
+            && 'Modules.' === substr($domain, 0, 8)
             && (
                 !method_exists($this, 'getCatalogue')
                 || !$this->getCatalogue()->has($message, $this->normalizeDomain($domain))

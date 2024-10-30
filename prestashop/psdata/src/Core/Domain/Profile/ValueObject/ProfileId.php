@@ -24,12 +24,13 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-declare(strict_types=1);
-
 namespace PrestaShop\PrestaShop\Core\Domain\Profile\ValueObject;
 
-use PrestaShop\PrestaShop\Core\Domain\Profile\Exception\ProfileConstraintException;
+use PrestaShop\PrestaShop\Core\Domain\Profile\Exception\ProfileException;
 
+/**
+ * Class ProfileId
+ */
 class ProfileId
 {
     /**
@@ -38,13 +39,18 @@ class ProfileId
     private $profileId;
 
     /**
-     * @throws ProfileConstraintException
+     * @param int $profileId
+     *
+     * @throws ProfileException
      */
-    public function __construct(int $profileId)
+    public function __construct($profileId)
     {
-        $this->assertProfileIdIsGreaterThanZero($profileId);
+        // Strict type should be used in next major
+        if (!is_int($profileId)) {
+            @trigger_error('Invalid type, int is expected', E_STRICT);
+        }
 
-        $this->profileId = (int) $profileId;
+        $this->setProfileId($profileId);
     }
 
     /**
@@ -56,14 +62,16 @@ class ProfileId
     }
 
     /**
-     * @throws ProfileConstraintException
+     * @param mixed $profileId
+     *
+     * @throws ProfileException
      */
-    private function assertProfileIdIsGreaterThanZero(int $profileId)
+    private function setProfileId($profileId)
     {
-        if (0 >= $profileId) {
-            throw new ProfileConstraintException(
-                sprintf('Invalid profile id %s provided', var_export($profileId, true))
-            );
+        if ((!is_int($profileId) && !ctype_digit($profileId)) || 0 >= $profileId) {
+            throw new ProfileException(sprintf('Invalid Profile id %s supplied', var_export($profileId, true)));
         }
+
+        $this->profileId = (int) $profileId;
     }
 }

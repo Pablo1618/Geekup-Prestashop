@@ -27,7 +27,7 @@ class EntityFactory implements UserProviderFactoryInterface
     private $key;
     private $providerId;
 
-    public function __construct(string $key, string $providerId)
+    public function __construct($key, $providerId)
     {
         $this->key = $key;
         $this->providerId = $providerId;

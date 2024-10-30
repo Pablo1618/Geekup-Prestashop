@@ -8,8 +8,6 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
 use SplObjectStorage;
-
-use function assert;
 use function strlen;
 
 /**
@@ -32,7 +30,7 @@ class DropSchemaSqlCollector extends AbstractVisitor
     public function __construct(AbstractPlatform $platform)
     {
         $this->platform = $platform;
-        $this->initializeQueries();
+        $this->clearQueries();
     }
 
     /**
@@ -68,7 +66,9 @@ class DropSchemaSqlCollector extends AbstractVisitor
      */
     public function clearQueries()
     {
-        $this->initializeQueries();
+        $this->constraints = new SplObjectStorage();
+        $this->sequences   = new SplObjectStorage();
+        $this->tables      = new SplObjectStorage();
     }
 
     /**
@@ -79,28 +79,18 @@ class DropSchemaSqlCollector extends AbstractVisitor
         $sql = [];
 
         foreach ($this->constraints as $fkConstraint) {
-            assert($fkConstraint instanceof ForeignKeyConstraint);
             $localTable = $this->constraints[$fkConstraint];
             $sql[]      = $this->platform->getDropForeignKeySQL($fkConstraint, $localTable);
         }
 
         foreach ($this->sequences as $sequence) {
-            assert($sequence instanceof Sequence);
             $sql[] = $this->platform->getDropSequenceSQL($sequence);
         }
 
         foreach ($this->tables as $table) {
-            assert($table instanceof Table);
             $sql[] = $this->platform->getDropTableSQL($table);
         }
 
         return $sql;
-    }
-
-    private function initializeQueries(): void
-    {
-        $this->constraints = new SplObjectStorage();
-        $this->sequences   = new SplObjectStorage();
-        $this->tables      = new SplObjectStorage();
     }
 }

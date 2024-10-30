@@ -1,12 +1,4 @@
 <?php
-/**
- * This file is authored by PrestaShop SA and Contributors <contact@prestashop.com>
- *
- * It is distributed under MIT license.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 namespace PrestaShop\TranslationToolsBundle\Translation\Extractor\Visitor\Translation\FormType;
 
@@ -28,12 +20,12 @@ use PhpParser\Node;
  */
 class DefaultTranslationDomainExtractor
 {
-    public const CONFIGURE_OPTIONS = 'configureOptions';
+    const CONFIGURE_OPTIONS = 'configureOptions';
 
     /**
      * Types of nodes that we are interested in inspecting
      */
-    public const INTERESTING_NODE_TYPES = [
+    const INTERESTING_NODE_TYPES = [
         Node\Stmt\ClassMethod::class,
         Node\Expr\MethodCall::class,
     ];
@@ -41,12 +33,12 @@ class DefaultTranslationDomainExtractor
     /**
      * Name of the method that sets default settings
      */
-    public const SET_DEFAULTS_DECLARATION_METHOD_NAME = 'setDefaults';
+    const SET_DEFAULTS_DECLARATION_METHOD_NAME = 'setDefaults';
 
     /**
      * Index of the OptionsResolver parameter in the configureOptions method declaration
      */
-    public const OPTIONS_RESOLVER_PARAM_INDEX = 0;
+    const OPTIONS_RESOLVER_PARAM_INDEX = 0;
 
     /**
      * The extracted default translation domain

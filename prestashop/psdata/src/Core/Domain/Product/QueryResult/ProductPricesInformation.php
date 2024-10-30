@@ -29,7 +29,6 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Domain\Product\QueryResult;
 
 use PrestaShop\Decimal\DecimalNumber;
-use PrestaShop\PrestaShop\Core\Domain\Product\SpecificPrice\ValueObject\PriorityList;
 
 /**
  * Holds information about product prices
@@ -52,11 +51,6 @@ class ProductPricesInformation
     private $ecotax;
 
     /**
-     * @var DecimalNumber
-     */
-    private $ecotaxTaxIncluded;
-
-    /**
      * @var int
      */
     private $taxRulesGroupId;
@@ -77,11 +71,6 @@ class ProductPricesInformation
     private $unitPrice;
 
     /**
-     * @var DecimalNumber
-     */
-    private $unitPriceTaxIncluded;
-
-    /**
      * @var string
      */
     private $unity;
@@ -92,50 +81,36 @@ class ProductPricesInformation
     private $unitPriceRatio;
 
     /**
-     * @var PriorityList|null
-     */
-    private $specificPricePriorities;
-
-    /**
      * @param DecimalNumber $price
      * @param DecimalNumber $priceTaxIncluded
      * @param DecimalNumber $ecotax
-     * @param DecimalNumber $ecotaxTaxIncluded
      * @param int $taxRulesGroupId
      * @param bool $onSale
      * @param DecimalNumber $wholesalePrice
      * @param DecimalNumber $unitPrice
-     * @param DecimalNumber $unitPriceTaxIncluded
      * @param string $unity
      * @param DecimalNumber $unitPriceRatio
-     * @param PriorityList|null $specificPricePriorities
      */
     public function __construct(
         DecimalNumber $price,
         DecimalNumber $priceTaxIncluded,
         DecimalNumber $ecotax,
-        DecimalNumber $ecotaxTaxIncluded,
         int $taxRulesGroupId,
         bool $onSale,
         DecimalNumber $wholesalePrice,
         DecimalNumber $unitPrice,
-        DecimalNumber $unitPriceTaxIncluded,
         string $unity,
-        DecimalNumber $unitPriceRatio,
-        ?PriorityList $specificPricePriorities
+        DecimalNumber $unitPriceRatio
     ) {
         $this->price = $price;
         $this->priceTaxIncluded = $priceTaxIncluded;
         $this->ecotax = $ecotax;
-        $this->ecotaxTaxIncluded = $ecotaxTaxIncluded;
         $this->taxRulesGroupId = $taxRulesGroupId;
         $this->onSale = $onSale;
         $this->wholesalePrice = $wholesalePrice;
         $this->unitPrice = $unitPrice;
-        $this->unitPriceTaxIncluded = $unitPriceTaxIncluded;
         $this->unity = $unity;
         $this->unitPriceRatio = $unitPriceRatio;
-        $this->specificPricePriorities = $specificPricePriorities;
     }
 
     /**
@@ -160,14 +135,6 @@ class ProductPricesInformation
     public function getEcotax(): DecimalNumber
     {
         return $this->ecotax;
-    }
-
-    /**
-     * @return DecimalNumber
-     */
-    public function getEcotaxTaxIncluded(): DecimalNumber
-    {
-        return $this->ecotaxTaxIncluded;
     }
 
     /**
@@ -203,14 +170,6 @@ class ProductPricesInformation
     }
 
     /**
-     * @return DecimalNumber
-     */
-    public function getUnitPriceTaxIncluded(): DecimalNumber
-    {
-        return $this->unitPriceTaxIncluded;
-    }
-
-    /**
      * @return string
      */
     public function getUnity(): string
@@ -224,13 +183,5 @@ class ProductPricesInformation
     public function getUnitPriceRatio(): DecimalNumber
     {
         return $this->unitPriceRatio;
-    }
-
-    /**
-     * @return PriorityList|null
-     */
-    public function getSpecificPricePriorities(): ?PriorityList
-    {
-        return $this->specificPricePriorities;
     }
 }

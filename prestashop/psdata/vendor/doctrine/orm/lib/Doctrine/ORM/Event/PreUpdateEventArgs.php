@@ -1,28 +1,47 @@
 <?php
-
-declare(strict_types=1);
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license. For more information, see
+ * <http://www.doctrine-project.org>.
+ */
 
 namespace Doctrine\ORM\Event;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\PersistentCollection;
-use InvalidArgumentException;
-
-use function get_debug_type;
-use function sprintf;
 
 /**
  * Class that holds event arguments for a preInsert/preUpdate event.
+ *
+ * @author Guilherme Blanco <guilehrmeblanco@hotmail.com>
+ * @author Roman Borschel <roman@code-factory.org>
+ * @author Benjamin Eberlei <kontakt@beberlei.de>
+ * @since  2.0
  */
 class PreUpdateEventArgs extends LifecycleEventArgs
 {
-    /** @var array<string, array{mixed, mixed}|PersistentCollection> */
+    /**
+     * @var array
+     */
     private $entityChangeSet;
 
     /**
-     * @param object    $entity
-     * @param mixed[][] $changeSet
-     * @psalm-param array<string, array{mixed, mixed}|PersistentCollection> $changeSet
+     * Constructor.
+     *
+     * @param object                 $entity
+     * @param EntityManagerInterface $em
+     * @param array                  $changeSet
      */
     public function __construct($entity, EntityManagerInterface $em, array &$changeSet)
     {
@@ -34,8 +53,7 @@ class PreUpdateEventArgs extends LifecycleEventArgs
     /**
      * Retrieves entity changeset.
      *
-     * @return mixed[][]
-     * @psalm-return array<string, array{mixed, mixed}|PersistentCollection>
+     * @return array
      */
     public function getEntityChangeSet()
     {
@@ -47,7 +65,7 @@ class PreUpdateEventArgs extends LifecycleEventArgs
      *
      * @param string $field
      *
-     * @return bool
+     * @return boolean
      */
     public function hasChangedField($field)
     {
@@ -100,15 +118,19 @@ class PreUpdateEventArgs extends LifecycleEventArgs
     /**
      * Asserts the field exists in changeset.
      *
-     * @throws InvalidArgumentException
+     * @param string $field
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException
      */
-    private function assertValidField(string $field): void
+    private function assertValidField($field)
     {
-        if (! isset($this->entityChangeSet[$field])) {
-            throw new InvalidArgumentException(sprintf(
+        if ( ! isset($this->entityChangeSet[$field])) {
+            throw new \InvalidArgumentException(sprintf(
                 'Field "%s" is not a valid field of the entity "%s" in PreUpdateEventArgs.',
                 $field,
-                get_debug_type($this->getEntity())
+                get_class($this->getEntity())
             ));
         }
     }

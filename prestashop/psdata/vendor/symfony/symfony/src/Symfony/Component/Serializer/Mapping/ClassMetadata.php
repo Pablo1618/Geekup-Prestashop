@@ -40,27 +40,19 @@ class ClassMetadata implements ClassMetadataInterface
     private $reflClass;
 
     /**
-     * @var ClassDiscriminatorMapping|null
-     *
-     * @internal This property is public in order to reduce the size of the
-     *           class' serialized representation. Do not access it. Use
-     *           {@link getClassDiscriminatorMapping()} instead.
-     */
-    public $classDiscriminatorMapping;
-
-    /**
      * Constructs a metadata for the given class.
+     *
+     * @param string $class
      */
-    public function __construct(string $class, ClassDiscriminatorMapping $classDiscriminatorMapping = null)
+    public function __construct($class)
     {
         $this->name = $class;
-        $this->classDiscriminatorMapping = $classDiscriminatorMapping;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -76,7 +68,7 @@ class ClassMetadata implements ClassMetadataInterface
     /**
      * {@inheritdoc}
      */
-    public function getAttributesMetadata(): array
+    public function getAttributesMetadata()
     {
         return $this->attributesMetadata;
     }
@@ -98,29 +90,13 @@ class ClassMetadata implements ClassMetadataInterface
     /**
      * {@inheritdoc}
      */
-    public function getReflectionClass(): \ReflectionClass
+    public function getReflectionClass()
     {
         if (!$this->reflClass) {
             $this->reflClass = new \ReflectionClass($this->getName());
         }
 
         return $this->reflClass;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getClassDiscriminatorMapping(): ?ClassDiscriminatorMapping
-    {
-        return $this->classDiscriminatorMapping;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setClassDiscriminatorMapping(ClassDiscriminatorMapping $mapping = null)
-    {
-        $this->classDiscriminatorMapping = $mapping;
     }
 
     /**
@@ -133,7 +109,6 @@ class ClassMetadata implements ClassMetadataInterface
         return [
             'name',
             'attributesMetadata',
-            'classDiscriminatorMapping',
         ];
     }
 }

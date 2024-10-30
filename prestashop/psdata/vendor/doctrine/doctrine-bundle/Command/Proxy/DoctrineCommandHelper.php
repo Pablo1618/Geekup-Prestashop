@@ -3,12 +3,9 @@
 namespace Doctrine\Bundle\DoctrineBundle\Command\Proxy;
 
 use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-
-use function assert;
-use function class_exists;
 
 /**
  * Provides some helper and convenience methods to configure doctrine commands in the context of bundles
@@ -23,13 +20,10 @@ abstract class DoctrineCommandHelper
      */
     public static function setApplicationEntityManager(Application $application, $emName)
     {
-        $em = $application->getKernel()->getContainer()->get('doctrine')->getManager($emName);
-        assert($em instanceof EntityManagerInterface);
+        /** @var EntityManager $em */
+        $em        = $application->getKernel()->getContainer()->get('doctrine')->getManager($emName);
         $helperSet = $application->getHelperSet();
-        if (class_exists(ConnectionHelper::class)) {
-            $helperSet->set(new ConnectionHelper($em->getConnection()), 'db');
-        }
-
+        $helperSet->set(new ConnectionHelper($em->getConnection()), 'db');
         $helperSet->set(new EntityManagerHelper($em), 'em');
     }
 

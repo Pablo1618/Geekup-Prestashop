@@ -11,33 +11,27 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating\Helper;
 
-@trigger_error('The '.CodeHelper::class.' class is deprecated since version 4.3 and will be removed in 5.0; use Twig instead.', \E_USER_DEPRECATED);
-
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\Templating\Helper\Helper;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @internal since Symfony 4.2
- *
- * @deprecated since version 4.3, to be removed in 5.0; use Twig instead.
  */
 class CodeHelper extends Helper
 {
     protected $fileLinkFormat;
-    protected $rootDir; // to be renamed $projectDir in 5.0
+    protected $rootDir;
     protected $charset;
 
     /**
      * @param string|FileLinkFormatter $fileLinkFormat The format for links to source files
-     * @param string                   $projectDir     The project root directory
+     * @param string                   $rootDir        The project root directory
      * @param string                   $charset        The charset
      */
-    public function __construct($fileLinkFormat, string $projectDir, string $charset)
+    public function __construct($fileLinkFormat, $rootDir, $charset)
     {
-        $this->fileLinkFormat = $fileLinkFormat ?: \ini_get('xdebug.file_link_format') ?: get_cfg_var('xdebug.file_link_format');
-        $this->rootDir = str_replace('\\', '/', $projectDir).'/';
+        $this->fileLinkFormat = $fileLinkFormat ?: ini_get('xdebug.file_link_format') ?: get_cfg_var('xdebug.file_link_format');
+        $this->rootDir = str_replace('\\', '/', $rootDir).'/';
         $this->charset = $charset;
     }
 
@@ -63,8 +57,8 @@ class CodeHelper extends Helper
 
     public function abbrMethod($method)
     {
-        if (str_contains($method, '::')) {
-            [$class, $method] = explode('::', $method, 2);
+        if (false !== strpos($method, '::')) {
+            list($class, $method) = explode('::', $method, 2);
             $result = sprintf('%s::%s()', $this->abbrClass($class), $method);
         } elseif ('Closure' === $method) {
             $result = sprintf('<abbr title="%s">%1$s</abbr>', $method);
@@ -164,10 +158,10 @@ class CodeHelper extends Helper
         if (null === $text) {
             $file = trim($file);
             $fileStr = $file;
-            if (str_starts_with($fileStr, $this->rootDir)) {
+            if (0 === strpos($fileStr, $this->rootDir)) {
                 $fileStr = str_replace(['\\', $this->rootDir], ['/', ''], $fileStr);
                 $fileStr = htmlspecialchars($fileStr, $flags, $this->charset);
-                $fileStr = sprintf('<abbr title="%s">kernel.project_dir</abbr>/%s', htmlspecialchars($this->rootDir, $flags, $this->charset), $fileStr);
+                $fileStr = sprintf('<abbr title="%s">kernel.root_dir</abbr>/%s', htmlspecialchars($this->rootDir, $flags, $this->charset), $fileStr);
             }
 
             $text = sprintf('%s at line %d', $fileStr, $line);

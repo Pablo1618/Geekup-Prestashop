@@ -27,7 +27,6 @@
 namespace PrestaShop\PrestaShop\Core\Grid\Filter;
 
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
-use PrestaShop\PrestaShop\Core\Grid\Exception\ColumnNotFoundException;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use PrestaShopBundle\Event\Dispatcher\NullDispatcher;
 use Symfony\Component\DependencyInjection\Container;
@@ -72,22 +71,15 @@ final class GridFilterFormFactory implements GridFilterFormFactoryInterface
     {
         $formBuilder = $this->formFactory->createNamedBuilder(
             $definition->getId(),
-            FormType::class,
-            null,
-            [
-                'allow_extra_fields' => true,
-            ]
+            FormType::class
         );
 
         /** @var FilterInterface $filter */
         foreach ($definition->getFilters()->all() as $filter) {
-            $filterOptions = array_merge([
-                'label' => $this->getFilterLabel($definition, $filter),
-            ], $filter->getTypeOptions());
             $formBuilder->add(
                 $filter->getName(),
                 $filter->getType(),
-                $filterOptions
+                $filter->getTypeOptions()
             );
         }
 
@@ -96,19 +88,5 @@ final class GridFilterFormFactory implements GridFilterFormFactoryInterface
         ]);
 
         return $formBuilder->getForm();
-    }
-
-    private function getFilterLabel(GridDefinitionInterface $definition, FilterInterface $filter): string
-    {
-        $filterLabel = $filter->getName();
-        try {
-            if ($filter->getAssociatedColumn()) {
-                $column = $definition->getColumnById($filter->getAssociatedColumn());
-                $filterLabel = !empty($column->getName()) ? $column->getName() : $filterLabel;
-            }
-        } catch (ColumnNotFoundException $e) {
-        }
-
-        return $filterLabel;
     }
 }

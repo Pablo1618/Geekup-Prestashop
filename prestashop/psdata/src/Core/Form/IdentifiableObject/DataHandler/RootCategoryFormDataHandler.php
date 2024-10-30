@@ -129,7 +129,6 @@ final class RootCategoryFormDataHandler implements FormDataHandlerInterface
         );
 
         $command->setLocalizedDescriptions($data['description']);
-        $command->setLocalizedAdditionalDescriptions($data['additional_description']);
         $command->setLocalizedMetaTitles($data['meta_title']);
         $command->setLocalizedMetaDescriptions($data['meta_description']);
         $command->setLocalizedMetaKeywords($data['meta_keyword']);
@@ -152,7 +151,6 @@ final class RootCategoryFormDataHandler implements FormDataHandlerInterface
         $command->setLocalizedLinkRewrites($data['link_rewrite']);
         $command->setLocalizedNames($data['name']);
         $command->setLocalizedDescriptions($data['description']);
-        $command->setLocalizedAdditionalDescriptions($data['additional_description']);
         $command->setLocalizedMetaTitles($data['meta_title']);
         $command->setLocalizedMetaDescriptions($data['meta_description']);
         $command->setLocalizedMetaKeywords($data['meta_keyword']);

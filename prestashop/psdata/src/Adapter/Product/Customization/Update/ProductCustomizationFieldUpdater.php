@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Product\Customization\Update;
 
-use CustomizationField as LegacyCustomizationField;
+use CustomizationField;
 use PrestaShop\PrestaShop\Adapter\Product\Customization\Repository\CustomizationFieldRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\ValueObject\CustomizationFieldId;
@@ -36,7 +36,7 @@ use PrestaShop\PrestaShop\Core\Domain\Product\Customization\ValueObject\Customiz
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\CannotUpdateProductException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ProductCustomizabilitySettings;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
+use Product;
 
 /**
  * Updates CustomizationField & Product relation
@@ -75,37 +75,30 @@ class ProductCustomizationFieldUpdater
 
     /**
      * @param ProductId $productId
-     * @param LegacyCustomizationField[] $customizationFields
-     * @param ShopConstraint $shopConstraint
+     * @param CustomizationField[] $customizationFields
      */
-    public function setProductCustomizationFields(
-        ProductId $productId,
-        array $customizationFields,
-        ShopConstraint $shopConstraint
-    ): void {
-        $productShops = $this->productRepository->getAssociatedShopIds($productId);
-        $deletableFieldIds = $this->getDeletableFieldIds($customizationFields, $productId);
+    public function setProductCustomizationFields(ProductId $productId, array $customizationFields): void
+    {
+        $product = $this->productRepository->get($productId);
+        $deletableFieldIds = $this->getDeletableFieldIds($customizationFields, $product);
 
         foreach ($customizationFields as $customizationField) {
             if ($customizationField->id) {
-                $this->customizationFieldRepository->update($customizationField, [$shopConstraint->getShopId()]);
+                $this->customizationFieldRepository->update($customizationField);
             } else {
-                $this->customizationFieldRepository->add($customizationField, $productShops);
+                $this->customizationFieldRepository->add($customizationField);
             }
         }
 
         $this->customizationFieldDeleter->bulkDelete($deletableFieldIds);
-        $this->refreshProductCustomizability($productId);
+        $this->refreshProductCustomizability($product);
     }
 
     /**
-     * @param ProductId $productId
+     * @param Product $product
      */
-    public function refreshProductCustomizability(ProductId $productId): void
+    public function refreshProductCustomizability(Product $product): void
     {
-        // The modified fields are defined as multishop, but they depend on the association with customization fields
-        // which are not multishop, so all those fields must be synced between all associated shops
-        $product = $this->productRepository->getByShopConstraint($productId, ShopConstraint::allShops());
         if ($product->hasActivatedRequiredCustomizableFields()) {
             $product->customizable = ProductCustomizabilitySettings::REQUIRES_CUSTOMIZATION;
         } elseif (!empty($product->getNonDeletedCustomizationFieldIds())) {
@@ -120,7 +113,6 @@ class ProductCustomizationFieldUpdater
         $this->productRepository->partialUpdate(
             $product,
             ['customizable', 'text_fields', 'uploadable_files'],
-            ShopConstraint::allShops(),
             CannotUpdateProductException::FAILED_UPDATE_CUSTOMIZATION_FIELDS
         );
     }
@@ -128,25 +120,28 @@ class ProductCustomizationFieldUpdater
     /**
      * Checks provided customization fields against existing ones to determine which ones to delete
      *
-     * @param LegacyCustomizationField[] $providedCustomizationFields
-     * @param ProductId $productId
+     * @param CustomizationField[] $providedCustomizationFields
+     * @param Product $product
      *
      * @return CustomizationFieldId[] ids of customization fields which should be deleted
      */
-    private function getDeletableFieldIds(array $providedCustomizationFields, ProductId $productId): array
+    private function getDeletableFieldIds(array $providedCustomizationFields, Product $product): array
     {
-        // Get currently associated customization fields (which are not soft deleted already)
-        $existingFieldIds = $this->customizationFieldRepository->getCustomizationFieldIds($productId, false);
+        $existingFieldIds = $product->getNonDeletedCustomizationFieldIds();
+        $deletableIds = [];
 
-        // Filter all fields that are still present in the list, the returned list contains the fields that need to be deleted
-        return array_filter($existingFieldIds, static function (CustomizationFieldId $customizationFieldId) use ($providedCustomizationFields) {
-            foreach ($providedCustomizationFields as $providedCustomizationField) {
-                if ($providedCustomizationField->id === $customizationFieldId->getValue()) {
-                    return false;
-                }
+        foreach ($existingFieldIds as $existingFieldId) {
+            $deletableIds[$existingFieldId] = new CustomizationFieldId($existingFieldId);
+        }
+
+        foreach ($providedCustomizationFields as $providedCustomizationField) {
+            $providedId = (int) $providedCustomizationField->id;
+
+            if (isset($deletableIds[$providedId])) {
+                unset($deletableIds[$providedId]);
             }
+        }
 
-            return true;
-        });
+        return $deletableIds;
     }
 }

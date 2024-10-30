@@ -27,7 +27,6 @@
 namespace PrestaShop\PrestaShop\Core\Cart;
 
 use Cart;
-use CartCore;
 use Currency;
 use Tools;
 
@@ -80,13 +79,13 @@ class Fees
     }
 
     /**
-     * @param CartCore $cart
+     * @param Cart $cart
      * @param CartRowCollection $cartRowCollection
      * @param int $computePrecision
      * @param int|null $id_carrier
      */
     public function processCalculation(
-        CartCore $cart,
+        Cart $cart,
         CartRowCollection $cartRowCollection,
         $computePrecision,
         $id_carrier = null

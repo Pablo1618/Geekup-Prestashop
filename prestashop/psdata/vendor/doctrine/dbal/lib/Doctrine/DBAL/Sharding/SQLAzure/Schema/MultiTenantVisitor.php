@@ -10,7 +10,6 @@ use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\Visitor\Visitor;
 use RuntimeException;
-
 use function in_array;
 
 /**
@@ -31,8 +30,6 @@ use function in_array;
  *   (otherwise they will affect the same-id rows from other tenants as well).
  *   SQLAzure throws errors when you try to create IDENTIY columns on federated
  *   tables.
- *
- * @deprecated
  */
 class MultiTenantVisitor implements Visitor
 {
@@ -111,7 +108,6 @@ class MultiTenantVisitor implements Visitor
                 return $index;
             }
         }
-
         throw new RuntimeException('No clustered index found on table ' . $table->getName());
     }
 

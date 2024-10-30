@@ -23,7 +23,7 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *#}
 
-{% form_theme currencyForm '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig' %}
+{% form_theme currencyForm 'PrestaShopBundle:Admin/TwigTemplateForm:prestashop_ui_kit.html.twig' %}
 
 {% block form %}
   {{ form_start(currencyForm, {
@@ -43,7 +43,7 @@
         'list.edit': 'Edit symbol / format'|trans({}, 'Admin.International.Feature'),
         'list.reset': 'Reset'|trans({}, 'Admin.Actions'),
         'list.reset.success': 'Your symbol and format customizations have been successfully reset for this language.'|trans({}, 'Admin.Notifications.Success'),
-        'list.example.format': '{price}'|trans({}, 'Admin.International.Feature'),
+        'list.example.format': '%price%'|trans({}, 'Admin.International.Feature'),
         'modal.restore.title': 'Are you sure you want to restore default settings?'|trans({}, 'Admin.International.Feature'),
         'modal.restore.apply': 'Restore'|trans({}, 'Admin.Actions'),
         'modal.restore.cancel': 'Cancel'|trans({}, 'Admin.Actions'),
@@ -56,8 +56,8 @@
       <div class="card-header">
         {{ 'Currencies'|trans({}, 'Admin.Global') }}
       </div>
-      <div class="card-body">
-        <div class="form-wrapper">
+      <div class="card-block row">
+        <div class="card-text">
           {{ form_errors(currencyForm) }}
 
           {% if not currencyForm.vars.data.id is defined %}

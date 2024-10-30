@@ -66,7 +66,7 @@ services:
     arguments:
       - '@=service("prestashop.adapter.legacy.context").getLanguage().id'
       - '@prestashop.adapter.data_provider.order_state'
-      - '@PrestaShop\PrestaShop\Core\Util\ColorBrightnessCalculator'
+      - '@prestashop.core.util.color_brightness_calculator'
       - '@translator'
 
   prestashop.core.form.choice_provider.invoice_model_by_name:
@@ -77,6 +77,7 @@ services:
   prestashop.core.form.choice_provider.mail_method:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\MailMethodChoiceProvider'
     arguments:
+      - '@prestashop.adapter.legacy.configuration'
       - '@translator'
 
   prestashop.core.form.choice_provider.contact_by_id:
@@ -108,7 +109,7 @@ services:
   prestashop.core.form.choice_provider.module_by_name:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ModuleByNameChoiceProvider'
     arguments:
-      - '@=service("prestashop.core.admin.module.repository").getInstalledModules()'
+      - '@=service("prestashop.core.admin.module.repository").getInstalledModulesCollection()'
 
   prestashop.core.form.choice_provider.status:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\StatusChoiceProvider'
@@ -190,10 +191,6 @@ services:
 
   prestashop.core.form.choice_provider.tax_rule_group_choice_provider:
     class: 'PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\TaxRuleGroupChoiceProvider'
-    arguments:
-      - '@=service("prestashop.adapter.legacy.context").getContext().country.id'
-      - '@PrestaShop\PrestaShop\Adapter\TaxRulesGroup\Repository\TaxRulesGroupRepository'
-      - '@PrestaShop\PrestaShop\Adapter\Tax\TaxComputer'
 
   prestashop.core.form.choice_provider.cms_categories:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\CmsCategoriesChoiceProvider'
@@ -225,6 +222,11 @@ services:
     arguments:
       - '@translator'
 
+  prestashop.core.form.choice_provider.price_reduction_type:
+    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\PriceReductionTypeChoiceProvider'
+    arguments:
+      - '@translator'
+
   prestashop.core.form.choice_provider.address_required_fields:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\AddressRequiredFieldsChoiceProvider'
 
@@ -248,9 +250,6 @@ services:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\DeliveryTimeNoteTypesProvider'
     arguments:
       - '@translator'
-      - '@router'
-      - '@prestashop.adapter.legacy.configuration'
-      - '@=service("prestashop.adapter.legacy.context").getContext().language.id'
 
   prestashop.core.form.choice_provider.product_visibility_choice_provider:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ProductVisibilityChoiceProvider'
@@ -283,40 +282,3 @@ services:
     class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ProductImagesChoiceProvider'
     arguments:
       - '@prestashop.core.command_bus'
-      - '@=service("prestashop.adapter.legacy.configuration").getInt("PS_SHOP_DEFAULT")'
-      - "@=service('prestashop.adapter.shop.context').getContextShopID()"
-
-  prestashop.core.form.choice_provider.product_type_choice_provider:
-    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ProductTypeChoiceProvider'
-    arguments:
-      - '@translator'
-      - '@prestashop.adapter.legacy.configuration'
-
-  prestashop.core.form.choice_provider.zone_by_id:
-    class: 'PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\ZoneByIdChoiceProvider'
-
-  prestashop.core.form.choice_provider.configurable_country_by_id:
-    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\CountryByIdConfigurableChoiceProvider'
-    arguments:
-      - '@=service("prestashop.adapter.legacy.context").getLanguage().id'
-      - '@prestashop.adapter.data_provider.country'
-
-  prestashop.core.form.choice_provider.specific_price_priority_choice_provider:
-    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\SpecificPricePriorityChoiceProvider'
-    arguments:
-      - '@translator'
-
-  prestashop.core.form.choice_provider.gender_choice_provider:
-    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\GenderChoiceProvider'
-    arguments:
-      - '@translator'
-
-  prestashop.core.form.choice_provider.contact_type_choice_provider:
-    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ContactTypeChoiceProvider'
-    arguments:
-      - '@=service("prestashop.adapter.legacy.context").getContext().language.id'
-
-  prestashop.core.form.choice_provider.customer_thread_statuses_choice_provider:
-    class: 'PrestaShop\PrestaShop\Core\Form\ChoiceProvider\CustomerThreadStatusesChoiceProvider'
-    arguments:
-      - '@translator'

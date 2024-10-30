@@ -24,7 +24,7 @@ class SessionTokenStorage implements ClearableTokenStorageInterface
     /**
      * The namespace used to store values in the session.
      */
-    public const SESSION_NAMESPACE = '_csrf';
+    const SESSION_NAMESPACE = '_csrf';
 
     private $session;
     private $namespace;
@@ -32,9 +32,10 @@ class SessionTokenStorage implements ClearableTokenStorageInterface
     /**
      * Initializes the storage with a Session object and a session namespace.
      *
-     * @param string $namespace The namespace under which the token is stored in the session
+     * @param SessionInterface $session   The user session from which the session ID is returned
+     * @param string           $namespace The namespace under which the token is stored in the session
      */
-    public function __construct(SessionInterface $session, string $namespace = self::SESSION_NAMESPACE)
+    public function __construct(SessionInterface $session, $namespace = self::SESSION_NAMESPACE)
     {
         $this->session = $session;
         $this->namespace = $namespace;
@@ -98,7 +99,7 @@ class SessionTokenStorage implements ClearableTokenStorageInterface
     public function clear()
     {
         foreach (array_keys($this->session->all()) as $key) {
-            if (str_starts_with($key, $this->namespace.'/')) {
+            if (0 === strpos($key, $this->namespace.'/')) {
                 $this->session->remove($key);
             }
         }

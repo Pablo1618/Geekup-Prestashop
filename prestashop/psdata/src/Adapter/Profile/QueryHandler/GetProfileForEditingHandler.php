@@ -42,10 +42,6 @@ use Profile;
 final class GetProfileForEditingHandler extends AbstractObjectModelHandler implements GetProfileForEditingHandlerInterface
 {
     /**
-     * @var string
-     */
-    private $defaultAvatarUrl;
-    /**
      * @var ImageTagSourceParserInterface
      */
     private $imageTagSourceParser;
@@ -57,10 +53,8 @@ final class GetProfileForEditingHandler extends AbstractObjectModelHandler imple
     /**
      * @param ImageTagSourceParserInterface|null $imageTagSourceParser
      * @param string $imgDir
-     * @param string $defaultAvatarUrl
      */
     public function __construct(
-        string $defaultAvatarUrl,
         ImageTagSourceParserInterface $imageTagSourceParser = null,
         string $imgDir = _PS_PROFILE_IMG_DIR_
     ) {
@@ -68,14 +62,13 @@ final class GetProfileForEditingHandler extends AbstractObjectModelHandler imple
         if (null === $imageTagSourceParser) {
             @trigger_error('The $imageTagSourceParser parameter should not be null, inject your main ImageTagSourceParserInterface service', E_USER_DEPRECATED);
         }
-        $this->imageTagSourceParser = $imageTagSourceParser ?? new ImageTagSourceParser();
-        $this->defaultAvatarUrl = $defaultAvatarUrl;
+        $this->imageTagSourceParser = $imageTagSourceParser ?? new ImageTagSourceParser(__PS_BASE_URI__);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handle(GetProfileForEditing $query): EditableProfile
+    public function handle(GetProfileForEditing $query)
     {
         $profileId = $query->getProfileId();
         $profile = $this->getProfile($profileId);
@@ -85,7 +78,7 @@ final class GetProfileForEditingHandler extends AbstractObjectModelHandler imple
         return new EditableProfile(
             $profileId,
             $profile->name,
-            $avatarUrl ? $avatarUrl['path'] : $this->defaultAvatarUrl
+            $avatarUrl ? $avatarUrl['path'] : null
         );
     }
 

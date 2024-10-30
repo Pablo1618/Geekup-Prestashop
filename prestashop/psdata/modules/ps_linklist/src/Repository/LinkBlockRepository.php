@@ -21,15 +21,14 @@
 namespace PrestaShop\Module\LinkList\Repository;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Doctrine\DBAL\Result;
 use Hook;
 use PrestaShop\Module\LinkList\Adapter\ObjectModelHandler;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
 use PrestaShop\PrestaShop\Core\Exception\DatabaseException;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class LinkBlockRepository.
@@ -239,6 +238,8 @@ class LinkBlockRepository
 
     /**
      * @return array
+     *
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function createTables()
     {
@@ -270,11 +271,11 @@ class LinkBlockRepository
         ];
 
         foreach ($queries as $query) {
-            try {
-                $this->connection->executeQuery($query);
-            } catch (DBALException $e) {
+            $statement = $this->connection->executeQuery($query);
+
+            if ($statement instanceof Statement && 0 != (int) $statement->errorCode()) {
                 $errors[] = [
-                    'key' => json_encode($e->getMessage()),
+                    'key' => json_encode($statement->errorInfo()),
                     'parameters' => [],
                     'domain' => 'Admin.Modules.Notification',
                 ];
@@ -286,6 +287,8 @@ class LinkBlockRepository
 
     /**
      * @return array
+     *
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function installFixtures()
     {
@@ -313,11 +316,10 @@ class LinkBlockRepository
         }
 
         foreach ($queries as $query) {
-            try {
-                $this->connection->executeQuery($query);
-            } catch (DBALException $e) {
+            $statement = $this->connection->executeQuery($query);
+            if ($statement instanceof Statement && 0 != (int) $statement->errorCode()) {
                 $errors[] = [
-                    'key' => json_encode($e->getMessage()),
+                    'key' => json_encode($statement->errorInfo()),
                     'parameters' => [],
                     'domain' => 'Admin.Modules.Notification',
                 ];
@@ -329,6 +331,8 @@ class LinkBlockRepository
 
     /**
      * @return array
+     *
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function dropTables()
     {
@@ -340,11 +344,10 @@ class LinkBlockRepository
         ];
         foreach ($tableNames as $tableName) {
             $sql = 'DROP TABLE IF EXISTS ' . $this->dbPrefix . $tableName;
-            try {
-                $this->connection->executeQuery($sql);
-            } catch (DBALException $e) {
+            $statement = $this->connection->executeQuery($sql);
+            if ($statement instanceof Statement && 0 != (int) $statement->errorCode()) {
                 $errors[] = [
-                    'key' => json_encode($e->getMessage()),
+                    'key' => json_encode($statement->errorInfo()),
                     'parameters' => [],
                     'domain' => 'Admin.Modules.Notification',
                 ];
@@ -412,16 +415,15 @@ class LinkBlockRepository
      * @param QueryBuilder $qb
      * @param string $errorPrefix
      *
-     * @return Result|int|string
+     * @return Statement|int
      *
      * @throws DatabaseException
      */
     private function executeQueryBuilder(QueryBuilder $qb, $errorPrefix = 'SQL error')
     {
-        try {
-            $statement = $qb->execute();
-        } catch (DBALException $e) {
-            throw new DatabaseException($errorPrefix . ': ' . var_export($e->getMessage(), true));
+        $statement = $qb->execute();
+        if ($statement instanceof Statement && !empty($statement->errorInfo())) {
+            throw new DatabaseException($errorPrefix . ': ' . var_export($statement->errorInfo(), true));
         }
 
         return $statement;
@@ -445,7 +447,7 @@ class LinkBlockRepository
             ->setParameter('idShop', $idShop)
         ;
 
-        $maxPosition = $qb->execute()->fetch(\PDO::FETCH_COLUMN);
+        $maxPosition = $qb->execute()->fetchColumn(0);
 
         return null !== $maxPosition ? $maxPosition + 1 : 0;
     }
@@ -498,9 +500,8 @@ class LinkBlockRepository
 
                 ++$i;
 
-                try {
-                    $qb->execute();
-                } catch (DBALException $e) {
+                $statement = $qb->execute();
+                if ($statement instanceof Statement && $statement->errorCode()) {
                     throw new DatabaseException('Could not update #%i');
                 }
             }

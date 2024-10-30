@@ -54,12 +54,10 @@ final class HookDataCollector extends DataCollector
         $hooks = $this->registry->getHooks();
         $calledHooks = $this->registry->getCalledHooks();
         $notCalledHooks = $this->registry->getNotCalledHooks();
-        $notRegisteredHooks = $this->registry->getNotRegisteredHooks();
         $this->data = [
             'hooks' => $this->stringifyHookArguments($hooks),
             'calledHooks' => $this->stringifyHookArguments($calledHooks),
             'notCalledHooks' => $this->stringifyHookArguments($notCalledHooks),
-            'notRegisteredHooks' => $this->stringifyHookArguments($notRegisteredHooks),
         ];
     }
 
@@ -69,6 +67,7 @@ final class HookDataCollector extends DataCollector
     public function unserialize($data)
     {
         // it seems that php 7.3 has a bug with unserialize: https://bugs.php.net/bug.php?id=77302
+        /* @phpstan-ignore-next-line */
         $this->data = is_array($data) ? $data : @unserialize($data);
     }
 
@@ -100,16 +99,6 @@ final class HookDataCollector extends DataCollector
     public function getNotCalledHooks()
     {
         return $this->data['notCalledHooks'];
-    }
-
-    /**
-     * Return the list of every uncalled legacy hooks during oHookne request.
-     *
-     * @return array
-     */
-    public function getNotRegisteredHooks()
-    {
-        return $this->data['notRegisteredHooks'];
     }
 
     /**

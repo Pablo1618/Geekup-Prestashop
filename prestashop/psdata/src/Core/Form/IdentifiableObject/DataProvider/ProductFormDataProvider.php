@@ -29,31 +29,26 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider;
 
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
+use PrestaShop\PrestaShop\Core\Domain\Manufacturer\ValueObject\NoManufacturerId;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\Query\GetProductCustomizationFields;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\QueryResult\CustomizationField;
 use PrestaShop\PrestaShop\Core\Domain\Product\FeatureValue\Query\GetProductFeatureValues;
 use PrestaShop\PrestaShop\Core\Domain\Product\FeatureValue\QueryResult\ProductFeatureValue;
-use PrestaShop\PrestaShop\Core\Domain\Product\Pack\Query\GetPackedProducts;
-use PrestaShop\PrestaShop\Core\Domain\Product\Pack\QueryResult\PackedProductDetails;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetProductForEditing;
-use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetRelatedProducts;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\LocalizedTags;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductForEditing;
-use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\RelatedProduct;
-use PrestaShop\PrestaShop\Core\Domain\Product\SpecificPrice\ValueObject\PriorityList;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\Query\GetProductStockMovements;
-use PrestaShop\PrestaShop\Core\Domain\Product\Stock\QueryResult\StockMovement;
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\Query\GetProductSupplierOptions;
 use PrestaShop\PrestaShop\Core\Domain\Product\Supplier\QueryResult\ProductSupplierOptions;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\DeliveryTimeNoteType;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductCondition;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductType;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductVisibility;
 use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime;
 
 /**
  * Provides the data that is used to prefill the Product form
  */
-class ProductFormDataProvider implements FormDataProviderInterface
+final class ProductFormDataProvider implements FormDataProviderInterface
 {
     /**
      * @var CommandBusInterface
@@ -61,91 +56,145 @@ class ProductFormDataProvider implements FormDataProviderInterface
     private $queryBus;
 
     /**
-     * @var int
+     * @var bool
      */
-    private $contextLangId;
+    private $defaultProductActivation;
 
     /**
      * @var int
      */
-    private $defaultShopId;
+    private $mostUsedTaxRulesGroupId;
 
     /**
-     * @var int|null
+     * @var int
      */
-    private $contextShopId;
-
-    /**
-     * @var ConfigurationInterface
-     */
-    private $configuration;
+    private $defaultCategoryId;
 
     /**
      * @param CommandBusInterface $queryBus
-     * @param ConfigurationInterface $configuration
-     * @param int $contextLangId
-     * @param int $defaultShopId
-     * @param int|null $contextShopId
+     * @param bool $defaultProductActivation
+     * @param int $mostUsedTaxRulesGroupId
+     * @param int $defaultCategoryId
      */
     public function __construct(
         CommandBusInterface $queryBus,
-        ConfigurationInterface $configuration,
-        int $contextLangId,
-        int $defaultShopId,
-        ?int $contextShopId
+        bool $defaultProductActivation,
+        int $mostUsedTaxRulesGroupId,
+        int $defaultCategoryId
     ) {
         $this->queryBus = $queryBus;
-        $this->configuration = $configuration;
-        $this->contextLangId = $contextLangId;
-        $this->defaultShopId = $defaultShopId;
-        $this->contextShopId = $contextShopId;
+        $this->defaultProductActivation = $defaultProductActivation;
+        $this->mostUsedTaxRulesGroupId = $mostUsedTaxRulesGroupId;
+        $this->defaultCategoryId = $defaultCategoryId;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getData($id): array
+    public function getData($id)
     {
         $productId = (int) $id;
-        $shopConstraint = ShopConstraint::shop($this->contextShopId ?? $this->defaultShopId);
         /** @var ProductForEditing $productForEditing */
-        $productForEditing = $this->queryBus->handle(
-            new GetProductForEditing($productId, $shopConstraint, $this->contextLangId)
-        );
+        $productForEditing = $this->queryBus->handle(new GetProductForEditing($productId));
 
         $productData = [
             'id' => $productId,
             'header' => $this->extractHeaderData($productForEditing),
-            'description' => $this->extractDescriptionData($productForEditing),
-            'details' => $this->extractDetailsData($productForEditing, $shopConstraint),
-            'stock' => $this->extractStockData($productForEditing, $shopConstraint),
+            'basic' => $this->extractBasicData($productForEditing),
+            'stock' => $this->extractStockData($productForEditing),
             'pricing' => $this->extractPricingData($productForEditing),
             'seo' => $this->extractSEOData($productForEditing),
             'shipping' => $this->extractShippingData($productForEditing),
             'options' => $this->extractOptionsData($productForEditing),
+            'categories' => $this->extractCategoriesData($productForEditing),
+            'footer' => [
+                'active' => $productForEditing->getOptions()->isActive(),
+            ],
         ];
 
-        if ($productForEditing->getType() === ProductType::TYPE_COMBINATIONS) {
-            $productData['combinations'] = [
-                'availability' => [
-                    'out_of_stock_type' => $productData['stock']['availability']['out_of_stock_type'],
-                    'available_now_label' => $productData['stock']['availability']['available_now_label'] ?? [],
-                    'available_later_label' => $productData['stock']['availability']['available_later_label'] ?? [],
-                ],
-            ];
-        }
-
-        return $productData;
+        return $this->addShortcutData($productData);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getDefaultData(): array
+    public function getDefaultData()
     {
-        return [
-            'type' => ProductType::TYPE_STANDARD,
+        return $this->addShortcutData([
+            'header' => [
+                'type' => ProductType::TYPE_STANDARD,
+            ],
+            'basic' => [
+                'manufacturer' => NoManufacturerId::NO_MANUFACTURER_ID,
+            ],
+            'stock' => [
+                'quantities' => [
+                    'quantity' => 0,
+                    'minimal_quantity' => 0,
+                ],
+            ],
+            'pricing' => [
+                'retail_price' => [
+                    'price_tax_excluded' => 0,
+                    'price_tax_included' => 0,
+                ],
+                'tax_rules_group_id' => $this->mostUsedTaxRulesGroupId,
+                'wholesale_price' => 0,
+                'unit_price' => [
+                    'price' => 0,
+                ],
+            ],
+            'shipping' => [
+                'dimensions' => [
+                    'width' => 0,
+                    'height' => 0,
+                    'depth' => 0,
+                    'weight' => 0,
+                ],
+                'additional_shipping_cost' => 0,
+                'delivery_time_note_type' => DeliveryTimeNoteType::TYPE_DEFAULT,
+            ],
+            'options' => [
+                'visibility' => [
+                    'visibility' => ProductVisibility::VISIBLE_EVERYWHERE,
+                ],
+                'condition' => ProductCondition::NEW,
+            ],
+            'categories' => [
+                'product_categories' => [
+                    $this->defaultCategoryId => [
+                        'is_associated' => true,
+                        'is_default' => true,
+                    ],
+                ],
+            ],
+            'footer' => [
+                'active' => $this->defaultProductActivation,
+            ],
+        ]);
+    }
+
+    /**
+     * Returned product data with shortcut data that is picked from existing data.
+     *
+     * @param array $productData
+     *
+     * @return array
+     */
+    private function addShortcutData(array $productData): array
+    {
+        $productData['shortcuts'] = [
+            'retail_price' => [
+                'price_tax_excluded' => $productData['pricing']['retail_price']['price_tax_excluded'],
+                'price_tax_included' => $productData['pricing']['retail_price']['price_tax_included'],
+                'tax_rules_group_id' => $productData['pricing']['tax_rules_group_id'],
+            ],
+            'stock' => [
+                'quantity' => $productData['stock']['quantities']['quantity'],
+            ],
         ];
+
+        return $productData;
     }
 
     /**
@@ -156,89 +205,17 @@ class ProductFormDataProvider implements FormDataProviderInterface
     private function extractCategoriesData(ProductForEditing $productForEditing): array
     {
         $categoriesInformation = $productForEditing->getCategoriesInformation();
-        $categories = $categoriesInformation->getCategoriesInformation();
-        $defaultCategoryId = $categoriesInformation->getDefaultCategoryId();
-
-        $categoriesData = [];
-        foreach ($categories as $category) {
-            $categoryId = $category->getId();
-
-            $categoriesData[] = [
-                'id' => $categoryId,
-                'name' => $category->getName(),
-                'display_name' => $category->getDisplayName(),
-                // do not allow removing default category or if it is the last one
-                'removable' => $defaultCategoryId !== $category->getId() && 1 !== count($categories),
+        $categories = [];
+        foreach ($categoriesInformation->getCategoryIds() as $categoryId) {
+            $categories[$categoryId] = [
+                'is_associated' => true,
+                'is_default' => $categoryId === $categoriesInformation->getDefaultCategoryId(),
             ];
         }
 
         return [
-            'product_categories' => $categoriesData,
-            'default_category_id' => $defaultCategoryId,
+            'product_categories' => $categories,
         ];
-    }
-
-    /**
-     * @param int $productId
-     *
-     * @return array<int, array<string, int|string>>
-     */
-    private function extractRelatedProducts(int $productId): array
-    {
-        /** @var RelatedProduct[] $relatedProducts */
-        $relatedProducts = $this->queryBus->handle(new GetRelatedProducts($productId, $this->contextLangId));
-
-        $relatedProductsData = [];
-        foreach ($relatedProducts as $relatedProduct) {
-            $productName = $relatedProduct->getName();
-
-            if (!empty($relatedProduct->getReference())) {
-                $productName .= sprintf(
-                    ' (ref: %s)',
-                    $relatedProduct->getReference()
-                );
-            }
-
-            $relatedProductsData[] = [
-                'id' => $relatedProduct->getProductId(),
-                'name' => $productName,
-                'image' => $relatedProduct->getImageUrl(),
-            ];
-        }
-
-        return $relatedProductsData;
-    }
-
-    /**
-     * @param int $productId
-     * @param ShopConstraint $shopConstraint
-     *
-     * @return array<int, array<string, int|string>>
-     */
-    protected function extractPackedProducts(int $productId, ShopConstraint $shopConstraint): array
-    {
-        /** @var PackedProductDetails[] $packedProductsDetails */
-        $packedProductsDetails = $this->queryBus->handle(
-            new GetPackedProducts(
-                $productId,
-                $this->contextLangId,
-                $shopConstraint
-            )
-        );
-        $packedProductsData = [];
-        foreach ($packedProductsDetails as $packedProductDetails) {
-            $packedProductsData[] = [
-                'product_id' => $packedProductDetails->getProductId(),
-                'name' => $packedProductDetails->getProductName(),
-                'reference' => $packedProductDetails->getReference(),
-                'combination_id' => $packedProductDetails->getCombinationId(),
-                'image' => $packedProductDetails->getImageUrl(),
-                'quantity' => $packedProductDetails->getQuantity(),
-                'unique_identifier' => $packedProductDetails->getProductId() . '_' . $packedProductDetails->getCombinationId(),
-            ];
-        }
-
-        return $packedProductsData;
     }
 
     /**
@@ -278,10 +255,7 @@ class ProductFormDataProvider implements FormDataProviderInterface
     {
         return [
             'type' => $productForEditing->getType(),
-            'initial_type' => $productForEditing->getType(),
             'name' => $productForEditing->getBasicInformation()->getLocalizedNames(),
-            'cover_thumbnail' => $productForEditing->getCoverThumbnailUrl(),
-            'active' => $productForEditing->isActive(),
         ];
     }
 
@@ -290,41 +264,13 @@ class ProductFormDataProvider implements FormDataProviderInterface
      *
      * @return array<string, mixed>
      */
-    private function extractDescriptionData(ProductForEditing $productForEditing): array
+    private function extractBasicData(ProductForEditing $productForEditing): array
     {
         return [
             'description' => $productForEditing->getBasicInformation()->getLocalizedDescriptions(),
             'description_short' => $productForEditing->getBasicInformation()->getLocalizedShortDescriptions(),
-            'categories' => $this->extractCategoriesData($productForEditing),
-            'manufacturer' => $productForEditing->getOptions()->getManufacturerId(),
-            'related_products' => $this->extractRelatedProducts($productForEditing->getProductId()),
-        ];
-    }
-
-    /**
-     * @param ProductForEditing $productForEditing
-     * @param ShopConstraint $shopConstraint
-     *
-     * @return array<string, mixed>
-     */
-    private function extractDetailsData(ProductForEditing $productForEditing, ShopConstraint $shopConstraint): array
-    {
-        $details = $productForEditing->getDetails();
-        $options = $productForEditing->getOptions();
-
-        return [
-            'references' => [
-                'mpn' => $details->getMpn(),
-                'upc' => $details->getUpc(),
-                'ean_13' => $details->getEan13(),
-                'isbn' => $details->getIsbn(),
-                'reference' => $details->getReference(),
-            ],
             'features' => $this->extractFeatureValues($productForEditing->getProductId()),
-            'attachments' => $this->extractAttachmentsData($productForEditing),
-            'show_condition' => $options->showCondition(),
-            'condition' => $options->getCondition(),
-            'customizations' => $this->extractCustomizationsData($productForEditing, $shopConstraint),
+            'manufacturer' => $productForEditing->getOptions()->getManufacturerId(),
         ];
     }
 
@@ -362,31 +308,23 @@ class ProductFormDataProvider implements FormDataProviderInterface
 
     /**
      * @param ProductForEditing $productForEditing
-     * @param ShopConstraint $shopConstraint
      *
      * @return array<string, mixed>
      */
-    private function extractStockData(ProductForEditing $productForEditing, ShopConstraint $shopConstraint): array
+    private function extractStockData(ProductForEditing $productForEditing): array
     {
         $stockInformation = $productForEditing->getStockInformation();
         $availableDate = $stockInformation->getAvailableDate();
 
         return [
             'quantities' => [
-                'delta_quantity' => [
-                    'quantity' => $stockInformation->getQuantity(),
-                    'delta' => 0,
-                ],
-                'stock_movements' => $this->getStockMovementHistory(
-                    $productForEditing->getProductId(),
-                    $shopConstraint
-                ),
+                'quantity' => $stockInformation->getQuantity(),
                 'minimal_quantity' => $stockInformation->getMinimalQuantity(),
             ],
             'options' => [
                 'stock_location' => $stockInformation->getLocation(),
-                'low_stock_threshold' => $stockInformation->getLowStockThreshold(),
-                'disabling_switch_low_stock_threshold' => $stockInformation->isLowStockAlertEnabled(),
+                'low_stock_threshold' => $stockInformation->getLowStockThreshold() ?: null,
+                'low_stock_alert' => $stockInformation->isLowStockAlertEnabled(),
             ],
             'virtual_product_file' => $this->extractVirtualProductFileData($productForEditing),
             'pack_stock_type' => $stockInformation->getPackStockType(),
@@ -396,39 +334,7 @@ class ProductFormDataProvider implements FormDataProviderInterface
                 'available_later_label' => $stockInformation->getLocalizedAvailableLaterLabels(),
                 'available_date' => $availableDate ? $availableDate->format(DateTime::DEFAULT_DATE_FORMAT) : '',
             ],
-            'packed_products' => $this->extractPackedProducts($productForEditing->getProductId(), $shopConstraint),
         ];
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function getStockMovementHistory(int $productId, ShopConstraint $shopConstraint): array
-    {
-        return array_map(
-            function (StockMovement $stockMovement): array {
-                $date = null;
-                if ($stockMovement->isEdition()) {
-                    $date = $stockMovement
-                        ->getDate('add')
-                        ->format(DateTime::DEFAULT_DATETIME_FORMAT)
-                    ;
-                }
-
-                return [
-                    'type' => $stockMovement->getType(),
-                    'date' => $date,
-                    'employee_name' => $stockMovement->getEmployeeName(),
-                    'delta_quantity' => $stockMovement->getDeltaQuantity(),
-                ];
-            },
-            $this->queryBus->handle(
-                new GetProductStockMovements(
-                    $productId,
-                    $shopConstraint->getShopId()->getValue()
-                )
-            )
-        );
     }
 
     /**
@@ -442,40 +348,15 @@ class ProductFormDataProvider implements FormDataProviderInterface
             'retail_price' => [
                 'price_tax_excluded' => (float) (string) $productForEditing->getPricesInformation()->getPrice(),
                 'price_tax_included' => (float) (string) $productForEditing->getPricesInformation()->getPriceTaxIncluded(),
-                'tax_rules_group_id' => $productForEditing->getPricesInformation()->getTaxRulesGroupId(),
-                'ecotax_tax_excluded' => (float) (string) $productForEditing->getPricesInformation()->getEcotax(),
-                'ecotax_tax_included' => (float) (string) $productForEditing->getPricesInformation()->getEcotaxTaxIncluded(),
+                'ecotax' => (float) (string) $productForEditing->getPricesInformation()->getEcotax(),
             ],
+            'tax_rules_group_id' => $productForEditing->getPricesInformation()->getTaxRulesGroupId(),
             'on_sale' => $productForEditing->getPricesInformation()->isOnSale(),
             'wholesale_price' => (float) (string) $productForEditing->getPricesInformation()->getWholesalePrice(),
             'unit_price' => [
-                'price_tax_excluded' => (float) (string) $productForEditing->getPricesInformation()->getUnitPrice(),
-                'price_tax_included' => (float) (string) $productForEditing->getPricesInformation()->getUnitPriceTaxIncluded(),
+                'price' => (float) (string) $productForEditing->getPricesInformation()->getUnitPrice(),
                 'unity' => $productForEditing->getPricesInformation()->getUnity(),
             ],
-            'priority_management' => $this->getPriorityManagement($productForEditing),
-        ];
-    }
-
-    /**
-     * @param ProductForEditing $productForEditing
-     *
-     * @return array<string, bool|string[]>
-     */
-    private function getPriorityManagement(ProductForEditing $productForEditing): array
-    {
-        $priorities = $productForEditing->getPricesInformation()->getSpecificPricePriorities();
-
-        if (!$priorities) {
-            return [
-                'use_custom_priority' => false,
-                'priorities' => $this->getDefaultPrioritiesData(),
-            ];
-        }
-
-        return [
-            'use_custom_priority' => true,
-            'priorities' => $priorities->getPriorities(),
         ];
     }
 
@@ -493,33 +374,21 @@ class ProductFormDataProvider implements FormDataProviderInterface
             'meta_description' => $seoOptions->getLocalizedMetaDescriptions(),
             'link_rewrite' => $seoOptions->getLocalizedLinkRewrites(),
             'redirect_option' => $this->extractRedirectOptionData($productForEditing),
-            'tags' => $this->presentTags($productForEditing->getBasicInformation()->getLocalizedTags()),
         ];
     }
 
     /**
      * @param ProductForEditing $productForEditing
      *
-     * @return array{type: string, target: null|array}
+     * @return array<string, int|string>
      */
     private function extractRedirectOptionData(ProductForEditing $productForEditing): array
     {
         $seoOptions = $productForEditing->getProductSeoOptions();
 
-        // It is important to return null when nothing is selected this way the transformer and therefore
-        // the form field have no value to try and display
-        $redirectTarget = null;
-        if (null !== $seoOptions->getRedirectTarget()) {
-            $redirectTarget = [
-                'id' => $seoOptions->getRedirectTarget()->getId(),
-                'name' => $seoOptions->getRedirectTarget()->getName(),
-                'image' => $seoOptions->getRedirectTarget()->getImage(),
-            ];
-        }
-
         return [
             'type' => $seoOptions->getRedirectType(),
-            'target' => $redirectTarget,
+            'target' => $seoOptions->getRedirectTargetId(),
         ];
     }
 
@@ -557,52 +426,40 @@ class ProductFormDataProvider implements FormDataProviderInterface
     private function extractOptionsData(ProductForEditing $productForEditing): array
     {
         $options = $productForEditing->getOptions();
-        $suppliersData = $this->extractSuppliersData($productForEditing);
+        $details = $productForEditing->getDetails();
 
-        return array_merge([
+        return [
             'visibility' => [
                 'visibility' => $options->getVisibility(),
                 'available_for_order' => $options->isAvailableForOrder(),
                 'show_price' => $options->showPrice(),
                 'online_only' => $options->isOnlineOnly(),
             ],
-        ], $suppliersData);
+            'tags' => $this->presentTags($productForEditing->getBasicInformation()->getLocalizedTags()),
+            'show_condition' => $options->showCondition(),
+            'condition' => $options->getCondition(),
+            'references' => [
+                'mpn' => $details->getMpn(),
+                'upc' => $details->getUpc(),
+                'ean_13' => $details->getEan13(),
+                'isbn' => $details->getIsbn(),
+                'reference' => $details->getReference(),
+            ],
+            'customizations' => $this->extractCustomizationsData($productForEditing),
+            'suppliers' => $this->extractSuppliersData($productForEditing),
+        ];
     }
 
     /**
      * @param ProductForEditing $productForEditing
-     *
-     * @return array<string, array<int, array<string, mixed>>>
-     */
-    private function extractAttachmentsData(ProductForEditing $productForEditing): array
-    {
-        $productAttachments = $productForEditing->getAssociatedAttachments();
-
-        $attachmentsData = [];
-        foreach ($productAttachments as $productAttachment) {
-            $localizedNames = $productAttachment->getLocalizedNames();
-            $attachmentsData['attached_files'][] = [
-                'attachment_id' => $productAttachment->getAttachmentId(),
-                'name' => $localizedNames[$this->contextLangId] ?? reset($localizedNames),
-                'file_name' => $productAttachment->getFilename(),
-                'mime_type' => $productAttachment->getMimeType(),
-            ];
-        }
-
-        return $attachmentsData;
-    }
-
-    /**
-     * @param ProductForEditing $productForEditing
-     * @param ShopConstraint $shopConstraint
      *
      * @return array<string, array<int, mixed>>
      */
-    private function extractCustomizationsData(ProductForEditing $productForEditing, ShopConstraint $shopConstraint): array
+    private function extractCustomizationsData(ProductForEditing $productForEditing): array
     {
         /** @var CustomizationField[] $customizationFields */
         $customizationFields = $this->queryBus->handle(
-            new GetProductCustomizationFields($productForEditing->getProductId(), $shopConstraint)
+            new GetProductCustomizationFields($productForEditing->getProductId())
         );
 
         if (empty($customizationFields)) {
@@ -616,7 +473,6 @@ class ProductFormDataProvider implements FormDataProviderInterface
                 'name' => $customizationField->getLocalizedNames(),
                 'type' => $customizationField->getType(),
                 'required' => $customizationField->isRequired(),
-                'addedByModule' => $customizationField->isAddedByModule(),
             ];
         }
 
@@ -643,55 +499,38 @@ class ProductFormDataProvider implements FormDataProviderInterface
     /**
      * @param ProductForEditing $productForEditing
      *
-     * @return array{suppliers: array{default_supplier_id: int, supplier_ids: int[]}, product_suppliers: array<int, array{supplier_id: int, supplier_name: string, product_supplier_id: int, price_tax_excluded: string, reference: string, currency_id: int, combination_id: int}>}
+     * @return array<string, int|array<int, int|array<string, string|int>>>
      */
     private function extractSuppliersData(ProductForEditing $productForEditing): array
     {
-        $suppliersData = [
-            'suppliers' => [
-                'default_supplier_id' => 0,
-                'supplier_ids' => [],
-            ],
-            'product_suppliers' => [],
-        ];
-
         /** @var ProductSupplierOptions $productSupplierOptions */
         $productSupplierOptions = $this->queryBus->handle(new GetProductSupplierOptions($productForEditing->getProductId()));
-        $suppliersData['suppliers']['default_supplier_id'] = $productSupplierOptions->getDefaultSupplierId();
-        $suppliersData['suppliers']['supplier_ids'] = $productSupplierOptions->getSupplierIds();
 
-        if (empty($productSupplierOptions->getProductSuppliers())) {
-            return $suppliersData;
+        if (empty($productSupplierOptions->getSuppliersInfo())) {
+            return [];
         }
 
-        foreach ($productSupplierOptions->getProductSuppliers() as $supplierForEditing) {
-            $supplierId = $supplierForEditing->getSupplierId();
+        $defaultSupplierId = $productSupplierOptions->getDefaultSupplierId();
+        $suppliersData = [
+            'default_supplier_id' => $defaultSupplierId,
+        ];
 
-            if ($productForEditing->getType() !== ProductType::TYPE_COMBINATIONS) {
-                $suppliersData['product_suppliers'][$supplierId] = [
-                    'supplier_id' => $supplierId,
-                    'supplier_name' => $supplierForEditing->getSupplierName(),
-                    'product_supplier_id' => $supplierForEditing->getProductSupplierId(),
-                    'price_tax_excluded' => $supplierForEditing->getPriceTaxExcluded(),
-                    'reference' => $supplierForEditing->getReference(),
-                    'currency_id' => $supplierForEditing->getCurrencyId(),
-                    'combination_id' => $supplierForEditing->getCombinationId(),
-                ];
-            }
+        foreach ($productSupplierOptions->getSuppliersInfo() as $supplierOption) {
+            $supplierForEditing = $supplierOption->getProductSupplierForEditing();
+            $supplierId = $supplierOption->getSupplierId();
+
+            $suppliersData['supplier_ids'][] = $supplierId;
+            $suppliersData['product_suppliers'][$supplierId] = [
+                'supplier_id' => $supplierId,
+                'supplier_name' => $supplierOption->getSupplierName(),
+                'product_supplier_id' => $supplierForEditing->getProductSupplierId(),
+                'price_tax_excluded' => $supplierForEditing->getPriceTaxExcluded(),
+                'reference' => $supplierForEditing->getReference(),
+                'currency_id' => $supplierForEditing->getCurrencyId(),
+                'combination_id' => $supplierForEditing->getCombinationId(),
+            ];
         }
 
         return $suppliersData;
-    }
-
-    /**
-     * @return string[]
-     */
-    private function getDefaultPrioritiesData(): array
-    {
-        if (!empty($this->configuration->get('PS_SPECIFIC_PRICE_PRIORITIES'))) {
-            return explode(';', $this->configuration->get('PS_SPECIFIC_PRICE_PRIORITIES'));
-        }
-
-        return array_values(PriorityList::AVAILABLE_PRIORITIES);
     }
 }

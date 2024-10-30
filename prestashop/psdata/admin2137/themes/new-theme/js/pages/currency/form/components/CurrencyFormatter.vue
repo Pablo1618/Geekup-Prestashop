@@ -46,8 +46,6 @@
 
 <script>
   import {showGrowl} from '@app/utils/growl';
-  import {EventEmitter} from '@components/event-emitter';
-  import CurrencyFormEventMap from '@pages/currency/form/currency-form-event-map';
   import LanguageList from './LanguageList';
   import CurrencyModal from './CurrencyModal';
 
@@ -91,8 +89,6 @@
         this.currencyData.symbols[language.id] = language.currencySymbol;
 
         showGrowl('success', this.$t('list.reset.success'));
-
-        EventEmitter.emit(CurrencyFormEventMap.refreshCurrencyApp, this.currencyData);
       },
       applyCustomization(customData) {
         const selectedPattern = this.selectedLanguage.transformations[
@@ -103,13 +99,11 @@
         this.selectedLanguage.priceSpecification.currencySymbol = customData.symbol;
         this.selectedLanguage.priceSpecification.positivePattern = patterns[0];
         // eslint-disable-next-line
-        this.selectedLanguage.priceSpecification.negativePattern =
+      this.selectedLanguage.priceSpecification.negativePattern =
           patterns.length > 1 ? patterns[1] : `-${patterns[0]}`;
 
         this.currencyData.transformations[this.selectedLanguage.id] = customData.transformation;
         this.currencyData.symbols[this.selectedLanguage.id] = customData.symbol;
-
-        EventEmitter.emit(CurrencyFormEventMap.refreshCurrencyApp, this.currencyData);
 
         this.closeModal();
       },

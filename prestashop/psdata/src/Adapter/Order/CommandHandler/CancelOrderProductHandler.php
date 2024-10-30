@@ -41,7 +41,7 @@ use PrestaShop\PrestaShop\Core\Domain\Order\CommandHandler\CancelOrderProductHan
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\InvalidCancelProductException;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\InvalidOrderStateException;
 use Psr\Log\LoggerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @internal
@@ -158,7 +158,7 @@ final class CancelOrderProductHandler extends AbstractOrderCommandHandler implem
     {
         $history = new OrderHistory();
         $history->id_order = (int) $order->id;
-        $history->changeIdOrderState((int) Configuration::get('PS_OS_CANCELED'), $order);
+        $history->changeIdOrderState(Configuration::get('PS_OS_CANCELED'), $order);
         if (!$history->addWithemail()) {
             // email failure must not block order update process
             $this->logger->warning(
@@ -241,7 +241,6 @@ final class CancelOrderProductHandler extends AbstractOrderCommandHandler implem
                 $newQuantity = max((int) $orderDetail->product_quantity - (int) $qty_cancel_product, 0);
                 $orderInvoice = $orderDetail->id_order_invoice != 0 ? new OrderInvoice($orderDetail->id_order_invoice) : null;
                 $this->orderProductQuantityUpdater->update($order, $orderDetail, $newQuantity, $orderInvoice);
-                // Hook called only for the shop concerned
                 Hook::exec('actionProductCancel', ['order' => $order, 'id_order_detail' => (int) $orderDetail->id_order_detail, 'cancel_quantity' => $qty_cancel_product, 'action' => CancellationActionType::CANCEL_PRODUCT], null, false, true, false, $order->id_shop);
             }
         }

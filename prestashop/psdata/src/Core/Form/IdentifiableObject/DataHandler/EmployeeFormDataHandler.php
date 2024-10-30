@@ -26,6 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler;
 
+use PrestaShop\PrestaShop\Adapter\Image\Uploader\EmployeeImageUploader;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 use PrestaShop\PrestaShop\Core\Domain\Employee\Command\AddEmployeeCommand;
@@ -78,31 +79,13 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
     private $imageUploader;
 
     /**
-     * @var int
-     */
-    private $minScore;
-
-    /**
-     * @var int
-     */
-    private $minLength;
-
-    /**
-     * @var int
-     */
-    private $maxLength;
-
-    /**
      * @param CommandBusInterface $bus
      * @param array $defaultShopAssociation
      * @param int $superAdminProfileId
      * @param EmployeeFormAccessCheckerInterface $employeeFormAccessChecker
      * @param EmployeeDataProviderInterface $employeeDataProvider
      * @param Hashing $hashing
-     * @param ImageUploaderInterface $imageUploader
-     * @param int $minLength
-     * @param int $maxLength
-     * @param int $minScore
+     * @param ImageUploaderInterface|null $imageUploader
      */
     public function __construct(
         CommandBusInterface $bus,
@@ -111,10 +94,7 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
         EmployeeFormAccessCheckerInterface $employeeFormAccessChecker,
         EmployeeDataProviderInterface $employeeDataProvider,
         Hashing $hashing,
-        ImageUploaderInterface $imageUploader,
-        int $minLength,
-        int $maxLength,
-        int $minScore
+        ImageUploaderInterface $imageUploader = null
     ) {
         $this->bus = $bus;
         $this->defaultShopAssociation = $defaultShopAssociation;
@@ -122,10 +102,7 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
         $this->employeeFormAccessChecker = $employeeFormAccessChecker;
         $this->employeeDataProvider = $employeeDataProvider;
         $this->hashing = $hashing;
-        $this->imageUploader = $imageUploader;
-        $this->minLength = $minLength;
-        $this->maxLength = $maxLength;
-        $this->minScore = $minScore;
+        $this->imageUploader = $imageUploader ?? new EmployeeImageUploader();
     }
 
     /**
@@ -149,13 +126,10 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
             $data['active'],
             $data['profile'],
             isset($data['shop_association']) ? $data['shop_association'] : $this->defaultShopAssociation,
-            $data['has_enabled_gravatar'] ?? false,
-            $this->minLength,
-            $this->maxLength,
-            $this->minScore
+            $data['has_enabled_gravatar'] ?? false
         ));
 
-        /** @var UploadedFile|null $uploadedAvatar */
+        /** @var UploadedFile $uploadedAvatar */
         $uploadedAvatar = $data['avatarUrl'] ?? null;
         if (!empty($uploadedAvatar) && $uploadedAvatar instanceof UploadedFile) {
             $this->imageUploader->upload($employeeId->getValue(), $uploadedAvatar);
@@ -169,6 +143,12 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
      */
     public function update($id, array $data)
     {
+        /** @var UploadedFile $uploadedAvatar */
+        $uploadedAvatar = $data['avatarUrl'];
+        if ($uploadedAvatar instanceof UploadedFile) {
+            $this->imageUploader->upload($id, $uploadedAvatar);
+        }
+
         $command = (new EditEmployeeCommand($id))
             ->setFirstName($data['firstname'])
             ->setLastName($data['lastname'])
@@ -187,10 +167,10 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
                     $id
                 );
 
-                $command->setPlainPassword($data['change_password']['new_password'], $this->minLength, $this->maxLength, $this->minScore);
+                $command->setPlainPassword($data['change_password']['new_password']);
             }
         } elseif (isset($data['password'])) {
-            $command->setPlainPassword($data['password'], $this->minLength, $this->maxLength, $this->minScore);
+            $command->setPlainPassword($data['password']);
         }
 
         if (isset($data['shop_association'])) {
@@ -201,29 +181,6 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
         }
 
         $this->bus->handle($command);
-
-        /**
-         * IMPORTANT : Apply all validations before file upload
-         *
-         * During avatar upload, EmployeeController::editAction takes image path
-         * from `$_FILES["employee"]["tmp_name"]["avatarUrl"]`
-         * But AbstractImageUploader::createTemporaryImage($image) executes
-         * `move_uploaded_file($image->getPathname(), $temporaryImageName))`
-         * that removes the image but keep $_FILES["employee"]["tmp_name"]["avatarUrl"] value.
-         *
-         * During data validation (`setXXX($value)` apply validation),
-         * any error would break the workflow and call `render(...)`
-         * (cf. EmployeeController::editAction).
-         * But `DispatcherCore::getInstance(...)` runs
-         * `$request = SymfonyRequest::createFromGlobals()` that take `$_FILES` global variable.
-         * Then during Request object creation,
-         * `$_FILES["employee"]["tmp_name"]["avatarUrl"]` is detected as invalid.
-         */
-        /** @var UploadedFile $uploadedAvatar */
-        $uploadedAvatar = $data['avatarUrl'];
-        if ($uploadedAvatar instanceof UploadedFile) {
-            $this->imageUploader->upload($id, $uploadedAvatar);
-        }
     }
 
     /**

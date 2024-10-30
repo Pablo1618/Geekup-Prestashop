@@ -25,9 +25,7 @@
  */
 class BoOrderCore extends PaymentModule
 {
-    /** @var bool */
-    public $active = true;
-    /** @var string */
+    public $active = 1;
     public $name = 'bo_order';
 
     public function __construct()

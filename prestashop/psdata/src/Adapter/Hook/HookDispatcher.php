@@ -30,8 +30,6 @@ use PrestaShop\PrestaShop\Core\Hook\Hook;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcherInterface;
 use PrestaShop\PrestaShop\Core\Hook\HookInterface;
 use PrestaShop\PrestaShop\Core\Hook\RenderedHook;
-use PrestaShop\PrestaShop\Core\Version;
-use PrestaShopBundle\DataCollector\HookRegistry;
 use PrestaShopBundle\Service\Hook\HookEvent;
 use PrestaShopBundle\Service\Hook\RenderingHookEvent;
 use Symfony\Component\EventDispatcher\Event;
@@ -54,48 +52,26 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
     private $renderingContent = [];
 
     /**
+     * @var bool|callable
+     */
+    private $propagationStoppedCalledBy = false;
+
+    /**
      * @var RequestStack
      */
     private $requestStack;
 
     /**
-     * @var HookRegistry
+     * @param RequestStack $requestStack (nullable to preserve backward compatibility)
      */
-    private $hookRegistry;
-
-    /**
-     * @var bool
-     */
-    private $isDebug;
-
-    /**
-     * @param RequestStack|null $requestStack (nullable to preserve backward compatibility)
-     * @param iterable|null $hookSubscribers
-     * @param HookRegistry|null $hookRegistry (nullable to preserve backward compatibility)
-     * @param bool $isDebug
-     */
-    public function __construct(
-        RequestStack $requestStack = null,
-        iterable $hookSubscribers = null,
-        HookRegistry $hookRegistry = null,
-        bool $isDebug = false
-    ) {
+    public function __construct(RequestStack $requestStack = null)
+    {
         $this->requestStack = $requestStack;
-        $this->hookRegistry = $hookRegistry;
-        $this->isDebug = $isDebug;
-
-        foreach ($hookSubscribers as $hookSubscriber) {
-            $this->addSubscriber($hookSubscriber);
-        }
     }
 
     /**
+     * {@inheritdoc}
      * This override will check if $event is an instance of HookEvent.
-     *
-     * @param string|Hook $eventName
-     * @param Event|null $event
-     *
-     * @return Event|HookEvent
      *
      * @throws \Exception if the Event is not HookEvent or a subclass
      */
@@ -111,25 +87,6 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
 
         if ($listeners = $this->getListeners(strtolower($eventName))) {
             $this->doDispatch($listeners, $eventName, $event);
-        } elseif ($this->isDebug && null !== $this->hookRegistry) {
-            // When a hook has no listeners it means it's not even in the database or no modules were attached, in the current case
-            // Hook::exec will never be called meaning no stats will be registered for this hook So we handle the registry data collection
-            // here so that we can still get some info in the Debug toolbar
-            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
-
-            // Try to find the initial backtrace that was not called from the dispatcher services
-            $initialBackTrace = [];
-            for ($i = 0; $i < count($backtrace); ++$i) {
-                $initialBackTrace = $backtrace[$i];
-                $isCodeFromDispatcher = (bool) strpos($initialBackTrace['file'], 'HookDispatcher');
-                if (!$isCodeFromDispatcher) {
-                    break;
-                }
-            }
-
-            $this->hookRegistry->selectHook($eventName, $event->getHookParameters(), $initialBackTrace['file'] ?? 'unknown file', $initialBackTrace['line'] ?? 'unknown line');
-            $this->hookRegistry->hookWasNotRegistered();
-            $this->hookRegistry->collect();
         }
 
         return $event;
@@ -173,6 +130,7 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
      */
     protected function doDispatch($listeners, $eventName, Event $event)
     {
+        $this->propagationStoppedCalledBy = false;
         foreach ($listeners as $listener) {
             // removes $this to parameters. Hooks should not have access to dispatcher
             ob_start();
@@ -183,6 +141,9 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
                 $listenerName = $event->popListener() ?: $listener[1];
 
                 $this->renderingContent[$listenerName] = $event->popContent();
+            }
+            if ($event->isPropagationStopped()) {
+                $this->propagationStoppedCalledBy = $listener;
             }
         }
         if ($event instanceof RenderingHookEvent) {
@@ -235,7 +196,7 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
      */
     public function dispatchWithParameters($hookName, array $hookParameters = [])
     {
-        $this->dispatchForParameters($hookName, $hookParameters);
+        $this->dispatch(new Hook($hookName, $hookParameters));
     }
 
     /**
@@ -268,7 +229,7 @@ class HookDispatcher extends EventDispatcher implements HookDispatcherInterface
      */
     private function getHookEventContextParameters(): array
     {
-        $globalParameters = ['_ps_version' => Version::VERSION];
+        $globalParameters = ['_ps_version' => \AppKernel::VERSION];
 
         if (null === $this->requestStack) {
             return $globalParameters;

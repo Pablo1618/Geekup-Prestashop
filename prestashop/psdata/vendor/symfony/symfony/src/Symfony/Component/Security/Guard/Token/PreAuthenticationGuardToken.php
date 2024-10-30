@@ -31,7 +31,7 @@ class PreAuthenticationGuardToken extends AbstractToken implements GuardTokenInt
      * @param mixed  $credentials
      * @param string $guardProviderKey Unique key that bind this token to a specific AuthenticatorInterface
      */
-    public function __construct($credentials, string $guardProviderKey)
+    public function __construct($credentials, $guardProviderKey)
     {
         $this->credentials = $credentials;
         $this->guardProviderKey = $guardProviderKey;

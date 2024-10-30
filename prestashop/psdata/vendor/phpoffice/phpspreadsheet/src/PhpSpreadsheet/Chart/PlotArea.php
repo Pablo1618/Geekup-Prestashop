@@ -23,9 +23,10 @@ class PlotArea
     /**
      * Create a new PlotArea.
      *
+     * @param null|Layout $layout
      * @param DataSeries[] $plotSeries
      */
-    public function __construct(?Layout $layout = null, array $plotSeries = [])
+    public function __construct(Layout $layout = null, array $plotSeries = [])
     {
         $this->layout = $layout;
         $this->plotSeries = $plotSeries;
@@ -43,8 +44,10 @@ class PlotArea
 
     /**
      * Get Number of Plot Groups.
+     *
+     * @return array of DataSeries
      */
-    public function getPlotGroupCount(): int
+    public function getPlotGroupCount()
     {
         return count($this->plotSeries);
     }
@@ -67,7 +70,7 @@ class PlotArea
     /**
      * Get Plot Series.
      *
-     * @return DataSeries[]
+     * @return array of DataSeries
      */
     public function getPlotGroup()
     {
@@ -100,7 +103,7 @@ class PlotArea
         return $this;
     }
 
-    public function refresh(Worksheet $worksheet): void
+    public function refresh(Worksheet $worksheet)
     {
         foreach ($this->plotSeries as $plotSeries) {
             $plotSeries->refresh($worksheet);

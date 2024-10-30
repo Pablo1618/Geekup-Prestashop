@@ -13,12 +13,9 @@ namespace Symfony\Component\WebLink\EventListener;
 
 use Psr\Link\LinkProviderInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\WebLink\HttpHeaderSerializer;
-
-// Help opcache.preload discover always-needed symbols
-class_exists(HttpHeaderSerializer::class);
 
 /**
  * Adds the Link HTTP header to the response.
@@ -36,7 +33,7 @@ class AddLinkHeaderListener implements EventSubscriberInterface
         $this->serializer = new HttpHeaderSerializer();
     }
 
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelResponse(FilterResponseEvent $event)
     {
         if (!$event->isMasterRequest()) {
             return;
@@ -53,7 +50,7 @@ class AddLinkHeaderListener implements EventSubscriberInterface
     /**
      * {@inheritdoc}
      */
-    public static function getSubscribedEvents(): array
+    public static function getSubscribedEvents()
     {
         return [KernelEvents::RESPONSE => 'onKernelResponse'];
     }

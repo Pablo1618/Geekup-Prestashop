@@ -31,15 +31,13 @@ class SerializerCacheWarmer extends AbstractPhpFileCacheWarmer
     private $loaders;
 
     /**
-     * @param LoaderInterface[] $loaders      The serializer metadata loaders
-     * @param string            $phpArrayFile The PHP file where metadata are cached
+     * @param LoaderInterface[]      $loaders      The serializer metadata loaders
+     * @param string                 $phpArrayFile The PHP file where metadata are cached
+     * @param CacheItemPoolInterface $fallbackPool The pool where runtime-discovered metadata are cached
      */
-    public function __construct(array $loaders, string $phpArrayFile)
+    public function __construct(array $loaders, $phpArrayFile, CacheItemPoolInterface $fallbackPool)
     {
-        if (2 < \func_num_args() && func_get_arg(2) instanceof CacheItemPoolInterface) {
-            @trigger_error(sprintf('The CacheItemPoolInterface $fallbackPool argument of "%s()" is deprecated since Symfony 4.2, you should not pass it anymore.', __METHOD__), \E_USER_DEPRECATED);
-        }
-        parent::__construct($phpArrayFile);
+        parent::__construct($phpArrayFile, $fallbackPool);
         $this->loaders = $loaders;
     }
 
@@ -74,7 +72,7 @@ class SerializerCacheWarmer extends AbstractPhpFileCacheWarmer
      *
      * @return XmlFileLoader[]|YamlFileLoader[]
      */
-    private function extractSupportedLoaders(array $loaders): array
+    private function extractSupportedLoaders(array $loaders)
     {
         $supportedLoaders = [];
 

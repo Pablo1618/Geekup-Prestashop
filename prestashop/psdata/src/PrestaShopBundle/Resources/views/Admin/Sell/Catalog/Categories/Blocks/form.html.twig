@@ -23,16 +23,16 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *#}
 
-{% import '@PrestaShop/Admin/macros.html.twig' as ps %}
+{% import 'PrestaShopBundle:Admin:macros.html.twig' as ps %}
 
 {% block category_form_block %}
-{{ form_start(categoryForm, {'attr': {'data-id': categoryId|default(0)}}) }}
+{{ form_start(categoryForm) }}
 <div class="card">
   <h3 class="card-header">
     {{ 'Category'|trans({}, 'Admin.Catalog.Feature') }}
   </h3>
-  <div class="card-body">
-    <div class="form-wrapper">
+  <div class="card-block row">
+    <div class="card-text">
       {{ form_errors(categoryForm) }}
 
       {{ ps.form_group_row(categoryForm.name, {}, {
@@ -70,11 +70,6 @@
 
       {{ ps.form_group_row(categoryForm.description, {}, {
         'label': 'Description'|trans({}, 'Admin.Global'),
-        'help': 'Invalid characters:'|trans({}, 'Admin.Notifications.Info') ~ ' <>;=#{}'
-      }) }}
-
-      {{ ps.form_group_row(categoryForm.additional_description, {}, {
-        'label': 'Additional description'|trans({}, 'Admin.Catalog.Feature'),
         'help': 'Invalid characters:'|trans({}, 'Admin.Notifications.Info') ~ ' <>;=#{}'
       }) }}
 
@@ -118,9 +113,7 @@
           {% if allowMenuThumbnailsUpload %}
             {{ form_widget(categoryForm.menu_thumbnail_images) }}
           {% else %}
-            <div class="d-none">
-              {{ form_widget(categoryForm.menu_thumbnail_images) }}
-            </div>
+            {{ form_widget(categoryForm.menu_thumbnail_images, {'attr': {'class': 'd-none'}}) }}
 
             <div class="alert alert-warning" role="alert">
               <p class="alert-text">
@@ -136,20 +129,17 @@
 
       {{ renderhook('displayBackOfficeCategory') }}
 
-      {# Do not display category preview while creating a category #}
-      {% if categoryUrl is not null %}
-        {% block category_tool_serp %}
-          <div class="form-group row">
-            <label class="form-control-label">{{ 'SEO preview'|trans({}, 'Admin.Global') }}</label>
-            <div class="col-sm">
-              <div id="serp-app" data-category-url="{{ categoryUrl }}"></div>
-              <small class="form-text">
-                {{ 'Here is a preview of how your page will appear in search engine results.'|trans({}, 'Admin.Global') }}
-              </small>
-            </div>
+      {% block category_tool_serp %}
+        <div class="form-group row">
+          <label class="form-control-label">{{ 'SEO preview'|trans({}, 'Admin.Global') }}</label>
+          <div class="col-sm">
+            <div id="serp-app" data-category-url="{{ categoryUrl }}"></div>
+            <small class="form-text">
+              {{ 'Here is a preview of how your page will appear in search engine results.'|trans({}, 'Admin.Global') }}
+            </small>
           </div>
-        {% endblock %}
-      {% endif %}
+        </div>
+      {% endblock %}
 
       <div class="form-group row">
         {{ ps.label_with_help(('Meta title'|trans({}, 'Admin.Global')), ('Invalid characters:'|trans({}, 'Admin.Notifications.Info') ~ ' <>;=#{}')) }}
@@ -203,7 +193,7 @@
       {% if categoryForm.shop_association is defined %}
         <div class="form-group row">
           <label class="form-control-label">
-            {{ 'Store association'|trans({}, 'Admin.Global') }}
+            {{ 'Shop association'|trans({}, 'Admin.Global') }}
           </label>
           <div class="col-sm">
             {{ form_widget(categoryForm.shop_association) }}

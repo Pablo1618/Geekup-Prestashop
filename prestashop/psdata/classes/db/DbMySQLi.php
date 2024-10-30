@@ -48,8 +48,8 @@ class DbMySQLiCore extends Db
      */
     public function connect()
     {
-        $socket = $port = false;
-        $server = '';
+        $socket = false;
+        $port = false;
         if (Tools::strpos($this->server, ':') !== false) {
             list($server, $port) = explode(':', $this->server);
             if (is_numeric($port) === false) {
@@ -61,10 +61,9 @@ class DbMySQLiCore extends Db
         }
 
         if ($socket) {
-            /* @phpstan-ignore-next-line */
-            $this->link = @new mysqli(null, $this->user, $this->password, $this->database, 0, $socket);
+            $this->link = @new mysqli(null, $this->user, $this->password, $this->database, null, $socket);
         } elseif ($port) {
-            $this->link = @new mysqli($server, $this->user, $this->password, $this->database, (int) $port);
+            $this->link = @new mysqli($server, $this->user, $this->password, $this->database, $port);
         } else {
             $this->link = @new mysqli($this->server, $this->user, $this->password, $this->database);
         }
@@ -99,7 +98,7 @@ class DbMySQLiCore extends Db
     {
         if (strpos($host, ':') !== false) {
             list($host, $port) = explode(':', $host);
-            $link = @new mysqli($host, $user, $password, '', (int) $port);
+            $link = @new mysqli($host, $user, $password, null, $port);
         } else {
             $link = @new mysqli($host, $user, $password);
         }
@@ -328,7 +327,7 @@ class DbMySQLiCore extends Db
      * @param string $user Login for database connection
      * @param string $pwd Password for database connection
      * @param string $db Database name
-     * @param bool $new_db_link
+     * @param bool $newDbLink
      * @param string|bool $engine
      * @param int $timeout
      *
@@ -449,26 +448,27 @@ class DbMySQLiCore extends Db
             return false;
         }
 
-        $enginesToTest = ['InnoDB', 'MyISAM'];
-        if ($engine !== null) {
-            $enginesToTest = [$engine];
+        if ($engine === null) {
+            $engine = 'MyISAM';
         }
 
-        foreach ($enginesToTest as $engineToTest) {
-            $link->query('CREATE TABLE `' . $prefix . 'test` (
-                `test` tinyint(1) unsigned NOT NULL
-            ) ENGINE=' . $engineToTest);
+        // Create a table
+        $link->query('
+		CREATE TABLE `' . $prefix . 'test` (
+			`test` tinyint(1) unsigned NOT NULL
+		) ENGINE=' . $engine);
 
-            $result = $link->query('SELECT * FROM `' . $prefix . 'test`');
+        // Select content
+        $result = $link->query('SELECT * FROM `' . $prefix . 'test`');
 
-            $link->query('DROP TABLE `' . $prefix . 'test`');
+        // Drop the table
+        $link->query('DROP TABLE `' . $prefix . 'test`');
 
-            if ($result) {
-                return true;
-            }
+        if (!$result) {
+            return $link->error;
         }
 
-        return $link->error;
+        return true;
     }
 
     /**

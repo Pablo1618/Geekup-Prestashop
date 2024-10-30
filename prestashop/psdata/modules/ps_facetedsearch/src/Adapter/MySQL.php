@@ -52,6 +52,7 @@ class MySQL extends AbstractAdapter
         $mysqlAdapter = $this->getFilteredSearchAdapter();
         $mysqlAdapter->copyFilters($this);
         $mysqlAdapter->setSelectFields(['price_min', 'MIN(price_min) as min, MAX(price_max) as max']);
+        $mysqlAdapter->setLimit(null);
         $mysqlAdapter->setOrderField('');
 
         $result = $mysqlAdapter->execute();
@@ -133,6 +134,10 @@ class MySQL extends AbstractAdapter
             if ($orderField !== 'p.id_product') {
                 $query .= ', p.id_product DESC';
             }
+        }
+
+        if ($this->limit !== null) {
+            $query .= ' LIMIT ' . $this->offset . ', ' . $this->limit;
         }
 
         return $query;
@@ -583,6 +588,7 @@ class MySQL extends AbstractAdapter
                 $idTmpFilteredProducts = [];
                 $mysqlAdapter = $this->getFilteredSearchAdapter();
                 $mysqlAdapter->addSelectField('id_product');
+                $mysqlAdapter->setLimit(null);
                 $mysqlAdapter->setOrderField('');
                 $mysqlAdapter->addFilter($filterName, $filterValues, $operator);
                 $idProducts = $mysqlAdapter->execute();
@@ -739,6 +745,7 @@ class MySQL extends AbstractAdapter
         $mysqlAdapter = $this->getFilteredSearchAdapter();
         $mysqlAdapter->copyFilters($this);
         $mysqlAdapter->setSelectFields(['MIN(' . $fieldName . ') as min, MAX(' . $fieldName . ') as max']);
+        $mysqlAdapter->setLimit(null);
         $mysqlAdapter->setOrderField('');
 
         $result = $mysqlAdapter->execute();
@@ -771,6 +778,7 @@ class MySQL extends AbstractAdapter
         }
 
         $this->addSelectField('COUNT(DISTINCT p.id_product) c');
+        $this->setLimit(null);
         $this->setOrderField('');
 
         $this->copyOperationsFilters();
@@ -783,7 +791,8 @@ class MySQL extends AbstractAdapter
      */
     public function useFiltersAsInitialPopulation()
     {
-        // Initial population has no ORDER BY
+        // Initial population has NO LIMIT and no ORDER BY
+        $this->setLimit(null);
         $this->setOrderField('');
 
         // We add basic select fields we will need to matter what

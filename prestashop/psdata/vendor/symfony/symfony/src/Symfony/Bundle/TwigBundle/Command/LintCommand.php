@@ -12,6 +12,8 @@
 namespace Symfony\Bundle\TwigBundle\Command;
 
 use Symfony\Bridge\Twig\Command\LintCommand as BaseLintCommand;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -20,8 +22,11 @@ use Symfony\Component\Finder\Finder;
  * @author Marc Weistroff <marc.weistroff@sensiolabs.com>
  * @author Jérôme Tamarelle <jerome@tamarelle.net>
  */
-final class LintCommand extends BaseLintCommand
+final class LintCommand extends BaseLintCommand implements ContainerAwareInterface
 {
+    // BC to be removed in 4.0
+    use ContainerAwareTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -42,9 +47,9 @@ EOF
         ;
     }
 
-    protected function findFiles($filename): iterable
+    protected function findFiles($filename)
     {
-        if (str_starts_with($filename, '@')) {
+        if (0 === strpos($filename, '@')) {
             $dir = $this->getApplication()->getKernel()->locateResource($filename);
 
             return Finder::create()->files()->in($dir)->name('*.twig');

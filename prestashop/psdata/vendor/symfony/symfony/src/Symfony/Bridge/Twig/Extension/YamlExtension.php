@@ -20,15 +20,11 @@ use Twig\TwigFilter;
  * Provides integration of the Yaml component with Twig.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @final since Symfony 4.4
  */
 class YamlExtension extends AbstractExtension
 {
     /**
      * {@inheritdoc}
-     *
-     * @return TwigFilter[]
      */
     public function getFilters()
     {
@@ -47,7 +43,15 @@ class YamlExtension extends AbstractExtension
         }
 
         if (\defined('Symfony\Component\Yaml\Yaml::DUMP_OBJECT')) {
-            return $dumper->dump($input, $inline, 0, $dumpObjects);
+            if (\is_bool($dumpObjects)) {
+                @trigger_error('Passing a boolean flag to toggle object support is deprecated since Symfony 3.1 and will be removed in 4.0. Use the Yaml::DUMP_OBJECT flag instead.', \E_USER_DEPRECATED);
+
+                $flags = $dumpObjects ? Yaml::DUMP_OBJECT : 0;
+            } else {
+                $flags = $dumpObjects;
+            }
+
+            return $dumper->dump($input, $inline, 0, $flags);
         }
 
         return $dumper->dump($input, $inline, 0, false, $dumpObjects);

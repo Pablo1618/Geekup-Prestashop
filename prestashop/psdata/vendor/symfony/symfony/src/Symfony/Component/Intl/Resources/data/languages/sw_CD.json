@@ -1,6 +1,7 @@
 {
     "Names": {
         "ak": "Kiakan",
+        "ar_001": "Kiarabu cha Dunia Kilichosanifishwa",
         "arq": "Kiarabu cha Aljeria",
         "az": "Kiazabajani",
         "gv": "Kimanksi",
@@ -8,6 +9,7 @@
         "hup": "Kihupa",
         "jbo": "Kilojban",
         "kac": "Kikachin",
+        "khq": "Kikoyra Chiini",
         "kkj": "Kikako",
         "koi": "Kikomipermyak",
         "kru": "Kikurukh",
@@ -30,8 +32,5 @@
         "syr": "Kisiria",
         "udm": "Kiudumurti",
         "yi": "Kiyidi"
-    },
-    "LocalizedNames": {
-        "ar_001": "Kiarabu cha Dunia Kilichosanifishwa"
     }
 }

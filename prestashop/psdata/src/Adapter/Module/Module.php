@@ -29,7 +29,7 @@ namespace PrestaShop\PrestaShop\Adapter\Module;
 use Module as LegacyModule;
 use PrestaShop\PrestaShop\Core\Addon\AddonListFilterOrigin;
 use PrestaShop\PrestaShop\Core\Addon\Module\AddonListFilterDeviceStatus;
-use PrestaShop\PrestaShop\Core\Module\ModuleInterface;
+use PrestaShop\PrestaShop\Core\Addon\Module\ModuleInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -43,12 +43,10 @@ class Module implements ModuleInterface
     public const ACTION_UNINSTALL = 'uninstall';
     public const ACTION_ENABLE = 'enable';
     public const ACTION_DISABLE = 'disable';
-    public const ACTION_ENABLE_MOBILE = 'enableMobile';
-    public const ACTION_DISABLE_MOBILE = 'disableMobile';
+    public const ACTION_ENABLE_MOBILE = 'enable_mobile';
+    public const ACTION_DISABLE_MOBILE = 'disable_mobile';
     public const ACTION_RESET = 'reset';
     public const ACTION_UPGRADE = 'upgrade';
-    public const ACTION_CONFIGURE = 'configure';
-    public const ACTION_DELETE = 'delete';
 
     /**
      * @var LegacyModule Module The instance of the legacy module
@@ -91,7 +89,7 @@ class Module implements ModuleInterface
         'author' => '',
         'author_uri' => false,
         'tab' => 'others',
-        'is_configurable' => false,
+        'is_configurable' => 0,
         'need_instance' => 0,
         'limited_countries' => [],
         'parent_class' => 'Module',
@@ -138,8 +136,8 @@ class Module implements ModuleInterface
      */
     private $database_default = [
         'installed' => 0,
-        'active' => null,
-        'active_on_mobile' => null,
+        'active' => 0,
+        'active_on_mobile' => true,
         'version' => null,
         'last_access_date' => '0000-00-00 00:00:00',
         'date_add' => null,
@@ -161,7 +159,7 @@ class Module implements ModuleInterface
         $this->disk->add($disk);
         $this->database->add($database);
 
-        if ($this->isInstalled()) {
+        if ($this->database->get('installed')) {
             $version = $this->database->get('version');
         } elseif (null === $this->attributes->get('version') && $this->disk->get('is_valid')) {
             $version = $this->disk->get('version');
@@ -184,12 +182,14 @@ class Module implements ModuleInterface
     }
 
     /**
-     * @return LegacyModule|null
+     * @return LegacyModule|void
+     *
+     * @throws \Exception
      */
-    public function getInstance(): ?LegacyModule
+    public function getInstance()
     {
         if (!$this->hasValidInstance()) {
-            return null;
+            return;
         }
 
         return $this->instance;
@@ -198,7 +198,7 @@ class Module implements ModuleInterface
     /**
      * @return bool True if valid Module instance
      */
-    public function hasValidInstance(): bool
+    public function hasValidInstance()
     {
         if (($this->disk->has('is_present') && $this->disk->getBoolean('is_present') === false)
             || ($this->disk->has('is_valid') && $this->disk->getBoolean('is_valid') === false)
@@ -225,35 +225,15 @@ class Module implements ModuleInterface
     /**
      * @return bool
      */
-    public function isActive(): bool
+    public function isActive()
     {
         return (bool) $this->database->get('active');
-    }
-
-    public function isActiveOnMobile(): bool
-    {
-        return (bool) $this->database->get('active_on_mobile');
-    }
-
-    public function isInstalled(): bool
-    {
-        return (bool) $this->database->get('installed');
-    }
-
-    public function isUninstalled(): bool
-    {
-        return !$this->isInstalled() && $this->disk->get('is_present');
-    }
-
-    public function isConfigurable(): bool
-    {
-        return (bool) $this->attributes->get('is_configurable');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function onInstall(): bool
+    public function onInstall()
     {
         if (!$this->hasValidInstance()) {
             return false;
@@ -280,19 +260,7 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onPostInstall(): bool
-    {
-        if (!$this->hasValidInstance()) {
-            return false;
-        }
-
-        return $this->instance->postInstall();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function onUninstall(): bool
+    public function onUninstall()
     {
         if (!$this->hasValidInstance()) {
             return false;
@@ -307,7 +275,7 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onUpgrade(string $version): bool
+    public function onUpgrade($version)
     {
         $this->database->set('version', $this->attributes->get('version_available'));
 
@@ -317,7 +285,7 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onEnable(): bool
+    public function onEnable()
     {
         if (!$this->hasValidInstance()) {
             return false;
@@ -332,7 +300,7 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onDisable(): bool
+    public function onDisable()
     {
         if (!$this->hasValidInstance()) {
             return false;
@@ -347,7 +315,7 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onMobileEnable(): bool
+    public function onMobileEnable()
     {
         if (!$this->hasValidInstance()) {
             return false;
@@ -362,7 +330,7 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onMobileDisable(): bool
+    public function onMobileDisable()
     {
         if (!$this->hasValidInstance()) {
             return false;
@@ -377,28 +345,13 @@ class Module implements ModuleInterface
     /**
      * {@inheritdoc}
      */
-    public function onReset(): bool
+    public function onReset()
     {
         if (!$this->hasValidInstance()) {
             return false;
         }
 
         return is_callable([$this->instance, 'reset']) ? $this->instance->reset() : true;
-    }
-
-    public function getAttributes(): ParameterBag
-    {
-        return $this->attributes;
-    }
-
-    public function getDiskAttributes(): ParameterBag
-    {
-        return $this->disk;
-    }
-
-    public function getDatabaseAttributes(): ParameterBag
-    {
-        return $this->database;
     }
 
     /**
@@ -460,9 +413,9 @@ class Module implements ModuleInterface
     {
         $img = $this->attributes->get('img');
         if (empty($img)) {
-            $this->attributes->set('img', __PS_BASE_URI__ . 'img/module/default.png');
+            $this->attributes->set('img', __PS_BASE_URI__ . 'img/questionmark.png');
         }
-        $this->attributes->set('logo', __PS_BASE_URI__ . 'img/module/default.png');
+        $this->attributes->set('logo', __PS_BASE_URI__ . 'img/questionmark.png');
 
         foreach (['logo.png', 'logo.gif'] as $logo) {
             $logo_path = _PS_MODULE_DIR_ . $this->get('name') . DIRECTORY_SEPARATOR . $logo;
@@ -482,12 +435,12 @@ class Module implements ModuleInterface
      */
     public function canBeUpgraded()
     {
-        if (!$this->isInstalled()) {
+        if ($this->database->get('installed') == 0) {
             return false;
         }
 
         // Potential update from API
-        if ($this->hasNewVersionAvailable()) {
+        if ($this->canBeUpgradedFromAddons()) {
             return true;
         }
 
@@ -496,11 +449,11 @@ class Module implements ModuleInterface
     }
 
     /**
-     * Only check if an upgrade is available
+     * Only check if an upgrade is available on the marketplace.
      *
      * @return bool
      */
-    public function hasNewVersionAvailable(): bool
+    public function canBeUpgradedFromAddons()
     {
         return $this->attributes->get('version_available') !== 0
             && version_compare($this->database->get('version'), $this->attributes->get('version_available'), '<');

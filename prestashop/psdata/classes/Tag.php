@@ -86,20 +86,6 @@ class TagCore extends ObjectModel
     }
 
     /**
-     * @return bool
-     */
-    public function delete()
-    {
-        if (!parent::delete()) {
-            return false;
-        }
-
-        Search::removeProductsSearchIndex(array_column($this->getProducts(), 'id_product'));
-
-        return true;
-    }
-
-    /**
      * Add several tags in database and link it to a product.
      *
      * @param int $idLang Language id
@@ -115,7 +101,7 @@ class TagCore extends ObjectModel
         }
 
         if (!is_array($tagList)) {
-            $tagList = array_filter(array_unique(array_map('trim', preg_split('#\\' . $separator . '#', $tagList, 0, PREG_SPLIT_NO_EMPTY))));
+            $tagList = array_filter(array_unique(array_map('trim', preg_split('#\\' . $separator . '#', $tagList, null, PREG_SPLIT_NO_EMPTY))));
         }
 
         $list = [];
@@ -124,8 +110,7 @@ class TagCore extends ObjectModel
                 if (!Validate::isGenericName($tag)) {
                     return false;
                 }
-                $tagMaxLength = self::$definition['fields']['name']['size'];
-                $tag = trim(Tools::substr(trim($tag), 0, $tagMaxLength));
+                $tag = trim(Tools::substr($tag, 0, self::$definition['fields']['name']['size']));
                 $tagObj = new Tag(null, $tag, (int) $idLang);
 
                 /* Tag does not exist in database */
@@ -272,18 +257,15 @@ class TagCore extends ObjectModel
         }
 
         $in = $associated ? 'IN' : 'NOT IN';
-        // select not only active products when we are getting list of already associated products
-        // to avoid confusion when product is disabled, but still has the tag assigned
-        $onlyActive = $associated ? '' : 'AND product_shop.active = 1';
 
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
         SELECT pl.name, pl.id_product
         FROM `' . _DB_PREFIX_ . 'product` p
         LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON p.id_product = pl.id_product' . Shop::addSqlRestrictionOnLang('pl') . '
         ' . Shop::addSqlAssociation('product', 'p') . '
-        WHERE pl.id_lang = ' . (int) $idLang .
-        ' ' . $onlyActive . ' ' .
-        ($this->id ? ('AND p.id_product ' . $in . ' (SELECT pt.id_product FROM `' . _DB_PREFIX_ . 'product_tag` pt WHERE pt.id_tag = ' . (int) $this->id . ')') : '') . '
+        WHERE pl.id_lang = ' . (int) $idLang . '
+        AND product_shop.active = 1
+        ' . ($this->id ? ('AND p.id_product ' . $in . ' (SELECT pt.id_product FROM `' . _DB_PREFIX_ . 'product_tag` pt WHERE pt.id_tag = ' . (int) $this->id . ')') : '') . '
         ORDER BY pl.name');
     }
 
@@ -299,16 +281,16 @@ class TagCore extends ObjectModel
         $result = Db::getInstance()->delete('product_tag', 'id_tag = ' . (int) $this->id);
         if (is_array($array)) {
             $array = array_map('intval', $array);
-            $result = $result && ObjectModel::updateMultishopTable('Product', ['indexed' => 0], 'a.id_product IN (' . implode(',', $array) . ')');
+            $result &= ObjectModel::updateMultishopTable('Product', ['indexed' => 0], 'a.id_product IN (' . implode(',', $array) . ')');
+            $ids = [];
+            foreach ($array as $idProduct) {
+                $ids[] = '(' . (int) $idProduct . ',' . (int) $this->id . ',' . (int) $this->id_lang . ')';
+            }
 
             if ($result) {
-                $ids = [];
-                foreach ($array as $idProduct) {
-                    $ids[] = '(' . (int) $idProduct . ',' . (int) $this->id . ',' . (int) $this->id_lang . ')';
-                }
-                $result = Db::getInstance()->execute('INSERT INTO ' . _DB_PREFIX_ . 'product_tag (id_product, id_tag, id_lang) VALUES ' . implode(',', $ids));
+                $result &= Db::getInstance()->execute('INSERT INTO ' . _DB_PREFIX_ . 'product_tag (id_product, id_tag, id_lang) VALUES ' . implode(',', $ids));
                 if (Configuration::get('PS_SEARCH_INDEXATION')) {
-                    $result = $result && Search::indexation(false);
+                    $result &= Search::indexation(false);
                 }
             }
         }
@@ -347,7 +329,7 @@ class TagCore extends ObjectModel
     /**
      * Deletes product tags.
      *
-     * @param int $idProduct
+     * @param $idProduct
      * @param int|null $langId if provided, only deletes tags in specific language
      *
      * @return bool
@@ -362,8 +344,8 @@ class TagCore extends ObjectModel
             WHERE id_product=' . (int) $idProduct
         ;
         if ($langId) {
-            $removeWhere .= ' AND id_lang =' . $langId;
-            $selectTagsToRemove .= ' AND id_lang =' . $langId;
+            $removeWhere .= ' AND id_lang =' . (int) $langId;
+            $selectTagsToRemove .= ' AND id_lang =' . (int) $langId;
         }
 
         $tagsRemoved = Db::getInstance()->executeS($selectTagsToRemove);

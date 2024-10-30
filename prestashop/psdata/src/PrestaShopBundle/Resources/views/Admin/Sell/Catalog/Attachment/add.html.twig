@@ -22,11 +22,15 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *#}
-{% set legacyBaseLayout = lightDisplay|default(false) ? 'light_display_layout.tpl' : 'layout.tpl' %}
-{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% extends 'PrestaShopBundle:Admin:layout.html.twig' %}
 
 {% block content %}
-  {% include '@PrestaShop/Admin/Sell/Catalog/Attachment/Blocks/form.html.twig' %}
+  <div class="row justify-content-center">
+    <div class="col">
+      {% include '@PrestaShop/Admin/Sell/Catalog/Attachment/Blocks/form.html.twig' %}
+    </div>
+  </div>
 {% endblock %}
 
 {% block javascripts %}

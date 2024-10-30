@@ -32,7 +32,6 @@ use Symfony\Component\Security\Core\Exception\LockedException;
  *
  * @see UserInterface
  * @see AccountStatusException
- * @deprecated since Symfony 4.1
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */

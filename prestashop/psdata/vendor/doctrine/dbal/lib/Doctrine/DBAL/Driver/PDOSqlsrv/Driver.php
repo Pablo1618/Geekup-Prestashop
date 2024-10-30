@@ -3,17 +3,11 @@
 namespace Doctrine\DBAL\Driver\PDOSqlsrv;
 
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
-use Doctrine\DBAL\Driver\AbstractSQLServerDriver\Exception\PortWithoutHost;
-use Doctrine\DBAL\Driver\PDO;
-use Doctrine\Deprecations\Deprecation;
-
 use function is_int;
 use function sprintf;
 
 /**
  * The PDO-based Sqlsrv driver.
- *
- * @deprecated Use {@link PDO\SQLSrv\Driver} instead.
  */
 class Driver extends AbstractSQLServerDriver
 {
@@ -22,21 +16,13 @@ class Driver extends AbstractSQLServerDriver
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
     {
-        $pdoOptions = $dsnOptions = [];
+        [$driverOptions, $connectionOptions] = $this->splitOptions($driverOptions);
 
-        foreach ($driverOptions as $option => $value) {
-            if (is_int($option)) {
-                $pdoOptions[$option] = $value;
-            } else {
-                $dsnOptions[$option] = $value;
-            }
-        }
-
-        return new PDO\SQLSrv\Connection(
-            $this->_constructPdoDsn($params, $dsnOptions),
+        return new Connection(
+            $this->_constructPdoDsn($params, $connectionOptions),
             $username,
             $password,
-            $pdoOptions
+            $driverOptions
         );
     }
 
@@ -54,12 +40,10 @@ class Driver extends AbstractSQLServerDriver
 
         if (isset($params['host'])) {
             $dsn .= $params['host'];
+        }
 
-            if (isset($params['port'])) {
-                $dsn .= ',' . $params['port'];
-            }
-        } elseif (isset($params['port'])) {
-            throw PortWithoutHost::new();
+        if (isset($params['port']) && ! empty($params['port'])) {
+            $dsn .= ',' . $params['port'];
         }
 
         if (isset($params['dbname'])) {
@@ -74,11 +58,34 @@ class Driver extends AbstractSQLServerDriver
     }
 
     /**
+     * Separates a connection options from a driver options
+     *
+     * @param int[]|string[] $options
+     *
+     * @return int[][]|string[][]
+     */
+    private function splitOptions(array $options) : array
+    {
+        $driverOptions     = [];
+        $connectionOptions = [];
+
+        foreach ($options as $optionKey => $optionValue) {
+            if (is_int($optionKey)) {
+                $driverOptions[$optionKey] = $optionValue;
+            } else {
+                $connectionOptions[$optionKey] = $optionValue;
+            }
+        }
+
+        return [$driverOptions, $connectionOptions];
+    }
+
+    /**
      * Converts a connection options array to the DSN
      *
      * @param string[] $connectionOptions
      */
-    private function getConnectionOptionsDsn(array $connectionOptions): string
+    private function getConnectionOptionsDsn(array $connectionOptions) : string
     {
         $connectionOptionsDsn = '';
 
@@ -91,17 +98,9 @@ class Driver extends AbstractSQLServerDriver
 
     /**
      * {@inheritdoc}
-     *
-     * @deprecated
      */
     public function getName()
     {
-        Deprecation::trigger(
-            'doctrine/dbal',
-            'https://github.com/doctrine/dbal/issues/3580',
-            'Driver::getName() is deprecated'
-        );
-
         return 'pdo_sqlsrv';
     }
 }

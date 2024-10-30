@@ -26,7 +26,8 @@ class Packages
     private $packages = [];
 
     /**
-     * @param PackageInterface[] $packages Additional packages indexed by name
+     * @param PackageInterface   $defaultPackage The default package
+     * @param PackageInterface[] $packages       Additional packages indexed by name
      */
     public function __construct(PackageInterface $defaultPackage = null, array $packages = [])
     {
@@ -45,7 +46,8 @@ class Packages
     /**
      * Adds a  package.
      *
-     * @param string $name The package name
+     * @param string           $name    The package name
+     * @param PackageInterface $package The package
      */
     public function addPackage($name, PackageInterface $package)
     {

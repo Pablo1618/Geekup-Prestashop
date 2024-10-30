@@ -23,7 +23,4 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  *#}
 
-<img
-  src="{{ record[column.options.src_field] }}"
-  {% if record[column.options.alt_field] is defined %}alt="{{ record[column.options.alt_field] }}"{% endif %}
-/>
+<img src="{{ record[column.options.src_field] }}">

@@ -27,12 +27,14 @@ trait ClassResolverTrait
      *
      * @param object|string $value
      *
+     * @return string
+     *
      * @throws InvalidArgumentException If the class does not exist
      */
-    private function getClass($value): string
+    private function getClass($value)
     {
         if (\is_string($value)) {
-            if (!class_exists($value) && !interface_exists($value, false)) {
+            if (!class_exists($value) && !interface_exists($value)) {
                 throw new InvalidArgumentException(sprintf('The class or interface "%s" does not exist.', $value));
             }
 

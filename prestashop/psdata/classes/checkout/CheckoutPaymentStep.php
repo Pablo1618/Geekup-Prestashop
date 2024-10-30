@@ -23,29 +23,13 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class CheckoutPaymentStepCore extends AbstractCheckoutStep
 {
     protected $template = 'checkout/_partials/steps/payment.tpl';
     private $selected_payment_option;
 
-    /**
-     * @var ConditionsToApproveFinder
-     */
-    public $conditionsToApproveFinder;
-
-    /**
-     * @var PaymentOptionsFinder
-     */
-    public $paymentOptionsFinder;
-
-    /**
-     * @param Context $context
-     * @param TranslatorInterface $translator
-     * @param PaymentOptionsFinder $paymentOptionsFinder
-     * @param ConditionsToApproveFinder $conditionsToApproveFinder
-     */
     public function __construct(
         Context $context,
         TranslatorInterface $translator,
@@ -59,6 +43,26 @@ class CheckoutPaymentStepCore extends AbstractCheckoutStep
 
     public function handleRequest(array $requestParams = [])
     {
+        $cart = $this->getCheckoutSession()->getCart();
+        $allProductsInStock = $cart->isAllProductsInStock();
+        $allProductsExist = $cart->checkAllProductsAreStillAvailableInThisState();
+        $allProductsHaveMinimalQuantity = $cart->checkAllProductsHaveMinimalQuantities();
+
+        if ($allProductsInStock !== true || $allProductsExist !== true || $allProductsHaveMinimalQuantity !== true) {
+            $cartShowUrl = $this->context->link->getPageLink(
+                'cart',
+                null,
+                $this->context->language->id,
+                [
+                    'action' => 'show',
+                ],
+                false,
+                null,
+                false
+            );
+            Tools::redirect($cartShowUrl);
+        }
+
         if (isset($requestParams['select_payment_option'])) {
             $this->selected_payment_option = $requestParams['select_payment_option'];
         }
@@ -90,10 +94,7 @@ class CheckoutPaymentStepCore extends AbstractCheckoutStep
         } else {
             $selectedDeliveryOption = 0;
         }
-
-        if (true === is_array($selectedDeliveryOption) && isset($selectedDeliveryOption['product_list'])) {
-            unset($selectedDeliveryOption['product_list']);
-        }
+        unset($selectedDeliveryOption['product_list']);
 
         $assignedVars = [
             'is_free' => $isFree,
@@ -102,7 +103,6 @@ class CheckoutPaymentStepCore extends AbstractCheckoutStep
             'selected_payment_option' => $this->selected_payment_option,
             'selected_delivery_option' => $selectedDeliveryOption,
             'show_final_summary' => Configuration::get('PS_FINAL_SUMMARY_ENABLED'),
-            'is_recyclable_packaging' => $this->getCheckoutSession()->isRecyclable(),
         ];
 
         return $this->renderTemplate($this->getTemplate(), $extraParams, $assignedVars);

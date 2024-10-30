@@ -28,23 +28,13 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Tax;
 
-use Address;
 use PrestaShop\Decimal\DecimalNumber;
-use PrestaShop\Decimal\Operation\Division;
 use PrestaShop\PrestaShop\Adapter\TaxRulesGroup\Repository\TaxRulesGroupRepository;
 use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
-use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\StateId;
 use PrestaShop\PrestaShop\Core\Domain\TaxRulesGroup\ValueObject\TaxRulesGroupId;
-use TaxManagerFactory;
 
 class TaxComputer
 {
-    /**
-     * The conversion between tax rate as percent to tax ratio as float value can make us lose some precision,
-     * so we increase the default precision (6) to avoid losing two digits by diving by 100 (two decimal factors).
-     */
-    protected const DIVISION_PRECISION = Division::DEFAULT_PRECISION + 2;
-
     /**
      * @var TaxRulesGroupRepository
      */
@@ -94,57 +84,21 @@ class TaxComputer
     }
 
     /**
-     * Returns the tax rate for a group and a specific country. The value is the decimal rate (usually a float between 0 and 1)
-     *
      * @param TaxRulesGroupId $taxRulesGroupId
      * @param CountryId $countryId
      *
      * @return DecimalNumber
      */
-    public function getTaxRate(TaxRulesGroupId $taxRulesGroupId, CountryId $countryId): DecimalNumber
+    private function getTaxRatio(TaxRulesGroupId $taxRulesGroupId, CountryId $countryId): DecimalNumber
     {
-        $stateId = $this->taxRulesGroupRepository->getTaxRulesGroupDefaultStateId($taxRulesGroupId, $countryId);
-        if ($stateId) {
-            return $this->getTaxRateByState($taxRulesGroupId, $countryId, new StateId($stateId));
+        $taxRulesGroup = $this->taxRulesGroupRepository->getTaxRulesGroupDetails($taxRulesGroupId);
+        if (!empty($taxRulesGroup['rates'])) {
+            // Use the tax rate associated to context country, or the first one as fallback
+            $countryTaxRate = $taxRulesGroup['rates'][$countryId->getValue()] ?? reset($taxRulesGroup['rates']);
+        } else {
+            $countryTaxRate = 0;
         }
 
-        $address = new Address();
-        $address->id_country = $countryId->getValue();
-        $taxCalculator = TaxManagerFactory::getManager($address, $taxRulesGroupId->getValue())->getTaxCalculator();
-
-        return new DecimalNumber((string) $taxCalculator->getTotalRate());
-    }
-
-    /**
-     * Returns the tax rate for a group and a specific country and state. The value is the decimal rate (usually a float between 0 and 1)
-     *
-     * @param TaxRulesGroupId $taxRulesGroupId
-     * @param CountryId $countryId
-     * @param StateId $stateId
-     *
-     * @return DecimalNumber
-     */
-    public function getTaxRateByState(TaxRulesGroupId $taxRulesGroupId, CountryId $countryId, StateId $stateId): DecimalNumber
-    {
-        $address = new Address();
-        $address->id_country = $countryId->getValue();
-        $address->id_state = $stateId->getValue();
-
-        $taxCalculator = TaxManagerFactory::getManager($address, $taxRulesGroupId->getValue())->getTaxCalculator();
-
-        return new DecimalNumber((string) $taxCalculator->getTotalRate());
-    }
-
-    /**
-     * @param TaxRulesGroupId $taxRulesGroupId
-     * @param CountryId $countryId
-     *
-     * @return DecimalNumber
-     */
-    protected function getTaxRatio(TaxRulesGroupId $taxRulesGroupId, CountryId $countryId): DecimalNumber
-    {
-        $countryTaxRate = $this->getTaxRate($taxRulesGroupId, $countryId);
-
-        return $countryTaxRate->dividedBy(new DecimalNumber('100'), self::DIVISION_PRECISION)->plus(new DecimalNumber('1'));
+        return new DecimalNumber((string) (1 + ($countryTaxRate / 100)));
     }
 }

@@ -22,7 +22,7 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-import {createApp} from 'vue';
+import Vue from 'vue';
 import {EventEmitter} from '@components/event-emitter';
 import serp from './serp.vue';
 
@@ -42,7 +42,6 @@ class SerpApp {
     }
 
     this.originalUrl = url;
-    this.selectors = selectors;
     this.useMultiLang = selectors.multiLanguageInput !== undefined || selectors.multiLanguageField !== undefined;
 
     if (this.useMultiLang) {
@@ -64,22 +63,15 @@ class SerpApp {
       description: '',
     };
 
-    this.initializeSelectors(selectors);
-    this.attachInputEvents();
-  }
-
-  updateComponent() {
-    if (this.vm) {
-      this.vm.unmount();
-    }
-
-    this.vm = createApp({
+    this.vm = new Vue({
+      el: selectors.container,
       template: '<serp ref="serp" :url="url" :title="title" :description="description" />',
       components: {serp},
-      data: () => this.data,
+      data: this.data,
     });
 
-    this.vm.mount(this.selectors.container);
+    this.initializeSelectors(selectors);
+    this.attachInputEvents();
   }
 
   attachMultiLangEvents(itemSelector) {
@@ -155,7 +147,6 @@ class SerpApp {
     this.setTitle(title1 === '' ? title2 : title1);
     // Always check for url if title change
     this.checkUrl();
-    this.updateComponent();
   }
 
   checkDesc() {
@@ -172,10 +163,9 @@ class SerpApp {
     }
 
     const desc1 = watchedDescription.length ? watchedDescription.val().innerText || watchedDescription.val() : '';
-    const desc2 = defaultDescription.length ? defaultDescription.text() : '';
+    const desc2 = defaultDescription.length ? $(defaultDescription.val()).text() || defaultDescription.val() : '';
 
     this.setDescription(desc1 === '' ? desc2 : desc1);
-    this.updateComponent();
   }
 
   checkUrl() {
@@ -186,7 +176,6 @@ class SerpApp {
     }
 
     this.setUrl(watchedMetaUrl.val());
-    this.updateComponent();
   }
 }
 

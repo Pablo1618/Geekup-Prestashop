@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Form\Extension\Validator\Type;
 
-use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Validator\EventListener\ValidationListener;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -68,8 +67,8 @@ class FormTypeValidatorExtension extends BaseValidatorExtension
     /**
      * {@inheritdoc}
      */
-    public static function getExtendedTypes(): iterable
+    public function getExtendedType()
     {
-        return [FormType::class];
+        return 'Symfony\Component\Form\Extension\Core\Type\FormType';
     }
 }

@@ -78,7 +78,7 @@ class AddSupplierCommand
     private $localizedMetaKeywords;
 
     /**
-     * @var int[]
+     * @var array
      */
     private $shopAssociation;
 
@@ -278,7 +278,7 @@ class AddSupplierCommand
     }
 
     /**
-     * @return int[]
+     * @return array
      */
     public function getShopAssociation(): array
     {

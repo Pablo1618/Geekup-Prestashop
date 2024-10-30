@@ -33,16 +33,14 @@ use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Attribute\Repository\AttributeRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Image\ProductImagePathFactory;
 use PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepository;
-use PrestaShop\PrestaShop\Core\Domain\Product\Combination\CombinationAttributeInformation;
-use PrestaShop\PrestaShop\Core\Domain\Product\Combination\Exception\CombinationException;
+use PrestaShop\PrestaShop\Adapter\Product\Stock\Repository\StockAvailableRepository;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\Query\GetEditableCombinationsList;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\QueryHandler\GetEditableCombinationsListHandlerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Product\Combination\QueryResult\CombinationAttributeInformation;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\QueryResult\CombinationListForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\QueryResult\EditableCombinationForListing;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
-use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Grid\Query\DoctrineQueryBuilderInterface;
-use PrestaShop\PrestaShop\Core\Product\Combination\NameBuilder\CombinationNameBuilderInterface;
 use PrestaShop\PrestaShop\Core\Search\Filters\ProductCombinationFilters;
 
 /**
@@ -50,6 +48,11 @@ use PrestaShop\PrestaShop\Core\Search\Filters\ProductCombinationFilters;
  */
 final class GetEditableCombinationsListHandler implements GetEditableCombinationsListHandlerInterface
 {
+    /**
+     * @var StockAvailableRepository
+     */
+    private $stockAvailableRepository;
+
     /**
      * @var DoctrineQueryBuilderInterface
      */
@@ -71,29 +74,24 @@ final class GetEditableCombinationsListHandler implements GetEditableCombination
     private $productImagePathFactory;
 
     /**
-     * @var CombinationNameBuilderInterface
-     */
-    private $combinationNameBuilder;
-
-    /**
+     * @param StockAvailableRepository $stockAvailableRepository
      * @param DoctrineQueryBuilderInterface $combinationQueryBuilder
      * @param AttributeRepository $attributeRepository
      * @param ProductImageRepository $productImageRepository
      * @param ProductImagePathFactory $productImagePathFactory
-     * @param CombinationNameBuilderInterface $combinationNameBuilder
      */
     public function __construct(
+        StockAvailableRepository $stockAvailableRepository,
         DoctrineQueryBuilderInterface $combinationQueryBuilder,
         AttributeRepository $attributeRepository,
         ProductImageRepository $productImageRepository,
-        ProductImagePathFactory $productImagePathFactory,
-        CombinationNameBuilderInterface $combinationNameBuilder
+        ProductImagePathFactory $productImagePathFactory
     ) {
+        $this->stockAvailableRepository = $stockAvailableRepository;
         $this->combinationQueryBuilder = $combinationQueryBuilder;
         $this->attributeRepository = $attributeRepository;
         $this->productImageRepository = $productImageRepository;
         $this->productImagePathFactory = $productImagePathFactory;
-        $this->combinationNameBuilder = $combinationNameBuilder;
     }
 
     /**
@@ -101,34 +99,21 @@ final class GetEditableCombinationsListHandler implements GetEditableCombination
      */
     public function handle(GetEditableCombinationsList $query): CombinationListForEditing
     {
-        $shopId = $query->getShopConstraint()->getShopId();
-
-        if (!$shopId) {
-            throw new CombinationException(sprintf(
-                'Only single shop constraint is supported for query %s',
-                GetEditableCombinationsList::class
-            ));
-        }
-
         $filters = $query->getFilters();
         $filters['product_id'] = $query->getProductId()->getValue();
-
-        $searchCriteria = new ProductCombinationFilters(
-            ShopConstraint::shop($shopId->getValue()),
-            [
-                'limit' => $query->getLimit(),
-                'offset' => $query->getOffset(),
-                'orderBy' => $query->getOrderBy(),
-                'sortOrder' => $query->getOrderWay(),
-                'filters' => $filters,
-            ]
-        );
+        $searchCriteria = new ProductCombinationFilters([
+            'limit' => $query->getLimit(),
+            'offset' => $query->getOffset(),
+            'orderBy' => $query->getOrderBy(),
+            'sortOrder' => $query->getOrderWay(),
+            'filters' => $filters,
+        ]);
 
         $combinations = $this->combinationQueryBuilder->getSearchQueryBuilder($searchCriteria)->execute()->fetchAll();
         $total = (int) $this->combinationQueryBuilder->getCountQueryBuilder($searchCriteria)->execute()->fetch(PDO::FETCH_COLUMN);
 
-        $combinationIds = array_map(function (array $combination): CombinationId {
-            return new CombinationId((int) $combination['id_product_attribute']);
+        $combinationIds = array_map(function ($combination): int {
+            return (int) $combination['id_product_attribute'];
         }, $combinations);
 
         $attributesInformation = $this->attributeRepository->getAttributesInfoByCombinationIds(
@@ -136,8 +121,8 @@ final class GetEditableCombinationsListHandler implements GetEditableCombination
             $query->getLanguageId()
         );
 
-        $productImageIds = $this->productImageRepository->getImageIds($query->getProductId(), $query->getShopConstraint());
-        $imageIdsByCombinationIds = $this->productImageRepository->getImageIdsForCombinations($combinationIds);
+        $productImageIds = $this->productImageRepository->getImagesIds($query->getProductId());
+        $imageIdsByCombinationIds = $this->productImageRepository->getImagesIdsForCombinations($combinationIds);
 
         return $this->formatEditableCombinationsForListing(
             $combinations,
@@ -150,7 +135,7 @@ final class GetEditableCombinationsListHandler implements GetEditableCombination
 
     /**
      * @param array $combinations
-     * @param array<int, CombinationAttributeInformation[]> $attributesInformationByCombinationId
+     * @param array<int, array<int, mixed>> $attributesInformationByCombinationId
      * @param int $totalCombinationsCount
      * @param array $imageIdsByCombinationIds
      * @param array $defaultImageIds
@@ -168,6 +153,16 @@ final class GetEditableCombinationsListHandler implements GetEditableCombination
 
         foreach ($combinations as $combination) {
             $combinationId = (int) $combination['id_product_attribute'];
+            $combinationAttributesInformation = [];
+
+            foreach ($attributesInformationByCombinationId[$combinationId] as $attributeInfo) {
+                $combinationAttributesInformation[] = new CombinationAttributeInformation(
+                    (int) $attributeInfo['id_attribute_group'],
+                    $attributeInfo['attribute_group_name'],
+                    (int) $attributeInfo['id_attribute'],
+                    $attributeInfo['attribute_name']
+                );
+            }
 
             $imageId = null;
             if (!empty($imageIdsByCombinationIds[$combinationId])) {
@@ -176,28 +171,38 @@ final class GetEditableCombinationsListHandler implements GetEditableCombination
                 $imageId = reset($defaultImageIds);
             }
 
-            if (null === $imageId) {
-                $imagePath = $this->productImagePathFactory->getNoImagePath(ProductImagePathFactory::IMAGE_TYPE_SMALL_DEFAULT);
-            } else {
-                $imagePath = $this->productImagePathFactory->getPathByType(
-                    $imageId,
-                    ProductImagePathFactory::IMAGE_TYPE_SMALL_DEFAULT
-                );
-            }
-
+            $impactOnPrice = new DecimalNumber($combination['price']);
             $combinationsForEditing[] = new EditableCombinationForListing(
                 $combinationId,
-                $this->combinationNameBuilder->buildName($attributesInformationByCombinationId[$combinationId]),
+                $this->buildCombinationName($combinationAttributesInformation),
                 $combination['reference'],
-                $attributesInformationByCombinationId[$combinationId],
+                $combinationAttributesInformation,
                 (bool) $combination['default_on'],
-                new DecimalNumber($combination['price']),
-                (int) $combination['quantity'],
-                $imagePath,
-                new DecimalNumber($combination['ecotax'])
+                $impactOnPrice,
+                (int) $this->stockAvailableRepository->getForCombination(new CombinationId($combinationId))->quantity,
+                $imageId ? $this->productImagePathFactory->getPathByType($imageId, ProductImagePathFactory::IMAGE_TYPE_SMALL_DEFAULT) : null
             );
         }
 
         return new CombinationListForEditing($totalCombinationsCount, $combinationsForEditing);
+    }
+
+    /**
+     * @param CombinationAttributeInformation[] $attributesInformation
+     *
+     * @return string
+     */
+    private function buildCombinationName(array $attributesInformation): string
+    {
+        $combinedNameParts = [];
+        foreach ($attributesInformation as $combinationAttributeInformation) {
+            $combinedNameParts[] = sprintf(
+                '%s - %s',
+                $combinationAttributeInformation->getAttributeGroupName(),
+                $combinationAttributeInformation->getAttributeName()
+            );
+        }
+
+        return implode(', ', $combinedNameParts);
     }
 }

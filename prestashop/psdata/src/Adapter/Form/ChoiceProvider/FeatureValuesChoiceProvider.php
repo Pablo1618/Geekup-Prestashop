@@ -45,18 +45,18 @@ class FeatureValuesChoiceProvider implements ConfigurableFormChoiceProviderInter
     private $contextLanguageId;
 
     /**
-     * Cache value to avoid performing the same request multiple times as the value should remain the same inside a request.
-     *
-     * @var array
+     * @var int
      */
-    private $cacheFeatureValueChoices;
+    private $defaultLanguageId;
 
     public function __construct(
         FeatureValueRepository $featureValueRepository,
-        LegacyContext $legacyContext
+        LegacyContext $legacyContext,
+        int $defaultLanguageId
     ) {
         $this->featureValueRepository = $featureValueRepository;
         $this->contextLanguageId = (int) $legacyContext->getLanguage()->getId();
+        $this->defaultLanguageId = $defaultLanguageId;
     }
 
     /**
@@ -74,17 +74,20 @@ class FeatureValuesChoiceProvider implements ConfigurableFormChoiceProviderInter
         if (isset($options['custom'])) {
             $filters['custom'] = $options['custom'];
         }
-        $cacheKey = md5(serialize($filters));
-        if (!empty($this->cacheFeatureValueChoices[$cacheKey])) {
-            return $this->cacheFeatureValueChoices[$cacheKey];
-        }
 
-        $featureValues = $this->featureValueRepository->getFeatureValuesByLang($this->contextLanguageId, $filters);
-        $this->cacheFeatureValueChoices[$cacheKey] = [];
+        $featureValues = $this->featureValueRepository->getFeatureValues(null, null, $filters);
+        $choices = [];
         foreach ($featureValues as $feature) {
-            $this->cacheFeatureValueChoices[$cacheKey][$feature['value']] = (int) $feature['id_feature_value'];
+            if (!empty($feature['localized_values'][$this->contextLanguageId])) {
+                $featureValueName = $feature['localized_values'][$this->contextLanguageId];
+            } elseif (!empty($feature['localized_values'][$this->defaultLanguageId])) {
+                $featureValueName = $feature['localized_values'][$this->defaultLanguageId];
+            } else {
+                $featureValueName = reset($feature['localized_values']);
+            }
+            $choices[$featureValueName] = (int) $feature['id_feature_value'];
         }
 
-        return $this->cacheFeatureValueChoices[$cacheKey];
+        return $choices;
     }
 }

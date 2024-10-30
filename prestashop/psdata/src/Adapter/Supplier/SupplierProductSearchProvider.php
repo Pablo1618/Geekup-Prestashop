@@ -32,7 +32,7 @@ use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchQuery;
 use PrestaShop\PrestaShop\Core\Product\Search\ProductSearchResult;
 use PrestaShop\PrestaShop\Core\Product\Search\SortOrderFactory;
 use Supplier;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class responsible of retrieving products in Suppliers page of Front Office.
@@ -70,26 +70,22 @@ class SupplierProductSearchProvider implements ProductSearchProviderInterface
      * @param ProductSearchQuery $query
      * @param string $type
      *
-     * @return int|array
+     * @return array|bool
      */
     private function getProductsOrCount(
         ProductSearchContext $context,
         ProductSearchQuery $query,
         $type = 'products'
     ) {
-        $isTypeProducts = $type === 'products';
-
-        $result = $this->supplier->getProducts(
+        return $this->supplier->getProducts(
             $this->supplier->id,
             $context->getIdLang(),
             $query->getPage(),
             $query->getResultsPerPage(),
             $query->getSortOrder()->toLegacyOrderBy(),
             $query->getSortOrder()->toLegacyOrderWay(),
-            !$isTypeProducts
+            $type !== 'products'
         );
-
-        return $isTypeProducts ? $result : (int) $result;
     }
 
     /**
