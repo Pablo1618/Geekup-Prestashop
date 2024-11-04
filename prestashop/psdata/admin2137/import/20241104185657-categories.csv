@@ -1,0 +1,635 @@
+ID;Active (0/1);Name *;Parent category;Root category (0/1);URL rewritten
+;1;Home;;1;
+;1;Mystery Boxy;Home;0;/mystery-boxy
+;1;Zakupy Wg Kategorii;Home;0;/zakupy-wg-kategorii
+;1;Do Domu, Biura I Kuchni;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/do-domu-biura-i-kuchni
+;1;Akcesoria Kuchenne;Do Domu, Biura I Kuchni;0;/do-domu-biura-i-kuchni/akcesoria-kuchenne
+;1;Do Sypialni  Pokoju;Do Domu, Biura I Kuchni;0;/pokoju
+;1;Kubki  Kufle  Miski;Do Domu, Biura I Kuchni;0;/miski
+;1;Lampki  Skarbonki;Do Domu, Biura I Kuchni;0;/skarbonki
+;1;Zegary  Budziki;Do Domu, Biura I Kuchni;0;/budziki
+;1;Pozosta³e Akcesoria;Do Domu, Biura I Kuchni;0;/do-domu-biura-i-kuchni/pozostale-akcesoria
+;1;Akcesoria Kuchenne;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/akcesoria-kuchenne
+;1;Do Sypialni  Pokoju;Zakupy Wg Kategorii;0;/pokoju
+;1;Kubki  Kufle  Miski;Zakupy Wg Kategorii;0;/miski
+;1;Lampki  Skarbonki;Zakupy Wg Kategorii;0;/skarbonki
+;1;Zegary  Budziki;Zakupy Wg Kategorii;0;/budziki
+;1;Pozosta³e Akcesoria;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/pozostale-akcesoria
+;1;Gad¿ety;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/gadzety
+;1;Breloki;Gad¿ety;0;/gadzety/breloki
+;1;D³ugopisy  Zak³adki;Gad¿ety;0;/zakladki
+;1;Gry  Puzzle;Gad¿ety;0;/puzzle
+;1;Maskotki;Gad¿ety;0;/gadzety/maskotki
+;1;Pozosta³e Gad¿ety;Gad¿ety;0;/gadzety/pozostale-gadzety
+;1;Breloki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/breloki
+;1;D³ugopisy  Zak³adki;Zakupy Wg Kategorii;0;/zakladki
+;1;Gry  Puzzle;Zakupy Wg Kategorii;0;/puzzle
+;1;Maskotki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/maskotki
+;1;Pozosta³e Gad¿ety;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/pozostale-gadzety
+;1;Figurki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/figurki
+;1;Figurki Action Modele;Figurki;0;/modele
+;1;Funko Pop!;Figurki;0;/figurki/funko-pop
+;1;Limited Edition (Exclusive);Funko Pop!;0;/funko-pop/limited-edition-exclusive
+;1;Figurki Action Modele;Funko Pop!;0;/modele
+;1;Limited Edition (Exclusive);Figurki;0;/figurki/limited-edition-exclusive
+;1;Figurki Action Modele;Figurki;0;/modele
+;1;Mini Figurki;Figurki;0;/figurki/mini-figurki
+;1;Statuetki;Figurki;0;/figurki/statuetki
+;1;Tubbz;Figurki;0;/figurki/tubbz
+;1;Uszkodzone Opakowania;Figurki;0;/figurki/uszkodzone-opakowania
+;1;Figurki Action Modele;Zakupy Wg Kategorii;0;/modele
+;1;Funko Pop!;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/funko-pop
+;1;Limited Edition (Exclusive);Funko Pop!;0;/funko-pop/limited-edition-exclusive
+;1;Figurki Action Modele;Funko Pop!;0;/modele
+;1;Limited Edition (Exclusive);Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/limited-edition-exclusive
+;1;Figurki Action Modele;Zakupy Wg Kategorii;0;/modele
+;1;Mini Figurki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/mini-figurki
+;1;Statuetki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/statuetki
+;1;Tubbz;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/tubbz
+;1;Uszkodzone Opakowania;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/uszkodzone-opakowania
+;1;Odzie¿;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/odziez
+;1;Koszulki Mêskie;Odzie¿;0;/odziez/koszulki-meskie
+;1;Koszulki Damskie;Odzie¿;0;/odziez/koszulki-damskie
+;1;Bluzy;Odzie¿;0;/odziez/bluzy
+;1;Pozosta³e;Odzie¿;0;/odziez/pozostale
+;1;Koszulki Mêskie;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/koszulki-meskie
+;1;Koszulki Damskie;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/koszulki-damskie
+;1;Bluzy;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/bluzy
+;1;Pozosta³e;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/pozostale
+;1;Dodatki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/dodatki
+;1;Bi¿uteria;Dodatki;0;/dodatki/bizuteria
+;1;Bransoletki  Opaski;Dodatki;0;/opaski
+;1;Czapki Z Daszkiem;Dodatki;0;/dodatki/czapki-z-daszkiem
+;1;Czapki Zimowe;Dodatki;0;/dodatki/czapki-zimowe
+;1;Portfele;Dodatki;0;/dodatki/portfele
+;1;Plecaki;Dodatki;0;/dodatki/plecaki
+;1;Szaliki;Dodatki;0;/dodatki/szaliki
+;1;Torby & Worki;Dodatki;0;/dodatki/torby--worki
+;1;Pozosta³e;Dodatki;0;/dodatki/pozostale
+;1;Bi¿uteria;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/bizuteria
+;1;Bransoletki  Opaski;Zakupy Wg Kategorii;0;/opaski
+;1;Czapki Z Daszkiem;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/czapki-z-daszkiem
+;1;Czapki Zimowe;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/czapki-zimowe
+;1;Portfele;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/portfele
+;1;Plecaki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/plecaki
+;1;Szaliki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/szaliki
+;1;Torby & Worki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/torby--worki
+;1;Pozosta³e;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/pozostale
+;1;Repliki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/repliki
+;1;Repliki Filmowe;Repliki;0;/repliki/repliki-filmowe
+;1;Repliki Z Gier;Repliki;0;/repliki/repliki-z-gier
+;1;Ró¿d¿ki;Repliki;0;/repliki/rozdzki
+;1;Repliki Filmowe;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/repliki-filmowe
+;1;Repliki Z Gier;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/repliki-z-gier
+;1;Ró¿d¿ki;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/rozdzki
+;1;Gad¿ety Sportowe;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/gadzety-sportowe
+;1;Gad¿ety Pi³karskie;Gad¿ety Sportowe;0;/gadzety-sportowe/gadzety-pilkarskie
+;1;Gad¿ety Koszykarskie;Gad¿ety Sportowe;0;/gadzety-sportowe/gadzety-koszykarskie
+;1;Inne Gad¿ety Sportowe;Gad¿ety Sportowe;0;/gadzety-sportowe/inne-gadzety-sportowe
+;1;Gad¿ety Pi³karskie;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/gadzety-pilkarskie
+;1;Gad¿ety Koszykarskie;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/gadzety-koszykarskie
+;1;Inne Gad¿ety Sportowe;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/inne-gadzety-sportowe
+;1;Akcesoria Szkolne;Zakupy Wg Kategorii;0;/zakupy-wg-kategorii/akcesoria-szkolne
+;1;Do Domu, Biura I Kuchni;Home;0;/do-domu-biura-i-kuchni
+;1;Akcesoria Kuchenne;Do Domu, Biura I Kuchni;0;/do-domu-biura-i-kuchni/akcesoria-kuchenne
+;1;Do Sypialni  Pokoju;Do Domu, Biura I Kuchni;0;/pokoju
+;1;Kubki  Kufle  Miski;Do Domu, Biura I Kuchni;0;/miski
+;1;Lampki  Skarbonki;Do Domu, Biura I Kuchni;0;/skarbonki
+;1;Zegary  Budziki;Do Domu, Biura I Kuchni;0;/budziki
+;1;Pozosta³e Akcesoria;Do Domu, Biura I Kuchni;0;/do-domu-biura-i-kuchni/pozostale-akcesoria
+;1;Akcesoria Kuchenne;Home;0;/akcesoria-kuchenne
+;1;Do Sypialni  Pokoju;Home;0;/pokoju
+;1;Kubki  Kufle  Miski;Home;0;/miski
+;1;Lampki  Skarbonki;Home;0;/skarbonki
+;1;Zegary  Budziki;Home;0;/budziki
+;1;Pozosta³e Akcesoria;Home;0;/pozostale-akcesoria
+;1;Gad¿ety;Home;0;/gadzety
+;1;Breloki;Gad¿ety;0;/gadzety/breloki
+;1;D³ugopisy  Zak³adki;Gad¿ety;0;/zakladki
+;1;Gry  Puzzle;Gad¿ety;0;/puzzle
+;1;Maskotki;Gad¿ety;0;/gadzety/maskotki
+;1;Pozosta³e Gad¿ety;Gad¿ety;0;/gadzety/pozostale-gadzety
+;1;Breloki;Home;0;/breloki
+;1;D³ugopisy  Zak³adki;Home;0;/zakladki
+;1;Gry  Puzzle;Home;0;/puzzle
+;1;Maskotki;Home;0;/maskotki
+;1;Pozosta³e Gad¿ety;Home;0;/pozostale-gadzety
+;1;Figurki;Home;0;/figurki
+;1;Figurki Action Modele;Figurki;0;/modele
+;1;Funko Pop!;Figurki;0;/figurki/funko-pop
+;1;Limited Edition (Exclusive);Funko Pop!;0;/funko-pop/limited-edition-exclusive
+;1;Figurki Action Modele;Funko Pop!;0;/modele
+;1;Limited Edition (Exclusive);Figurki;0;/figurki/limited-edition-exclusive
+;1;Figurki Action Modele;Figurki;0;/modele
+;1;Mini Figurki;Figurki;0;/figurki/mini-figurki
+;1;Statuetki;Figurki;0;/figurki/statuetki
+;1;Tubbz;Figurki;0;/figurki/tubbz
+;1;Uszkodzone Opakowania;Figurki;0;/figurki/uszkodzone-opakowania
+;1;Figurki Action Modele;Home;0;/modele
+;1;Funko Pop!;Home;0;/funko-pop
+;1;Limited Edition (Exclusive);Funko Pop!;0;/funko-pop/limited-edition-exclusive
+;1;Figurki Action Modele;Funko Pop!;0;/modele
+;1;Limited Edition (Exclusive);Home;0;/limited-edition-exclusive
+;1;Figurki Action Modele;Home;0;/modele
+;1;Mini Figurki;Home;0;/mini-figurki
+;1;Statuetki;Home;0;/statuetki
+;1;Tubbz;Home;0;/tubbz
+;1;Uszkodzone Opakowania;Home;0;/uszkodzone-opakowania
+;1;Odzie¿;Home;0;/odziez
+;1;Koszulki Mêskie;Odzie¿;0;/odziez/koszulki-meskie
+;1;Koszulki Damskie;Odzie¿;0;/odziez/koszulki-damskie
+;1;Bluzy;Odzie¿;0;/odziez/bluzy
+;1;Pozosta³e;Odzie¿;0;/odziez/pozostale
+;1;Koszulki Mêskie;Home;0;/koszulki-meskie
+;1;Koszulki Damskie;Home;0;/koszulki-damskie
+;1;Bluzy;Home;0;/bluzy
+;1;Pozosta³e;Home;0;/pozostale
+;1;Dodatki;Home;0;/dodatki
+;1;Bi¿uteria;Dodatki;0;/dodatki/bizuteria
+;1;Bransoletki  Opaski;Dodatki;0;/opaski
+;1;Czapki Z Daszkiem;Dodatki;0;/dodatki/czapki-z-daszkiem
+;1;Czapki Zimowe;Dodatki;0;/dodatki/czapki-zimowe
+;1;Portfele;Dodatki;0;/dodatki/portfele
+;1;Plecaki;Dodatki;0;/dodatki/plecaki
+;1;Szaliki;Dodatki;0;/dodatki/szaliki
+;1;Torby & Worki;Dodatki;0;/dodatki/torby--worki
+;1;Pozosta³e;Dodatki;0;/dodatki/pozostale
+;1;Bi¿uteria;Home;0;/bizuteria
+;1;Bransoletki  Opaski;Home;0;/opaski
+;1;Czapki Z Daszkiem;Home;0;/czapki-z-daszkiem
+;1;Czapki Zimowe;Home;0;/czapki-zimowe
+;1;Portfele;Home;0;/portfele
+;1;Plecaki;Home;0;/plecaki
+;1;Szaliki;Home;0;/szaliki
+;1;Torby & Worki;Home;0;/torby--worki
+;1;Pozosta³e;Home;0;/pozostale
+;1;Repliki;Home;0;/repliki
+;1;Repliki Filmowe;Repliki;0;/repliki/repliki-filmowe
+;1;Repliki Z Gier;Repliki;0;/repliki/repliki-z-gier
+;1;Ró¿d¿ki;Repliki;0;/repliki/rozdzki
+;1;Repliki Filmowe;Home;0;/repliki-filmowe
+;1;Repliki Z Gier;Home;0;/repliki-z-gier
+;1;Ró¿d¿ki;Home;0;/rozdzki
+;1;Gad¿ety Sportowe;Home;0;/gadzety-sportowe
+;1;Gad¿ety Pi³karskie;Gad¿ety Sportowe;0;/gadzety-sportowe/gadzety-pilkarskie
+;1;Gad¿ety Koszykarskie;Gad¿ety Sportowe;0;/gadzety-sportowe/gadzety-koszykarskie
+;1;Inne Gad¿ety Sportowe;Gad¿ety Sportowe;0;/gadzety-sportowe/inne-gadzety-sportowe
+;1;Gad¿ety Pi³karskie;Home;0;/gadzety-pilkarskie
+;1;Gad¿ety Koszykarskie;Home;0;/gadzety-koszykarskie
+;1;Inne Gad¿ety Sportowe;Home;0;/inne-gadzety-sportowe
+;1;Akcesoria Szkolne;Home;0;/akcesoria-szkolne
+;1;Zakupy Wg Tematyki;Home;0;/zakupy-wg-tematyki
+;1;Gad¿ety Z Filmów I Seriali;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/gadzety-z-filmow-i-seriali
+;1;Alien (Obcy);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/alien-obcy
+;1;Back To The Future;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/back-to-the-future
+;1;Big Bang Theory;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/big-bang-theory
+;1;Diuna (Dune);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/diuna-dune
+;1;Doctor Who;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/doctor-who
+;1;Fantastyczne Zwierzêta;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/fantastyczne-zwierzeta
+;1;Friends (Przyjaciele);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/friends-przyjaciele
+;1;Ghostbusters;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/ghostbusters
+;1;Godfather (Ojciec Chrzestny);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/godfather-ojciec-chrzestny
+;1;Gra O Tron  Ród Smoka;Gad¿ety Z Filmów I Seriali;0;/rod-smoka
+;1;Harry Potter;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/harry-potter
+;1;Figurki;Harry Potter;0;/harry-potter/figurki
+;1;Gad¿ety;Harry Potter;0;/harry-potter/gadzety
+;1;Odzie¿ I Akcesoria;Harry Potter;0;/harry-potter/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Harry Potter;0;/harry-potter/rozdzki-i-repliki
+;1;Figurki;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/figurki
+;1;Gad¿ety;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/gadzety
+;1;Odzie¿ I Akcesoria;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/rozdzki-i-repliki
+;1;Jurassic Park (Jurassic World);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/jurassic-park-jurassic-world
+;1;Lord Of The Rings;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/lord-of-the-rings
+;1;Peaky Blinders;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/peaky-blinders
+;1;Piraci Z Karaibów;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/piraci-z-karaibow
+;1;Predator;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/predator
+;1;Resident Evil;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/resident-evil
+;1;Rick And Morty;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/rick-and-morty
+;1;South Park;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/south-park
+;1;Star Wars Gwiezdne Wojny;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/star-wars-gwiezdne-wojny
+;1;Star Trek;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/star-trek
+;1;Stranger Things;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/stranger-things
+;1;The Office;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/the-office
+;1;Inne Filmy I Seriale;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/inne-filmy-i-seriale
+;1;Alien (Obcy);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/alien-obcy
+;1;Back To The Future;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/back-to-the-future
+;1;Big Bang Theory;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/big-bang-theory
+;1;Diuna (Dune);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/diuna-dune
+;1;Doctor Who;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/doctor-who
+;1;Fantastyczne Zwierzêta;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/fantastyczne-zwierzeta
+;1;Friends (Przyjaciele);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/friends-przyjaciele
+;1;Ghostbusters;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/ghostbusters
+;1;Godfather (Ojciec Chrzestny);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/godfather-ojciec-chrzestny
+;1;Gra O Tron  Ród Smoka;Zakupy Wg Tematyki;0;/rod-smoka
+;1;Harry Potter;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/harry-potter
+;1;Figurki;Harry Potter;0;/harry-potter/figurki
+;1;Gad¿ety;Harry Potter;0;/harry-potter/gadzety
+;1;Odzie¿ I Akcesoria;Harry Potter;0;/harry-potter/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Harry Potter;0;/harry-potter/rozdzki-i-repliki
+;1;Figurki;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/figurki
+;1;Gad¿ety;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/gadzety
+;1;Odzie¿ I Akcesoria;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/rozdzki-i-repliki
+;1;Jurassic Park (Jurassic World);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/jurassic-park-jurassic-world
+;1;Lord Of The Rings;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/lord-of-the-rings
+;1;Peaky Blinders;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/peaky-blinders
+;1;Piraci Z Karaibów;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/piraci-z-karaibow
+;1;Predator;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/predator
+;1;Resident Evil;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/resident-evil
+;1;Rick And Morty;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/rick-and-morty
+;1;South Park;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/south-park
+;1;Star Wars Gwiezdne Wojny;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/star-wars-gwiezdne-wojny
+;1;Star Trek;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/star-trek
+;1;Stranger Things;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/stranger-things
+;1;The Office;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/the-office
+;1;Inne Filmy I Seriale;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/inne-filmy-i-seriale
+;1;Gad¿ety Z Komiksów, Anime I Bajek;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/gadzety-z-komiksow-anime-i-bajek
+;1;Attack On Titan;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/attack-on-titan
+;1;Chainsaw Man;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/chainsaw-man
+;1;Cowboy Bebop;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/cowboy-bebop
+;1;Dc Comics;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/dc-comics
+;1;Batman;Dc Comics;0;/dc-comics/batman
+;1;Superman;Dc Comics;0;/dc-comics/superman
+;1;Batman;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/batman
+;1;Superman;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/superman
+;1;Death Note;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/death-note
+;1;Demon Slayer;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/demon-slayer
+;1;Disney;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/disney
+;1;Dragon Ball Z;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/dragon-ball-z
+;1;Hello Kitty;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/hello-kitty
+;1;Jujutsu Kaisen;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/jujutsu-kaisen
+;1;Marvel;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/marvel
+;1;Deadpool;Marvel;0;/marvel/deadpool
+;1;Deadpool;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/deadpool
+;1;My Hero Academia;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/my-hero-academia
+;1;Naruto  Boruto;Gad¿ety Z Komiksów, Anime I Bajek;0;/boruto
+;1;One Piece;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/one-piece
+;1;One Punch Man;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/one-punch-man
+;1;Pokemon;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/pokemon
+;1;Sailor Moon (Czarodziejka Z Ksiê¿yca);Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/sailor-moon-czarodziejka-z-ksiezyca
+;1;Spy X Family;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/spy-x-family
+;1;Studio Ghibli;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/studio-ghibli
+;1;Toy Story;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/toy-story
+;1;Masters Of The Universe;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/masters-of-the-universe
+;1;Yu-Gi-Oh!;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/yu-gi-oh
+;1;¯ó³wie Ninja (Tmnt);Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/zolwie-ninja-tmnt
+;1;Inne Bajki, Anime, Komiksy;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/inne-bajki-anime-komiksy
+;1;Attack On Titan;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/attack-on-titan
+;1;Chainsaw Man;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/chainsaw-man
+;1;Cowboy Bebop;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/cowboy-bebop
+;1;Dc Comics;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/dc-comics
+;1;Batman;Dc Comics;0;/dc-comics/batman
+;1;Superman;Dc Comics;0;/dc-comics/superman
+;1;Batman;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/batman
+;1;Superman;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/superman
+;1;Death Note;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/death-note
+;1;Demon Slayer;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/demon-slayer
+;1;Disney;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/disney
+;1;Dragon Ball Z;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/dragon-ball-z
+;1;Hello Kitty;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/hello-kitty
+;1;Jujutsu Kaisen;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/jujutsu-kaisen
+;1;Marvel;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/marvel
+;1;Deadpool;Marvel;0;/marvel/deadpool
+;1;Deadpool;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/deadpool
+;1;My Hero Academia;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/my-hero-academia
+;1;Naruto  Boruto;Zakupy Wg Tematyki;0;/boruto
+;1;One Piece;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/one-piece
+;1;One Punch Man;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/one-punch-man
+;1;Pokemon;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/pokemon
+;1;Sailor Moon (Czarodziejka Z Ksiê¿yca);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/sailor-moon-czarodziejka-z-ksiezyca
+;1;Spy X Family;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/spy-x-family
+;1;Studio Ghibli;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/studio-ghibli
+;1;Toy Story;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/toy-story
+;1;Masters Of The Universe;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/masters-of-the-universe
+;1;Yu-Gi-Oh!;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/yu-gi-oh
+;1;¯ó³wie Ninja (Tmnt);Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/zolwie-ninja-tmnt
+;1;Inne Bajki, Anime, Komiksy;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/inne-bajki-anime-komiksy
+;1;Gad¿ety Z Gier;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/gadzety-z-gier
+;1;Assassin'S Creed;Gad¿ety Z Gier;0;/gadzety-z-gier/assassins-creed
+;1;Borderlands;Gad¿ety Z Gier;0;/gadzety-z-gier/borderlands
+;1;Call Of Duty;Gad¿ety Z Gier;0;/gadzety-z-gier/call-of-duty
+;1;Cuphead;Gad¿ety Z Gier;0;/gadzety-z-gier/cuphead
+;1;Cyberpunk 2077;Gad¿ety Z Gier;0;/gadzety-z-gier/cyberpunk-2077
+;1;Fallout;Gad¿ety Z Gier;0;/gadzety-z-gier/fallout
+;1;Five Nights At Freddy'S;Gad¿ety Z Gier;0;/gadzety-z-gier/five-nights-at-freddys
+;1;Fortnite;Gad¿ety Z Gier;0;/gadzety-z-gier/fortnite
+;1;God Of War;Gad¿ety Z Gier;0;/gadzety-z-gier/god-of-war
+;1;League Of Legends;Gad¿ety Z Gier;0;/gadzety-z-gier/league-of-legends
+;1;Legend Of Zelda;Gad¿ety Z Gier;0;/gadzety-z-gier/legend-of-zelda
+;1;Mario Bros;Gad¿ety Z Gier;0;/gadzety-z-gier/mario-bros
+;1;Mass Effect;Gad¿ety Z Gier;0;/gadzety-z-gier/mass-effect
+;1;Minecraft;Gad¿ety Z Gier;0;/gadzety-z-gier/minecraft
+;1;Nintendo;Gad¿ety Z Gier;0;/gadzety-z-gier/nintendo
+;1;Overwatch;Gad¿ety Z Gier;0;/gadzety-z-gier/overwatch
+;1;Pacman;Gad¿ety Z Gier;0;/gadzety-z-gier/pacman
+;1;Playstation;Gad¿ety Z Gier;0;/gadzety-z-gier/playstation
+;1;Poppy Playtime;Gad¿ety Z Gier;0;/gadzety-z-gier/poppy-playtime
+;1;The Elder Scrolls Skyrim;Gad¿ety Z Gier;0;/gadzety-z-gier/the-elder-scrolls-skyrim
+;1;Sonic;Gad¿ety Z Gier;0;/gadzety-z-gier/sonic
+;1;Tetris;Gad¿ety Z Gier;0;/gadzety-z-gier/tetris
+;1;WiedŸmin;Gad¿ety Z Gier;0;/gadzety-z-gier/wiedzmin
+;1;World Of Warcraft;Gad¿ety Z Gier;0;/gadzety-z-gier/world-of-warcraft
+;1;Inne Gry;Gad¿ety Z Gier;0;/gadzety-z-gier/inne-gry
+;1;Assassin'S Creed;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/assassins-creed
+;1;Borderlands;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/borderlands
+;1;Call Of Duty;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/call-of-duty
+;1;Cuphead;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/cuphead
+;1;Cyberpunk 2077;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/cyberpunk-2077
+;1;Fallout;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/fallout
+;1;Five Nights At Freddy'S;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/five-nights-at-freddys
+;1;Fortnite;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/fortnite
+;1;God Of War;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/god-of-war
+;1;League Of Legends;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/league-of-legends
+;1;Legend Of Zelda;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/legend-of-zelda
+;1;Mario Bros;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/mario-bros
+;1;Mass Effect;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/mass-effect
+;1;Minecraft;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/minecraft
+;1;Nintendo;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/nintendo
+;1;Overwatch;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/overwatch
+;1;Pacman;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/pacman
+;1;Playstation;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/playstation
+;1;Poppy Playtime;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/poppy-playtime
+;1;The Elder Scrolls Skyrim;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/the-elder-scrolls-skyrim
+;1;Sonic;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/sonic
+;1;Tetris;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/tetris
+;1;WiedŸmin;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/wiedzmin
+;1;World Of Warcraft;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/world-of-warcraft
+;1;Inne Gry;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/inne-gry
+;1;Gad¿ety Muzyczne;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/gadzety-muzyczne
+;1;Pozosta³e Geekowe Gad¿ety;Zakupy Wg Tematyki;0;/zakupy-wg-tematyki/pozostale-geekowe-gadzety
+;1;Gad¿ety Z Filmów I Seriali;Home;0;/gadzety-z-filmow-i-seriali
+;1;Alien (Obcy);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/alien-obcy
+;1;Back To The Future;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/back-to-the-future
+;1;Big Bang Theory;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/big-bang-theory
+;1;Diuna (Dune);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/diuna-dune
+;1;Doctor Who;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/doctor-who
+;1;Fantastyczne Zwierzêta;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/fantastyczne-zwierzeta
+;1;Friends (Przyjaciele);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/friends-przyjaciele
+;1;Ghostbusters;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/ghostbusters
+;1;Godfather (Ojciec Chrzestny);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/godfather-ojciec-chrzestny
+;1;Gra O Tron  Ród Smoka;Gad¿ety Z Filmów I Seriali;0;/rod-smoka
+;1;Harry Potter;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/harry-potter
+;1;Figurki;Harry Potter;0;/harry-potter/figurki
+;1;Gad¿ety;Harry Potter;0;/harry-potter/gadzety
+;1;Odzie¿ I Akcesoria;Harry Potter;0;/harry-potter/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Harry Potter;0;/harry-potter/rozdzki-i-repliki
+;1;Figurki;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/figurki
+;1;Gad¿ety;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/gadzety
+;1;Odzie¿ I Akcesoria;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/rozdzki-i-repliki
+;1;Jurassic Park (Jurassic World);Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/jurassic-park-jurassic-world
+;1;Lord Of The Rings;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/lord-of-the-rings
+;1;Peaky Blinders;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/peaky-blinders
+;1;Piraci Z Karaibów;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/piraci-z-karaibow
+;1;Predator;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/predator
+;1;Resident Evil;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/resident-evil
+;1;Rick And Morty;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/rick-and-morty
+;1;South Park;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/south-park
+;1;Star Wars Gwiezdne Wojny;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/star-wars-gwiezdne-wojny
+;1;Star Trek;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/star-trek
+;1;Stranger Things;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/stranger-things
+;1;The Office;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/the-office
+;1;Inne Filmy I Seriale;Gad¿ety Z Filmów I Seriali;0;/gadzety-z-filmow-i-seriali/inne-filmy-i-seriale
+;1;Alien (Obcy);Home;0;/alien-obcy
+;1;Back To The Future;Home;0;/back-to-the-future
+;1;Big Bang Theory;Home;0;/big-bang-theory
+;1;Diuna (Dune);Home;0;/diuna-dune
+;1;Doctor Who;Home;0;/doctor-who
+;1;Fantastyczne Zwierzêta;Home;0;/fantastyczne-zwierzeta
+;1;Friends (Przyjaciele);Home;0;/friends-przyjaciele
+;1;Ghostbusters;Home;0;/ghostbusters
+;1;Godfather (Ojciec Chrzestny);Home;0;/godfather-ojciec-chrzestny
+;1;Gra O Tron  Ród Smoka;Home;0;/rod-smoka
+;1;Harry Potter;Home;0;/harry-potter
+;1;Figurki;Harry Potter;0;/harry-potter/figurki
+;1;Gad¿ety;Harry Potter;0;/harry-potter/gadzety
+;1;Odzie¿ I Akcesoria;Harry Potter;0;/harry-potter/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Harry Potter;0;/harry-potter/rozdzki-i-repliki
+;1;Figurki;Home;0;/figurki
+;1;Gad¿ety;Home;0;/gadzety
+;1;Odzie¿ I Akcesoria;Home;0;/odziez-i-akcesoria
+;1;Ró¿d¿ki I Repliki;Home;0;/rozdzki-i-repliki
+;1;Jurassic Park (Jurassic World);Home;0;/jurassic-park-jurassic-world
+;1;Lord Of The Rings;Home;0;/lord-of-the-rings
+;1;Peaky Blinders;Home;0;/peaky-blinders
+;1;Piraci Z Karaibów;Home;0;/piraci-z-karaibow
+;1;Predator;Home;0;/predator
+;1;Resident Evil;Home;0;/resident-evil
+;1;Rick And Morty;Home;0;/rick-and-morty
+;1;South Park;Home;0;/south-park
+;1;Star Wars Gwiezdne Wojny;Home;0;/star-wars-gwiezdne-wojny
+;1;Star Trek;Home;0;/star-trek
+;1;Stranger Things;Home;0;/stranger-things
+;1;The Office;Home;0;/the-office
+;1;Inne Filmy I Seriale;Home;0;/inne-filmy-i-seriale
+;1;Gad¿ety Z Komiksów, Anime I Bajek;Home;0;/gadzety-z-komiksow-anime-i-bajek
+;1;Attack On Titan;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/attack-on-titan
+;1;Chainsaw Man;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/chainsaw-man
+;1;Cowboy Bebop;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/cowboy-bebop
+;1;Dc Comics;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/dc-comics
+;1;Batman;Dc Comics;0;/dc-comics/batman
+;1;Superman;Dc Comics;0;/dc-comics/superman
+;1;Batman;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/batman
+;1;Superman;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/superman
+;1;Death Note;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/death-note
+;1;Demon Slayer;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/demon-slayer
+;1;Disney;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/disney
+;1;Dragon Ball Z;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/dragon-ball-z
+;1;Hello Kitty;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/hello-kitty
+;1;Jujutsu Kaisen;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/jujutsu-kaisen
+;1;Marvel;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/marvel
+;1;Deadpool;Marvel;0;/marvel/deadpool
+;1;Deadpool;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/deadpool
+;1;My Hero Academia;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/my-hero-academia
+;1;Naruto  Boruto;Gad¿ety Z Komiksów, Anime I Bajek;0;/boruto
+;1;One Piece;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/one-piece
+;1;One Punch Man;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/one-punch-man
+;1;Pokemon;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/pokemon
+;1;Sailor Moon (Czarodziejka Z Ksiê¿yca);Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/sailor-moon-czarodziejka-z-ksiezyca
+;1;Spy X Family;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/spy-x-family
+;1;Studio Ghibli;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/studio-ghibli
+;1;Toy Story;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/toy-story
+;1;Masters Of The Universe;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/masters-of-the-universe
+;1;Yu-Gi-Oh!;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/yu-gi-oh
+;1;¯ó³wie Ninja (Tmnt);Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/zolwie-ninja-tmnt
+;1;Inne Bajki, Anime, Komiksy;Gad¿ety Z Komiksów, Anime I Bajek;0;/gadzety-z-komiksow-anime-i-bajek/inne-bajki-anime-komiksy
+;1;Attack On Titan;Home;0;/attack-on-titan
+;1;Chainsaw Man;Home;0;/chainsaw-man
+;1;Cowboy Bebop;Home;0;/cowboy-bebop
+;1;Dc Comics;Home;0;/dc-comics
+;1;Batman;Dc Comics;0;/dc-comics/batman
+;1;Superman;Dc Comics;0;/dc-comics/superman
+;1;Batman;Home;0;/batman
+;1;Superman;Home;0;/superman
+;1;Death Note;Home;0;/death-note
+;1;Demon Slayer;Home;0;/demon-slayer
+;1;Disney;Home;0;/disney
+;1;Dragon Ball Z;Home;0;/dragon-ball-z
+;1;Hello Kitty;Home;0;/hello-kitty
+;1;Jujutsu Kaisen;Home;0;/jujutsu-kaisen
+;1;Marvel;Home;0;/marvel
+;1;Deadpool;Marvel;0;/marvel/deadpool
+;1;Deadpool;Home;0;/deadpool
+;1;My Hero Academia;Home;0;/my-hero-academia
+;1;Naruto  Boruto;Home;0;/boruto
+;1;One Piece;Home;0;/one-piece
+;1;One Punch Man;Home;0;/one-punch-man
+;1;Pokemon;Home;0;/pokemon
+;1;Sailor Moon (Czarodziejka Z Ksiê¿yca);Home;0;/sailor-moon-czarodziejka-z-ksiezyca
+;1;Spy X Family;Home;0;/spy-x-family
+;1;Studio Ghibli;Home;0;/studio-ghibli
+;1;Toy Story;Home;0;/toy-story
+;1;Masters Of The Universe;Home;0;/masters-of-the-universe
+;1;Yu-Gi-Oh!;Home;0;/yu-gi-oh
+;1;¯ó³wie Ninja (Tmnt);Home;0;/zolwie-ninja-tmnt
+;1;Inne Bajki, Anime, Komiksy;Home;0;/inne-bajki-anime-komiksy
+;1;Gad¿ety Z Gier;Home;0;/gadzety-z-gier
+;1;Assassin'S Creed;Gad¿ety Z Gier;0;/gadzety-z-gier/assassins-creed
+;1;Borderlands;Gad¿ety Z Gier;0;/gadzety-z-gier/borderlands
+;1;Call Of Duty;Gad¿ety Z Gier;0;/gadzety-z-gier/call-of-duty
+;1;Cuphead;Gad¿ety Z Gier;0;/gadzety-z-gier/cuphead
+;1;Cyberpunk 2077;Gad¿ety Z Gier;0;/gadzety-z-gier/cyberpunk-2077
+;1;Fallout;Gad¿ety Z Gier;0;/gadzety-z-gier/fallout
+;1;Five Nights At Freddy'S;Gad¿ety Z Gier;0;/gadzety-z-gier/five-nights-at-freddys
+;1;Fortnite;Gad¿ety Z Gier;0;/gadzety-z-gier/fortnite
+;1;God Of War;Gad¿ety Z Gier;0;/gadzety-z-gier/god-of-war
+;1;League Of Legends;Gad¿ety Z Gier;0;/gadzety-z-gier/league-of-legends
+;1;Legend Of Zelda;Gad¿ety Z Gier;0;/gadzety-z-gier/legend-of-zelda
+;1;Mario Bros;Gad¿ety Z Gier;0;/gadzety-z-gier/mario-bros
+;1;Mass Effect;Gad¿ety Z Gier;0;/gadzety-z-gier/mass-effect
+;1;Minecraft;Gad¿ety Z Gier;0;/gadzety-z-gier/minecraft
+;1;Nintendo;Gad¿ety Z Gier;0;/gadzety-z-gier/nintendo
+;1;Overwatch;Gad¿ety Z Gier;0;/gadzety-z-gier/overwatch
+;1;Pacman;Gad¿ety Z Gier;0;/gadzety-z-gier/pacman
+;1;Playstation;Gad¿ety Z Gier;0;/gadzety-z-gier/playstation
+;1;Poppy Playtime;Gad¿ety Z Gier;0;/gadzety-z-gier/poppy-playtime
+;1;The Elder Scrolls Skyrim;Gad¿ety Z Gier;0;/gadzety-z-gier/the-elder-scrolls-skyrim
+;1;Sonic;Gad¿ety Z Gier;0;/gadzety-z-gier/sonic
+;1;Tetris;Gad¿ety Z Gier;0;/gadzety-z-gier/tetris
+;1;WiedŸmin;Gad¿ety Z Gier;0;/gadzety-z-gier/wiedzmin
+;1;World Of Warcraft;Gad¿ety Z Gier;0;/gadzety-z-gier/world-of-warcraft
+;1;Inne Gry;Gad¿ety Z Gier;0;/gadzety-z-gier/inne-gry
+;1;Assassin'S Creed;Home;0;/assassins-creed
+;1;Borderlands;Home;0;/borderlands
+;1;Call Of Duty;Home;0;/call-of-duty
+;1;Cuphead;Home;0;/cuphead
+;1;Cyberpunk 2077;Home;0;/cyberpunk-2077
+;1;Fallout;Home;0;/fallout
+;1;Five Nights At Freddy'S;Home;0;/five-nights-at-freddys
+;1;Fortnite;Home;0;/fortnite
+;1;God Of War;Home;0;/god-of-war
+;1;League Of Legends;Home;0;/league-of-legends
+;1;Legend Of Zelda;Home;0;/legend-of-zelda
+;1;Mario Bros;Home;0;/mario-bros
+;1;Mass Effect;Home;0;/mass-effect
+;1;Minecraft;Home;0;/minecraft
+;1;Nintendo;Home;0;/nintendo
+;1;Overwatch;Home;0;/overwatch
+;1;Pacman;Home;0;/pacman
+;1;Playstation;Home;0;/playstation
+;1;Poppy Playtime;Home;0;/poppy-playtime
+;1;The Elder Scrolls Skyrim;Home;0;/the-elder-scrolls-skyrim
+;1;Sonic;Home;0;/sonic
+;1;Tetris;Home;0;/tetris
+;1;WiedŸmin;Home;0;/wiedzmin
+;1;World Of Warcraft;Home;0;/world-of-warcraft
+;1;Inne Gry;Home;0;/inne-gry
+;1;Gad¿ety Muzyczne;Home;0;/gadzety-muzyczne
+;1;Pozosta³e Geekowe Gad¿ety;Home;0;/pozostale-geekowe-gadzety
+;1;Producenci;Home;0;/producenci
+;1;Bandai;Producenci;0;/producenci/bandai
+;1;Dark Horse;Producenci;0;/producenci/dark-horse
+;1;Difuzed;Producenci;0;/producenci/difuzed
+;1;Funko;Producenci;0;/producenci/funko
+;1;Furyu;Producenci;0;/producenci/furyu
+;1;Good Smile Company;Producenci;0;/producenci/good-smile-company
+;1;Hasbro;Producenci;0;/producenci/hasbro
+;1;Hot Toys;Producenci;0;/producenci/hot-toys
+;1;Loungefly By Funko;Producenci;0;/producenci/loungefly-by-funko
+;1;Mcfarlane Toys;Producenci;0;/producenci/mcfarlane-toys
+;1;Mezco Toys;Producenci;0;/producenci/mezco-toys
+;1;Neca;Producenci;0;/producenci/neca
+;1;Noble Collection;Producenci;0;/producenci/noble-collection
+;1;Numskull;Producenci;0;/producenci/numskull
+;1;Panini;Producenci;0;/producenci/panini
+;1;The Carat Shop;Producenci;0;/producenci/the-carat-shop
+;1;Weta Workshop;Producenci;0;/producenci/weta-workshop
+;1;Youtooz;Producenci;0;/producenci/youtooz
+;1;Bandai;Home;0;/bandai
+;1;Dark Horse;Home;0;/dark-horse
+;1;Difuzed;Home;0;/difuzed
+;1;Funko;Home;0;/funko
+;1;Furyu;Home;0;/furyu
+;1;Good Smile Company;Home;0;/good-smile-company
+;1;Hasbro;Home;0;/hasbro
+;1;Hot Toys;Home;0;/hot-toys
+;1;Loungefly By Funko;Home;0;/loungefly-by-funko
+;1;Mcfarlane Toys;Home;0;/mcfarlane-toys
+;1;Mezco Toys;Home;0;/mezco-toys
+;1;Neca;Home;0;/neca
+;1;Noble Collection;Home;0;/noble-collection
+;1;Numskull;Home;0;/numskull
+;1;Panini;Home;0;/panini
+;1;The Carat Shop;Home;0;/the-carat-shop
+;1;Weta Workshop;Home;0;/weta-workshop
+;1;Youtooz;Home;0;/youtooz
+;1;Manga;Home;0;/manga
+;1;J.P. Fantastica;Manga;0;/manga/jp-fantastica
+;1;Berserk;J.P. Fantastica;0;/jp-fantastica/berserk
+;1;Naruto;J.P. Fantastica;0;/jp-fantastica/naruto
+;1;Berserk;Manga;0;/manga/berserk
+;1;Naruto;Manga;0;/manga/naruto
+;1;Waneko;Manga;0;/manga/waneko
+;1;Bungou Stray Dogs Dead Apple;Waneko;0;/waneko/bungou-stray-dogs-dead-apple
+;1;Chainsaw Man;Waneko;0;/waneko/chainsaw-man
+;1;Jujutsu Kaisen;Waneko;0;/waneko/jujutsu-kaisen
+;1;Miecz Zabójcy Demonów;Waneko;0;/waneko/miecz-zabojcy-demonow
+;1;My Hero Academia;Waneko;0;/waneko/my-hero-academia
+;1;Spy X Family;Waneko;0;/waneko/spy-x-family
+;1;The Promised Neverland;Waneko;0;/waneko/the-promised-neverland
+;1;The Walking Cat;Waneko;0;/waneko/the-walking-cat
+;1;Bungou Stray Dogs Dead Apple;Manga;0;/manga/bungou-stray-dogs-dead-apple
+;1;Chainsaw Man;Manga;0;/manga/chainsaw-man
+;1;Jujutsu Kaisen;Manga;0;/manga/jujutsu-kaisen
+;1;Miecz Zabójcy Demonów;Manga;0;/manga/miecz-zabojcy-demonow
+;1;My Hero Academia;Manga;0;/manga/my-hero-academia
+;1;Spy X Family;Manga;0;/manga/spy-x-family
+;1;The Promised Neverland;Manga;0;/manga/the-promised-neverland
+;1;The Walking Cat;Manga;0;/manga/the-walking-cat
+;1;J.P. Fantastica;Home;0;/jp-fantastica
+;1;Berserk;J.P. Fantastica;0;/jp-fantastica/berserk
+;1;Naruto;J.P. Fantastica;0;/jp-fantastica/naruto
+;1;Berserk;Home;0;/berserk
+;1;Naruto;Home;0;/naruto
+;1;Waneko;Home;0;/waneko
+;1;Bungou Stray Dogs Dead Apple;Waneko;0;/waneko/bungou-stray-dogs-dead-apple
+;1;Chainsaw Man;Waneko;0;/waneko/chainsaw-man
+;1;Jujutsu Kaisen;Waneko;0;/waneko/jujutsu-kaisen
+;1;Miecz Zabójcy Demonów;Waneko;0;/waneko/miecz-zabojcy-demonow
+;1;My Hero Academia;Waneko;0;/waneko/my-hero-academia
+;1;Spy X Family;Waneko;0;/waneko/spy-x-family
+;1;The Promised Neverland;Waneko;0;/waneko/the-promised-neverland
+;1;The Walking Cat;Waneko;0;/waneko/the-walking-cat
+;1;Bungou Stray Dogs Dead Apple;Home;0;/bungou-stray-dogs-dead-apple
+;1;Chainsaw Man;Home;0;/chainsaw-man
+;1;Jujutsu Kaisen;Home;0;/jujutsu-kaisen
+;1;Miecz Zabójcy Demonów;Home;0;/miecz-zabojcy-demonow
+;1;My Hero Academia;Home;0;/my-hero-academia
+;1;Spy X Family;Home;0;/spy-x-family
+;1;The Promised Neverland;Home;0;/the-promised-neverland
+;1;The Walking Cat;Home;0;/the-walking-cat
+;1;Gry Karciane;Home;0;/gry-karciane
+;1;Digimon;Gry Karciane;0;/gry-karciane/digimon
+;1;Dragon Ball;Gry Karciane;0;/gry-karciane/dragon-ball
+;1;Kolekcje Panini;Gry Karciane;0;/gry-karciane/kolekcje-panini
+;1;Magic The Gathering;Gry Karciane;0;/gry-karciane/magic-the-gathering
+;1;Marvel;Gry Karciane;0;/gry-karciane/marvel
+;1;Digimon;Home;0;/digimon
+;1;Dragon Ball;Home;0;/dragon-ball
+;1;Kolekcje Panini;Home;0;/kolekcje-panini
+;1;Magic The Gathering;Home;0;/magic-the-gathering
+;1;Marvel;Home;0;/marvel
+;1;Karty Podarunkowe;Home;0;/karty-podarunkowe
+;1;Nowoœci;Home;0;/nowosci
+;1;Promocje;Home;0;/promocje

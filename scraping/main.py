@@ -38,8 +38,8 @@ def categoryCrawlHelper(parentName, currentLi):
         thisTitle = currentLi.find_element(By.TAG_NAME, "a").get_attribute('title')
         if thisTitle is None:
             thisTitle = ""
-
-        categoriesHere.append(parentName + "|" + thisTitle)
+        else:
+            categoriesHere.append(parentName + "|" + thisTitle)
     except:
         pass
 
@@ -47,10 +47,9 @@ def categoryCrawlHelper(parentName, currentLi):
         currentUl = currentLi.find_element(By.TAG_NAME, "ul")
 
         if currentUl is not None:
-            ulChildren = currentUl.find_elements(By.TAG_NAME, 'li')
+            ulChildren = currentUl.find_elements(By.XPATH, './li')
 
             for child in ulChildren:
-                #we skip those categories because they have nothing inside, annoying as all hell
                 categoriesThere = categoryCrawlHelper(thisTitle, child)
                 categoriesHere.extend(categoriesThere)
     except:
@@ -85,8 +84,12 @@ def getAllCategories():
             break
 
     categories = []
-    for li in standard.find_elements(By.TAG_NAME, 'li'):
-        categories.extend(categoryCrawlHelper("", li))
+
+    ul = standard.find_element(By.XPATH, './ul')
+    #get only children of standard
+    for li in ul.find_elements(By.XPATH, './li'):
+
+        categories.extend(categoryCrawlHelper("Home", li))
 
 
 
@@ -186,7 +189,7 @@ def scrapeProductsPage(pageLink):
     return results
 
 def saveProductsInfo(products):
-    with open('products.csv', 'w') as file:
+    with open('products.csv', 'w',  encoding="utf-8") as file:
         # name, price, brand, availability, delivery, description, categories
 
         header = "ID;Active (0/1);Name *;Categories (x,y,z...);Wholesale price;Brand;Delivery;Availability;Description"
@@ -200,12 +203,11 @@ def saveProductsInfo(products):
                 isActive = 1
                 productName = product['name']
 
-                categories = "("
+                categories = ""
                 for category in product['categories']:
                     categories+=category + ","
 
                 categories = categories[:-1]
-                categories += ')'
 
                 price = product['price']
                 brand = product['brand']
@@ -273,10 +275,13 @@ def fixCategoryURL(url):
 def scrapeCategories():
     categories = getAllCategories()
     print(categories)
-    with open('categories.csv', 'w') as file:
+    with open('categories.csv', 'w',  encoding="utf-8") as file:
         header = "ID;Active (0/1);Name *;Parent category;Root category (0/1);URL rewritten"
 
         file.write(header + '\n')
+
+        thisLine = f";1;Home;;1;"
+        file.write(thisLine + '\n')
 
         for category in categories:
             isActive = 1
@@ -284,7 +289,7 @@ def scrapeCategories():
             categoryName = re.sub(r'/', '', category)
 
             parentCategoryName = categoryName.split("|")
-            if len(parentCategoryName) <= 1:
+            if len(parentCategoryName) <= 1 or len(parentCategoryName[-2]) <= 1:
                 parentCategoryName = "Home"
             else:
                 parentCategoryName = parentCategoryName[-2].title()
@@ -310,7 +315,7 @@ def scrapeEverything():
 
 startTime = time.time()
 
-scrapeAllProducts()
+scrapeEverything()
 
 endTime = time.time()
 
