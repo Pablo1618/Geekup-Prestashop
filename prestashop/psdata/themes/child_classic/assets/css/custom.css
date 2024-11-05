@@ -1,0 +1,91 @@
+/*
+ * Custom code goes here.
+ * A template should always ship with an empty custom.css
+ */
+
+.inside-contact-block {
+    font-size: .875rem;
+    margin-left: 15px;
+}
+
+i.material-icons.in-footer-icons {
+    margin-left: -27px;
+}
+
+.maxsote_hotinfo {
+    width: 100%;
+    padding: 10px 0px;
+    color: rgb(255, 255, 255);
+    background: rgb(213, 15, 124);
+    font-size: 10pt;
+    text-align: center;
+    font-weight: 600;
+    z-index: 1000;
+    top: 0px;
+    cursor: pointer;
+    position: relative;
+    box-sizing: initial;
+    height: auto;
+}
+
+.k_phrases {
+    width: 88%;
+    margin: 0px 6%;
+    text-align: center;
+    white-space: normal;
+    max-height: unset;
+    line-height: 150%;
+}
+
+.k_phrase.hotinfo_phrase_2 {
+    width: 88% !important;
+    margin: 0px 6% !important;
+    color: rgb(255, 255, 255) !important;
+    text-align: center !important;
+    white-space: normal !important;
+    max-height: unset !important;
+    line-height: 150% !important;
+}
+
+.yellow-line {
+    height: 7px;
+    border-radius: 0 0 7px 7px;
+    background: #f6a802;
+}
+
+#search_widget {
+    float: left;
+}
+
+@media only screen and (min-width: 992px) {
+    #search_widget {
+        min-width: 40rem;
+    }
+}
+
+#_desktop_user_info {
+
+    float: right;
+    margin-right: 38px;
+}
+
+.gray-line-vertical {
+    width: 1px;              /* Thickness of the line */
+    height: 77%;            /* Full height of the container */
+    background: #ededed;
+    position: absolute;       /* Positioning to control placement */
+    left: 70%;
+    top: 47px;         
+}
+
+.gray-line-horizontal {
+    width: 67%;
+    margin: 1rem auto;
+    height: 1px;
+    background: #ededed;
+}
+
+#_desktop_cart {
+    float: right;
+    margin-right: -120px;
+}
