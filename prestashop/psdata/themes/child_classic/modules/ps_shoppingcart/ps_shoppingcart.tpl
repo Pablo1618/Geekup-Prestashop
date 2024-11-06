@@ -28,9 +28,13 @@
       {if $cart.products_count > 0}
         <a rel="nofollow" aria-label="{l s='Shopping cart link containing %nbProducts% product(s)' sprintf=['%nbProducts%' => $cart.products_count] d='Shop.Theme.Checkout'}" href="{$cart_url}">
       {/if}
-        <i class="material-icons shopping-cart" aria-hidden="true">shopping_cart</i>
+        <i class="material-icons shopping-cart" aria-hidden="true">shopping_basket</i>
         <span class="hidden-sm-down">{l s='Cart' d='Shop.Theme.Checkout'}</span>
+      {if $cart.products_count > 0}
         <span class="cart-products-count">({$cart.products_count})</span>
+      {else}
+        <span class="cart-products-count">(pusty)</span>
+      {/if}
       {if $cart.products_count > 0}
         </a>
       {/if}

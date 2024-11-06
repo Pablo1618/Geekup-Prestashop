@@ -45,6 +45,7 @@ i.material-icons.in-footer-icons {
     white-space: normal !important;
     max-height: unset !important;
     line-height: 150% !important;
+    font-weight: 900 !important;
 }
 
 .yellow-line {
@@ -66,14 +67,14 @@ i.material-icons.in-footer-icons {
 #_desktop_user_info {
 
     float: right;
-    margin-right: 38px;
+    margin-right: 70px;
 }
 
 .gray-line-vertical {
-    width: 1px;              /* Thickness of the line */
-    height: 77%;            /* Full height of the container */
+    width: 1px; 
+    height: 77%;
     background: #ededed;
-    position: absolute;       /* Positioning to control placement */
+    position: absolute;
     left: 70%;
     top: 47px;         
 }
@@ -88,4 +89,58 @@ i.material-icons.in-footer-icons {
 #_desktop_cart {
     float: right;
     margin-right: -120px;
+    margin-top: 10px;
 }
+
+.header-top-right.col-md-10.col-sm-12.position-static {
+    font-size: 12px !important;
+}
+
+.material-icons.signIn {
+    color: #f6a802;
+    content: "g01-login";
+}
+
+.material-icons.signIn.login {
+    height: auto;
+    width: 1.3rem;
+    margin-right: 4px;
+    content: url("../img/login.png")
+}
+
+.login-register {
+    display: flex;
+    flex-direction: column;
+}
+
+#search_widget form i {
+    position: absolute;
+    right: 3%;
+    padding: .5rem;
+}
+
+#search_widget form input {
+    width: 100%;
+    padding: 10px 20px 10px 13px;
+    outline: none;
+    background-color: white;
+    border-style: solid;
+    border-color: lightgray;
+    border-width: 0.5px;
+    border-radius: 5px;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 400;
+    font-size: 14px;
+    background: #fff;
+    opacity: 1;
+}/*
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: #000;
+    background-color: #fff;
+    font-size: 13px;
+    line-height: 18px;
+}*/

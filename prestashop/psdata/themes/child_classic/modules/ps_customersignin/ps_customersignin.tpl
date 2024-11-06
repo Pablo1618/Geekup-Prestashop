@@ -31,7 +31,7 @@
         rel="nofollow"
       >
         <i class="material-icons">&#xE7FF;</i>
-        {l s='Sign out' d='Shop.Theme.Actions'}
+        {l s='Wyloguj się' d='Shop.Theme.Actions'}
       </a>
       <a
         class="account"
@@ -43,14 +43,24 @@
         <span class="hidden-sm-down">{$customerName}</span>
       </a>
     {else}
-      <a
-        href="{$urls.pages.my_account}"
-        title="{l s='Log in to your customer account' d='Shop.Theme.Customeraccount'}"
-        rel="nofollow"
-      >
-        <i class="material-icons">&#xE7FF;</i>
-        <span class="hidden-sm-down">{l s='Zarejestruj się' d='Shop.Theme.Actions'}</span>
-      </a>
+      <div class="login-register">
+        <a
+          href="{$urls.pages.register}"
+          title="{l s='Register to your customer account' d='Shop.Theme.Customeraccount'}"
+          rel="nofollow"
+        >
+          <i class="material-icons signIn">&#xE7FF;</i>
+          <span class="hidden-sm-down">{l s='Zarejestruj się' d='Shop.Theme.Actions'}</span>
+        </a>
+        <a
+          href="{$urls.pages.my_account}"
+          title="{l s='Log in to your customer account' d='Shop.Theme.Customeraccount'}"
+          rel="nofollow"
+        >
+          <i class="material-icons signIn login"></i>
+          <span class="hidden-sm-down">{l s='Zaloguj się' d='Shop.Theme.Actions'}</span>
+        </a>
+      </div>
     {/if}
   </div>
 </div>
