@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-06 12:51:07
+/* Smarty version 3.1.48, created on 2024-11-08 19:31:47
   from '/var/www/html/themes/child_classic/templates/_partials/header.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_672b582b54b3c3_15033911',
+  'unifunc' => 'content_672e5913a574d1_13499160',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     '97b8f15a4097c905a770e7ce7929d15eb9fca3bc' => 
     array (
       0 => '/var/www/html/themes/child_classic/templates/_partials/header.tpl',
-      1 => 1730893469,
+      1 => 1731090702,
       2 => 'file',
     ),
   ),
@@ -20,29 +20,29 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_672b582b54b3c3_15033911 (Smarty_Internal_Template $_smarty_tpl) {
+function content_672e5913a574d1_13499160 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_loadInheritance();
 $_smarty_tpl->inheritance->init($_smarty_tpl, false);
 ?>
   <?php 
-$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_169756110672b582b547541_69830713', 'header_banner');
+$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_1904218355672e5913a53ed8_41514760', 'header_banner');
 ?>
  <?php 
-$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_104809028672b582b5480e2_54851192', 'header_nav');
+$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_1105956533672e5913a548a0_95806830', 'header_nav');
 ?>
  <?php 
-$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_1277351760672b582b548802_11865807', 'header_top');
+$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_400177179672e5913a54ea6_78449373', 'header_top');
 ?>
 
 </contact@prestashop.com>
 <?php }
 /* {block 'header_banner'} */
-class Block_169756110672b582b547541_69830713 extends Smarty_Internal_Block
+class Block_1904218355672e5913a53ed8_41514760 extends Smarty_Internal_Block
 {
 public $subBlocks = array (
   'header_banner' => 
   array (
-    0 => 'Block_169756110672b582b547541_69830713',
+    0 => 'Block_1904218355672e5913a53ed8_41514760',
   ),
 );
 public function callBlock(Smarty_Internal_Template $_smarty_tpl) {
@@ -55,12 +55,12 @@ public function callBlock(Smarty_Internal_Template $_smarty_tpl) {
 }
 /* {/block 'header_banner'} */
 /* {block 'header_nav'} */
-class Block_104809028672b582b5480e2_54851192 extends Smarty_Internal_Block
+class Block_1105956533672e5913a548a0_95806830 extends Smarty_Internal_Block
 {
 public $subBlocks = array (
   'header_nav' => 
   array (
-    0 => 'Block_104809028672b582b5480e2_54851192',
+    0 => 'Block_1105956533672e5913a548a0_95806830',
   ),
 );
 public function callBlock(Smarty_Internal_Template $_smarty_tpl) {
@@ -71,7 +71,7 @@ public function callBlock(Smarty_Internal_Template $_smarty_tpl) {
       <div id="MX_phrases" class="k_phrases">
         <a
           class="k_phrase hotinfo_phrase_2"
-          href="https://geekup.pl/darmowa-dostawa.html"
+          href="content/6-darmowa-dostawa-od-79-zl-z-kodem-free"
           >DARMOWA DOSTAWA od 79 zł z kodem FREE</a
         >
       </div>
@@ -87,12 +87,12 @@ public function callBlock(Smarty_Internal_Template $_smarty_tpl) {
 }
 /* {/block 'header_nav'} */
 /* {block 'header_top'} */
-class Block_1277351760672b582b548802_11865807 extends Smarty_Internal_Block
+class Block_400177179672e5913a54ea6_78449373 extends Smarty_Internal_Block
 {
 public $subBlocks = array (
   'header_top' => 
   array (
-    0 => 'Block_1277351760672b582b548802_11865807',
+    0 => 'Block_400177179672e5913a54ea6_78449373',
   ),
 );
 public function callBlock(Smarty_Internal_Template $_smarty_tpl) {

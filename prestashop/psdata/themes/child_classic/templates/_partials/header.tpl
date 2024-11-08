@@ -21,7 +21,7 @@ to newer * versions in the future. If you wish to customize PrestaShop for your
       <div id="MX_phrases" class="k_phrases">
         <a
           class="k_phrase hotinfo_phrase_2"
-          href="https://geekup.pl/darmowa-dostawa.html"
+          href="content/6-darmowa-dostawa-od-79-zl-z-kodem-free"
           >DARMOWA DOSTAWA od 79 zł z kodem FREE</a
         >
       </div>
