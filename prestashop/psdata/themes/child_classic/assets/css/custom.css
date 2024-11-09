@@ -130,6 +130,27 @@ i.material-icons.in-footer-icons {
     border-radius: 5px;
 }
 
+#content-wrapper.js-content-wrapper {
+    padding-top: 35px;
+}
+
+p, .page-content.page-cms ul {
+    color: black;
+}
+
+.hidden-sm-down.bold, .cart-products-count.bold {
+    color: black;
+    font-weight: 900;
+}
+
+.page-content.page-cms {
+    padding: 0;
+}
+
+#wrapper {
+    background: white;
+}
+
 body {
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 400;
@@ -144,3 +165,30 @@ body {
     font-size: 13px;
     line-height: 18px;
 }*/
+
+#top-menu li a.dropdown-item {
+    text-transform: none;
+}
+
+#top-menu {
+    margin-left: -30px;
+}
+
+#top-menu li a.dropdown-item[data-depth="0"] {
+    font-size: 12px;
+    padding-right: 4px;
+    text-transform: none;
+    color: black;
+    font-weight:lighter;
+}
+
+#top-menu li a.dropdown-item[data-depth="0"]::after{
+    content: "keyboard_arrow_down";
+    font-family: 'Material Icons';
+    font-size: 18px;
+    vertical-align: middle;
+}
+
+#top-menu li a.dropdown-item[data-depth="0"]:hover {
+    color: #f6a802;
+}
