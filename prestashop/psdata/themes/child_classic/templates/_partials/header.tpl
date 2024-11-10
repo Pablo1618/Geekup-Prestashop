@@ -21,7 +21,7 @@ to newer * versions in the future. If you wish to customize PrestaShop for your
       <div id="MX_phrases" class="k_phrases">
         <a
           class="k_phrase hotinfo_phrase_2"
-          href="content/6-promocje-specjalne"
+          href="{$link->getCMSLink(6)}"
           >DARMOWA DOSTAWA od 79 zł z kodem FREE</a
         >
       </div>
