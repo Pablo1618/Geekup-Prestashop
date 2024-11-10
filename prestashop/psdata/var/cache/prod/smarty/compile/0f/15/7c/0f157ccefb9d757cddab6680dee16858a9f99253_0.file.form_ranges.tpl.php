@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-10 12:42:38
+/* Smarty version 3.1.48, created on 2024-11-10 17:46:16
   from '/var/www/html/admin2137/themes/default/template/controllers/carrier_wizard/helpers/form/form_ranges.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_67309c2e8f2d39_53816040',
+  'unifunc' => 'content_6730e3587ba228_07758917',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_67309c2e8f2d39_53816040 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6730e3587ba228_07758917 (Smarty_Internal_Template $_smarty_tpl) {
 ?>		<?php echo '<script'; ?>
 >var zones_nbr = <?php echo count($_smarty_tpl->tpl_vars['zones']->value)+3;?>
  ; /*corresponds to the third input text (max, min and all)*/<?php echo '</script'; ?>
