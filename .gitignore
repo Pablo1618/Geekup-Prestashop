@@ -4,7 +4,6 @@
 *.log
 
 # Cache
-cache/
 /cache/*
 !/cache/.htaccess
 !/cache/cachefs/index.php
