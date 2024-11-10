@@ -14,11 +14,11 @@ to newer * versions in the future. If you wish to customize PrestaShop for your
   * @copyright Since 2007 PrestaShop SA and Contributors * @license
   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0) *}
   
-  <div class="container">
+  {*<div class="container">
     <div class="row">
       {block name='hook_footer_before'} {hook h='displayFooterBefore'} {/block}
     </div>
-  </div>
+  </div>*}
   
   <div class="box box_webcodersInfoiconsApp wce_Chrome wce_align-center" style="color: rgb(40, 40, 40); background-color: rgb(255, 255, 255);">
     <div class="innerbox container">
@@ -27,14 +27,14 @@ to newer * versions in the future. If you wish to customize PrestaShop for your
           <li class="wce_group" style="border-color:#d8d8d8;"> 
             <a class="wce_link" title="Atrakcyjne promocje i rabaty" href=""></a> 
             <div class="img-wrap wce_defIco" style="color: #282828;"> 
-              <i data-wce-ii="tag"></i> 
+              <i class="footer-tags promotion-sale"></i>
             </div> 
             <strong class="wce_h3" style="color:#282828;">Atrakcyjne promocje i rabaty</strong> 
             <p class="wce_description" style="color:#282828;">Doceniamy stałych klientów</p> 
           </li> 
           <li class="wce_group" style="border-color:#d8d8d8;"> 
             <div class="img-wrap wce_defIco" style="color: #282828;"> 
-              <i data-wce-ii="badge"></i> 
+              <i class="footer-tags high-quality"></i>
             </div> 
             <strong class="wce_h3" style="color:#282828;">Najwyższa jakość produktów</strong> 
             <p class="wce_description" style="color:#282828;">Wszystkie produkty są nowe i oryginalne</p> 
@@ -42,7 +42,7 @@ to newer * versions in the future. If you wish to customize PrestaShop for your
           <li class="wce_group" style="border-color:#d8d8d8;">
             <a class="wce_link" title="Szybka wysyłka" href="{$link->getCMSLink(13)}"></a> 
             <div class="img-wrap wce_defIco" style="color: #282828;"> 
-              <i data-wce-ii="quick-shipp"></i> 
+              <i class="footer-tags quick-delivery"></i>
             </div> 
             <strong class="wce_h3" style="color:#282828;">Szybka wysyłka</strong> 
             <p class="wce_description" style="color:#282828;">Zamówienia złożone do godziny 13:00 wysyłamy tego samego dnia</p> 
@@ -50,7 +50,7 @@ to newer * versions in the future. If you wish to customize PrestaShop for your
           <li class="wce_group" style="border-color:#d8d8d8;"> 
             <a class="wce_link" title="Zaufanie i pozytywne opinie" href="https://allegro.pl/uzytkownik/GeekupPL/oceny"></a> 
             <div class="img-wrap wce_defIco" style="color: #282828;"> 
-              <i data-wce-ii="comment"></i> 
+              <i class="footer-tags trust-positive"></i>
             </div> 
             <strong class="wce_h3" style="color:#282828;">Zaufanie i pozytywne opinie</strong> 
             <p class="wce_description" style="color:#282828;">Dołącz do grona zadowolonych klientów. 99% pozytywnych opini</p> 

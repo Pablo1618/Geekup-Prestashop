@@ -439,6 +439,10 @@ p.h3.hidden-sm-down::before {
     z-index: 1;
 }
 
+.wce_link:hover ~ .wce_h3 {
+    text-decoration: underline !important;
+}
+
 .wce_listWrap .wce_group .img-wrap {
     display: block;
     height: 50px;
@@ -463,26 +467,28 @@ p.h3.hidden-sm-down::before {
     justify-content: center;
 }
 
-[data-wce-ii]:before {
-    font-family: 'wce-info-icons-app' !important;
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
-    letter-spacing: 0;
-    -webkit-font-feature-settings: "liga";
-    -moz-font-feature-settings: "liga=1";
-    -moz-font-feature-settings: "liga";
-    -ms-font-feature-settings: "liga" 1;
-    font-feature-settings: "liga";
-    -webkit-font-variant-ligatures: discretionary-ligatures;
-    font-variant-ligatures: discretionary-ligatures;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    content: attr(data-wce-ii);
-    white-space: pre;
+.footer-tags.promotion-sale {
+    content: url("../img/sale.png");
+    height: auto;
+    width: 3.3rem;
+}
+
+.footer-tags.high-quality {
+    content: url("../img/quality.png");
+    height: auto;
+    width: 3.3rem;
+}
+
+.footer-tags.quick-delivery {
+    content: url("../img/delivery.png");
+    height: auto;
+    width: 3.3rem;
+}
+
+.footer-tags.trust-positive {
+    content: url("../img/correct.png");
+    height: auto;
+    width: 3.3rem;
 }
 
 .wce_listWrap .wce_group .wce_h3 {
@@ -490,7 +496,7 @@ p.h3.hidden-sm-down::before {
     margin: 7px 0;
     display: block;
     line-height: 1.1em;
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .wce_listWrap .wce_group .wce_description {
@@ -531,4 +537,8 @@ p.h3.hidden-sm-down::before {
     -moz-transition: opacity .3s ease-in-out;
     -o-transition: opacity .3s ease-in-out;
     transition: opacity .3s ease-in-out;
+}
+
+.wce_description {
+    font-size: 0.9rem !important;
 }
