@@ -108,10 +108,23 @@ i.material-icons.in-footer-icons {
     content: url("../img/login.png")
 }
 
+.material-icons.signIn.logout {
+    height: auto;
+    width: 1.3rem;
+    margin-right: 4px;
+    content: url("../img/logout.png")
+}
+
 .login-register {
     display: flex;
     flex-direction: column;
 }
+
+.user-logged {
+    display: flex;
+    flex-direction: column;
+}
+
 
 #search_widget form i {
     position: absolute;
