@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-11 11:46:05
+/* Smarty version 3.1.48, created on 2024-11-11 11:59:01
   from 'module:psimagesliderviewstemplat' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_6731e06d02e842_58732571',
+  'unifunc' => 'content_6731e3755d27e1_97164650',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     '6c2108a17c7103b6e203f4f0621d4645b56b0114' => 
     array (
       0 => 'module:psimagesliderviewstemplat',
-      1 => 1731261081,
+      1 => 1731322573,
       2 => 'module',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6731e06d02e842_58732571 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6731e3755d27e1_97164650 (Smarty_Internal_Template $_smarty_tpl) {
 if ($_smarty_tpl->tpl_vars['homeslider']->value['slides']) {?>
   <div id="carousel" data-ride="carousel" class="carousel slide" data-interval="<?php echo htmlspecialchars($_smarty_tpl->tpl_vars['homeslider']->value['speed'], ENT_QUOTES, 'UTF-8');?>
 " data-wrap="<?php echo htmlspecialchars((string)$_smarty_tpl->tpl_vars['homeslider']->value['wrap'], ENT_QUOTES, 'UTF-8');?>
