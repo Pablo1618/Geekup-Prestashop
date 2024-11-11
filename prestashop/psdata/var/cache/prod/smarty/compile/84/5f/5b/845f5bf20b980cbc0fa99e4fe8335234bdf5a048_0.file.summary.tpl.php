@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-11 12:00:57
+/* Smarty version 3.1.48, created on 2024-11-11 12:46:43
   from '/var/www/html/admin2137/themes/default/template/controllers/carrier_wizard/summary.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_6731e3e93d63a7_07732917',
+  'unifunc' => 'content_6731eea3828411_66098002',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     '845f5bf20b980cbc0fa99e4fe8335234bdf5a048' => 
     array (
       0 => '/var/www/html/admin2137/themes/default/template/controllers/carrier_wizard/summary.tpl',
-      1 => 1731322567,
+      1 => 1731324198,
       2 => 'file',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6731e3e93d63a7_07732917 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6731eea3828411_66098002 (Smarty_Internal_Template $_smarty_tpl) {
 echo '<script'; ?>
  type="text/javascript">
 	var summary_translation_undefined = '<?php echo call_user_func_array( $_smarty_tpl->smarty->registered_plugins[Smarty::PLUGIN_FUNCTION]['l'][0], array( array('s'=>'[undefined]','js'=>1),$_smarty_tpl ) );?>

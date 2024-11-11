@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-11 12:00:57
+/* Smarty version 3.1.48, created on 2024-11-11 12:46:43
   from '/var/www/html/admin2137/themes/default/template/helpers/form/form_group.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_6731e3e9036068_51951647',
+  'unifunc' => 'content_6731eea34696a7_74114554',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     'c1eba303fb6cb87a0f25d84ffc3024d5ecf68191' => 
     array (
       0 => '/var/www/html/admin2137/themes/default/template/helpers/form/form_group.tpl',
-      1 => 1731322567,
+      1 => 1731324198,
       2 => 'file',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6731e3e9036068_51951647 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6731eea34696a7_74114554 (Smarty_Internal_Template $_smarty_tpl) {
 if (count($_smarty_tpl->tpl_vars['groups']->value) && (isset($_smarty_tpl->tpl_vars['groups']->value))) {?>
 <div class="row">
 	<div class="col-lg-6">

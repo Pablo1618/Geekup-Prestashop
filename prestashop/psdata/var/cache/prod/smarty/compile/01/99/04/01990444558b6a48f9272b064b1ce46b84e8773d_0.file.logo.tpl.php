@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-11 12:00:57
+/* Smarty version 3.1.48, created on 2024-11-11 12:46:43
   from '/var/www/html/admin2137/themes/default/template/controllers/carrier_wizard/logo.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_6731e3e93e4358_38660887',
+  'unifunc' => 'content_6731eea383b576_45289238',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     '01990444558b6a48f9272b064b1ce46b84e8773d' => 
     array (
       0 => '/var/www/html/admin2137/themes/default/template/controllers/carrier_wizard/logo.tpl',
-      1 => 1731322567,
+      1 => 1731324198,
       2 => 'file',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6731e3e93e4358_38660887 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6731eea383b576_45289238 (Smarty_Internal_Template $_smarty_tpl) {
 ?>
 <div id="carrier_logo_block" class="panel">
 	<div class="panel-heading">
