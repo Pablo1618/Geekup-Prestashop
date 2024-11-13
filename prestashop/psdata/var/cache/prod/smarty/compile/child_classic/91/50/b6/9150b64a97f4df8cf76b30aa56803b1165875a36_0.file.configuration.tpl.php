@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-11 12:37:26
+/* Smarty version 3.1.48, created on 2024-11-13 20:39:36
   from '/var/www/html/modules/ps_checkout/views/templates/admin/configuration.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_6731ec76d45827_99102654',
+  'unifunc' => 'content_67350078769543_95167589',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     '9150b64a97f4df8cf76b30aa56803b1165875a36' => 
     array (
       0 => '/var/www/html/modules/ps_checkout/views/templates/admin/configuration.tpl',
-      1 => 1731324201,
+      1 => 1731526635,
       2 => 'file',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_6731ec76d45827_99102654 (Smarty_Internal_Template $_smarty_tpl) {
+function content_67350078769543_95167589 (Smarty_Internal_Template $_smarty_tpl) {
 if ((isset($_smarty_tpl->tpl_vars['hasRequiredDependencies']->value)) && !$_smarty_tpl->tpl_vars['hasRequiredDependencies']->value) {?>
   <?php echo '<script'; ?>
  src="https://assets.prestashop3.com/dst/mbo/v1/mbo-cdc-dependencies-resolver.umd.js"><?php echo '</script'; ?>
