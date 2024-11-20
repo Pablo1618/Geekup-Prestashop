@@ -53,20 +53,39 @@
 
         {include file='catalog/_partials/product-flags.tpl'}
       </div>
-      {* {$product|dump} *}
+      
       <div class="product-description">
         {block name='product_name'}
           {if $page.page_name == 'index'}
-            <h3 class="h3 product-title"><a href="{$product.url}" content="{$product.url}">{$product.name|truncate:30:'...'}</a></h3>
+            <span class="product-title"><a href="{$product.url}" content="{$product.url}">{$product.name|truncate:30:'...'}</a></span>
           {else}
-            <h2 class="h3 product-title"><a href="{$product.url}" content="{$product.url}">{$product.name|truncate:30:'...'}</a></h2>
+            <span class="product-title"><a href="{$product.url}" content="{$product.url}">{$product.name|truncate:30:'...'}</a></span>
           {/if}
         {/block}
 
         {block name='product_price_and_shipping'}
           {if $product.show_price}
             <div class="product-price-and-shipping">
+
+              <p class="price" aria-label="{l s='Price' d='Shop.Theme.Catalog'}">
+                {capture name='custom_price'}{hook h='displayProductPriceBlock' product=$product type='custom_price' hook_origin='products_list'}{/capture}
+                {if '' !== $smarty.capture.custom_price}
+                  {$smarty.capture.custom_price nofilter}
+                {else}
+                  {$product.price}
+                {/if}
+              </p>
+
               {if $product.has_discount}
+                {hook h='displayProductPriceBlock' product=$product type="old_price"}
+
+                <p class="regular-price-label">
+                  {l s='Regular price' d='Shop.Theme.Catalog'}
+                  <del class="regular-price" aria-label="{l s='Regular price' d='Shop.Theme.Catalog'}">{$product.regular_price}</del>
+                </p>
+              {/if}
+              
+              {* {if $product.has_discount}
                 {hook h='displayProductPriceBlock' product=$product type="old_price"}
 
                 <span class="regular-price" aria-label="{l s='Regular price' d='Shop.Theme.Catalog'}">{$product.regular_price}</span>
@@ -90,7 +109,7 @@
 
               {hook h='displayProductPriceBlock' product=$product type='unit_price'}
 
-              {hook h='displayProductPriceBlock' product=$product type='weight'}
+              {hook h='displayProductPriceBlock' product=$product type='weight'} *}
             </div>
           {/if}
         {/block}

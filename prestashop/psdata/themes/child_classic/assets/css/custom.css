@@ -556,6 +556,17 @@ p.h3.hidden-sm-down::before {
     font-size: 0.9rem !important;
 }
 
+.product-miniature {
+    height: 100%;
+    padding: 10px;
+    border-bottom: 1px solid #d8d8d8;
+}
+
+.product-miniature .product-description {
+    padding: 0;
+    margin: 10px 0 10px !important;
+}
+
 .product-flag.discount {
     position: absolute;
     bottom: 0;
@@ -568,4 +579,81 @@ p.h3.hidden-sm-down::before {
     font-weight: 500;
     border-radius: 1.4em;
     font-style: normal !important;
+}
+
+
+.product-miniature .product-price-and-shipping {
+    min-height: 0 !important;
+    margin: 0 0 10px !important;
+    padding: 25px 0 0 !important;
+}
+
+.price {
+    font-family: 'Montserrat',sans-serif;
+    text-align: left !important;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0 none;
+    line-height: 22px;
+    font-style: normal;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+}
+
+.product-miniature .product-title a {
+    border: 0;
+    outline: 0 none;
+    background: transparent;
+    color: #000;
+    text-align: left !important;
+    font-family: 'Montserrat',sans-serif;
+    height: 2.4em !important;
+    font-size: 1em !important;
+    line-height: 1.2em !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-weight: 500;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.regular-price-label {
+    font-family: 'Montserrat',sans-serif;
+    text-align: left !important;
+    background: transparent;
+    border: 0;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.5em;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    padding: .5em 0;
+    border-bottom: 1px solid #d8d8d8;
+    grid-gap: 0.2em;
+    align-items: end;
+    margin-top: 0;
+    color: #666;
+
+    min-height: 0 !important;
+    margin: 0 0 10px !important;
+    padding: 25px 0 0 !important;
+}
+
+.regular-price-label del {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0 none;
+    text-decoration: line-through;
+    font-size: 12px;
+    color: #6a6a6a;
+    font-weight: 500;
+    line-height: 1.5em;
+    text-align: center;
+    display: inline;
 }
