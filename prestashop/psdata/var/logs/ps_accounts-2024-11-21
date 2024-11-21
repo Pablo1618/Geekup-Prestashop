@@ -1,0 +1,4 @@
+[2024-11-21 19:52:11] ps_accounts.ERROR: PrestaShop\Module\PsAccounts\Repository\ConfigurationRepository::fixMultiShopConfig [] []
+[2024-11-21 19:52:11] ps_accounts.INFO: Install - Loading ps_accounts Env : [] [] []
+[2024-11-21 19:53:36] ps_accounts.ERROR: PrestaShop\Module\PsAccounts\Repository\ConfigurationRepository::fixMultiShopConfig [] []
+[2024-11-21 19:53:37] ps_accounts.INFO: Install - Loading ps_accounts Env : [] [] []

@@ -67,7 +67,7 @@
           {if $product.show_price}
             <div class="product-price-and-shipping">
 
-              <p class="price" aria-label="{l s='Price' d='Shop.Theme.Catalog'}">
+              <p class="product-miniature-price" aria-label="{l s='Price' d='Shop.Theme.Catalog'}">
                 {capture name='custom_price'}{hook h='displayProductPriceBlock' product=$product type='custom_price' hook_origin='products_list'}{/capture}
                 {if '' !== $smarty.capture.custom_price}
                   {$smarty.capture.custom_price nofilter}
@@ -78,13 +78,21 @@
 
               {if $product.has_discount}
                 {hook h='displayProductPriceBlock' product=$product type="old_price"}
-
                 <p class="regular-price-label">
                   {l s='Regular price' d='Shop.Theme.Catalog'}
                   <del class="regular-price" aria-label="{l s='Regular price' d='Shop.Theme.Catalog'}">{$product.regular_price}</del>
                 </p>
               {/if}
               
+              
+              {* {include file='catalog/_partials/product-add-to-cart.tpl'} *}
+              
+              {* {block name='quick_view'}
+                <a class="quick-view js-quick-view" href="#" data-link-action="quickview">
+                  <i class="material-icons search">&#xE8B6;</i> {l s='Quick view' d='Shop.Theme.Actions'}
+                </a>
+              {/block} *}
+
               {* {if $product.has_discount}
                 {hook h='displayProductPriceBlock' product=$product type="old_price"}
 
@@ -118,6 +126,22 @@
           {hook h='displayProductListReviews' product=$product}
         {/block}
       </div>
+
+
+      <form action="{$urls.pages.cart}" method="post" class="add-to-cart-or-refresh main-page-add-to-cart-form">
+        <input type="hidden" name="token" value="{$static_token}">
+        <input type="hidden" name="id_product" value="{$product.id}" class="product-page-product-id">
+        <input type="hidden" name="qty" value="1">
+        <button class="main-page-add-to-cart-button"
+          data-button-action="add-to-cart"
+          type="submit"
+          {if !$product.add_to_cart_url}
+            disabled
+          {/if}
+        >
+          {l s='Add to cart' d='Shop.Theme.Actions'}
+        </button>
+      </form>
     </div>
   </article>
 </div>

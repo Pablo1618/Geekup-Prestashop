@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-20 22:53:57
+/* Smarty version 3.1.48, created on 2024-11-21 19:59:56
   from '/var/www/html/themes/classic/templates/catalog/_partials/product-customization.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_673e5a75a92067_41820344',
+  'unifunc' => 'content_673f832c358797_23228431',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_673e5a75a92067_41820344 (Smarty_Internal_Template $_smarty_tpl) {
+function content_673f832c358797_23228431 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_loadInheritance();
 $_smarty_tpl->inheritance->init($_smarty_tpl, false);
 ?>
@@ -33,7 +33,7 @@ $_smarty_tpl->inheritance->init($_smarty_tpl, false);
 
 
       <?php 
-$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_473246045673e5a75a8d978_30329888', 'product_customization_form');
+$_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_1290067865673f832c353e84_23109987', 'product_customization_form');
 ?>
 
 
@@ -42,12 +42,12 @@ $_smarty_tpl->inheritance->instanceBlock($_smarty_tpl, 'Block_473246045673e5a75a
 </section>
 <?php }
 /* {block 'product_customization_form'} */
-class Block_473246045673e5a75a8d978_30329888 extends Smarty_Internal_Block
+class Block_1290067865673f832c353e84_23109987 extends Smarty_Internal_Block
 {
 public $subBlocks = array (
   'product_customization_form' => 
   array (
-    0 => 'Block_473246045673e5a75a8d978_30329888',
+    0 => 'Block_1290067865673f832c353e84_23109987',
   ),
 );
 public function callBlock(Smarty_Internal_Template $_smarty_tpl) {

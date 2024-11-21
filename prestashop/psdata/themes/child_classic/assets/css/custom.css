@@ -564,7 +564,13 @@ p.h3.hidden-sm-down::before {
 
 .product-miniature .product-description {
     padding: 0;
-    margin: 10px 0 10px !important;
+    margin: 10px 0 0px !important;
+}
+
+.product-miniature .thumbnail-container {
+    margin: 10px 0 0px !important;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-flag.discount {
@@ -588,12 +594,12 @@ p.h3.hidden-sm-down::before {
     padding: 25px 0 0 !important;
 }
 
-.price {
+.product-miniature-price {
     font-family: 'Montserrat',sans-serif;
     text-align: left !important;
     background: transparent;
     margin: 0;
-    padding: 0;
+    padding: 0 0 20px;
     border: 0;
     outline: 0 none;
     line-height: 22px;
@@ -632,7 +638,6 @@ p.h3.hidden-sm-down::before {
     font-size: 12px;
     display: flex;
     justify-content: space-between;
-    padding: .5em 0;
     border-bottom: 1px solid #d8d8d8;
     grid-gap: 0.2em;
     align-items: end;
@@ -641,7 +646,7 @@ p.h3.hidden-sm-down::before {
 
     min-height: 0 !important;
     margin: 0 0 10px !important;
-    padding: 25px 0 0 !important;
+    padding: 0 0 0 !important;
 }
 
 .regular-price-label del {
@@ -656,4 +661,54 @@ p.h3.hidden-sm-down::before {
     line-height: 1.5em;
     text-align: center;
     display: inline;
+}
+
+
+.main-page-add-to-cart-button {
+    outline: 0 none;
+    max-width: 100%;
+    position: relative;
+    text-transform: lowercase;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 0;
+    box-sizing: border-box;
+    height: 48px;
+    line-height: 1em;
+    padding: 0 15px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Montserrat',sans-serif;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    transition: background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out;
+    will-change: background-color,border-color,color;
+    border: 1px solid #f6a802;
+    color: #fff;
+    border-color: #f6a802;
+    box-shadow: none;
+    background: #f6a802;
+}
+
+.main-page-add-to-cart-button:hover {
+    transition: background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out;
+    will-change: background-color,border-color,color;
+    color: #fff;
+    border-color: black;
+    background: black;
+}
+
+.main-page-add-to-cart-form {
+    text-align: left !important;
+    padding: 0;
+    border: 0;
+    outline: 0 none;
+    font-size: 100%;
+    background: transparent;
+    margin-top: auto;
+    margin-bottom: 0px;
 }
