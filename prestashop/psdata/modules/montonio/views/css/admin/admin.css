@@ -1,0 +1,31 @@
+#montonio-payment-methods-order {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.montonio-list-group-item {
+    margin: 0 0 4px 0;
+    padding: 10px;
+    background-color: rgb(245, 248, 249);
+    border-bottom: 1px solid rgb(199, 214, 219);
+    cursor: move;
+    border-radius: 4px;
+    width: 184px;
+}
+.backfill-checkbox {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.backfill-checkbox .backfill-checkbox-label {
+    margin-bottom: 0;
+    font-weight: normal;
+}
+
+.backfill-checkbox .backfill-checkbox-input[type="checkbox"] {
+    margin: 0;
+    margin-right: 4px;
+}

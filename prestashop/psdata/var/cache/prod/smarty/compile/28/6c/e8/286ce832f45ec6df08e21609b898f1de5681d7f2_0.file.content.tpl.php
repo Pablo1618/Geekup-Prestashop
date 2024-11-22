@@ -1,18 +1,18 @@
 <?php
-/* Smarty version 3.1.48, created on 2024-11-13 20:39:34
+/* Smarty version 3.1.48, created on 2024-11-22 18:42:35
   from '/var/www/html/admin2137/themes/new-theme/template/content.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.48',
-  'unifunc' => 'content_67350076867c52_33227306',
+  'unifunc' => 'content_6740c28b0d4973_37878016',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
     '286ce832f45ec6df08e21609b898f1de5681d7f2' => 
     array (
       0 => '/var/www/html/admin2137/themes/new-theme/template/content.tpl',
-      1 => 1731526635,
+      1 => 1731775526,
       2 => 'file',
     ),
   ),
@@ -20,7 +20,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   array (
   ),
 ),false)) {
-function content_67350076867c52_33227306 (Smarty_Internal_Template $_smarty_tpl) {
+function content_6740c28b0d4973_37878016 (Smarty_Internal_Template $_smarty_tpl) {
 ?>
 <div id="ajax_confirmation" class="alert alert-success" style="display: none;"></div>
 
