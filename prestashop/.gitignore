@@ -1,7 +1,5 @@
 /upload/*
 !/upload/.htaccess
-psdata/app/config/parameters.php
-psdata/config/defines_custom.inc.php
 psdata/var/cache
 psdata/var/logs
 psdata/var/sessions
