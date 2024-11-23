@@ -32,9 +32,9 @@ sudo chmod -R 777 Geekup-Prestashop
 ```
 
 #### Now you can access the website:
-[localhost:8080](localhost:8080 "localhost:8080")
+http://localhost:8080/
 #### Also you have access to the admin panel:
-[localhost:8080/admin2137](localhost:8080/admin2137 "localhost:8080/admin2137")
+http://localhost:8080/admin2137
 
 
 ## Software versions
