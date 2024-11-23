@@ -4,10 +4,10 @@
 
 # Geekup-Prestashop
 
-Kopia sklepu internetowego geekup.pl z wykorzystaniem PrestaShop
+Copy of website geekup.pl in PrestaShop
 
 
-## Członkowie zespołu
+## Team members
 
 - Michał Grabowski 193314
 - Patryk Sawuk 193059
@@ -16,14 +16,31 @@ Kopia sklepu internetowego geekup.pl z wykorzystaniem PrestaShop
 - Filip Jezierski 196333
 
 
-## Sposób uruchomienia
+## How to run it locally
 
-Todo
+Firstly, you have to install Docker and Git if you dont have them already
+#### Pull this repository from GitHub and then:
+
+##### Start docker container (while being in directory with docker-compose.yml file):
+```
+docker compose up -d
+```
+##### It is possible that you will have to give access to the files:
+```
+sudo chmod -R 777 Geekup-Prestashop
+```
+[========]
+#### Now you can access the website:
+##### [localhost:8080](localhost:8080 "localhost:8080")
+#### Also you have access to the admin panel:
+##### [localhost:8080/admin2137](localhost:8080/admin2137 "localhost:8080/admin2137")
 
 
-## Wersja oprogramowania
+## Software versions
 
 **Prestashop:** 1.7.8
 
-**Selenium:** -
+**Selenium:** 4.26.0
+
+**JUnit**  4.13.2
 
