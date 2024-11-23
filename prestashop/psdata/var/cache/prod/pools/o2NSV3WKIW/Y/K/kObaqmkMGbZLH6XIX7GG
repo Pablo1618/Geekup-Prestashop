@@ -1,4 +1,0 @@
-<?php return array (
-  0 => 9223372036854775807,
-  1 => 'a:1:{i:0;O:52:"PrestaShopBundle\\Security\\Annotation\\ModuleActivated":4:{s:9:"' . "\0" . '*' . "\0" . 'domain";s:25:"Admin.Notifications.Error";s:10:"' . "\0" . '*' . "\0" . 'message";s:26:"The module %s is inactive.";s:16:"' . "\0" . '*' . "\0" . 'redirectRoute";s:19:"admin_module_manage";s:13:"' . "\0" . '*' . "\0" . 'moduleName";s:11:"ps_linklist";}}',
-);

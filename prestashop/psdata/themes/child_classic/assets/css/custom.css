@@ -555,3 +555,19 @@ p.h3.hidden-sm-down::before {
 .wce_description {
     font-size: 0.9rem !important;
 }
+
+.banner {
+    position: relative;   /* Pozwala na wychodzenie poza kontener */
+    width: 100vw;         /* Ustawia szerokość banera na 100% szerokości ekranu */
+    margin-left: calc(-50vw + 50%);  /* Przesuwa baner na całą szerokość okna */
+}
+
+.banner img {
+    width: 100%;     /* Ustala szerokość obrazka na 100% szerokości kontenera */
+    height: auto;    /* Utrzymuje proporcje obrazka */
+    display: block;  /* Usuwa przestrzeń pod obrazkiem */
+}
+
+
+
+

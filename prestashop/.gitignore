@@ -1,0 +1,5 @@
+/upload/*
+!/upload/.htaccess
+psdata/var/cache
+psdata/var/logs
+psdata/var/sessions
