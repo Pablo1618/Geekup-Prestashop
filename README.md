@@ -4,7 +4,7 @@
 
 # Geekup-Prestashop
 
-Copy of website geekup.pl in PrestaShop
+Copy of website geekup.pl in PrestaShop.
 
 
 ## Team members
@@ -18,22 +18,23 @@ Copy of website geekup.pl in PrestaShop
 
 ## How to run it locally
 
-Firstly, you have to install Docker and Git if you dont have them already
+Firstly, you have to install Docker and Git if you dont have them already.
+<br>If you are using Windows you will also have to install WSL.
 #### Pull this repository from GitHub and then:
 
-##### Start docker container (while being in directory with docker-compose.yml file):
+Start docker container (while being in directory with docker-compose.yml file):
 ```
 docker compose up -d
 ```
-##### It is possible that you will have to give access to the files:
+It is possible that you will have to give access to the files:
 ```
 sudo chmod -R 777 Geekup-Prestashop
 ```
-[========]
+
 #### Now you can access the website:
-##### [localhost:8080](localhost:8080 "localhost:8080")
+[localhost:8080](localhost:8080 "localhost:8080")
 #### Also you have access to the admin panel:
-##### [localhost:8080/admin2137](localhost:8080/admin2137 "localhost:8080/admin2137")
+[localhost:8080/admin2137](localhost:8080/admin2137 "localhost:8080/admin2137")
 
 
 ## Software versions
