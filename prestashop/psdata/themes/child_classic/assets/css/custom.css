@@ -568,6 +568,190 @@ p.h3.hidden-sm-down::before {
     display: block;  /* Usuwa przestrzeń pod obrazkiem */
 }
 
+.product-flags li.product-flag.discount-percentage, .product-flags li.product-flag.discount-amount, .product-flags li.product-flag.discount {
+    background-color: #f6a802;
+    border-radius: 2rem;
+}
 
+.promo {
+    border-radius: 0.5rem;
+    position: absolute;
+    left: 0;
+    background-color:#c40000 ;
+    padding: 0.3125rem 0.4375rem;
+    color: #fff !important;
+}
 
+.product-flags li.product-flag {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    padding: 0.5125rem 1.9375rem;
+    position:absolute;
+    bottom: 0;
+    right: 0;
+    margin-top: .625rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    pointer-events: auto;
+    background: #24b9d7;
+}
+.product-flags {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 18%;
+    z-index: 2;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    width: 100%;
+    pointer-events: none;
+}
 
+.product-width {
+    width: 140%;
+    margin-left: -20%;
+}
+
+#wrapper .breadcrumb li::after {
+    color: rgb(246, 168, 2);
+    font-weight: 900;
+    content: ">";
+    margin: 0.3125rem;
+}
+
+.col-md-6.product-content-1 {
+    width: 40%;
+}
+
+.col-md-6.product-content-2 {
+    width: 55%;
+}
+
+.product-line {
+    height: 3px;
+    width: 100%;
+    border-radius: 3px;
+    background: #f6a802;
+    margin-bottom: 20px;
+    display: block;
+}
+
+span.cena-name {
+    color: #f6a802;
+    font-weight: 900;
+}
+
+span.current-price-value {
+    display: inline-block;
+    color: black;
+    font-size: 2rem;
+}
+
+span.product-price {
+    display: inline-block;
+    color: black;
+    font-size: 2rem;
+}
+
+.product-discount {
+    color: #333333;
+}
+
+span.regular-price {
+    color: #000;
+    font-weight: 900;
+}
+
+.product-actions.js-product-actions {
+    background-color: #f9f9f9;
+}
+
+form#add-to-cart-or-refresh {
+    margin-left: auto;
+    margin-right: auto;
+    width: 98%;
+}
+
+.row {
+    margin-right: -15px;
+    margin-left: 0px;
+}
+
+.manufacturer, .delivery, .shipping-costs, .availability {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 20px;
+    padding: 5px 0;
+    font-size: 14px;
+}
+
+.hint:hover .icon {
+    color: #3c83ec;
+}
+
+.hint .icon {
+    vertical-align: middle;
+}
+
+.icon {
+    font-size: 1rem;
+}
+
+.hint__content {
+    position: absolute;
+    display: none;
+    right: 1.5%;
+    top: calc(100% + -9px);
+    font-size: 13px;
+    line-height: 1.5em;
+    z-index: 5;
+    min-width: 258px;
+    padding: 1rem;
+    text-align: left;
+    background-color: #fff;
+    box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.hint__content::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: -14px;
+    right: 4px;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent #fff transparent;
+}
+
+.hint:hover .hint__content {
+    display: block;
+}
+
+.availability {
+    grid-column-gap: 5px;
+}
+
+.shipping-costs .showShippingCost {
+    grid-column-start: 2;
+    grid-row-start: 2;
+    text-align: left;
+    width: auto;
+    color: #000;
+    font-size: 0.8em;
+    text-decoration: underline;
+}
+
+.showShippingCost:hover {
+    text-decoration: none;
+}
