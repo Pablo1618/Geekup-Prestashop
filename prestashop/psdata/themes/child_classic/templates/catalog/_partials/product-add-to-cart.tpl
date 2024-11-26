@@ -48,22 +48,37 @@
         </div>
 
         <div class="add">
-          <button
-            class="btn btn-primary add-to-cart"
-            data-button-action="add-to-cart"
-            type="submit"
-            {if !$product.add_to_cart_url}
-              disabled
-            {/if}
-          >
-            <i class="material-icons shopping-cart">&#xE547;</i>
-            {l s='Add to cart' d='Shop.Theme.Actions'}
-          </button>
+          <div style="margin-bottom: -0.5rem;">
+            <button
+              class="btn btn-primary add-to-cart"
+              data-button-action="add-to-cart"
+              type="submit"
+              {if !$product.add_to_cart_url}
+                disabled
+              {/if}
+            >
+              {*<i class="material-icons shopping-cart">&#xE547;</i>*}
+              {l s='Add to cart' d='Shop.Theme.Actions'}
+            </button>
+          </div>
+          <div class="inpostizi-button inpostizi-bind-button inpostizi-bind-button-primary  inpostizi-bind-button-PRODUCT_CARD size-220x80 inpostizi-button-rounded" style="max-width: 600px">
+            <div class="inpostizi-bind-button-body">
+              <div class="inpostizi-bind-button-content">
+                Dodaj do koszyka
+                <div class="inpostizi-image-logo"></div>
+              </div>
+            </div>
+            <span class="inpostizi-button-bottom">
+              Kupuj, śledź i odbieraj z apką InPost!
+              <a target="_blank" href="https://www.inpostpay.pl/" class="inpostizi-button-bottom-link" rel="nofollow noopener noreferrer">więcej</a>
+            </span>
+          </div>
         </div>
 
-        {hook h='displayProductActions' product=$product}
+        {*{hook h='displayProductActions' product=$product}*}
       </div>
     {/block}
+
 
     {block name='product_availability'}
       <span id="product-availability" class="js-product-availability">

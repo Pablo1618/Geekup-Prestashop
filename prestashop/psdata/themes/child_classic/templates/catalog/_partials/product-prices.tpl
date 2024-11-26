@@ -57,6 +57,10 @@
           {hook h='displayProductPriceBlock' product=$product type="old_price"}
           <span class="regular-price">{$product.regular_price}</span>
         </div>
+        <div class="current-price">
+          <span>Najniższa cena z 30 dni przed obniżką: </span>
+          <span class="regular-price">{$product.price}</span>
+        </div>
       {/if}
     {/block}
 

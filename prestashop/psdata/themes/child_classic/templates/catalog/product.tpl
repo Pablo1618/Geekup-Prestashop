@@ -83,12 +83,14 @@
               <div class="product-info row">
                 <div class="row manufacturer">
                   <span class="first">Producent: </span>
-                  
+                  <a href="{$product_brand_url}">
+                    <span class="second">{$product_manufacturer->name}</span>
+                  </a>
                 </div>
                 <div class="row">
                   <div class="row availability">
                     <span class="first">Dostępność:</span>
-                    <span class="second"></span>
+                    <span class="second">{$product.availability}</span>
                   </div>
               
                   <div class="delivery">
@@ -158,7 +160,7 @@
                     {block name='product_add_to_cart'}
                       {include file='catalog/_partials/product-add-to-cart.tpl'}
                     {/block}
-  
+
                     {* {block name='product_additional_info'}
                       {include file='catalog/_partials/product-additional-info.tpl'}
                     {/block} *}

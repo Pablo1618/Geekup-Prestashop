@@ -681,7 +681,8 @@ span.regular-price {
 form#add-to-cart-or-refresh {
     margin-left: auto;
     margin-right: auto;
-    width: 98%;
+    width: 75%;
+    padding-top: 0.5rem;
 }
 
 .row {
@@ -927,4 +928,181 @@ form#add-to-cart-or-refresh {
 
 .product-miniature .promo {
     display: none;
+}
+
+.product-add-to-cart .btn-primary {
+    outline: 0 none;
+    max-width: 100%;
+    position: relative;
+    text-transform: lowercase;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 0;
+    box-sizing: border-box;
+    height: 48px;
+    line-height: 1em;
+    padding: 0 54px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Montserrat',sans-serif;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    transition: background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out;
+    will-change: background-color,border-color,color;
+    border: 1px solid #f6a802;
+    color: #fff;
+    border-color: #f6a802;
+    box-shadow: none;
+    background: #f6a802;
+}
+.product-add-to-cart .btn-primary:hover {
+    transition: background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out;
+    will-change: background-color,border-color,color;
+    color: #fff;
+    border-color: black;
+    background: black;
+}
+
+.product-images>li.thumb-container>.thumb.selected, .product-images>li.thumb-container>.thumb {
+    border: #c8c8c8 2px solid;
+}
+
+.product-images>li.thumb-container>.thumb.selected:hover, .product-images>li.thumb-container>.thumb:hover {
+    border: #c8c8c8 3px solid;
+}
+
+.h1 {
+    font-weight: 900;
+    font-size: 1.8rem;
+    text-transform: none;
+}
+
+.inpostizi-button-rounded .inpostizi-bind-button-body {
+    border-radius: 8px !important;
+}
+
+.inpostizi-bind-button-primary .inpostizi-bind-button-body {
+    background: #ffcd00;
+}
+.inpostizi-bind-button-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    cursor: pointer;
+    user-select: none;
+    min-height: 48px;
+    padding: 8px;
+}
+.inpostizi-button * {
+    box-sizing: border-box;
+}
+
+.size-220x80.inpostizi-bind-button .inpostizi-bind-button-content {
+    font-size: 10px;
+}
+
+.size-220x80 .inpostizi-bind-button-content, .size-220x68 .inpostizi-bind-button-content, .size-220x64 .inpostizi-bind-button-content, .size-220x60 .inpostizi-bind-button-content {
+    gap: 6px;
+}
+.inpostizi-bind-button .inpostizi-bind-button-content {
+    gap: 12px;
+}
+.inpostizi-bind-button-content {
+    font-family: "Inpost Montserrat";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 16px;
+    text-align: left;
+    letter-spacing: 0.3px;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    white-space: nowrap;
+}
+
+.size-240x80 .inpostizi-button-bottom, .size-220x80 .inpostizi-button-bottom, .size-220x68 .inpostizi-button-bottom, .size-220x64 .inpostizi-button-bottom, .size-220x60 .inpostizi-button-bottom {
+    font-size: 10px;
+}
+
+.inpostizi-button .inpostizi-button-bottom {
+    color: #262628 !important;
+}
+.inpostizi-button-bottom {
+    font-family: "Inpost Montserrat";
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+    text-align: center;
+    color: inherit;
+    padding: 8px 0;
+    display: inline-block;
+    width: 100%;
+}
+
+.inpostizi-button-bottom-link {
+    color: #ff2b7e;
+    text-decoration: none;
+    text-transform: capitalize;
+}
+
+.product-quantity .add {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inpostizi-button-bottom {
+    text-align: center; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 10px; 
+    word-wrap: break-word; 
+    word-break: break-word;
+    max-width: 100%; 
+    box-sizing: border-box; 
+}
+  
+.inpostizi-button-bottom-link {
+    display: inline-block; 
+    text-decoration: none; 
+    text-align: center; 
+    white-space: normal;
+}
+  
+.size-220x80.inpostizi-bind-button .inpostizi-bind-button-content .inpostizi-image-logo {
+    width: 70.83px;
+    height: 20px;
+}
+.inpostizi-image-logo {
+    background-image: url(https://static.inpost.pl/izi_images/inpost3.svg);
+}
+.inpostizi-bind-button-content .inpostizi-image-logo {
+    width: 85px;
+    height: 24px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    min-width: 25.86px;
+}
+
+.manufacturer>a:hover {
+    text-decoration: none;
+    color: #000;
+}
+.manufacturer>a {
+    color: #000;
+    font-weight: 500;
+    position: relative;
+    text-decoration: underline;
 }
