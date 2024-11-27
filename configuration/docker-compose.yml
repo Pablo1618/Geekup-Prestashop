@@ -19,8 +19,11 @@ services:
       - mysql
     ports:
       - 8080:80
+      - 8443:443  # Add SSL port mapping
     volumes:
       - ../prestashop/psdata:/var/www/html
+      - ./certs:/etc/apache2/ssl  # Map certs directory to Apache
+      - ./ssl.conf:/etc/apache2/sites-available/default-ssl.conf  # Map ssl configuration file
     environment:
       DB_SERVER: some-mysql
       DB_NAME: prestashop
@@ -28,10 +31,19 @@ services:
       DB_PASSWD: admin
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:8080
+      PS_SSL_DOMAIN: localhost:8443   # HTTPS domain (SSL)
       PS_FOLDER_ADMIN: admin2137
       PS_FOLDER_INSTALL: install2137
     networks:
       - prestashop_network
+    command: >
+      bash -c "
+      echo 'ServerName localhost' >> /etc/apache2/apache2.conf &&
+      a2enmod ssl &&
+      a2ensite default-ssl &&
+      apache2-foreground
+      "
+    
   pma:
     container_name: pma
     image: phpmyadmin/phpmyadmin:5.2.1
