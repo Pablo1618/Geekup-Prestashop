@@ -659,7 +659,7 @@ span.current-price-value {
     font-size: 2rem;
 }
 
-span.product-price {
+.product-container span.product-price {
     display: inline-block;
     color: black;
     font-size: 2rem;
@@ -683,6 +683,10 @@ form#add-to-cart-or-refresh {
     margin-right: auto;
     width: 75%;
     padding-top: 0.5rem;
+}
+
+.card-block.checkout .btn-primary {
+    font-size: 0.85rem;
 }
 
 .row {
