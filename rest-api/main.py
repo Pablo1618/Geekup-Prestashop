@@ -10,6 +10,9 @@ import requests
 import base64
 import lxml.etree as ET  # Changed to lxml
 
+import mimetypes
+from PIL import Image
+
 # API stuff
 domain = "http://localhost:8080"
 key = "K1TQX9S3AMSY1DCRWCQM5UAPHCTEUYQ5"
@@ -32,6 +35,10 @@ imageFolderRelativePath = "../ScrapedData/images/"
 
 
 maxAllowedTimeout = 8.0
+
+
+ourIDToPrestashopID = {}
+prestashopIDToOurID = {}
 
 
 def getAllCategories():
@@ -111,13 +118,31 @@ async def deleteAllProducts():
 
 
 async def addCategory(client, category, semaphor):
+    global ourIDToPrestashopID
+    global prestashopIDToOurID
+
     async with semaphor:
         url = domain + "/api/categories"
 
-        res = await client.post(url, data=category, headers=xmlHeaders, timeout=maxAllowedTimeout)
+        res = await client.post(url, data=category['xml'], headers=xmlHeaders, timeout=maxAllowedTimeout)
 
         if res.status_code == 200 or res.status_code == 201:
             print(f"category added")
+
+            root = ET.fromstring(res.content)
+
+           # print(res.content)
+
+            prestashopID = root.find("./category/id").text
+
+            #print(prestashopID)
+
+            ourIDToPrestashopID[str(category['ourID'])] = str(prestashopID)
+            prestashopIDToOurID[str(prestashopID)] = str(category['ourID'])
+
+
+
+
         else:
             print(res.status_code)
             print(res.text)
@@ -146,59 +171,52 @@ async def updateCategoryParent(client, category, categoryNameData, semaphor):
 
         thisName = resXML.find('./category/name/language').text
 
-        if thisName.strip() == "Home":
+        if thisName.strip() == "Home" or thisID <=2:
             return
 
-        if thisName in categoryNameData:
-            parentName = categoryNameData[thisName]['parentName']
 
-            getParentURL = domain + f"/api/categories?filter[name]=[{parentName.strip()}]"
 
-            for i in range(0, 2):
-                res = await client.get(getParentURL, headers=headers, timeout=maxAllowedTimeout)
-                if res.status_code == 200:
-                    break
 
-            resXML2 = ET.fromstring(res.content)  # Use .content to get bytes
+        ourID = prestashopIDToOurID[str(thisID)]
+        ourParentID = categoryNameData[str(ourID)]
 
-            categoryElement = resXML2.find('.//category')
-            if not categoryElement is None:
-                parentID = categoryElement.attrib['id']
+        if ourParentID == "1":
+            prestashopParentID = 2
+        else:
+            prestashopParentID = ourIDToPrestashopID[str(ourParentID)]
 
-                activeValue = resXML.find('./category/active').text
-                nameValue = resXML.find('./category/name/language').text
-                isRoot = resXML.find('./category/is_root_category').text
-                linkRewrite = resXML.find('./category/link_rewrite/language').text
 
-                updateXML = f"""
-                    <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
-                       <category>
-                                <id><![CDATA[{thisID}]]></id>
-                                <active><![CDATA[{activeValue}]]></active>
-                                <name>
-                                    <language id="1"><![CDATA[{nameValue}]]></language>
-                                    <language id="2"><![CDATA[{nameValue}]]></language>
-                                </name>
-                                <id_parent><![CDATA[{parentID}]]></id_parent>
-                                <is_root_category><![CDATA[{isRoot}]]></is_root_category>
-                                <link_rewrite>
-                                    <language id="1"><![CDATA[{linkRewrite}]]></language>
-                                    <language id="2"><![CDATA[{linkRewrite}]]></language>
-                                </link_rewrite>
-                            </category>
-                    </prestashop>
-                    """
+        activeValue = resXML.find('./category/active').text
+        nameValue = resXML.find('./category/name/language').text
+        isRoot = resXML.find('./category/is_root_category').text
+        linkRewrite = resXML.find('./category/link_rewrite/language').text
 
-                res = await client.put(url, data=updateXML, headers=xmlHeaders, timeout=maxAllowedTimeout)
+        updateXML = f"""
+            <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+               <category>
+                        <id><![CDATA[{thisID}]]></id>
+                        <active><![CDATA[{activeValue}]]></active>
+                        <name>
+                            <language id="1"><![CDATA[{nameValue}]]></language>
+                            <language id="2"><![CDATA[{nameValue}]]></language>
+                        </name>
+                        <id_parent><![CDATA[{prestashopParentID}]]></id_parent>
+                        <is_root_category><![CDATA[{isRoot}]]></is_root_category>
+                        <link_rewrite>
+                            <language id="1"><![CDATA[{linkRewrite}]]></language>
+                            <language id="2"><![CDATA[{linkRewrite}]]></language>
+                        </link_rewrite>
+                    </category>
+            </prestashop>
+            """
 
-                if res.status_code == 200:
-                    print(f"Updated parents for {thisID}")
-                else:
-                    print(res.status_code)
-                    print(res.text)
-            else:
-                # We are at the root, no need to do anything
-                pass
+        res = await client.put(url, data=updateXML, headers=xmlHeaders, timeout=maxAllowedTimeout)
+
+        if res.status_code == 200:
+            print(f"Updated parents for {thisID}")
+        else:
+            print(res.status_code)
+            print(res.text)
 
 
 async def updateCategoryParentsAsync(categories, categoryNameData):
@@ -217,7 +235,12 @@ def addCategories():
 
         for row in csvReader:
 
-            categories.append(f"""<?xml version="1.0" encoding="UTF-8"?>
+            if row.get("Name *").strip().lower() == "home":
+                continue
+
+            categories.append(
+                {
+                    "xml":  f"""<?xml version="1.0" encoding="UTF-8"?>
                         <prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
                             <category>
                                 <active><![CDATA[{int(row.get("Active (0/1)", 0))}]]></active>
@@ -233,9 +256,15 @@ def addCategories():
                                 </link_rewrite>
                             </category>
                         </prestashop>
-                    """)
+                    """,
 
-            categoryNameData[row.get("Name *")] = {"parentName": row.get("Parent category")}
+                    "ourID": str(row.get("ID"))
+                 }
+
+               )
+
+            categoryNameData[str(row.get("ID"))] = str(row.get("ParentID"))
+
 
     asyncio.run(addCategoriesAsync(categories))
 
@@ -357,9 +386,11 @@ def addProducts():
     manufacturers = []
     manufacturerNameToID = {}
 
-    categoryNameToID = asyncio.run(getCategoryNameToID())
+    categoryNameToID, IDToCategoryName = asyncio.run(getCatNameToIDAndReverse())
 
-    with open('productsWithImages.csv', newline='', encoding='utf-8') as file:
+    print(categoryNameToID)
+
+    with open(productsInputName, newline='', encoding='utf-8') as file:
         csvReader = csv.DictReader(file, delimiter=';')
 
         for row in csvReader:
@@ -377,11 +408,18 @@ def addProducts():
 
             categories = []
             for oldCategory in oldCategories:
-                if oldCategory.strip().lower() in categoryNameToID:
-                    categoryID = categoryNameToID[oldCategory.strip().lower()]
-                    categories.append(categoryID)
-                else:
-                    pass
+
+                #oldCategory contains ourIDs, we need to convert to presta
+
+                prestashopID = ourIDToPrestashopID[str(oldCategory)]
+
+                categories.append(prestashopID)
+
+
+
+
+
+
             if categories == []:
                 continue
 
@@ -436,22 +474,33 @@ def addProducts():
     asyncio.run(addProductsAsync(products, manufacturerNameToID))
 
 
-async def getCategoryNameToID():
-    url = domain + "/api/categories?display=[id,name]&limit=1000&offset=0"
+async def getCatNameToIDAndReverse():
+    url = domain + "/api/categories?display=[id,name,id_parent]&limit=1000&offset=0"
     async with httpx.AsyncClient() as client:
         res = await client.get(url, headers=xmlHeaders, timeout=maxAllowedTimeout)
 
         if res.status_code == 200:
             resXML = ET.fromstring(res.content)  # Use .content to get bytes
 
-            categoryDict = {}
+            nameToIDDict = {}
+            IDToNameDict ={}
 
             for category in resXML.findall(".//category"):
                 categoryID = category.find("id").text
+                parentID = category.find("id_parent").text
                 categoryName = category.find("./name/language").text
-                categoryDict[categoryName.strip().lower()] = categoryID
 
-            return categoryDict
+                IDToNameDict[str(categoryID)] = categoryName
+
+                if categoryName.strip().lower() in nameToIDDict:
+                    nameToIDDict[categoryName.strip().lower()].append({"id": categoryID, "parentID": parentID})
+
+                else:
+                    nameToIDDict[categoryName.strip().lower()] = [{"id":categoryID, "parentID": parentID}]
+
+
+
+            return nameToIDDict, IDToNameDict
         else:
             print(res.status_code)
             print(res.text)
@@ -543,6 +592,21 @@ async def addImageAsync(client, productData, semaphor):
     for imageFilename in os.listdir(pathToImageFolder):
         pathToThisImage = os.path.join(pathToImageFolder, imageFilename)
 
+        mime_type, _ = mimetypes.guess_type(pathToThisImage)
+
+        #prestashop only supports those three
+        if mime_type not in ['image/png', 'image/jpeg', 'image/gif']:
+            print("Converting image to proper format!")
+
+            try:
+                with Image.open(pathToThisImage) as image:
+                    newPath = os.path.splitext(pathToThisImage)[0] + ".png"
+                    image.convert("RGBA").save(newPath, "PNG")
+                    pathToThisImage = newPath
+                    imageFilename = os.path.basename(pathToThisImage)
+            except Exception as e:
+                print(e)
+
         try:
             async with semaphor:
 
@@ -581,7 +645,7 @@ def addAllImages():
 
 
     productDatas = []
-    with open('productsWithImages.csv', newline='', encoding='utf-8') as file:
+    with open(productsInputName, newline='', encoding='utf-8') as file:
         csvReader = csv.DictReader(file, delimiter=';')
 
         for row in csvReader:
@@ -605,11 +669,11 @@ def addAllImages():
 
 if __name__ == "__main__":
 
-    if False:
+    if True:
         asyncio.run(deleteAllCategories())
         addCategories()
 
-    if False:
+    if True:
         asyncio.run(deleteAllProducts())
         addProducts()
 

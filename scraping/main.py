@@ -43,6 +43,15 @@ productDictionary = {
 
 imageResultPromises =[]
 
+idCounter = 1
+
+def getNewID():
+    global idCounter
+
+    idCounter+=1
+
+    return idCounter
+
 
 #No idea if this actually helps, but supposedly this was a popular exploit sometime ago, so might help
 def getRandomIP():
@@ -63,7 +72,7 @@ def getCustomHeaders():
 
 
 
-def categoryCrawlHelper(parentName, currentLi):
+def categoryCrawlHelper(parentName, currentLi, lastID):
     global categoryPageLinks
 
     categoriesHere = []
@@ -71,13 +80,18 @@ def categoryCrawlHelper(parentName, currentLi):
     try:
         element = currentLi.find_element(By.TAG_NAME, "a")
         thisTitle = element.get_attribute('title')
+
+        idHere = getNewID()
         if thisTitle is None:
             thisTitle = ""
         else:
             categoryPageLinks.append(
                 {
                     "href":element.get_attribute("href"),
-                    "name": thisTitle
+                    "name": thisTitle,
+                    "parentName": parentName,
+                    "id": idHere,
+                    "parentID": lastID
                 }
             )
             categoriesHere.append(parentName + "|" + thisTitle)
@@ -91,7 +105,7 @@ def categoryCrawlHelper(parentName, currentLi):
             ulChildren = currentUl.find_elements(By.XPATH, './li')
 
             for child in ulChildren:
-                categoriesThere = categoryCrawlHelper(thisTitle, child)
+                categoriesThere = categoryCrawlHelper(thisTitle, child, idHere)
                 categoriesHere.extend(categoriesThere)
     except:
         pass
@@ -130,7 +144,7 @@ def getAllCategories():
     #get only children of standard
     for li in ul.find_elements(By.XPATH, './li'):
 
-        categories.extend(categoryCrawlHelper("Home", li))
+        categories.extend(categoryCrawlHelper("Home", li, 1))
 
 
 
@@ -146,7 +160,7 @@ def downloadImage(imageLink, folder):
     except:
         pass
 
-def scrapeProduct(fullURL, categoryName):
+def scrapeProduct(fullURL, id):
     global productDictionary
 
 
@@ -180,15 +194,10 @@ def scrapeProduct(fullURL, categoryName):
             imageResultPromises.extend([executor.submit(downloadImage, imageLink, folder) for imageLink in imageLinks])
 
 
-        allCategories = [brand]
-        categoryMetas = html.findAll("meta", attrs={"itemprop": "category"})
 
         descriptionHolder = html.find("div", attrs={"itemprop": "description"})
         description = str(descriptionHolder)
 
-
-        for meta in categoryMetas:
-            allCategories.append(meta['content'])
 
 
         imageUrls = []
@@ -196,7 +205,7 @@ def scrapeProduct(fullURL, categoryName):
         for link in imageLinks:
             imageUrls.append(link.split('/')[-1].replace(" ", "_"))
 
-
+        categoryIDs = [id]
 
         #we are using brand twice here (wasting space) for simplicity later.
         productJSON = {
@@ -206,17 +215,18 @@ def scrapeProduct(fullURL, categoryName):
             "availability": availability,
             "delivery": delivery,
             "description": description,
-            "categories": allCategories,
+            "categoryIDs": categoryIDs,
             "imageUrls":imageUrls,
-            "url": fullURL
+            "url": fullURL,
+
 
         }
 
         if fullURL in productDictionary:
-            if categoryName not in productDictionary[fullURL]['categories'] and categoryName != " ":
-                productDictionary[fullURL]['categories'].append(categoryName)
+            if id not in productDictionary[fullURL]['categoryIDs']:
+                productDictionary[fullURL]['categoryIDs'].append(id)
                 print("\t in scrapingOneProduct")
-                print(productDictionary[fullURL]['categories'])
+                print(productDictionary[fullURL]['categoryIDs'])
         else:
             productDictionary[fullURL] = productJSON
 
@@ -225,10 +235,8 @@ def scrapeProduct(fullURL, categoryName):
     except  Exception as error:
         pass
 
-def scrapeProductsPage(pageLink, oldCategoryName):
+def scrapeProductsPage(pageLink, id):
     global productDictionary
-
-    categoryName = str(oldCategoryName)
 
     try:
         pageContent = session.get(pageLink, headers=getCustomHeaders(), timeout=10)
@@ -247,16 +255,16 @@ def scrapeProductsPage(pageLink, oldCategoryName):
         if fullURL not in productDictionary:
             productPages.append(fullURL)
         else:
-            if categoryName not in productDictionary[fullURL]['categories']:
-                productDictionary[fullURL]['categories'].append(categoryName)
+            if id not in productDictionary[fullURL]['categoryIDs']:
+                productDictionary[fullURL]['categoryIDs'].append(id)
                 print("\t before scrapingOneProduct")
-                print(productDictionary[fullURL]['categories'])
+                print(productDictionary[fullURL]['categoryIDs'])
 
 
     with tqdm(total=len(productPages), desc=f"Progress of {pageLink}", position=0) as pageProgress:
         with concurrent.futures.ThreadPoolExecutor(max_workers=threadNum) as executor:
             results = []
-            resultFutures = [executor.submit(scrapeProduct, productLink, categoryName) for productLink in productPages]
+            resultFutures = [executor.submit(scrapeProduct, productLink, id) for productLink in productPages]
             for future in as_completed(resultFutures):
                 pageProgress.update(1)
                 results.append(future.result())
@@ -292,12 +300,12 @@ def saveProductsInfo(products):
 
 
                 productHref = product['url']
-                actualCategories = productDictionary[productHref]['categories']
+                actualCategories = productDictionary[productHref]['categoryIDs']
                 categories = ""
 
 
                 for category in actualCategories:
-                    categories+=category + "|"
+                    categories+=str(category) + "|"
 
                 categories = categories[:-1]
 
@@ -320,7 +328,7 @@ def saveProductsInfo(products):
                 thisLine = f';{isActive};{productName};{categories};{price};{brand};{delivery};{availability};{description};{imageUrls}'
                 file.write(thisLine + '\n')
 
-               # print(thisLine)
+                print(thisLine)
 
 
 def scrapeOneCategory(categoryData):
@@ -355,7 +363,7 @@ def scrapeOneCategory(categoryData):
 
         pageUrls = [f"{link}/{i}" for i in range(1, lastPageNum + 1)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=threadNum) as executor:
-        promisedResults = executor.map(scrapeProductsPage, pageUrls, itertools.repeat(categoryData['name']))
+        promisedResults = executor.map(scrapeProductsPage, pageUrls, itertools.repeat(categoryData['id']))
         results = list(itertools.chain.from_iterable(promisedResults))
 
     return results
@@ -397,35 +405,44 @@ def scrapeCategories():
     categories = getAllCategories()
     #print(categories)
     with open('categories.csv', 'w',  encoding="utf-8") as file:
-        header = "ID;Active (0/1);Name *;Parent category;Root category (0/1);URL rewritten"
+        header = "ID;Active (0/1);Name *;Parent category;Root category (0/1);URL rewritten;ParentID"
+
+        id = 0
+        parentID =0
 
         file.write(header + '\n')
 
-        thisLine = f";1;Home;;1;"
+        thisLine = f"0;1;Home;;1;"
         file.write(thisLine + '\n')
 
-        for category in categories:
+        # categoryPageLinks.append(
+        #     {
+        #         "href": element.get_attribute("href"),
+        #         "name": thisTitle,
+        #         "parentName": parentName,
+        #         "id": getNewID(),
+        #         "parentID": lastID
+        #     }
+        # )
+
+        for category in categoryPageLinks:
             isActive = 1
 
-            categoryName = re.sub(r'/', '', category)
+            categoryName = re.sub(r'/', '', category['name'])
+            parentCategoryName = category['parentName']
 
-            parentCategoryName = categoryName.split("|")
-            if len(parentCategoryName) <= 1 or len(parentCategoryName[-2]) <= 1:
-                parentCategoryName = "Home"
-            else:
-                parentCategoryName = parentCategoryName[-2].title()
-
-            categoryName = categoryName.split("|")[-1].title()
 
             categoryName = re.sub(r'\|', '', categoryName)
             parentCategoryName = re.sub(r'\|', '', parentCategoryName)
 
             isRoot = 0
 
-            print(category.split("/")[-1].split("|")[-1])
-            newUrl = fixCategoryURL(category.split("/")[-1].split("|")[-1])
+            newUrl = fixCategoryURL(category['name'])
 
-            thisLine = f";{isActive};{categoryName};{parentCategoryName};{isRoot};{newUrl}"
+            id = category['id']
+            parentID = category['parentID']
+
+            thisLine = f"{id};{isActive};{categoryName};{parentCategoryName};{isRoot};{newUrl};{parentID}"
             file.write(thisLine + '\n')
 
 
@@ -472,8 +489,9 @@ startTime = time.time()
 
 
 
-#scrapeEverything()
-fixImageFolderNames()
+scrapeEverything()
+#fixImageFolderNames()
+
 
 endTime = time.time()
 
