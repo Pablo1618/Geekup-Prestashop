@@ -4,7 +4,7 @@
 
 # Geekup-Prestashop
 
-Copy of website https://geekup.pl/ in PrestaShop.
+Copy of website geekup.pl in PrestaShop.
 
 
 ## Team members
@@ -22,32 +22,20 @@ Firstly, you have to install Docker and Git if you dont have them already.
 <br>If you are using Windows you will also have to install WSL.
 #### Pull this repository from GitHub and then:
 
-(All of the scripts are located inside the *scripts* folder)
-1. Start the container:
+Start docker container (while being in directory with docker-compose.yml file):
 ```
-./run.sh
+docker compose up -d
 ```
-2. Import the database which is saved in the file *dump.sql*:
+It is possible that you will have to give access to the files:
 ```
-./import_database.sh
+sudo chmod -R 777 Geekup-Prestashop
 ```
-
 
 #### Now you can access the website:
-https://localhost:8443/
+http://localhost:8080/
 #### Also you have access to the admin panel:
-https://localhost:8443/admin2137
-#### Also you can access the database by using phpMyAdmin:
-http://localhost:8081
-<br>
-Exporting the database to *prestashop/database-dump/dump.sql*:
-```
-./export_database.sh
-```
-Stopping the container:
-```
-./stop.sh
-```
+http://localhost:8080/admin2137
+
 
 ## Software versions
 

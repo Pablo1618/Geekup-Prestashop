@@ -560,7 +560,7 @@ p.h3.hidden-sm-down::before {
 
 .banner {
     position: relative;   /* Pozwala na wychodzenie poza kontener */
-    width: 100vw;         /* Ustawia szerokość banera na 100% szerokości ekranu */
+    width: 99.55vw;         /* Ustawia szerokość banera na 100% szerokości ekranu */
     margin-left: calc(-50vw + 50%);  /* Przesuwa baner na całą szerokość okna */
 }
 
@@ -659,7 +659,7 @@ span.current-price-value {
     font-size: 2rem;
 }
 
-span.product-price {
+.product-container span.product-price {
     display: inline-block;
     color: black;
     font-size: 2rem;
@@ -683,6 +683,14 @@ form#add-to-cart-or-refresh {
     margin-right: auto;
     width: 75%;
     padding-top: 0.5rem;
+}
+
+.card-block.checkout .btn-primary {
+    font-size: 0.85rem;
+}
+
+section.product-discounts.js-product-discounts {
+    margin-left: -1.5rem;
 }
 
 .row {
@@ -1105,4 +1113,241 @@ form#add-to-cart-or-refresh {
     font-weight: 500;
     position: relative;
     text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .paypo__open {
+        width: calc(100% - 15px);
+    }
+}
+
+.paypo__open {
+    display: inline-block;
+    width: 392px;
+    cursor: pointer;
+}
+
+.links-q {
+    padding: 20px 0 0;
+    float: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.links-q li a.comment.addcomment:hover, .links-q li a.question.ajaxlayer:hover {
+    text-decoration: none;
+}
+.links-q li a.comment.addcomment, .links-q li a.question.ajaxlayer {
+    color: #000;
+    text-decoration: underline;
+}
+
+.links-q  li.comment{
+    float: right;
+    padding-bottom: 1em;
+}
+
+.hint:hover .hint__content.tab__content {
+    display: block;
+}
+
+.hint__content.tab__content {
+    color: #232323;
+    position: absolute;
+    display: none;
+    right: 72.3%;
+    top: 111%;
+    font-size: 13px;
+    line-height: 1.5em;
+    z-index: 5;
+    min-width: 258px;
+    padding: 1rem;
+    text-align: left;
+    background-color: #fff;
+    box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.hint__content.tab__content::after {
+    content: '';
+    color: #232323;
+    display: block;
+    position: absolute;
+    top: -14px;
+    right: 4px;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent #fff transparent;
+}
+
+.block_newsletter {
+    padding: 5% 0% 5% 0%;
+    margin-top: 5rem;
+}
+
+.block_newsletter .row.block_newsletter_background:before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url(../img/newsletter_bg.jpg) 50% 50% no-repeat fixed;
+    background-size: cover;
+    z-index: 1;
+    width: 99.55vw;
+    margin-left: calc(-50vw + 50%);
+}
+    
+.boxhead {
+    position: relative;
+    z-index: 2;
+    color: #f6a802;
+    display: block;
+    font-size: 40px;
+    text-align: center;
+    line-height: 1em;
+    margin: 0;
+    font-weight: 900;
+}
+
+p#block-newsletter-label {
+    z-index: 2;
+    color: white !important;
+    padding: 2% 0 1%;
+    position: relative;
+    display: block;
+    font-size: 1.2rem !important;
+    text-align: center;
+    line-height: 1em !important;
+    margin: 0;
+}
+
+.newsletter-form-class {
+    position: relative;
+    z-index: 2;
+}
+
+input.btn.btn-primary.float-xs-right.hidden-xs-down {
+    margin-left: 0 !important;
+}
+
+.newsletter-form-class input.btn.btn-primary.float-xs-right.hidden-xs-down {
+    outline: 0 none;
+    max-width: 100%;
+    position: relative;
+    text-transform: lowercase;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 0;
+    box-sizing: border-box;
+    line-height: 1em;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Montserrat',sans-serif;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+    transition: background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out;
+    will-change: background-color,border-color,color;
+    border: 1px solid #f6a802;
+    color: #fff;
+    border-color: #f6a802;
+    box-shadow: none;
+    background: #f6a802;
+}
+
+.newsletter-form-class input.btn.btn-primary.float-xs-right.hidden-xs-down:hover {
+    transition: background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out;
+    will-change: background-color,border-color,color;
+    color: #fff;
+    border-color: black;
+    background: black;
+}
+
+.block_newsletter form input[type="email"] {
+    color:#000;
+}
+
+.product-deliveries .delivery-container {
+    min-width: 0;
+    width: 568px;
+    max-width: 100%;
+}
+
+.product-deliveries .shipping {
+    padding-top: 0.8em;
+}
+.f-row {
+    width: 100%;
+}
+
+.f-row::before, .f-row::after {
+    display: table;
+    content: '';
+    line-height: 0;
+}
+
+.f-row::after {
+    clear: both !important
+}
+
+.f-row [class*='grid']:first-child {
+    margin-left: 0 !important;
+}
+.product-deliveries .shipping-label-container {
+    padding-left: 0.5em !important;
+    padding-bottom: 0.8em !important;
+}
+.f-row .f-grid-9 {
+    width: 74.4680851064% !important;
+}
+.f-row [class*='grid'] {
+    display: block !important;
+    float: left !important;
+    width: 100% !important;
+    min-height: 30px !important;
+    margin-left: 2.1276595745% !important;
+    -webkit-box-sizing: border-box !important;
+    -moz-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+}
+[class*='s-grid'], [class*='f-grid'] {
+    float: left !important;
+    min-height: 1px !important;
+    margin-left: 20px !important;
+}
+
+.product-deliveries .shipping-cost {
+    padding-right: 2em !important;
+    text-align: right !important;
+}
+
+.f-row .f-grid-3 {
+    width: 23.4042553191% !important;
+}
+
+.home_page_image {
+    background-image: url(../img/Info3.jpg);
+    width: auto; 
+    height: 680px;
+    background-size: contain; 
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+div#custom-text {
+    text-align: left;
+}
+
+.custom-text-width {
+    width: 140%;
+    margin-bottom: 0%;
+    margin-left: -20%;
 }
