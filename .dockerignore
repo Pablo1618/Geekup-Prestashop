@@ -1,0 +1,8 @@
+prestashop/psdata/var/cache
+prestashop/psdata/var/logs
+prestashop/psdata/var/sessions
+prestashop/psdata/img/tmp
+
+.git/
+
+prestashop/psdata/img

@@ -10,20 +10,20 @@ services:
     networks:
       - prestashop_network
     volumes:
-      - ../prestashop/dbdata:/var/lib/mysql
+      - ./prestashop/dbdata:/var/lib/mysql
   prestashop:
     container_name: prestashop
-    image: prestashop/prestashop:1.7.8.11
+    image: mrktosiek/geekup-prestashop:1.0
     restart: unless-stopped
     depends_on:
       - mysql
     ports:
       - 8080:80
       - 8443:443  # Add SSL port mapping
-    volumes:
-      - ../prestashop/psdata:/var/www/html
-      - ./certs:/etc/apache2/ssl  # Map certs directory to Apache
-      - ./ssl.conf:/etc/apache2/sites-available/default-ssl.conf  # Map ssl configuration file
+    # volumes:
+      # - ./prestashop/psdata:/var/www/html
+      # - ./configuration/certs:/etc/apache2/ssl  # Map certs directory to Apache
+      # - ./configuration/ssl.conf:/etc/apache2/sites-available/default-ssl.conf  # Map ssl configuration file
     environment:
       DB_SERVER: some-mysql
       DB_NAME: prestashop
@@ -61,4 +61,4 @@ networks:
     prestashop_network:
 volumes:
   dbdata:
-  psdata:
+  #psdata:

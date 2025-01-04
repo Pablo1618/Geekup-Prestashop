@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PRESTASHOP_PATH="../prestashop"
-DOCKER_COMPOSE_PATH="../configuration"
+DOCKER_COMPOSE_PATH=".."
 
 echo -e "\e[1;37m > Starting Docker Compose for the first time to create folder dbdata...\e[0m"
 docker-compose -f $DOCKER_COMPOSE_PATH/docker-compose.yml up -d

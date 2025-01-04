@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PRESTASHOP_PATH="../prestashop"
-DOCKER_COMPOSE_PATH="../configuration"
+DOCKER_COMPOSE_PATH=".."
 
 # Uprawnienia
 if ! [[ $(stat -c "%A" $PRESTASHOP_PATH/dbdata) =~ "-rw.rw.rw." ]]; then 
