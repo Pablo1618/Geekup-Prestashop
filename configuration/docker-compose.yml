@@ -1,5 +1,14 @@
+# custom prestashop image:
+#   dockerfile - prestashop
+#   prestashop files + images, no cache
+#   db dump + restore script in entrypoint
+#   
+# docker-compose - whole thing
+
+
 version: '3'
 services:
+  # TODO: remove and use provided mysql server
   mysql:
     container_name: some-mysql
     image: mysql:5.7
@@ -11,6 +20,7 @@ services:
       - prestashop_network
     volumes:
       - ./prestashop/dbdata:/var/lib/mysql
+
   prestashop:
     container_name: prestashop
     image: mrktosiek/geekup-prestashop:1.0
@@ -21,9 +31,9 @@ services:
       - 8080:80
       - 8443:443  # Add SSL port mapping
     # volumes:
-      # - ./prestashop/psdata:/var/www/html
-      # - ./configuration/certs:/etc/apache2/ssl  # Map certs directory to Apache
-      # - ./configuration/ssl.conf:/etc/apache2/sites-available/default-ssl.conf  # Map ssl configuration file
+      # - ../prestashop/psdata:/var/www/html
+      # - ./certs:/etc/apache2/ssl  # Map certs directory to Apache
+      # - ./ssl.conf:/etc/apache2/sites-available/default-ssl.conf  # Map ssl configuration file
     environment:
       DB_SERVER: some-mysql
       DB_NAME: prestashop
@@ -36,13 +46,13 @@ services:
       PS_FOLDER_INSTALL: install2137
     networks:
       - prestashop_network
-    command: >
-      bash -c "
-      echo 'ServerName localhost' >> /etc/apache2/apache2.conf &&
-      a2enmod ssl &&
-      a2ensite default-ssl &&
-      apache2-foreground
-      "
+    # command: >
+    #   bash -c "
+    #   echo 'ServerName localhost' >> /etc/apache2/apache2.conf &&
+    #   a2enmod ssl &&
+    #   a2ensite default-ssl &&
+    #   apache2-foreground
+    #   "
     
   pma:
     container_name: pma
@@ -57,6 +67,7 @@ services:
         - 8081:80
     networks:
         - prestashop_network
+        
 networks:
     prestashop_network:
 volumes:
