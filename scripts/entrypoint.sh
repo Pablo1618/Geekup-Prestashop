@@ -1,11 +1,10 @@
 #!/bin/bash
 
-chmod 755 /var/www/html -R
+chmod 777 /var/www/html -R
 
 # import database
 echo -e "\e[1;37m > Importing database...\e[0m"
 if mysql -u root -p"admin" -h $DB_SERVER < /tmp/dump.sql; then
-    rm /tmp/dump.sql
     echo -e "\e[1;37;42m > Database imported successfully.\e[0m"
 else
     echo -e "\e[1;37;41m > Failed to import database.\e[0m"

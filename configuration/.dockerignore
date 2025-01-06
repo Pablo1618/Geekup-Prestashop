@@ -5,4 +5,5 @@ prestashop/psdata/img/tmp
 
 .git/
 
+# comment this out to include product images in the build
 prestashop/psdata/img
