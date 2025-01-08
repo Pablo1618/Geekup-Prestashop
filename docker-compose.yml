@@ -11,6 +11,14 @@ services:
       - prestashop_network
     volumes:
       - dbdata:/var/lib/mysql
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0" 
+          memory: "3G"
+        reservations:
+          cpus: "0.5"
+          memory: "2G"
 
   prestashop:
     container_name: prestashop
@@ -35,6 +43,14 @@ services:
       - prestashop_network
     volumes:
       - psdata:/var/www/html
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0" 
+          memory: "3G"
+        reservations:
+          cpus: "1.0"
+          memory: "512M"
 
   pma:
     container_name: pma
@@ -48,6 +64,11 @@ services:
       - 8081:80
     networks:
       - prestashop_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5" 
+          memory: "256M"
 
 networks:
   prestashop_network:
