@@ -48,6 +48,6 @@ services:
       - 8081:80
     networks:
       - prestashop_network
-
+      
 networks:
   prestashop_network:
