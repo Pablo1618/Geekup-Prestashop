@@ -22,10 +22,26 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
-<a class="banner" href="{$link->getCMSLink(6)}" title="{$banner_desc}">
+<a class="banner" href="{$link->getCMSLink(6)}" title="{$banner_desc}" onclick="trackBannerClick('{$banner_desc}', '{$link->getCMSLink(6)}')">
   {if isset($banner_img)}
     <img src="{$banner_img}" alt="{$banner_desc}" title="{$banner_desc}" class="img-fluid" loading="lazy" width="1110" height="213">
   {else}
     <span>{$banner_desc}</span>
   {/if}
 </a>
+
+<script>
+  function trackBannerClick(bannerDesc, bannerLink) {
+    if (typeof gtag === 'function') {
+      gtag('event', 'banner_click', {
+        event_category: 'Banner',
+        event_label: bannerDesc,
+        value: 1 // Wartość zdarzenia, można zmienić według potrzeb
+      });
+      console.log('Zdarzenie banner_click wysłane:', bannerDesc, bannerLink);
+    } else {
+      console.warn('gtag nie jest zdefiniowany!');
+    }
+  }
+</script>
+

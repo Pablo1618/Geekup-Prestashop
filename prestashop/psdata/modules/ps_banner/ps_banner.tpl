@@ -24,14 +24,15 @@
  *}
 <a class="banner" href="{$banner_link}">
   {if isset($banner_img)}
-    <img
-      class="img-fluid"
-      src="{$banner_img}"
-      alt="{$banner_desc}"
-      title="{$banner_desc}"
-      width="{$banner_width}"
-      height="{$banner_height}"
+	<img
+  	class="img-fluid"
+  	src="{$banner_img}"
+  	alt="{$banner_desc}"
+  	title="{$banner_desc}"
+  	width="{$banner_width}"
+  	height="{$banner_height}"
   {else}
-    <span>{$banner_desc}</span>
+	<span>{$banner_desc}</span>
   {/if}
 </a>
+
