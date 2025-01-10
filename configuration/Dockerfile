@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Copy PrestaShop application files into the container
 COPY ./prestashop/psdata /var/www/html
+RUN chmod 777 /var/www/html -R
 
 # Copy MySQL dump files into the container
 COPY ./prestashop/database-dump/dump.sql /tmp/dump.sql
@@ -13,6 +14,7 @@ COPY ./prestashop/database-dump/dump.sql /tmp/dump.sql
 COPY ./configuration/certs /etc/apache2/ssl
 COPY ./configuration/ssl.conf /etc/apache2/sites-available/default-ssl.conf
 
+# Copy the entrypoint script into the container
 COPY ./scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 

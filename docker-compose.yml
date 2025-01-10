@@ -1,78 +1,57 @@
-version: '3'
 services:
   mysql:
-    container_name: some-mysql
     image: mysql:5.7
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: prestashop
     networks:
       - prestashop_network
-    volumes:
-      - dbdata:/var/lib/mysql
     deploy:
       resources:
         limits:
-          cpus: "2.0" 
+          cpus: "2.0"
           memory: "3G"
         reservations:
           cpus: "0.5"
           memory: "2G"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   prestashop:
-    container_name: prestashop
-    image: mrktosiek/geekup-prestashop:1.0
-    restart: unless-stopped
+    image: mrktosiek/geekup-prestashop:1.1
     depends_on:
       - mysql
     ports:
-      - 8080:80
       - 8443:443
     environment:
-      DB_SERVER: some-mysql
+      DB_SERVER: BE_193059_mysql
       DB_NAME: prestashop
       DB_USER: root
       DB_PASSWD: admin
       PS_INSTALL_AUTO: 1
-      PS_DOMAIN: example.com
-      PS_SSL_DOMAIN: example.com
+      PS_DOMAIN: localhost:8080
+      PS_SSL_DOMAIN: localhost:8443
       PS_FOLDER_ADMIN: admin2137
       PS_FOLDER_INSTALL: install2137
     networks:
       - prestashop_network
-    volumes:
-      - psdata:/var/www/html
     deploy:
       resources:
         limits:
-          cpus: "2.0" 
+          cpus: "2.0"
           memory: "3G"
         reservations:
           cpus: "1.0"
           memory: "512M"
-
-  pma:
-    container_name: pma
-    image: phpmyadmin/phpmyadmin:5.2.1
-    restart: unless-stopped
-    environment:
-      PMA_HOST: some-mysql
-      PMA_USER: root
-      PMA_PASSWORD: admin
-    ports:
-      - 8081:80
-    networks:
-      - prestashop_network
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5" 
-          memory: "256M"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 networks:
   prestashop_network:
-
-volumes:
-  dbdata:
-  psdata:
+    driver: overlay

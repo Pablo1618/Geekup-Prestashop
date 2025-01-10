@@ -1,4 +1,3 @@
-version: '3'
 services:
   mysql:
     container_name: some-mysql
@@ -14,7 +13,7 @@ services:
 
   prestashop:
     container_name: prestashop
-    image: mrktosiek/geekup-prestashop:1.0
+    image: mrktosiek/geekup-prestashop:1.1
     restart: unless-stopped
     depends_on:
       - mysql
@@ -24,7 +23,7 @@ services:
     volumes:
       - ./prestashop/psdata:/var/www/html
     environment:
-      DB_SERVER: mysql
+      DB_SERVER: some-mysql
       DB_NAME: prestashop
       DB_USER: root
       DB_PASSWD: admin

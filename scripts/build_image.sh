@@ -1,8 +1,14 @@
 #!/bin/bash
 
+TAG=$1
+if [ -z "$TAG" ]; then
+    echo "Please provide a tag for the Docker image"
+    exit 1
+fi
+
 DOCKERFILE_PATH="./configuration/Dockerfile"
 
-IMAGE_NAME="mrktosiek/geekup-prestashop:1.0"
+IMAGE_NAME="mrktosiek/geekup-prestashop:$TAG"
 
 # Build the Docker image
 (

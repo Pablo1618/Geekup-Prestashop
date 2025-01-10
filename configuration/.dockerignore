@@ -1,9 +1,11 @@
 prestashop/psdata/var/cache
 prestashop/psdata/var/logs
 prestashop/psdata/var/sessions
+prestashop/psdata/var/modules
 prestashop/psdata/img/tmp
+prestashop/psdata/themes/*/assets/cache/
 
 .git/
 
 # comment this out to include product images in the build
-prestashop/psdata/img
+# prestashop/psdata/img
