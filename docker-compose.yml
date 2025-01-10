@@ -21,20 +21,19 @@ services:
         window: 120s
 
   prestashop:
-    image: mrktosiek/geekup-prestashop:1.1
+    image: mrktosiek/geekup-prestashop:1.2
     depends_on:
       - mysql
     ports:
-      - 8080:80
-      - 8443:443
+      - 19305:443
     environment:
       DB_SERVER: some-mysql
       DB_NAME: prestashop
       DB_USER: root
       DB_PASSWD: admin
       PS_INSTALL_AUTO: 1
-      PS_DOMAIN: localhost:8080
-      PS_SSL_DOMAIN: localhost:8443
+      PS_DOMAIN: localhost:19305
+      PS_SSL_DOMAIN: localhost:19305
       PS_FOLDER_ADMIN: admin2137
       PS_FOLDER_INSTALL: install2137
     networks:

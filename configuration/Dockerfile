@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Copy PrestaShop application files into the container
 COPY ./prestashop/psdata /var/www/html
+RUN rm -rf /var/www/html/install
 RUN chmod 777 /var/www/html -R
 
 # Copy MySQL dump files into the container

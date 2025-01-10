@@ -11,6 +11,7 @@ echo -e "\e[1;37;42m > MySQL is ready.\e[0m"
 
 # import database
 echo -e "\e[1;37m > Importing database...\e[0m"
+sed -i -e "s|\$PS_DOMAIN|$PS_DOMAIN|g" -e "s|\$PS_SSL_DOMAIN|$PS_SSL_DOMAIN|g" /tmp/dump.sql
 if mysql -u root -p"$DB_PASSWD" -h $DB_SERVER < /tmp/dump.sql; then
     echo -e "\e[1;37;42m > Database imported successfully.\e[0m"
 else
