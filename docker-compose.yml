@@ -1,5 +1,5 @@
 services:
-  mysql:
+  some-mysql:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: admin
@@ -25,9 +25,10 @@ services:
     depends_on:
       - mysql
     ports:
+      - 8080:80
       - 8443:443
     environment:
-      DB_SERVER: BE_193059_mysql
+      DB_SERVER: some-mysql
       DB_NAME: prestashop
       DB_USER: root
       DB_PASSWD: admin
