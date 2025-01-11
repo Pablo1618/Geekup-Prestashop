@@ -32,8 +32,8 @@ services:
       DB_USER: root
       DB_PASSWD: admin
       PS_INSTALL_AUTO: 1
-      PS_DOMAIN: localhost:19305
-      PS_SSL_DOMAIN: localhost:19305
+      PS_DOMAIN: localhost:5242
+      PS_SSL_DOMAIN: localhost:5242
       PS_FOLDER_ADMIN: admin2137
       PS_FOLDER_INSTALL: install2137
     networks:
