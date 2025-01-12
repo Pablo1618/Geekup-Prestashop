@@ -6,7 +6,7 @@ INFO="\e[1;37m"
 SUCCESS="\e[1;37;42m"
 ERROR="\e[1;37;41m"
 
-MYSQL_CONTAINER="some-mysql"
+MYSQL_CONTAINER="admin-mysql_db"
 PRESTASHOP_CONTAINER="prestashop"
 DB_NAME="BE_193059"
 DB_PASSWD="student"

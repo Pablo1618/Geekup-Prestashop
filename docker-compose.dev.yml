@@ -1,6 +1,6 @@
 services:
   mysql:
-    container_name: some-mysql
+    container_name: admin-mysql_db
     image: mysql:5.7
     restart: unless-stopped
     environment:
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./prestashop/psdata:/var/www/html
     environment:
-      DB_SERVER: some-mysql
+      DB_SERVER: admin-mysql_db
       DB_NAME: BE_193059
       DB_USER: root
       DB_PASSWD: student
@@ -40,7 +40,7 @@ services:
     image: phpmyadmin/phpmyadmin:5.2.1
     restart: unless-stopped
     environment:
-      PMA_HOST: some-mysql
+      PMA_HOST: admin-mysql_db
       PMA_USER: root
       PMA_PASSWORD: student
     ports:
