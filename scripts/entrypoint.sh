@@ -4,7 +4,7 @@ set -e
 
 # wait for MySQL to be ready
 echo -e "\e[1;37m > Waiting for MySQL to be ready...\e[0m"
-until mysqladmin ping -h $DB_SERVER -u root --password=$DB_PASSWD > /dev/null 2>&1; do
+until mysqladmin ping -h $DB_SERVER -u root --password=$DB_PASSWD; do
     sleep 1
 done
 echo -e "\e[1;37;42m > MySQL is ready.\e[0m"

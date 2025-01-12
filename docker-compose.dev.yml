@@ -4,8 +4,8 @@ services:
     image: mysql:5.7
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: prestashop
+      MYSQL_ROOT_PASSWORD: student
+      MYSQL_DATABASE: BE_193059
     networks:
       - prestashop_network
     volumes:
@@ -13,7 +13,7 @@ services:
 
   prestashop:
     container_name: prestashop
-    image: mrktosiek/geekup-prestashop:1.2
+    image: mrktosiek/geekup-prestashop:1.3
     restart: unless-stopped
     depends_on:
       - mysql
@@ -24,9 +24,9 @@ services:
       - ./prestashop/psdata:/var/www/html
     environment:
       DB_SERVER: some-mysql
-      DB_NAME: prestashop
+      DB_NAME: BE_193059
       DB_USER: root
-      DB_PASSWD: admin
+      DB_PASSWD: student
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:8080
       PS_SSL_DOMAIN: localhost:8443
@@ -42,7 +42,7 @@ services:
     environment:
       PMA_HOST: some-mysql
       PMA_USER: root
-      PMA_PASSWORD: admin
+      PMA_PASSWORD: student
     ports:
       - 8081:80
     networks:
