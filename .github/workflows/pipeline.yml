@@ -6,6 +6,7 @@ on:
       - main
       - master
   pull_request:
+    types: [closed]
     branches:
       - main
       - master
@@ -27,5 +28,5 @@ jobs:
           DOCKERFILE_PATH: ./configuration/Dockerfile
           IMAGE_NAME: geekup-prestashop
         run: |
-          docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:1.0 -f $DOCKERFILE_PATH .
-          docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:1.0
+          docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:latest -f $DOCKERFILE_PATH .
+          docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
