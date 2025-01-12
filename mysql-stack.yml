@@ -1,0 +1,16 @@
+# only for testing the prestashop stack locally
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: student
+      MYSQL_DATABASE: BE_193059
+    networks:
+      - admin-mysql_default
+    deploy:
+      replicas: 1
+
+networks:
+  admin-mysql_default:
+    external: true

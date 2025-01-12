@@ -1,43 +1,20 @@
 services:
-  some-mysql:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: prestashop
-    networks:
-      - prestashop_network
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: "3G"
-        reservations:
-          cpus: "0.5"
-          memory: "2G"
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-
   prestashop:
-    image: mrktosiek/geekup-prestashop:1.2
-    depends_on:
-      - mysql
+    image: mrktosiek/geekup-prestashop:1.4
     ports:
       - 19305:443
     environment:
-      DB_SERVER: some-mysql
-      DB_NAME: prestashop
+      DB_SERVER: admin-mysql_db
+      DB_NAME: BE_193059
       DB_USER: root
-      DB_PASSWD: admin
+      DB_PASSWD: student
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:5242
       PS_SSL_DOMAIN: localhost:5242
       PS_FOLDER_ADMIN: admin2137
       PS_FOLDER_INSTALL: install2137
     networks:
-      - prestashop_network
+      - admin-mysql_default
     deploy:
       resources:
         limits:
@@ -53,5 +30,5 @@ services:
         window: 120s
 
 networks:
-  prestashop_network:
-    driver: overlay
+  admin-mysql_default:
+    external: true

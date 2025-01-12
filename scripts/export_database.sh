@@ -6,8 +6,10 @@ INFO="\e[1;37m"
 SUCCESS="\e[1;37;42m"
 ERROR="\e[1;37;41m"
 
-MYSQL_CONTAINER="some-mysql"
+MYSQL_CONTAINER="admin-mysql_db"
 PRESTASHOP_CONTAINER="prestashop"
+DB_NAME="BE_193059"
+DB_PASSWD="student"
 
 PS_DOMAIN=$(docker exec "$PRESTASHOP_CONTAINER" printenv PS_DOMAIN)
 PS_SSL_DOMAIN=$(docker exec "$PRESTASHOP_CONTAINER" printenv PS_SSL_DOMAIN)
@@ -19,7 +21,7 @@ fi
 
 echo -e "${INFO} > Exporting database...${RESET}"
 DUMP_PATH="../prestashop/database-dump/dump.sql"
-if docker exec "$MYSQL_CONTAINER" mysqldump -u root -p"admin" --all-databases > "$DUMP_PATH"; then
+if docker exec "$MYSQL_CONTAINER" mysqldump -u root -p"$DB_PASSWD" "$DB_NAME" > "$DUMP_PATH"; then
     sed -i -e "s|$PS_DOMAIN|\$PS_DOMAIN|g" -e "s|$PS_SSL_DOMAIN|\$PS_SSL_DOMAIN|g" "$DUMP_PATH"
     echo -e "${SUCCESS} > Database exported successfully to: $DUMP_PATH${RESET}"
 else
