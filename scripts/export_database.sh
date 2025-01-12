@@ -21,7 +21,7 @@ fi
 
 echo -e "${INFO} > Exporting database...${RESET}"
 DUMP_PATH="../prestashop/database-dump/dump.sql"
-if docker exec "$MYSQL_CONTAINER" mysqldump -u root -p"$DB_PASSWD" $DB_NAME > "$DUMP_PATH"; then
+if docker exec "$MYSQL_CONTAINER" mysqldump -u root -p"$DB_PASSWD" "$DB_NAME" > "$DUMP_PATH"; then
     sed -i -e "s|$PS_DOMAIN|\$PS_DOMAIN|g" -e "s|$PS_SSL_DOMAIN|\$PS_SSL_DOMAIN|g" "$DUMP_PATH"
     echo -e "${SUCCESS} > Database exported successfully to: $DUMP_PATH${RESET}"
 else
