@@ -31,7 +31,7 @@ public class FunctionalTests {
     @BeforeEach
     public void setUp() throws IOException {
 
-        String websiteURL = "https://localhost:8443/index.php";
+        String websiteURL = "https://localhost:5242/index.php";
 
         System.setProperty("webdriver.chrome.driver", new File("./src/main/resources/chromedriver.exe").getCanonicalPath());
 
@@ -144,7 +144,7 @@ public class FunctionalTests {
     @Test
     public void RegisterAccountAndOrderProduct() throws InterruptedException {
 
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[title='Register to your customer account']"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("div[class='login-register'] i[class='material-icons signIn']"))).click();
 
         Random random = new Random();
 
