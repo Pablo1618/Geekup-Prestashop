@@ -6,7 +6,6 @@ on:
       - main
       - master
   pull_request:
-    types: [closed]
     branches:
       - main
       - master
@@ -69,7 +68,7 @@ jobs:
       
       - name: Start PrestaShop environment
         run: |
-          docker-compose -f docker-compose.dev.yml up -d
+          docker compose -f docker-compose.dev.yml up -d
 
       - name: Setup Google Chrome
         uses: browser-actions/setup-chrome@v1
@@ -84,17 +83,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y maven
-
+          
       - name: Run Selenium Tests
         run: |
-          mvn clean test -f selenium/Sellenium-Geekup/pom.xml
-      
-      - name: Stop PrestaShop environment
-        run: |
-          docker-compose -f docker-compose.dev.yml down
+          mvn test -Dtest=org.geekup.FunctionalTests
+          
       
   push:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     needs: 
       - build
       - test
