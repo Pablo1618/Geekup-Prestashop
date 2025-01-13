@@ -11,9 +11,16 @@ services:
     volumes:
       - ./prestashop/dbdata:/var/lib/mysql
 
+  memcached:
+    container_name: memcached
+    image: memcached:latest
+    restart: unless-stopped
+    networks:
+      - prestashop_network
+
   prestashop:
     container_name: prestashop
-    image: mrktosiek/geekup-prestashop:1.4
+    image: mrktosiek/geekup-prestashop:1.5
     restart: unless-stopped
     depends_on:
       - mysql
