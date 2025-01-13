@@ -619,11 +619,6 @@ p.h3.hidden-sm-down::before {
     pointer-events: none;
 }
 
-.product-width {
-    width: 140%;
-    margin-left: -20%;
-}
-
 #wrapper .breadcrumb li::after {
     color: rgb(246, 168, 2);
     font-weight: 900;
