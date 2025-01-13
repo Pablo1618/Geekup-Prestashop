@@ -6,7 +6,6 @@ on:
       - main
       - master
   pull_request:
-    types: [closed]
     branches:
       - main
       - master
@@ -69,7 +68,7 @@ jobs:
       
       - name: Start PrestaShop environment
         run: |
-          docker-compose -f docker-compose.dev.yml up -d
+          docker compose -f docker-compose.dev.yml up -d
 
       - name: Setup Google Chrome
         uses: browser-actions/setup-chrome@v1
@@ -91,6 +90,7 @@ jobs:
       
   push:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     needs: 
       - build
       - test
