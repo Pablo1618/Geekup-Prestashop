@@ -20,7 +20,7 @@ services:
 
   prestashop:
     container_name: prestashop
-    image: mrktosiek/geekup-prestashop:1.5
+    image: mrktosiek/geekup-prestashop:1.6
     restart: unless-stopped
     depends_on:
       - mysql

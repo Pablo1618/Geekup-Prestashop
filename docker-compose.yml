@@ -1,6 +1,6 @@
 services:
   prestashop:
-    image: mrktosiek/geekup-prestashop:1.5
+    image: mrktosiek/geekup-prestashop:1.6
     ports:
       - 19305:443
     environment:
