@@ -15,6 +15,15 @@ COPY ./prestashop/database-dump/dump.sql /tmp/dump.sql
 COPY ./configuration/certs /etc/apache2/ssl
 COPY ./configuration/ssl.conf /etc/apache2/sites-available/default-ssl.conf
 
+# Install PHP Memcached extension and dependencies
+RUN apt-get update && apt-get install -y \
+    libmemcached-dev \
+    zlib1g-dev \
+    && pecl install memcached \
+    && docker-php-ext-enable memcached \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy the entrypoint script into the container
 COPY ./scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh

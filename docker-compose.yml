@@ -1,6 +1,6 @@
 services:
   prestashop:
-    image: mrktosiek/geekup-prestashop:1.4
+    image: mrktosiek/geekup-prestashop:1.5
     ports:
       - 19305:443
     environment:
@@ -15,6 +15,7 @@ services:
       PS_FOLDER_INSTALL: install2137
     networks:
       - admin-mysql_default
+      - prestashop_network
     deploy:
       resources:
         limits:
@@ -29,6 +30,26 @@ services:
         max_attempts: 3
         window: 120s
 
+  memcached:
+    image: memcached:latest
+    networks:
+      - prestashop_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1G"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
 networks:
+  prestashop_network:
+    driver: overlay
   admin-mysql_default:
     external: true
