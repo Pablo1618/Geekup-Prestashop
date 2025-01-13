@@ -6,7 +6,6 @@ on:
       - main
       - master
   pull_request:
-    types: [closed]
     branches:
       - main
       - master
@@ -69,7 +68,7 @@ jobs:
       
       - name: Start PrestaShop environment
         run: |
-          docker-compose -f docker-compose.dev.yml up -d
+          docker compose -f docker-compose.dev.yml up -d
 
       - name: Setup Google Chrome
         uses: browser-actions/setup-chrome@v1
@@ -86,11 +85,13 @@ jobs:
           sudo apt-get install -y maven
 
       - name: Build and run Java app
+        working-directory: ./selenium/Selenium-Geekup
         run: |
           mvn clean install
       
   push:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     needs: 
       - build
       - test
