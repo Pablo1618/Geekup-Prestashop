@@ -86,8 +86,7 @@ jobs:
 
       - name: Build and run Java app
         run: |
-          cd selenium/Selenium-Geekup
-          mvn clean install
+          mvn -f ./selenium/Sellenium-Geekup/ clean install
       
   push:
     runs-on: ubuntu-latest
