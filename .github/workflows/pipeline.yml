@@ -85,13 +85,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y maven
 
-      - name: Run Selenium Tests
+      - name: Build and run Java app
         run: |
-          mvn clean test -f selenium/Sellenium-Geekup/pom.xml
-      
-      - name: Stop PrestaShop environment
-        run: |
-          docker-compose -f docker-compose.dev.yml down
+          mvn clean install
       
   push:
     runs-on: ubuntu-latest
