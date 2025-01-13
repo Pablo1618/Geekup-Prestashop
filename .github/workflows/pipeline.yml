@@ -85,8 +85,8 @@ jobs:
           sudo apt-get install -y maven
 
       - name: Build and run Java app
-        working-directory: ./selenium/Selenium-Geekup
         run: |
+          cd selenium/Selenium-Geekup
           mvn clean install
       
   push:
